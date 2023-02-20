@@ -1,0 +1,18 @@
+[Event "Live Chess"]
+[Site "Chess.com"]
+[Date "2023.02.01"]
+[Round "?"]
+[White "StephenS10"]
+[Black "ericvarner10"]
+[Result "1-0"]
+[ECO "C20"]
+[WhiteElo "695"]
+[BlackElo "719"]
+[TimeControl "600"]
+[EndTime "9:11:16 PST"]
+[Termination "StephenS10 won by checkmate"]
+
+1. d3 e5 2. e4 Bb4+ 3. Bd2 Bxd2+ 4. Qxd2 Nf6 5. Nf3 d6 6. d4 exd4 7. Qxd4 O-O 8.
+e5 dxe5 9. Qxd8 Rxd8 10. Nxe5 Bg4 11. Be2 Nc6 12. Nxg4 Nxg4 13. Bxg4 Re8+ 14.
+Be2 Re7 15. O-O Rxe2 16. Nc3 Rxc2 17. Nd5 Rxb2 18. Nxc7 Rc8 19. Rfe1 Rxc7 20.
+Re8# 1-0
