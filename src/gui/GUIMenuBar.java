@@ -1,9 +1,12 @@
+package gui;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+
+import game.Game;
 
 public class GUIMenuBar extends JMenuBar {
 

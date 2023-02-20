@@ -1,9 +1,12 @@
+package gui;
 import javax.swing.*;
-import javax.swing.event.MouseInputListener;
+import game.Game;
+import game.Move;
+import game.Piece;
+import game.Square;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 
 public class GUIBoard extends JPanel {
@@ -201,7 +204,7 @@ public class GUIBoard extends JPanel {
     }
 
     private void drawPiece(Piece p, Graphics gr) {
-        ImageIcon image = new ImageIcon((p.isWhite() ? "W" : "B") + p.getCode() + ".png");
+        ImageIcon image = new ImageIcon("img/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png");
         int ix = (p.getSquare().getFile() - 1) * 100 + 5;
         int iy = 700 - ((p.getSquare().getRank() - 1) * 100 - 5);
 

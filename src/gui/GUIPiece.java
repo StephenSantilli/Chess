@@ -1,4 +1,7 @@
+package gui;
 import javax.swing.ImageIcon;
+
+import game.Piece;
 
 public class GUIPiece {
 

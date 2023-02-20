@@ -1,12 +1,11 @@
-import javax.accessibility.Accessible;
+package gui;
 import javax.swing.*;
-import javax.swing.event.MouseInputListener;
+import game.Game;
+import game.Position;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.ImageObserver;
 import java.util.ArrayList;
-import java.util.EventListener;
 
 public class GUIMovePane extends JPanel implements Scrollable {
 

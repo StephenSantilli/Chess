@@ -1,6 +1,7 @@
+package game;
 import java.util.ArrayList;
 
-abstract class Piece {
+abstract public class Piece {
 
     /** The current square of the piece. */
     protected Square square;
@@ -107,12 +108,12 @@ abstract class Piece {
      * 
      * @return The piece code.
      */
-    abstract char getCode();
+    abstract public char getCode();
 
     /**
      * @return The number of points the piece is worth.
      */
-    abstract int getPoints();
+    abstract public int getPoints();
 
     /**
      * Gets all moves that a given piece can make, regardless of if they are
@@ -120,7 +121,7 @@ abstract class Piece {
      * 
      * @return A list of valid moves. Does not account for check.
      */
-    abstract ArrayList<Move> getMoves(Position p);
+    abstract public ArrayList<Move> getMoves(Position p);
 
     /**
      * Gets the vertical moves possible for the piece.

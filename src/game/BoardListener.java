@@ -1,4 +1,4 @@
-import java.awt.event.*;
+package game;
 import java.util.EventListener;
 
 public interface BoardListener extends EventListener {

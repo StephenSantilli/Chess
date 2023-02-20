@@ -1,13 +1,11 @@
+package gui;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.io.FileReader;
-import java.io.FilenameFilter;
-
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.MenuBarUI;
+import game.BoardListener;
+import game.Move;
 
 import java.util.*;
 
