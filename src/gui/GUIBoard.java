@@ -204,7 +204,7 @@ public class GUIBoard extends JPanel {
     }
 
     private void drawPiece(Piece p, Graphics gr) {
-        ImageIcon image = new ImageIcon("img/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png");
+        ImageIcon image = new ImageIcon(getClass().getResource("/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
         int ix = (p.getSquare().getFile() - 1) * 100 + 5;
         int iy = 700 - ((p.getSquare().getRank() - 1) * 100 - 5);
 
