@@ -7,14 +7,14 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-public class GUIMovePane extends JPanel implements Scrollable {
+public class MovePane extends JPanel implements Scrollable {
 
     private Game game;
     private ActionListener listener;
 
     private BoxLayout layout;
 
-    public GUIMovePane(Game game, ActionListener listener) {
+    public MovePane(Game game, ActionListener listener) {
 
         // setPreferredSize(new Dimension(200, 800));
 
@@ -61,7 +61,7 @@ public class GUIMovePane extends JPanel implements Scrollable {
                         b2 += "+";
                 }
 
-                add(new GUIMoveRow(label, b1, b2, game, listener));
+                add(new MoveRow(label, b1, b2, game, listener));
 
                 add(new Box.Filler(new Dimension(1, 10), new Dimension(1, 10), new Dimension(1, 10)));
                 int height = i * 60; 

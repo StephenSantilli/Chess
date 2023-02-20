@@ -2,9 +2,9 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 
-public class GUIErrorDialog extends JDialog {
+public class ErrorDialog extends JDialog {
     
-    public GUIErrorDialog(Frame owner, String error) {
+    public ErrorDialog(Frame owner, String error) {
 
         super(owner, error);
 

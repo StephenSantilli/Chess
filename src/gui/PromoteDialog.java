@@ -6,7 +6,7 @@ import game.Game;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GUIPromoteDialog extends JDialog implements ActionListener {
+public class PromoteDialog extends JDialog implements ActionListener {
 
     private char promoteType;
 
@@ -14,7 +14,7 @@ public class GUIPromoteDialog extends JDialog implements ActionListener {
         return promoteType;
     }
 
-    public GUIPromoteDialog(App owner, String title) {
+    public PromoteDialog(App owner, String title) {
 
         super(owner, title, true);
 

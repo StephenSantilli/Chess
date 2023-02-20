@@ -5,5 +5,5 @@
         "lib/**/*.jar"
     ],
     "java.dependency.packagePresentation": "flat",
-    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.configuration.updateBuildConfiguration": "automatic",
 }

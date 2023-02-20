@@ -11,14 +11,14 @@ import java.util.*;
 
 class App extends JFrame implements BoardListener, ActionListener, MouseInputListener, KeyListener {
 
-    private GUIBoard gb;
+    private Board gb;
 
-    public GUIBoard getGb() {
+    public Board getGb() {
         return gb;
     }
 
-    private GUIMovePane movePane;
-    private GUIMenuBar menuBar;
+    private MovePane movePane;
+    private MenuBar menuBar;
     private JScrollPane scrollPane;
 
     public App(String title) {
@@ -32,10 +32,10 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
         SpringLayout layout = new SpringLayout();
         setLayout(layout);
 
-        this.gb = new GUIBoard(this);
+        this.gb = new Board(this);
         add(gb);
 
-        this.movePane = new GUIMovePane(gb.getGame(), this);
+        this.movePane = new MovePane(gb.getGame(), this);
         scrollPane = new JScrollPane(movePane);
         add(scrollPane);
 
@@ -48,7 +48,7 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
         layout.putConstraint(SpringLayout.EAST, getContentPane(), 10, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, scrollPane);
 
-        this.menuBar = new GUIMenuBar(this);
+        this.menuBar = new MenuBar(this);
         setJMenuBar(menuBar);
 
         pack();
@@ -156,7 +156,7 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
 
         if (e.getActionCommand().equals("Paste")) {
 
-            GUILoadPositionDialog dialog = new GUILoadPositionDialog(this, "Load Position");
+            LoadPositionDialog dialog = new LoadPositionDialog(this, "Load Position");
             dialog.setVisible(true);
 
             try {

@@ -8,7 +8,7 @@ import javax.swing.KeyStroke;
 
 import game.Game;
 
-public class GUIMenuBar extends JMenuBar {
+public class MenuBar extends JMenuBar {
 
     private App app;
 
@@ -26,7 +26,7 @@ public class GUIMenuBar extends JMenuBar {
 
     }
 
-    public GUIMenuBar(App app) {
+    public MenuBar(App app) {
         super();
 
         this.app = app;

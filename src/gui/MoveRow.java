@@ -7,11 +7,11 @@ import game.Game;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GUIMoveRow extends JPanel {
+public class MoveRow extends JPanel {
 
     private Game game;
 
-    public GUIMoveRow(String label, String b1, String b2, Game g, ActionListener listener) {
+    public MoveRow(String label, String b1, String b2, Game g, ActionListener listener) {
 
         this.game = g;
 
@@ -35,7 +35,7 @@ public class GUIMoveRow extends JPanel {
         int b1Move = labelNumber * 2 - 1;
         int b2Move = labelNumber * 2;
 
-        GUIMoveBtn btn1 = new GUIMoveBtn(b1);
+        MoveBtn btn1 = new MoveBtn(b1);
         btn1.addActionListener(listener);
         btn1.setActionCommand("" + (b1Move));
         if (b1Move == g.getCurrentPos())
@@ -43,7 +43,7 @@ public class GUIMoveRow extends JPanel {
         add(btn1);
 
         if (b2 != null) {
-            GUIMoveBtn btn2 = new GUIMoveBtn(b2);
+            MoveBtn btn2 = new MoveBtn(b2);
             btn2.addActionListener(listener);
             btn2.setActionCommand("" + (b2Move));
             if (b2Move == g.getCurrentPos())

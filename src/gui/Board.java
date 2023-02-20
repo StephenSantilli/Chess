@@ -6,10 +6,14 @@ import game.Piece;
 import game.Square;
 
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-public class GUIBoard extends JPanel {
+import org.apache.batik.*;
+import org.apache.batik.swing.*;
+
+public class Board extends JPanel {
 
     private static final Color GREEN = new Color(23, 153, 64);
     private static final Color WHITE = new Color(231, 232, 220);
@@ -31,7 +35,7 @@ public class GUIBoard extends JPanel {
 
     public char promptForPromote(Move m) {
 
-        GUIPromoteDialog promoteScreen = new GUIPromoteDialog(app, "Select Promotion Piece");
+        PromoteDialog promoteScreen = new PromoteDialog(app, "Select Promotion Piece");
         Square s = m.getDestination();
         int ry = (squareWidth * 8) - (s.getRank() * squareHeight) + (m.isWhite() ? squareWidth : -squareWidth);
         int rx = (s.getFile() * squareWidth);
@@ -41,7 +45,7 @@ public class GUIBoard extends JPanel {
 
     }
 
-    public GUIBoard(App app) {
+    public Board(App app) {
 
         this.pcs = new ArrayList<GUIPiece>();
 
@@ -204,6 +208,10 @@ public class GUIBoard extends JPanel {
     }
 
     private void drawPiece(Piece p, Graphics gr) {
+
+        JSVGCanvas canvas = new SVGPiece(p);
+        
+
         ImageIcon image = new ImageIcon(getClass().getResource("/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
         int ix = (p.getSquare().getFile() - 1) * 100 + 5;
         int iy = 700 - ((p.getSquare().getRank() - 1) * 100 - 5);
@@ -213,7 +221,10 @@ public class GUIBoard extends JPanel {
             iy = dragging.getY();
         }
 
-        gr.drawImage(image.getImage(), ix, iy, 90, 90, image.getImageObserver());
+        //gr.drawImage(image.getImage(), ix, iy, 90, 90, image.getImageObserver());
+        
+        Component comp = add(canvas);
+        //comp.setLocation(ix, iy);
 
         if (game.getActivePos().isInCheck() && p.getCode() == 'K' && p.isWhite() == game.getActivePos().isWhite())
             gr.fillOval(ix, iy, 20, 20);

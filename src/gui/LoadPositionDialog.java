@@ -3,7 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class GUILoadPositionDialog extends JDialog implements ActionListener {
+public class LoadPositionDialog extends JDialog implements ActionListener {
 
     private String importText;
 
@@ -13,7 +13,7 @@ public class GUILoadPositionDialog extends JDialog implements ActionListener {
         return importText;
     }
 
-    public GUILoadPositionDialog(JFrame owner, String title) {
+    public LoadPositionDialog(JFrame owner, String title) {
 
         super(owner, title, true);
 
