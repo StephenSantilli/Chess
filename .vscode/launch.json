@@ -7,6 +7,7 @@
         {
             "type": "java",
             "name": "Launch App",
+            "preLaunchTask": "gradle: build",
             "request": "launch",
             "mainClass": "gui.App",
             "projectName": "chess"

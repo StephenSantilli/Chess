@@ -1,0 +1,17 @@
+<synth>
+    <!--  Style that all regions will use  -->
+    <style id="backingStyle">
+        <!--  Make all the regions opaque -->
+        <opaque value="TRUE" />
+        <font name="Dialog" size="14" />
+        <state>
+            <color value="#D8D987" type="BACKGROUND" />
+            <color value="RED" type="FOREGROUND" />
+        </state>
+    </style>
+    <bind style="backingStyle" type="region" key=".*" />
+    <style id="defaultElementStyle">
+        <font name="Verdana" size="12" />
+    </style>
+    <bind style="defaultElementStyle" type="region" key=".*" />
+</synth>

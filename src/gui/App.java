@@ -4,6 +4,8 @@ import java.awt.event.*;
 import java.io.FileReader;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
+import javax.swing.plaf.synth.SynthLookAndFeel;
+
 import game.BoardListener;
 import game.Move;
 
@@ -24,6 +26,14 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
     public App(String title) {
 
         super(title);
+/*         SynthLookAndFeel synth = new SynthLookAndFeel();
+        try {
+            synth.load(getClass().getResourceAsStream("/style.xml"), this.getClass());
+            UIManager.setLookAndFeel(synth);
+        } catch (Exception e) {
+            System.out.println("Could not set look and feel.");
+            e.printStackTrace();
+        } */
 
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 
@@ -69,17 +79,12 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
     @Override
     public void boardUpdated() {
 
+        repaint();
         movePane.boardUpdate();
         gb.boardUpdate();
         menuBar.boardUpdate();
         movePane.revalidate();
 
-        // scrollPane.repaint();
-        // pack();
-        // scrollPane.revalidate();
-
-        // scrollPane.updateUI();
-        // scrollPane.scrollRectToVisible(new Rectangle(10, 200, 1, 1));
     }
 
     @Override

@@ -34,14 +34,14 @@ sourceSets {
             srcDirs 'src'
         }
         resources {
-            srcDirs 'img'
+            srcDirs 'resources'
         }
     }
 }
 
 application {
     // Define the main class for the application.
-    mainClass = 'src.gui.App'
+    mainClass = 'gui.App'
 }
 
 tasks.named('test') {

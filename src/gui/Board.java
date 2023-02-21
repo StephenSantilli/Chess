@@ -212,7 +212,7 @@ public class Board extends JPanel {
         // JSVGCanvas canvas = new SVGPiece(p);
         
 
-        ImageIcon image = new ImageIcon(getClass().getResource("/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
+        ImageIcon image = new ImageIcon(getClass().getResource("/img/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
         int ix = (p.getSquare().getFile() - 1) * 100 + 5;
         int iy = 700 - ((p.getSquare().getRank() - 1) * 100 - 5);
 
