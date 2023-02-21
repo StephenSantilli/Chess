@@ -209,7 +209,7 @@ public class Board extends JPanel {
 
     private void drawPiece(Piece p, Graphics gr) {
 
-        JSVGCanvas canvas = new SVGPiece(p);
+        // JSVGCanvas canvas = new SVGPiece(p);
         
 
         ImageIcon image = new ImageIcon(getClass().getResource("/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
@@ -221,9 +221,9 @@ public class Board extends JPanel {
             iy = dragging.getY();
         }
 
-        //gr.drawImage(image.getImage(), ix, iy, 90, 90, image.getImageObserver());
+        gr.drawImage(image.getImage(), ix, iy, 90, 90, image.getImageObserver());
         
-        Component comp = add(canvas);
+        // Component comp = add(canvas);
         //comp.setLocation(ix, iy);
 
         if (game.getActivePos().isInCheck() && p.getCode() == 'K' && p.isWhite() == game.getActivePos().isWhite())
