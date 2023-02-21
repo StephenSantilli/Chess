@@ -9,8 +9,7 @@
             "name": "Launch App",
             "request": "launch",
             "mainClass": "gui.Chess",
-            "preLaunchTask": "gradle: build",
-            "projectName": "Chess"
+            "preLaunchTask": "gradle: build"
         }
     ]
 }
