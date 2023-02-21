@@ -10,7 +10,7 @@ public class MoveBtn extends JButton {
 
         super(text);
         setPreferredSize(new Dimension(80, 40));
-        setBackground(Color.BLACK);
+        setBackground(Color.GRAY);
         setFocusable(false);
 
     }
