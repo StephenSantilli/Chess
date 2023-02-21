@@ -41,7 +41,7 @@ sourceSets {
 
 application {
     // Define the main class for the application.
-    mainClass = 'gui.App'
+    mainClass = 'gui.Chess'
 }
 
 tasks.named('test') {

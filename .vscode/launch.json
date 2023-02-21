@@ -7,6 +7,13 @@
         {
             "type": "java",
             "name": "Launch App",
+            "request": "launch",
+            "mainClass": "gui.App",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
+            "name": "Launch App",
             "preLaunchTask": "gradle: build",
             "request": "launch",
             "mainClass": "gui.App",
@@ -23,6 +30,7 @@
             "name": "Launch App",
             "request": "launch",
             "mainClass": "App",
+            "preLaunchTask": "gradle: build",
             "projectName": "Chess_602914b0"
         }
     ]

@@ -26,6 +26,8 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
     public App(String title) {
 
         super(title);
+
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
 /*         SynthLookAndFeel synth = new SynthLookAndFeel();
         try {
             synth.load(getClass().getResourceAsStream("/style.xml"), this.getClass());
@@ -34,9 +36,6 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
             System.out.println("Could not set look and feel.");
             e.printStackTrace();
         } */
-
-        System.setProperty("apple.laf.useScreenMenuBar", "true");
-        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Chess");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -69,12 +68,6 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
         gb.addMouseMotionListener(this);
         addKeyListener(this);
 
-    }
-
-    public static void main(String[] args) {
-        App frame = new App("Chess");
-        frame.setVisible(true);
-        frame.boardUpdated();
     }
 
     @Override
