@@ -8,30 +8,9 @@
             "type": "java",
             "name": "Launch App",
             "request": "launch",
-            "mainClass": "gui.App",
+            "mainClass": "gui.Chess",
+            "preLaunchTask": "gradle: build",
             "projectName": "Chess"
-        },
-        {
-            "type": "java",
-            "name": "Launch App",
-            "preLaunchTask": "gradle: build",
-            "request": "launch",
-            "mainClass": "gui.App",
-            "projectName": "chess"
-        },
-        {
-            "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
-            "name": "Launch App",
-            "request": "launch",
-            "mainClass": "App",
-            "preLaunchTask": "gradle: build",
-            "projectName": "Chess_602914b0"
         }
     ]
 }
