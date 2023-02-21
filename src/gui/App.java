@@ -36,6 +36,7 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
         } */
 
         System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Chess");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
