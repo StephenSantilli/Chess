@@ -201,6 +201,14 @@ public class Position {
 
         int movePIndex = findPiece(move.getOrigin());
         Piece movePiece = pieces.get(movePIndex);
+
+        if (movePiece.getCode() == 'K') {
+            if (movePiece.isWhite())
+                whiteKing = move.getDestination();
+            else
+                blackKing = move.getDestination();
+        }
+
         movePiece.setSquare(move.getDestination());
         movePiece.setHasMoved(true);
 
@@ -209,13 +217,6 @@ public class Position {
             Piece rook = getPieceAtSquare(move.getRookLocation());
             rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
 
-        }
-
-        if (movePiece.getCode() == 'K') {
-            if (movePiece.isWhite())
-                whiteKing = movePiece.getSquare();
-            else
-                blackKing = movePiece.getSquare();
         }
 
         if (checkForMate && move.getPromoteType() == '?') {
@@ -255,7 +256,7 @@ public class Position {
     }
 
     /**
-     * Initializes the moves
+     * Initializes the list of moves.
      * 
      * @param checkForMate
      * @param g
@@ -272,11 +273,11 @@ public class Position {
 
         ArrayList<Piece> ownPieces = getPiecesByAttacking(white ? whiteKing : blackKing);
         if (ownPieces.size() >= 1)
-            givingCheck = true;
+            inCheck = true;
 
         ArrayList<Piece> oppPieces = getPiecesByAttacking(!white ? whiteKing : blackKing);
         if (oppPieces.size() >= 1)
-            inCheck = true;
+            givingCheck = true;
 
         if (checkForMate) {
             setCheckMate(g);
@@ -284,6 +285,13 @@ public class Position {
 
     }
 
+    /**
+     * Calculates the amount of points the given color has.
+     * 
+     * @param white True if checking for white's points
+     * @return The point delta of the color chosen. Will be 0 if color has less
+     *         material.
+     */
     public int getCapturedPoints(boolean white) {
 
         int whitePoints = 0;
@@ -310,12 +318,17 @@ public class Position {
 
     }
 
+    /**
+     * Sets whether or not the position is check mate.
+     * 
+     * @param g The game to check.
+     */
     private void setCheckMate(Game g) {
 
-        if (!givingCheck) {
+/*         if (!givingCheck) {
             this.checkMate = false;
             return;
-        }
+        } */
 
         this.checkMate = true;
 
@@ -330,17 +343,20 @@ public class Position {
             }
 
             Position test = new Position(this, m, g, !white, false);
-            if (!test.isInCheck())
+            if (!test.isGivingCheck())
                 checkMate = false;
             else {
                 moves.remove(i);
                 --i;
             }
-            
+
         }
 
     }
 
+    /**
+     * Initializes the default board pieces and their positions.
+     */
     private void initDefaultPosition() {
 
         this.pieces = new ArrayList<Piece>();
@@ -382,6 +398,14 @@ public class Position {
 
     }
 
+    /**
+     * Finds the first occurance of a piece at the given square.
+     * 
+     * @param s The square to search for a piece at
+     * @return The index of the piece in the {@link #pieces} array. Will be
+     *         {@code -1} if
+     *         no piece is at the square.
+     */
     public int findPiece(Square s) {
 
         int found = -1;
@@ -396,6 +420,14 @@ public class Position {
 
     }
 
+    /**
+     * Finds the first occurance of a piece at the given square.
+     * 
+     * @param s The square to search for a piece at
+     * @return The {@link Piece} object. Will be {@code null}
+     *         if no
+     *         piece is at the square.
+     */
     public Piece getPieceAtSquare(Square s) {
 
         int index = findPiece(s);
@@ -408,6 +440,12 @@ public class Position {
 
     }
 
+    /**
+     * Gets a list of the pieces that are attacking the given square.
+     * 
+     * @param s The square to search for attacking pieces at.
+     * @return An {@link ArrayList} of {@link Piece} objects
+     */
     public ArrayList<Piece> getPiecesByAttacking(Square s) {
 
         ArrayList<Piece> pieces = new ArrayList<Piece>();
@@ -424,15 +462,27 @@ public class Position {
 
     }
 
-    public Square getKing(boolean white) {
+    /**
+     * Gets the square that the king resides on.
+     * 
+     * @param white The color of the piece to search for. True if white.
+     * @return A {@link Square} object
+     */
+    public Square getKingSquare(boolean white) {
 
         return white ? whiteKing : blackKing;
 
     }
 
+    /**
+     * @deprecated
+     *             Tests to see if the current board position is check.
+     * @param white
+     * @return
+     */
     public boolean isCheck(boolean white) {
 
-        return getPiecesByAttacking(getKing(white)).size() > 0;
+        return getPiecesByAttacking(getKingSquare(white)).size() > 0;
 
     }
 

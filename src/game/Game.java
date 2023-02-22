@@ -89,10 +89,13 @@ public class Game {
 
         Position movePosition = new Position(positions.get(currentPos), valid, this, !isWhiteTurn(true), true);
 
-        if (prev.isGivingCheck() && movePosition.isInCheck())
+        if (movePosition.isGivingCheck())
             return;
 
         if (movePosition.isGivingCheck() && movePosition.isInCheck())
+            return;
+
+        if (movePosition.isGivingCheck() && !prev.isInCheck())
             return;
 
         if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
@@ -155,7 +158,8 @@ public class Game {
         if (!canRedo())
             return;
 
-        makeMove(redo.getMove());
+        positions.add(redo);
+        currentPos = positions.size() - 1;
 
         fireBoardUpdate();
 
