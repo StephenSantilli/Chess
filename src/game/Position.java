@@ -336,6 +336,7 @@ public class Position {
                 moves.remove(i);
                 --i;
             }
+            
         }
 
     }

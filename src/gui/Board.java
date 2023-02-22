@@ -6,12 +6,8 @@ import game.Piece;
 import game.Square;
 
 import java.awt.*;
-import java.awt.image.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-
-import org.apache.batik.*;
-import org.apache.batik.swing.*;
 
 public class Board extends JPanel {
 
@@ -241,7 +237,7 @@ public class Board extends JPanel {
             prevActive = null;
             repaint();
         } else {
-            Piece search = game.getActivePos().getPieceAtSquare(clicked);
+            // Piece search = game.getActivePos().getPieceAtSquare(clicked);
             if (active != null) {
 
                 /*
