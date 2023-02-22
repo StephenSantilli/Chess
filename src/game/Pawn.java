@@ -1,4 +1,5 @@
 package game;
+
 import java.util.ArrayList;
 
 public class Pawn extends Piece {
@@ -40,14 +41,15 @@ public class Pawn extends Piece {
         try {
             Move move = new Move(square, new Square(file - 1, white ? rank + 1 : rank - 1), p);
             moves.add(move);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         // Capture right
         try {
             Move move = new Move(square, new Square(file + 1, white ? rank + 1 : rank - 1), p);
             moves.add(move);
-        } catch (Exception e) {}
-
+        } catch (Exception e) {
+        }
 
         return moves;
 

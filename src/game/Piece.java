@@ -1,4 +1,5 @@
 package game;
+
 import java.util.ArrayList;
 
 abstract public class Piece {

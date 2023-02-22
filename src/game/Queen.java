@@ -1,8 +1,8 @@
 package game;
+
 import java.util.ArrayList;
 
 public class Queen extends Piece {
-    
 
     public Queen(int file, int rank, boolean white) {
         super(file, rank, white);

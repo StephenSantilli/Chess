@@ -1,4 +1,5 @@
 package game;
+
 import java.util.ArrayList;
 
 public class Game {
@@ -89,6 +90,12 @@ public class Game {
         Position movePosition = new Position(positions.get(currentPos), valid, this, !isWhiteTurn(true), true);
 
         if (prev.isGivingCheck() && movePosition.isInCheck())
+            return;
+
+        if (movePosition.isGivingCheck() && movePosition.isInCheck())
+            return;
+
+        if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
             return;
 
         positions.add(movePosition);

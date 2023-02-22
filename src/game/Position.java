@@ -1,4 +1,5 @@
 package game;
+
 import java.util.ArrayList;
 
 public class Position {
@@ -132,12 +133,15 @@ public class Position {
     }
 
     /**
-     * Creates a new {@link Position} object from the previous position with the new {@link Move}.
+     * Creates a new {@link Position} object from the previous position with the new
+     * {@link Move}.
      * 
-     * @param prev The previous position to use as a baseline for this position.
-     * @param move The move to be made.
-     * @param game The game this position is associated with.
-     * @param isWhite Whether or not it is white's turn after this move is made.
+     * @param prev         The previous position to use as a baseline for this
+     *                     position.
+     * @param move         The move to be made.
+     * @param game         The game this position is associated with.
+     * @param isWhite      Whether or not it is white's turn after this move is
+     *                     made.
      * @param checkForMate Whether or not checkmate should be checked for.
      */
     public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
@@ -252,6 +256,7 @@ public class Position {
 
     /**
      * Initializes the moves
+     * 
      * @param checkForMate
      * @param g
      */
@@ -332,7 +337,6 @@ public class Position {
                 --i;
             }
         }
-        System.out.println("done");
 
     }
 

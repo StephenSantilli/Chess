@@ -1,4 +1,5 @@
 package game;
+
 import java.util.ArrayList;
 
 public class King extends Piece {
@@ -6,11 +7,10 @@ public class King extends Piece {
     public King(int file, int rank, boolean white) {
         super(file, rank, white);
     }
-    
+
     public King(int file, int rank, boolean white, boolean hasMoved) {
         super(file, rank, white, hasMoved);
     }
-
 
     public String toString() {
 

@@ -1,4 +1,5 @@
 package game;
+
 import java.util.ArrayList;
 
 public class Bishop extends Piece {
@@ -34,5 +35,5 @@ public class Bishop extends Piece {
         return moves;
 
     }
-    
+
 }

@@ -1,4 +1,5 @@
 package game;
+
 public class Square {
 
     /** The file of the {@link Square}. */
