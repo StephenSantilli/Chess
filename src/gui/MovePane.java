@@ -46,19 +46,11 @@ public class MovePane extends JPanel implements Scrollable {
             try {
 
                 Position one = positions.get(i);
-                b1 = one.getMove().getMoveText();
-                if (one.isCheckMate())
-                    b1 += "#";
-                else if (one.isGivingCheck())
-                    b1 += "+";
+                b1 = one.getMoveString();
 
                 if (i + 1 < positions.size()) {
                     Position two = positions.get(i + 1);
-                    b2 = two.getMove().getMoveText();
-                    if (two.isCheckMate())
-                        b2 += "#";
-                    else if (two.isGivingCheck())
-                        b2 += "+";
+                    b2 = two.getMoveString();
                 }
 
                 add(new MoveRow(label, b1, b2, game, listener));

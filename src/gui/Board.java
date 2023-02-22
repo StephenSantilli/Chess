@@ -1,4 +1,5 @@
 package gui;
+
 import javax.swing.*;
 import game.Game;
 import game.Move;
@@ -14,8 +15,7 @@ public class Board extends JPanel {
     private static final Color GREEN = new Color(23, 153, 64);
     private static final Color WHITE = new Color(231, 232, 220);
 
-    private int squareWidth = 100;
-    private int squareHeight = 100;
+    private int squareSize = 100;
 
     private Square active = null;
     private Square prevActive = null;
@@ -29,12 +29,29 @@ public class Board extends JPanel {
         revalidate();
     }
 
+    public Dimension getPreferredSize() {
+
+        int h = (int) Math.floor(getSize().getHeight());
+        int w = (int) Math.floor(getSize().getWidth());
+
+        if (h <= w) {
+            h = h / 8 * 8;
+
+            return new Dimension(h, h);
+
+        } else {
+            w = w / 8 * 8;
+            return new Dimension(w, w);
+        }
+
+    }
+
     public char promptForPromote(Move m) {
 
         PromoteDialog promoteScreen = new PromoteDialog(app, "Select Promotion Piece");
         Square s = m.getDestination();
-        int ry = (squareWidth * 8) - (s.getRank() * squareHeight) + (m.isWhite() ? squareWidth : -squareWidth);
-        int rx = (s.getFile() * squareWidth);
+        int ry = (squareSize * 8) - (s.getRank() * squareSize) + (m.isWhite() ? squareSize : -squareSize);
+        int rx = (s.getFile() * squareSize);
         promoteScreen.setLocation(rx, ry);
         promoteScreen.setVisible(true);
         return promoteScreen.getPromoteType();
@@ -45,10 +62,10 @@ public class Board extends JPanel {
 
         this.pcs = new ArrayList<GUIPiece>();
 
-        setPreferredSize(new Dimension(squareWidth * 8, squareHeight * 8));
-        setBounds(0, 0, squareWidth * 8, squareHeight * 8);
+        setPreferredSize(new Dimension(squareSize * 8, squareSize * 8));
+        setBounds(0, 0, squareSize * 8, squareSize * 8);
 
-        setBackground(Color.BLUE);
+        // setBackground(Color.BLUE);
         active = null;
         game = new Game();
 
@@ -93,7 +110,7 @@ public class Board extends JPanel {
                 } catch (Exception e) {
                     this.prevActive = null;
                     this.active = null;
-                    System.out.println(e);
+                    // System.out.println(e);
                 }
             }
 
@@ -102,9 +119,9 @@ public class Board extends JPanel {
     }
 
     private void drawSquare(int x, int y, Graphics gr) {
-        int rx = (x * 100);
-        int ry = 700 - (y * 100);
-        gr.fillRect(rx, ry, 100, 100);
+        int rx = (x * squareSize);
+        int ry = (7 * squareSize) - (y * squareSize);
+        gr.fillRect(rx, ry, squareSize, squareSize);
 
         if (y == 0) {
             gr.setColor(Color.darkGray);
@@ -124,6 +141,8 @@ public class Board extends JPanel {
     public void paintComponent(Graphics gr) {
 
         super.paintComponent(gr);
+
+        squareSize = (int) (Math.ceil(getSize().getWidth()) / 8.0);
 
         squareClicked();
 
@@ -206,9 +225,9 @@ public class Board extends JPanel {
     private void drawPiece(Piece p, Graphics gr) {
 
         // JSVGCanvas canvas = new SVGPiece(p);
-        
 
-        ImageIcon image = new ImageIcon(getClass().getResource("/img/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
+        ImageIcon image = new ImageIcon(
+                getClass().getResource("/img/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
         int ix = (p.getSquare().getFile() - 1) * 100 + 5;
         int iy = 700 - ((p.getSquare().getRank() - 1) * 100 - 5);
 
@@ -217,10 +236,11 @@ public class Board extends JPanel {
             iy = dragging.getY();
         }
 
-        gr.drawImage(image.getImage(), ix, iy, 90, 90, image.getImageObserver());
-        
+        gr.drawImage(image.getImage(), ix, iy, 90 * (squareSize / 100), 90 * (squareSize / 100),
+                image.getImageObserver());
+
         // Component comp = add(canvas);
-        //comp.setLocation(ix, iy);
+        // comp.setLocation(ix, iy);
 
         if (game.getActivePos().isInCheck() && p.getCode() == 'K' && p.isWhite() == game.getActivePos().isWhite())
             gr.fillOval(ix, iy, 20, 20);
@@ -243,7 +263,7 @@ public class Board extends JPanel {
                 /*
                  * if (search != null && game.isWhiteTurn(false) != search.isWhite()) {
                  * active = null;
-                  * prevActive = null;
+                 * prevActive = null;
                  * } else
                  */
                 setActive(clicked);
@@ -351,7 +371,7 @@ public class Board extends JPanel {
                 repaint();
 
             } catch (Exception ex) {
-                System.out.println(ex);
+                // System.out.println(ex);
             }
 
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && !e.isShiftDown()) {
@@ -361,7 +381,7 @@ public class Board extends JPanel {
                 repaint();
 
             } catch (Exception ex) {
-                System.out.println(ex);
+                // System.out.println(ex);
             }
 
         } else if (e.getKeyCode() == KeyEvent.VK_UP) {
@@ -369,7 +389,7 @@ public class Board extends JPanel {
             try {
                 game.setCurrentPos(0);
             } catch (Exception ex) {
-                System.out.println(ex);
+                // System.out.println(ex);
             }
 
         } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -377,7 +397,7 @@ public class Board extends JPanel {
             try {
                 game.setCurrentPos(game.getPositions().size() - 1);
             } catch (Exception ex) {
-                System.out.println(ex);
+                // System.out.println(ex);
             }
 
         }

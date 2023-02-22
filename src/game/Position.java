@@ -54,6 +54,23 @@ public class Position {
     }
 
     /**
+     * Returns a string representation of the move that led to this position.
+     * 
+     * @return A {@link String} containing the move text.
+     */
+    public String getMoveString() {
+
+        String str = move.getMoveText();
+        if (isCheckMate())
+            str += "#";
+        else if (isInCheck())
+            str += "+";
+            
+            return str;
+
+    }
+
+    /**
      * Sets the redo {@link Position}.
      * 
      * @param redo The redo {@link Position}

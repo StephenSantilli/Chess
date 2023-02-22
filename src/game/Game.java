@@ -190,7 +190,7 @@ public class Game {
                 makeMove(new Move(strings[1], getActivePos(), true));
                 makeMove(new Move(strings[2], getActivePos(), false));
             } catch (Exception e) {
-                System.out.println(e);
+                //System.out.println(e);
                 break;
             }
 

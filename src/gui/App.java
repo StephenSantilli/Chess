@@ -58,11 +58,13 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
         layout.putConstraint(SpringLayout.EAST, getContentPane(), 10, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, scrollPane);
 
+        layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, gb);
+
         this.menuBar = new MenuBar(this);
         setJMenuBar(menuBar);
 
         pack();
-        // setResizable(false);
+        setResizable(false);
         gb.getGame().addListener(this);
         gb.addMouseListener(this);
         gb.addMouseMotionListener(this);
@@ -73,11 +75,13 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
     @Override
     public void boardUpdated() {
 
-        repaint();
         movePane.boardUpdate();
-        gb.boardUpdate();
         menuBar.boardUpdate();
         movePane.revalidate();
+        gb.boardUpdate();
+        pack();
+        repaint();
+        gb.revalidate();
 
     }
 
