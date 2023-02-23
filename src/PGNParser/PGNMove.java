@@ -1,6 +1,13 @@
 package PGNParser;
 
+import java.util.StringTokenizer;
+
 public class PGNMove {
+
+    public static void main(String[] args) throws Exception {
+        PGNMove p = new PGNMove("Qd1xd3#!? $23 {[%clk 0:02:49]} {Test foo test foo }");
+        System.out.println(p);
+    }
 
     /**
      * The PGN notation text of the move, not including commentary, etc.
@@ -23,19 +30,128 @@ public class PGNMove {
      */
     private boolean drawOffer;
 
+    /**
+     * Suffix for commentary. Matches up with the first six (excluding 0)
+     * {@link #NAGs}
+     * <br>
+     * <br>
+     * <b>Potential values:</b>
+     * <ul>
+     * <li>!
+     * <li>?
+     * <li>!!
+     * <li>!?
+     * <li>??
+     */
+    private String suffix;
+
+    /** The result of the game. See {@link PGNParser#result}. */
+    private String gameTermination;
+
+    private int NAG;
+
+    public String toString() {
+
+        String str = "";
+
+        str += ("moveText: " + moveText + "\n");
+        str += ("clockTime: " + clockTime + "\n");
+        str += ("commentary: " + commentary + "\n");
+        str += ("drawOffer: " + drawOffer + "\n");
+        str += ("suffix: " + suffix + "\n");
+        str += ("gameTermination: " + gameTermination + "\n");
+        str += ("NAG: " + NAG + "\n");
+        str += ("NAG text: " + NAGs[NAG] + "\n");
+
+        return str;
+
+    }
+
     public PGNMove(String move) throws Exception {
+
+        drawOffer = false;
+        commentary = "";
+        suffix = "";
+        gameTermination = "";
+        NAG = 0;
+        clockTime = "";
 
         move = move.trim();
 
-        if (move.indexOf(" ") > -1) {
-            moveText = move.split(" ")[0];
-        } else
-            moveText = move;
+        String[] tokens = move.split("[. ]");
 
-        if (!moveText.matches(
-                "(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?)[+#]?|(O-O)|(O-O-O)"))
-            throw new Exception("Move text does not match the correct notation.");
+        for (int i = 0; i < tokens.length; i++) {
 
+            if (tokens[i].length() >= 3) {
+                // One char suffix
+                if (tokens[i].substring(tokens[i].length() - 2).matches("[?!][?!]")) {
+                    suffix = tokens[i].substring(tokens[i].length() - 2);
+                    tokens[i] = tokens[i].substring(0, tokens[i].length() - 2);
+                }
+
+                // Two char suffix
+                if (tokens[i].substring(tokens[i].length() - 1).matches("[?!]")) {
+                    suffix = tokens[i].substring(tokens[i].length() - 1);
+                    tokens[i] = tokens[i].substring(0, tokens[i].length() - 1);
+                }
+            }
+
+            // NAG
+            if (tokens[i].matches("\\$[0-9][0-9]?[0-9]?")) {
+                String n = tokens[i].substring(1);
+                NAG = Integer.parseInt(n);
+            }
+
+            // ; comment
+            if (tokens[i].startsWith(";")) {
+
+                for (int j = i; j < tokens.length; j++) {
+                    commentary += tokens[j];
+                }
+
+            }
+
+            // {} comment
+            if (tokens[i].startsWith("{")) {
+
+                String temp = "";
+                temp += tokens[i];
+                for (int j = i + 1; j < tokens.length; j++) {
+                    temp += " " + tokens[j];
+                    if (tokens[j].endsWith("}")) {
+                        break;
+                    }
+                }
+
+                if (temp.matches("\\{\\[%clk [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}\\]\\}")) {
+                    clockTime = temp.substring(7, temp.length() - 2);
+                } else
+                    commentary += temp;
+
+            }
+
+            if (tokens[i].equals("=")) {
+                drawOffer = true;
+            }
+
+            if (tokens[i].length() <= 7 && isMoveText(tokens[i])) {
+                moveText = tokens[i];
+            }
+
+            if (tokens[i].matches("1-0|0-1|1/2-1/2|\\*")) {
+                gameTermination = tokens[i];
+            }
+
+        }
+
+        if (moveText == null)
+            throw new Exception("No move text found or invalid format.");
+
+    }
+
+    public static boolean isMoveText(String text) {
+        return text.matches(
+                    "(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?)[+#]?|(O-O)|(O-O-O)");
     }
 
     public static final String[] NAGs = {
@@ -104,5 +220,37 @@ public class PGNMove {
             "White has moderate time control pressure", "Black has moderate time control pressure",
             "White has severe time control pressure", "Black has severe time control pressure"
     };
+
+    public String getMoveText() {
+        return moveText;
+    }
+
+    public String getClockTime() {
+        return clockTime;
+    }
+
+    public String getCommentary() {
+        return commentary;
+    }
+
+    public boolean isDrawOffer() {
+        return drawOffer;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public String getGameTermination() {
+        return gameTermination;
+    }
+
+    public int getNAG() {
+        return NAG;
+    }
+
+    public static String[] getNags() {
+        return NAGs;
+    }
 
 }
