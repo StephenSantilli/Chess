@@ -12,8 +12,13 @@ import java.util.ArrayList;
 
 public class Board extends JPanel {
 
-    private static final Color GREEN = new Color(23, 153, 64);
-    private static final Color WHITE = new Color(231, 232, 220);
+    private static final Color SQUARE_DARK = new Color(155, 182, 124);
+    private static final Color SQUARE_LIGHT = new Color(245, 241, 218);
+    private static final Color SQUARE_ACTIVE = new Color(238, 187, 77, 180);
+    private static final Color SQUARE_DARK_CHECK = new Color(231, 232, 220);
+    private static final Color SQUARE_DARK_CHECKMATE = new Color(231, 232, 220);
+    private static final Color ATTACK_INDICATOR_COLOR = new Color(100, 100, 100, 100);
+
 
     private int squareSize = 100;
 
@@ -148,7 +153,7 @@ public class Board extends JPanel {
 
         squareClicked();
 
-        Color c = WHITE;
+        Color c = SQUARE_LIGHT;
 
         for (int i = 0; i < 8; i++) {
 
@@ -156,32 +161,41 @@ public class Board extends JPanel {
 
                 gr.setColor(c);
 
+                drawSquare(i, j, gr);
+
                 if (game.getActivePos().getMove() != null
                         && (i + 1) == game.getActivePos().getMove().getDestination().getFile()
-                        && (j + 1) == game.getActivePos().getMove().getDestination().getRank())
-                    gr.setColor(Color.YELLOW);
+                        && (j + 1) == game.getActivePos().getMove().getDestination().getRank()) {
+
+                    gr.setColor(SQUARE_ACTIVE);
+                    drawSquare(i, j, gr);
+                }
 
                 if (game.getActivePos().getMove() != null
                         && (i + 1) == game.getActivePos().getMove().getOrigin().getFile()
-                        && (j + 1) == game.getActivePos().getMove().getOrigin().getRank())
-                    gr.setColor(Color.YELLOW);
+                        && (j + 1) == game.getActivePos().getMove().getOrigin().getRank()) {
 
-                if (active != null && active.getFile() == i + 1 && active.getRank() == (j + 1))
-                    gr.setColor(Color.RED);
+                    gr.setColor(SQUARE_ACTIVE);
+                    drawSquare(i, j, gr);
+                }
 
-                drawSquare(i, j, gr);
+                if (active != null && active.getFile() == i + 1 && active.getRank() == (j + 1)) {
 
-                if (c == WHITE)
-                    c = GREEN;
+                    gr.setColor(SQUARE_ACTIVE);
+                    drawSquare(i, j, gr);
+                }
+
+                if (c == SQUARE_LIGHT)
+                    c = SQUARE_DARK;
                 else
-                    c = WHITE;
+                    c = SQUARE_LIGHT;
 
             }
 
-            if (c == WHITE)
-                c = GREEN;
+            if (c == SQUARE_LIGHT)
+                c = SQUARE_DARK;
             else
-                c = WHITE;
+                c = SQUARE_LIGHT;
 
         }
 
@@ -216,7 +230,7 @@ public class Board extends JPanel {
                         pMoves.add(o);
                 }
 
-                gr.setColor(Color.YELLOW);
+                gr.setColor(ATTACK_INDICATOR_COLOR);
                 for (int i = 0; i < pMoves.size(); i++) {
 
                     Move m = pMoves.get(i);

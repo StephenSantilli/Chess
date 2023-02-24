@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     
-    implementation 'org.apache.xmlgraphics:batik-all:1.16'
+    //implementation 'org.apache.xmlgraphics:batik-all:1.16'
     
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
