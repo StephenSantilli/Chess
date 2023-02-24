@@ -1,13 +1,10 @@
 package PGNParser;
 
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PGNMove {
-
-    public static void main(String[] args) throws Exception {
-        PGNMove p = new PGNMove("Qd1xd3#!? $23 {[%clk 0:02:49]} {Test foo test foo }");
-        System.out.println(p);
-    }
 
     /**
      * The PGN notation text of the move, not including commentary, etc.
@@ -17,18 +14,8 @@ public class PGNMove {
      */
     private String moveText;
 
-    /** The time on the clock after the move. May be {@code null}. */
-    private String clockTime;
-
     /** The commentary on the move. May be {@code null}. */
     private String commentary;
-
-    /**
-     * Whether or not a draw was offered after the move. Not in official PGN
-     * notation, but will accept an {@code =} after the move, or the comment,
-     * {@code draw offered}
-     */
-    private boolean drawOffer;
 
     /**
      * Suffix for commentary. Matches up with the first six (excluding 0)
@@ -48,20 +35,34 @@ public class PGNMove {
     /** The result of the game. See {@link PGNParser#result}. */
     private String gameTermination;
 
+    /** The {@code int} corresponding to the numeric annotation glyph. Will be the same as the index in {@link #NAGs}. */
     private int NAG;
+
+    public String getTag(String key) {
+
+        Matcher m = Pattern.compile("\\[\\%(?<key>[^\\s]+) (?<value>[^\\]]+)\\]").matcher(commentary);
+        
+        while(m.find()) {
+
+            if(m.group("key").equals(key)) {
+                return m.group("value").trim().replaceAll("\n", "");
+            }
+
+        }
+
+        return null;
+
+    }
 
     public String toString() {
 
         String str = "";
 
-        str += ("moveText: " + moveText + "\n");
-        str += ("clockTime: " + clockTime + "\n");
-        str += ("commentary: " + commentary + "\n");
-        str += ("drawOffer: " + drawOffer + "\n");
-        str += ("suffix: " + suffix + "\n");
-        str += ("gameTermination: " + gameTermination + "\n");
-        str += ("NAG: " + NAG + "\n");
-        str += ("NAG text: " + NAGs[NAG] + "\n");
+        str += moveText;
+        str += suffix;
+        if(NAG > 5 || (suffix.equals("") && NAG > 0)) str += " $" + NAG;
+        if(!commentary.equals("")) str += " " + commentary;
+        if(!gameTermination.equals("")) str += " " + gameTermination;
 
         return str;
 
@@ -71,104 +72,17 @@ public class PGNMove {
 
         this.moveText = move;
 
-        this.commentary = comment;
+        this.commentary = comment == null ? "" : comment.trim().replaceAll("\n", " ").replaceAll("  ", " ");
 
-        this.NAG = NAG == null ? 0 : Integer.parseInt(NAG.substring(1));
+        this.NAG = NAG == null ? 0 : Integer.parseInt(NAG.substring(1).trim());
 
-        this.gameTermination = result;
+        this.gameTermination = result == null ? "" : result.trim().replaceAll("\n", " ").replaceAll("  ", " ");
 
-        this.suffix = suffix;
-
-        drawOffer = false;
+        this.suffix = suffix == null ? "" : suffix.trim().replaceAll("\n", " ").replaceAll("  ", " ");
 
     }
 
-    public PGNMove(String move) throws Exception {
 
-        drawOffer = false;
-        commentary = "";
-        suffix = "";
-        gameTermination = "";
-        NAG = 0;
-        clockTime = "";
-
-        move = move.trim();
-
-        String[] tokens = move.split("[. ]");
-
-        for (int i = 0; i < tokens.length; i++) {
-
-            if (tokens[i].length() >= 3) {
-                // One char suffix
-                if (tokens[i].substring(tokens[i].length() - 2).matches("[?!][?!]")) {
-                    suffix = tokens[i].substring(tokens[i].length() - 2);
-                    tokens[i] = tokens[i].substring(0, tokens[i].length() - 2);
-                }
-
-                // Two char suffix
-                if (tokens[i].substring(tokens[i].length() - 1).matches("[?!]")) {
-                    suffix = tokens[i].substring(tokens[i].length() - 1);
-                    tokens[i] = tokens[i].substring(0, tokens[i].length() - 1);
-                }
-            }
-
-            // NAG
-            if (tokens[i].matches("\\$[0-9][0-9]?[0-9]?")) {
-                String n = tokens[i].substring(1);
-                NAG = Integer.parseInt(n);
-            }
-
-            // ; comment
-            if (tokens[i].startsWith(";")) {
-
-                for (int j = i; j < tokens.length; j++) {
-                    commentary += tokens[j];
-                }
-
-            }
-
-            // {} comment
-            if (tokens[i].startsWith("{")) {
-
-                String temp = "";
-                temp += tokens[i];
-                for (int j = i + 1; j < tokens.length; j++) {
-                    temp += " " + tokens[j];
-                    if (tokens[j].endsWith("}")) {
-                        break;
-                    }
-                }
-
-                if (temp.matches("\\{\\[%clk [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}\\]\\}")) {
-                    clockTime = temp.substring(7, temp.length() - 2);
-                } else
-                    commentary += temp;
-
-            }
-
-            if (tokens[i].equals("=")) {
-                drawOffer = true;
-            }
-
-            if (tokens[i].length() <= 7 && isMoveText(tokens[i])) {
-                moveText = tokens[i];
-            }
-
-            if (tokens[i].matches("1-0|0-1|1/2-1/2|\\*")) {
-                gameTermination = tokens[i];
-            }
-
-        }
-
-        if (moveText == null)
-            throw new Exception("No move text found or invalid format.");
-
-    }
-
-    public static boolean isMoveText(String text) {
-        return text.matches(
-                "(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?)[+#]?|(O-O)|(O-O-O)");
-    }
 
     public static final String[] NAGs = {
             "null annotation", "good move (traditional !)", "poor move (traditional ?)",
@@ -241,16 +155,8 @@ public class PGNMove {
         return moveText;
     }
 
-    public String getClockTime() {
-        return clockTime;
-    }
-
     public String getCommentary() {
         return commentary;
-    }
-
-    public boolean isDrawOffer() {
-        return drawOffer;
     }
 
     public String getSuffix() {

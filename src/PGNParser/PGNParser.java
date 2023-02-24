@@ -196,19 +196,21 @@ public class PGNParser {
 
     public static void main(String[] args) throws Exception {
 
-        Scanner s = new Scanner(new FileReader("./test pgns/cbwra-gmnielsen.pgn"));
+        Scanner s = new Scanner(new FileReader("./test pgns/chesscom with clock.pgn"));
         String str = "";
         while (s.hasNextLine()) {
-            str += s.nextLine() + "\n";
+            str += s.nextLine().trim() + "\n";
         }
         PGNParser p = new PGNParser(str);
 
         System.out.println(p.outputPGN());
-    }
+
+        }
 
     public PGNParser(String text) throws Exception {
 
-        this.text = String.join(" ", text.trim().split("\n"));
+        // this.text = String.join(" ", text.trim().split("\n"));
+        this.text = text.trim();
         extraTags = new ArrayList<String>();
         moves = new ArrayList<String>();
         parsedMoves = new ArrayList<PGNMove>();
@@ -239,18 +241,17 @@ public class PGNParser {
         str += "\n";
 
         String moveList = "";
-        for (int i = 0; i < moves.size(); i++) {
+        for (int i = 0; i < parsedMoves.size(); i++) {
 
-            moveList += ((i / 2) + 1) + ". " + moves.get(i) + " ";
+            moveList += ((i / 2) + 1) + ". " + parsedMoves.get(i) + " ";
 
-            if (i + 1 < moves.size()) {
+            if (i + 1 < parsedMoves.size()) {
 
-                if (!parsedMoves.get(i).getCommentary().equals("") || !parsedMoves.get(i).getClockTime().equals("")
-                        || parsedMoves.get(i).getNAG() != 0) {
+                if (!parsedMoves.get(i).getCommentary().equals("") || parsedMoves.get(i).getNAG() != 0) {
                     moveList += ((i / 2) + 1) + "... ";
                 }
 
-                moveList += moves.get(++i) + " ";
+                moveList += parsedMoves.get(++i) + " ";
             }
 
         }
@@ -269,30 +270,18 @@ public class PGNParser {
         return str;
     }
 
-    // private static final String MOVE_REGEX = "(?<num>\\d+(...)?|\\d+.?)?
-    // ?(?<move>(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?|O-O|O-O-O)
-    // ?(?<comm>{[^\n\"]+})?";
-    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)? ?(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O)|(O-O-O)))(?<suffix>[?!]{0,2})(((?<comm> ?\\{[^\n\\}]+\\}))|((?<n> ?\\$\\d{1,3}))|((?<res> ?1-0|0-1|\\*|1\\/2-1\\/2))){0,3}";
+    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)?\\s*(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O)|(O-O-O)))(?<suffix>[?!]{0,2})(((?<comm>\\s*\\{[^\\}]+\\}))|((?<NAG>\\s*\\$\\d{1,3}))|((?<res>\\s*((1\\-0)|(0\\-1)|(\\*)|(1\\/2\\-1\\/2))))){0,3}\\s*(?<eol>\\;[^\n]*)?";
 
     private void parseMoves() throws Exception {
 
-        // TODO: Clean this method up. Use parseTags() as a reference.
-
         Matcher m = Pattern.compile(MOVE_REGEX).matcher(text);
-
-        ArrayList<String> ms = new ArrayList<String>();
-        String t = "";
-
-        int end;
 
         while (m.find()) {
 
-            parsedMoves.add(new PGNMove(m.group("move"), m.group("comm"), m.group("n"), m.group("res"), m.group("suffix")));
+            String comment = m.group("comm");
 
-        }
+            parsedMoves.add(new PGNMove(m.group("move"), comment, m.group("NAG"), m.group("res"), m.group("suffix")));
 
-        for(int i = 0; i < parsedMoves.size(); i++) {
-            System.out.println(parsedMoves.get(i));
         }
 
     }
@@ -395,6 +384,10 @@ public class PGNParser {
 
     public String getResult() {
         return result;
+    }
+
+    public ArrayList<PGNMove> getParsedMoves() {
+        return parsedMoves;
     }
 
 }

@@ -47,7 +47,7 @@ defender might do ok as black. ChessBrain is certainly such.}
 only advantage being its solidity. However Computers can do well in such. A human 
 would probably try and get some counter play preparing f5, here it would just 
 make whites task much easier. ChessBrain does well in the coming phase. [14.Nd5!? 
-Might have been the right moment. I wasn’t sure I had enough after: 14...Nxd5 15.cxd5 
+Might have been the right moment. I wasnï¿½t sure I had enough after: 14...Nxd5 15.cxd5 
 Bb5 Though. Here f5 is actually a relevant way of getting counter play.]} 
 
 14...h5 
@@ -91,13 +91,12 @@ a machine.]}
 26...gxf5 27.Bxf5 cxd5 28.Bxe6 Rxe6 29.Rxf7 
 {Sweet, unfortunately only giving me a draw.}
 
-29...Kxf7 30.Qh7+ Ke8  31.Qxh5+  31...Ke7 32.Qg5+ Ke8 33.Qh5+ Ke7 34.Qh7+ 
+29...Kxf7 30.Qh7+ Ke8  31.Qxh5+  31...Ke7 32.Qg5+ Ke8 33.Qh5+ Ke7 34.Qh7+
 {Here I offered a draw. Normally I would have repeated once more, making it a 
 threefold repetition, however ChessBrain was low on time, and this was the correct 
 result, instead of some nonsense win on time in a dead drawn position. As usual the 
 computer both impresses as well as plays some awful moves. Strategically it`s pretty 
 weak, but in defense and calculations is horribly strong. This mixture means humans 
 versus machines to my mind always will be a tense and rather equal struggle. I for 
-one at least enjoyed being part of one. 1/2-1/2} 
-
-1/2-1/2
+one at least enjoyed being part of one. 1/2-1/2}
+1-0
