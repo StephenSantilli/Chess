@@ -65,8 +65,8 @@ public class Position {
             str += "#";
         else if (isInCheck())
             str += "+";
-            
-            return str;
+
+        return str;
 
     }
 
@@ -342,10 +342,12 @@ public class Position {
      */
     private void setCheckMate(Game g) {
 
-/*         if (!givingCheck) {
-            this.checkMate = false;
-            return;
-        } */
+        /*
+         * if (!givingCheck) {
+         * this.checkMate = false;
+         * return;
+         * }
+         */
 
         this.checkMate = true;
 
@@ -492,11 +494,12 @@ public class Position {
     }
 
     /**
-     * @deprecated
-     *             Tests to see if the current board position is check.
+     * Tests to see if the current board position is check.
+     * 
      * @param white
      * @return
      */
+    @Deprecated
     public boolean isCheck(boolean white) {
 
         return getPiecesByAttacking(getKingSquare(white)).size() > 0;

@@ -8,15 +8,20 @@
 
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
-    id 'java-library'
     id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
 
+}
+
+javafx {
+    version = "17"
+    modules = [ 'javafx.controls' ]
 }
 
 dependencies {
@@ -41,7 +46,7 @@ sourceSets {
 
 application {
     // Define the main class for the application.
-    mainClass = 'gui.Chess'
+    mainClass = 'guifx.Launcher'
 }
 
 tasks.named('test') {
