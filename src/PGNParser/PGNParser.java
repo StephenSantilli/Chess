@@ -205,7 +205,7 @@ public class PGNParser {
 
         System.out.println(p.outputPGN());
 
-        }
+    }
 
     public PGNParser(String text) throws Exception {
 

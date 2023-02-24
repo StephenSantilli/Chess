@@ -6,27 +6,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch PGNParser",
-            "request": "launch",
-            "mainClass": "PGNParser.PGNParser",
-            "projectName": "chess"
-        },
-        {
-            "type": "java",
-            "name": "Launch PGNParser",
-            "request": "launch",
-            "mainClass": "PGNParser.PGNParser",
-            "projectName": "Chess"
-        },
-        {
-            "type": "java",
-            "name": "Launch PGNMove",
-            "request": "launch",
-            "mainClass": "PGNParser.PGNMove",
-            "projectName": "Chess"
-        },
-        {
-            "type": "java",
             "name": "Launch App",
             "request": "launch",
             "mainClass": "gui.Chess",

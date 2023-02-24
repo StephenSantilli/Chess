@@ -2,6 +2,9 @@ package game;
 
 import java.util.ArrayList;
 
+import PGNParser.PGNMove;
+import PGNParser.PGNParser;
+
 public class Game {
 
     private ArrayList<Position> positions;
@@ -165,36 +168,20 @@ public class Game {
 
     }
 
-    public void importPosition(String moves) throws Exception {
+    public void importPosition(PGNParser PGN) throws Exception {
 
         positions = new ArrayList<Position>();
         positions.add(new Position(this));
         currentPos = 0;
 
-        int i = 1;
+        ArrayList<PGNMove> moves = PGN.getParsedMoves();
 
-        int start = moves.indexOf(i + ". ");
-        while (start > -1) {
-            moves = moves.substring(start);
-            moves = moves.replaceAll("[^A-z0-9.-]", " ");
-            start = moves.indexOf((i + 1) + ". ");
+        for (int i = 0; i < moves.size(); i++) {
 
-            String[] strings;
+            Move m = new Move(moves.get(i).getMoveText(), getActivePos(), getActivePos().isWhite());
 
-            if (start > -1)
-                strings = moves.substring(0, start).split(" ");
-            else
-                strings = moves.substring(0).split(" ");
-
-            try {
-                makeMove(new Move(strings[1], getActivePos(), true));
-                makeMove(new Move(strings[2], getActivePos(), false));
-            } catch (Exception e) {
-                //System.out.println(e);
-                break;
-            }
-
-            ++i;
+            positions.add(new Position(getActivePos(), m, this, !getActivePos().isWhite(), true));
+            ++currentPos;
 
         }
 

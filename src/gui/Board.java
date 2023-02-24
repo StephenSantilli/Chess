@@ -26,23 +26,26 @@ public class Board extends JPanel {
 
     public void boardUpdate() {
         repaint();
-        revalidate();
     }
 
     public Dimension getPreferredSize() {
 
-        int h = (int) Math.floor(getSize().getHeight());
-        int w = (int) Math.floor(getSize().getWidth());
+        return new Dimension(800, 800);
 
-        if (h <= w) {
-            h = h / 8 * 8;
-
-            return new Dimension(h, h);
-
-        } else {
-            w = w / 8 * 8;
-            return new Dimension(w, w);
-        }
+        /*
+         * int h = (int) Math.floor(getSize().getHeight());
+         * int w = (int) Math.floor(getSize().getWidth());
+         * 
+         * if (h <= w) {
+         * h = h / 8 * 8;
+         * 
+         * return new Dimension(h, h);
+         * 
+         * } else {
+         * w = w / 8 * 8;
+         * return new Dimension(w, w);
+         * }
+         */
 
     }
 
@@ -62,8 +65,8 @@ public class Board extends JPanel {
 
         this.pcs = new ArrayList<GUIPiece>();
 
-        setPreferredSize(new Dimension(squareSize * 8, squareSize * 8));
-        setBounds(0, 0, squareSize * 8, squareSize * 8);
+        // setPreferredSize(new Dimension(squareSize * 8, squareSize * 8));
+        // setBounds(0, 0, squareSize * 8, squareSize * 8);
 
         // setBackground(Color.BLUE);
         active = null;
@@ -133,7 +136,6 @@ public class Board extends JPanel {
             gr.setColor(Color.darkGray);
             gr.setFont(gr.getFont().deriveFont(18));
             gr.drawString((y + 1) + "", rx + 5, ry + 15);
-
         }
 
     }
@@ -142,7 +144,7 @@ public class Board extends JPanel {
 
         super.paintComponent(gr);
 
-        squareSize = (int) (Math.ceil(getSize().getWidth()) / 8.0);
+        // squareSize = (int) (Math.ceil(getSize().getWidth()) / 8.0);
 
         squareClicked();
 
@@ -153,6 +155,16 @@ public class Board extends JPanel {
             for (int j = 0; j < 8; j++) {
 
                 gr.setColor(c);
+
+                if (game.getActivePos().getMove() != null
+                        && (i + 1) == game.getActivePos().getMove().getDestination().getFile()
+                        && (j + 1) == game.getActivePos().getMove().getDestination().getRank())
+                    gr.setColor(Color.YELLOW);
+
+                if (game.getActivePos().getMove() != null
+                        && (i + 1) == game.getActivePos().getMove().getOrigin().getFile()
+                        && (j + 1) == game.getActivePos().getMove().getOrigin().getRank())
+                    gr.setColor(Color.YELLOW);
 
                 if (active != null && active.getFile() == i + 1 && active.getRank() == (j + 1))
                     gr.setColor(Color.RED);
@@ -228,8 +240,8 @@ public class Board extends JPanel {
 
         ImageIcon image = new ImageIcon(
                 getClass().getResource("/img/" + (p.isWhite() ? "W" : "B") + p.getCode() + ".png"));
-        int ix = (p.getSquare().getFile() - 1) * 100 + 5;
-        int iy = 700 - ((p.getSquare().getRank() - 1) * 100 - 5);
+        int ix = (p.getSquare().getFile() - 1) * squareSize + 5;
+        int iy = (squareSize * 7) - ((p.getSquare().getRank() - 1) * squareSize - 5);
 
         if (dragging != null && p.equals(dragging.getPiece())) {
             ix = dragging.getX();

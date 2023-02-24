@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 import javax.swing.plaf.synth.SynthLookAndFeel;
 
+import PGNParser.PGNParser;
 import game.BoardListener;
 import game.Move;
 
@@ -58,7 +59,7 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
         layout.putConstraint(SpringLayout.EAST, getContentPane(), 10, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, scrollPane);
 
-        layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, gb);
+        // layout.putConstraint(SpringLayout.SOUTH, getContentPane(), 10, SpringLayout.SOUTH, gb);
 
         this.menuBar = new MenuBar(this);
         setJMenuBar(menuBar);
@@ -75,13 +76,13 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
     @Override
     public void boardUpdated() {
 
+        gb.boardUpdate();
         movePane.boardUpdate();
         menuBar.boardUpdate();
         movePane.revalidate();
-        gb.boardUpdate();
+        revalidate();
         pack();
-        repaint();
-        gb.revalidate();
+        // repaint();
 
     }
 
@@ -163,7 +164,7 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
             dialog.setVisible(true);
 
             try {
-                gb.getGame().importPosition(dialog.getImportText());
+                gb.getGame().importPosition(new PGNParser(dialog.getImportText()));
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getLocalizedMessage(), "Error", JOptionPane.PLAIN_MESSAGE);
@@ -186,7 +187,7 @@ class App extends JFrame implements BoardListener, ActionListener, MouseInputLis
                 scan.close();
                 str = str.trim();
 
-                gb.getGame().importPosition(str);
+                gb.getGame().importPosition(new PGNParser(str));
 
             } catch (Exception ex) {
 
