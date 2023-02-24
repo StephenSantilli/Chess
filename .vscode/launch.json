@@ -9,6 +9,13 @@
             "name": "Launch PGNParser",
             "request": "launch",
             "mainClass": "PGNParser.PGNParser",
+            "projectName": "chess"
+        },
+        {
+            "type": "java",
+            "name": "Launch PGNParser",
+            "request": "launch",
+            "mainClass": "PGNParser.PGNParser",
             "projectName": "Chess"
         },
         {

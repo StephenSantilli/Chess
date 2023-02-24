@@ -196,7 +196,7 @@ public class PGNParser {
 
     public static void main(String[] args) throws Exception {
 
-        Scanner s = new Scanner(new FileReader("./test pgns/chesscom with clock.pgn"));
+        Scanner s = new Scanner(new FileReader("./test pgns/cbwra-gmnielsen.pgn"));
         String str = "";
         while (s.hasNextLine()) {
             str += s.nextLine() + "\n";
@@ -257,10 +257,10 @@ public class PGNParser {
 
         while (moveList.length() > 80) {
             int find = moveList.lastIndexOf(" ", 80);
-            if(find <= -1) {
+            if (find <= -1) {
                 find = 79;
             }
-            str += moveList.substring(0, find + 1) + "\n";
+            str += moveList.substring(0, find + 1).trim() + "\n";
             moveList = moveList.substring(find + 1);
         }
         str += moveList;
@@ -269,103 +269,49 @@ public class PGNParser {
         return str;
     }
 
+    // private static final String MOVE_REGEX = "(?<num>\\d+(...)?|\\d+.?)?
+    // ?(?<move>(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?|O-O|O-O-O)
+    // ?(?<comm>{[^\n\"]+})?";
+    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)? ?(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O)|(O-O-O)))(?<suffix>[?!]{0,2})(((?<comm> ?\\{[^\n\\}]+\\}))|((?<n> ?\\$\\d{1,3}))|((?<res> ?1-0|0-1|\\*|1\\/2-1\\/2))){0,3}";
+
     private void parseMoves() throws Exception {
 
-        //TODO: Clean this method up. Use parseTags() as a reference.
-        int start = text.indexOf("1. ");
+        // TODO: Clean this method up. Use parseTags() as a reference.
 
-        if (start <= -1)
-            throw new Exception("No moves found.");
+        Matcher m = Pattern.compile(MOVE_REGEX).matcher(text);
 
-        for (int i = start; i < text.length();) {
+        ArrayList<String> ms = new ArrayList<String>();
+        String t = "";
 
-            char c = text.charAt(i);
+        int end;
 
-            String move = "";
-            if ((c + "").matches("[QKRBNOPa-h]")) {
-                move += c;
-                ++i;
-                c = text.charAt(i);
+        while (m.find()) {
 
-                int nextSpace = text.indexOf(' ', i + 1);
-
-                if (nextSpace <= -1) {
-                    move += text.substring(i);
-                } else {
-                    while (i < text.length()) {
-
-                        if (c == ' ' && nextSpace > -1
-                                && PGNMove.isMoveText(text.substring(i + 1, nextSpace)))
-                            break;
-
-                        if (nextSpace > -1 && text.substring(i, nextSpace).matches("[0-9][0-9]?[0-9]?\\.\\.?\\.?"))
-                            break;
-
-                        if (c == '{') {
-                            move += c;
-                            c = text.charAt(++i);
-                            while (c != '}' && i < text.length()) {
-                                move += c;
-                                c = text.charAt(++i);
-                            }
-                        }
-
-                        if (c == '(') {
-                            move += c;
-                            c = text.charAt(++i);
-                            while (c != ')' && i < text.length()) {
-                                move += c;
-                                c = text.charAt(++i);
-                            }
-                        }
-                        move += c;
-
-                        ++i;
-                        if (i >= text.length())
-                            break;
-
-                        c = text.charAt(i);
-                        nextSpace = text.indexOf(' ', i + 1);
-                    }
-                }
-
-            }
-            move = move.trim();
-            if (!move.equals("")) {
-
-                moves.add(move);
-
-            }
-
-            ++i;
+            parsedMoves.add(new PGNMove(m.group("move"), m.group("comm"), m.group("n"), m.group("res"), m.group("suffix")));
 
         }
 
-        for (int i = 0; i < moves.size(); i++) {
-
-            parsedMoves.add(new PGNMove(moves.get(i)));
-
+        for(int i = 0; i < parsedMoves.size(); i++) {
+            System.out.println(parsedMoves.get(i));
         }
 
     }
 
-    private static final String TAG_REGEX = "\\[([A-z0-9_]+) ?\"([^\"]*)\"\\]";
+    private static final String TAG_REGEX = "\\[([A-z0-9_]+) ?\"([^\"\n]*)\"\\]";
 
     private void parseTags() throws Exception {
 
         Matcher m = Pattern.compile(TAG_REGEX).matcher(text);
 
-
         ArrayList<String> tags = new ArrayList<String>();
         String t = "";
 
-        while(m.find()) {
+        while (m.find()) {
 
             tags.add(m.group(1));
             tags.add(m.group(2));
 
         }
-
 
         for (int i = 0; i + 1 < tags.size(); i++) {
 
@@ -402,10 +348,14 @@ public class PGNParser {
             }
         }
 
-/*         if (event == null || site == null || date == null || round == null || white == null || black == null
-                || result == null)
-            throw new Exception(
-                    "Part of seven tag roster is missing. You must include at least Event, Site, Date, Round, White, Black, and Result."); */
+        /*
+         * if (event == null || site == null || date == null || round == null || white
+         * == null || black == null
+         * || result == null)
+         * throw new Exception(
+         * "Part of seven tag roster is missing. You must include at least Event, Site, Date, Round, White, Black, and Result."
+         * );
+         */
 
         // TODO: add checking for value validity
 

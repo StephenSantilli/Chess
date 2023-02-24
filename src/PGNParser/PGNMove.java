@@ -67,6 +67,22 @@ public class PGNMove {
 
     }
 
+    public PGNMove(String move, String comment, String NAG, String result, String suffix) throws Exception {
+
+        this.moveText = move;
+
+        this.commentary = comment;
+
+        this.NAG = NAG == null ? 0 : Integer.parseInt(NAG.substring(1));
+
+        this.gameTermination = result;
+
+        this.suffix = suffix;
+
+        drawOffer = false;
+
+    }
+
     public PGNMove(String move) throws Exception {
 
         drawOffer = false;
@@ -151,7 +167,7 @@ public class PGNMove {
 
     public static boolean isMoveText(String text) {
         return text.matches(
-                    "(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?)[+#]?|(O-O)|(O-O-O)");
+                "(([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?)[+#]?|(O-O)|(O-O-O)");
     }
 
     public static final String[] NAGs = {
