@@ -5,8 +5,10 @@
             "type": "java",
             "name": "Launch App",
             "request": "launch",
-            "mainClass": "gui.Chess",
-            "preLaunchTask": "gradle: build"
+            "cwd": "${workspaceFolder}",
+            "projectName": "chess",
+            "mainClass": "guifx.App",
+            "preLaunchTask": "gradle: build",
         }
     ]
 }
