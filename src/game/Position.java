@@ -267,7 +267,7 @@ public class Position {
 
         initMoves(checkForMate, game);
 
-        move.setText(this);
+        move.setText(prev);
         this.move = move;
 
     }

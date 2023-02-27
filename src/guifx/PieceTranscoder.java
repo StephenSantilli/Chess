@@ -11,22 +11,30 @@ import org.apache.batik.transcoder.image.ImageTranscoder;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.ImageView;
 
-public class SVGTranscoder extends ImageTranscoder {
+public class PieceTranscoder extends ImageTranscoder {
 
     private BufferedImage img = null;
 
-    public SVGTranscoder(int pieceSize, String svgName) throws Exception {
+    private boolean color;
+    private char pieceCode;
+
+    public PieceTranscoder(int pieceSize, boolean color, char pieceCode) throws Exception {
 
         super();
+        this.color = color;
+        this.pieceCode = pieceCode;
+        
+        addTranscodingHint(PieceTranscoder.KEY_WIDTH, (float) pieceSize);
+        addTranscodingHint(PieceTranscoder.KEY_HEIGHT, (float) pieceSize);
+        try{
+            TranscoderInput input = new TranscoderInput(
+                    getClass().getResource("/img/" + (color ? "W" : "B") + pieceCode + ".svg").toURI().toString());
+            transcode(input, null);
+        } catch (Exception e) {
+            
+            throw new Exception("Piece image not found.");
 
-        addTranscodingHint(SVGTranscoder.KEY_WIDTH, (float) pieceSize);
-        addTranscodingHint(SVGTranscoder.KEY_HEIGHT, (float) pieceSize);
-
-        File f = new File(getClass().getResource("/img/" + svgName + ".svg").toString());
-        TranscoderInput input = new TranscoderInput(
-                getClass().getResource("/img/" + svgName + ".svg").toURI().toString());
-
-        transcode(input, null);
+        }
 
     }
 
@@ -51,6 +59,14 @@ public class SVGTranscoder extends ImageTranscoder {
 
     public BufferedImage getBufferedImage() {
         return img;
+    }
+
+    public boolean isColor() {
+        return color;
+    }
+
+    public char getPieceCode() {
+        return pieceCode;
     }
 
 }

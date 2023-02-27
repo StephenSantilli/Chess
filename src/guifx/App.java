@@ -36,6 +36,7 @@ public class App extends Application {
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         
         // gr.fillRect(50, 50, 100, 100);

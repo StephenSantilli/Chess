@@ -192,13 +192,13 @@ public class Move {
 
             if (a.getSquare().getFile() == origin.getFile()) {
 
-                modFile = origin.getFile();
+                modRank = origin.getRank();
 
             }
 
             if (a.getSquare().getRank() == origin.getRank()) {
 
-                modRank = origin.getRank();
+                modFile = origin.getFile();
 
             }
 
@@ -207,7 +207,7 @@ public class Move {
         String modifier = "";
 
         if (modFile > -1)
-            modifier += (char) modFile + 96;
+            modifier += (char) (modFile + 96);
 
         if (modRank > -1)
             modifier += modRank;
