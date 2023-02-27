@@ -17,9 +17,9 @@ repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
 
-    maven {
+/*     maven {
         url 'https://jitpack.io'
-    }
+    } */
 }
 
 javafx {
@@ -27,9 +27,9 @@ javafx {
 }
 
 dependencies {
-    //implementation 'org.apache.xmlgraphics:batik-all:1.16'
+    implementation 'org.apache.xmlgraphics:batik-all:1.16'
 
-    implementation 'com.github.hervegirod:fxsvgimage:1.1'
+    // implementation 'com.github.hervegirod:fxsvgimage:1.1'
     
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'

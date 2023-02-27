@@ -14,30 +14,30 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 
-import org.girod.javafx.svgimage.*;
-
 public class App extends Application {
-    
+
     public void onResize() {
-
-
 
     }
 
     @Override
     public void start(Stage stage) {
 
-       
-        Group hb = new Group();
+        HBox hb = new HBox();
 
         Scene s = new Scene(hb, 800, 800);
         s.setFill(Color.TRANSPARENT);
-        
+
         stage.setScene(s);
 
         stage.show();
-        Board b = new Board(800,800);
-        hb.getChildren().add(b);
+        try {
+
+            Board b = new Board(800, 800);
+            hb.getChildren().add(b);
+        } catch (Exception e) {
+        }
+        
         // gr.fillRect(50, 50, 100, 100);
 
     }
