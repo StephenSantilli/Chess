@@ -6,10 +6,13 @@ import game.BoardListener;
 import game.Game;
 import game.Move;
 import game.Piece;
+import game.Position;
 import game.Square;
 import javafx.event.Event;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -26,6 +29,7 @@ public class Board extends StackPane implements BoardListener {
     private Game game;
 
     private VBox sqPane;
+    private Canvas sqModifierPane;
     private Pane piecePane;
 
     private ArrayList<PieceTranscoder> transcoderPieces;
@@ -34,11 +38,17 @@ public class Board extends StackPane implements BoardListener {
 
     private GUIPiece dragging;
 
+    private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
+    private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
+    private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
+    private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
+
     private void initPieceTranscoders() throws Exception {
 
         transcoderPieces = new ArrayList<PieceTranscoder>();
 
         boolean color = true;
+
         for (int i = 0; i < 2; i++) {
 
             transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
@@ -53,6 +63,30 @@ public class Board extends StackPane implements BoardListener {
 
     }
 
+    private void drawModifierSq() {
+
+        GraphicsContext gc = sqModifierPane.getGraphicsContext2D();
+        gc.setFill(Color.TRANSPARENT);
+        gc.clearRect(0.0, 0.0, sqModifierPane.getLayoutBounds().getWidth(),
+                sqModifierPane.getLayoutBounds().getHeight());
+
+        gc.setFill(SQUARE_ACTIVE);
+        if (game.getCurrentPos() > 0) {
+
+            Position pos = game.getActivePos();
+            // prev move origin square
+            Square origin = pos.getMove().getOrigin();
+            gc.fillRect(getXBySquare(origin), getYBySquare(origin), squareSize, squareSize);
+
+            // prev move dest square
+            Square destination = pos.getMove().getDestination();
+            gc.fillRect(getXBySquare(destination), getYBySquare(destination), squareSize, squareSize);
+        }
+
+        // active piece square
+
+    }
+
     private void initSquares() {
         this.sqPane = new VBox();
 
@@ -63,7 +97,7 @@ public class Board extends StackPane implements BoardListener {
 
             for (int c = 0; c < 8; c++, dark = !dark) {
 
-                Rectangle sq = new Rectangle(100, 100, dark ? Color.GREEN : Color.WHITE);
+                Rectangle sq = new Rectangle(100, 100, dark ? SQUARE_DARK : SQUARE_LIGHT);
 
                 StackPane pane = new StackPane(sq);
 
@@ -83,20 +117,10 @@ public class Board extends StackPane implements BoardListener {
 
     }
 
-    public Board(int width, int height) throws Exception {
-
-        initSquares();
-
-        getChildren().add(sqPane);
-
-        piecePane = new Pane();
-
-        initPieceTranscoders();
-
-        this.game = new Game();
-        game.addListener(this);
+    private void drawPieces() {
 
         this.pieces = new ArrayList<GUIPiece>();
+        piecePane.getChildren().clear();
 
         for (int r = 0; r < 8; r++) {
 
@@ -112,7 +136,7 @@ public class Board extends StackPane implements BoardListener {
                 piecePane.getChildren().add(img);
 
                 img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
-                img.setLayoutY(c * squareSize + ((squareSize - pieceSize) / 2.0));
+                img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
 
                 GUIPiece guiP = new GUIPiece(p, img);
                 pieces.add(guiP);
@@ -127,36 +151,99 @@ public class Board extends StackPane implements BoardListener {
 
                 });
 
-                img.setOnMouseDragReleased(ev -> {
+                img.setOnMouseReleased(ev -> {
 
                     if (dragging == null)
                         return;
-                    try {
 
+                    try {
                         game.makeMove(new Move(dragging.getPiece().getSquare(),
-                                getSquareByLoc((int) ev.getX(), (int) ev.getY()), game.getActivePos()));
+                                getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos()));
                     } catch (Exception e) {
 
                     }
+
+                    boardUpdated();
                     dragging = null;
 
                 });
-
             }
         }
-        
-        getChildren().add(piecePane);
-        sqPane.requestFocus();
 
-        setOnMousePressed(e -> {
+    }
+
+    public Board(int width, int height) throws Exception {
+
+        this.game = new Game();
+        game.addListener(this);
+
+        initSquares();
+
+        getChildren().add(sqPane);
+
+        sqModifierPane = new Canvas(squareSize * 8, squareSize * 8);
+        drawModifierSq();
+
+        getChildren().add(sqModifierPane);
+
+        piecePane = new Pane();
+
+        initPieceTranscoders();
+        drawPieces();
+
+        getChildren().add(piecePane);
+
+        setOnMouseReleased(e -> {
+
+            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
+            if(found == null) return;
+
+            found.getImage().fireEvent(e);
+            e.consume();
+
+        });
+
+        setOnMouseDragged(e -> {
+
+            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
+            if (found == null)
+                return;
+
+            found.getImage().fireEvent(e);
+            e.consume();
 
         });
 
     }
 
-    public static Square getSquareByLoc(int x, int y) {
+    public GUIPiece getGUIPieceAtSquare(Square square) {
 
-        return new Square((x / 100) + 1, (((800 - y)) / 100) + 1);
+        GUIPiece found = null;
+        for (int i = 0; i < pieces.size() && found == null; i++) {
+
+            if (pieces.get(i).getPiece().getSquare().equals(square))
+                found = pieces.get(i);
+
+        }
+        return found;
+
+    }
+
+    public Square getSquareByLoc(int x, int y) {
+
+        return new Square((x / squareSize) + 1, (((squareSize * 8 - y)) / squareSize) + 1);
+
+    }
+
+    public int getXBySquare(Square sq) {
+
+        return (sq.getFile() - 1) * squareSize;
+
+    }
+
+    public int getYBySquare(Square sq) {
+
+        return (squareSize * 7) - ((sq.getRank() - 1) * squareSize);
 
     }
 
@@ -179,7 +266,8 @@ public class Board extends StackPane implements BoardListener {
     @Override
     public void boardUpdated() {
         // TODO Auto-generated method stub
-
+        drawModifierSq();
+        drawPieces();
     }
 
     @Override
