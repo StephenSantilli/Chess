@@ -460,7 +460,8 @@ public class Position {
     }
 
     /**
-     * Gets a list of the pieces that are attacking the given square.
+     * Gets a list of the pieces that are attacking the given square (able to
+     * capture the piece occupying it.)
      * 
      * @param s The square to search for attacking pieces at.
      * @return An {@link ArrayList} of {@link Piece} objects
@@ -473,6 +474,28 @@ public class Position {
 
             Move m = moves.get(i);
             if (m.isCapture() && m.getCaptureSquare().equals(s))
+                pieces.add(m.getPiece());
+
+        }
+
+        return pieces;
+
+    }
+
+    /**
+     * Gets a list of the pieces that are able to move to a given square.
+     * 
+     * @param s The square to search for moves to.
+     * @return An {@link ArrayList} of {@link Piece} objects
+     */
+    public ArrayList<Piece> getPiecesByCanMoveTo(Square s) {
+
+        ArrayList<Piece> pieces = new ArrayList<Piece>();
+
+        for (int i = 0; i < moves.size(); i++) {
+
+            Move m = moves.get(i);
+            if (m.getDestination().equals(s))
                 pieces.add(m.getPiece());
 
         }
@@ -503,6 +526,28 @@ public class Position {
     public boolean isCheck(boolean white) {
 
         return getPiecesByAttacking(getKingSquare(white)).size() > 0;
+
+    }
+
+    /**
+     * Checks if a piece can move to the given square.
+     * 
+     * @param piece  The piece to check
+     * @param square The square to check for
+     * @return Whether or not the location can be moved to
+     */
+    public boolean canPieceMoveToSquare(Piece piece, Square square) {
+
+        ArrayList<Piece> attackers = getPiecesByCanMoveTo(square);
+
+        for (int i = 0; i < attackers.size(); i++) {
+
+            if (attackers.get(i).equals(piece))
+                return true;
+
+        }
+
+        return false;
 
     }
 

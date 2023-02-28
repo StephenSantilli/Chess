@@ -1,7 +1,6 @@
 package guifx;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -23,15 +22,17 @@ public class PieceTranscoder extends ImageTranscoder {
         super();
         this.color = color;
         this.pieceCode = pieceCode;
-        
+
+        addTranscodingHint(KEY_PIXEL_UNIT_TO_MILLIMETER, (25.4f/1200));
         addTranscodingHint(PieceTranscoder.KEY_WIDTH, (float) pieceSize);
         addTranscodingHint(PieceTranscoder.KEY_HEIGHT, (float) pieceSize);
-        try{
+
+        try {
             TranscoderInput input = new TranscoderInput(
                     getClass().getResource("/img/" + (color ? "W" : "B") + pieceCode + ".svg").toURI().toString());
             transcode(input, null);
         } catch (Exception e) {
-            
+
             throw new Exception("Piece image not found.");
 
         }
