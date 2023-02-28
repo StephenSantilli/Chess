@@ -43,12 +43,104 @@ public class Board extends StackPane implements BoardListener {
     private GUIPiece dragging;
     private GUIPiece active;
 
+    private MovePane mp;
+
+    public MovePane getMp() {
+        return mp;
+    }
+
     private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
     private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
     private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
     private static final Color SQUARE_PREV_MOVE = Color.rgb(238, 187, 85, .70);
     private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
     private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
+
+    public Board(int width, int height) throws Exception {
+
+        
+        this.game = new Game();
+        game.addListener(this);
+
+        this.mp = new MovePane(game);
+
+        initSquares();
+        getChildren().add(sqPane);
+
+        sqModifierPane = new Canvas(squareSize * 8, squareSize * 8);
+        drawModifierSq();
+        getChildren().add(sqModifierPane);
+
+        borderPane = new Canvas(squareSize * 8, squareSize * 8);
+        clearBorder();
+        getChildren().add(borderPane);
+
+        movesPane = new Canvas(squareSize * 8, squareSize * 8);
+        getChildren().add(movesPane);
+        drawMovesPane();
+
+        piecePane = new Pane();
+        getChildren().add(piecePane);
+
+        initPieceTranscoders();
+        drawPieces();
+
+        setOnMouseReleased(e -> {
+
+            if (dragging != null) {
+                dragging.getImage().fireEvent(e);
+            } else {
+
+                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
+                if (found != null)
+                    found.getImage().fireEvent(e);
+                else if (active != null) {
+                    active.getImage().fireEvent(e);
+                }
+
+            }
+
+            e.consume();
+
+        });
+
+        setOnMouseDragged(e -> {
+
+            if (dragging != null) {
+
+                dragging.getImage().fireEvent(e);
+
+            } else {
+
+                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
+                if (found != null)
+                    found.getImage().fireEvent(e);
+
+            }
+
+            e.consume();
+
+        });
+
+        setOnMousePressed(e -> {
+
+            if (dragging != null) {
+
+                dragging.getImage().fireEvent(e);
+
+            } else {
+
+                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
+                if (found != null)
+                    found.getImage().fireEvent(e);
+
+            }
+
+            e.consume();
+
+        });
+
+    }
 
     private void initPieceTranscoders() throws Exception {
 
@@ -244,6 +336,7 @@ public class Board extends StackPane implements BoardListener {
                         dragging = null;
 
                         boardUpdated();
+                        //updateActive();
                         ev.consume();
                         return;
 
@@ -312,89 +405,6 @@ public class Board extends StackPane implements BoardListener {
 
     }
 
-    public Board(int width, int height) throws Exception {
-
-        this.game = new Game();
-        game.addListener(this);
-
-        initSquares();
-        getChildren().add(sqPane);
-
-        sqModifierPane = new Canvas(squareSize * 8, squareSize * 8);
-        drawModifierSq();
-        getChildren().add(sqModifierPane);
-
-        borderPane = new Canvas(squareSize * 8, squareSize * 8);
-        clearBorder();
-        getChildren().add(borderPane);
-
-        movesPane = new Canvas(squareSize * 8, squareSize * 8);
-        getChildren().add(movesPane);
-        drawMovesPane();
-
-        piecePane = new Pane();
-        getChildren().add(piecePane);
-
-        initPieceTranscoders();
-        drawPieces();
-
-        setOnMouseReleased(e -> {
-
-            if (dragging != null) {
-                dragging.getImage().fireEvent(e);
-            } else {
-
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
-                if (found != null)
-                    found.getImage().fireEvent(e);
-                else if (active != null) {
-                    active.getImage().fireEvent(e);
-                }
-
-            }
-
-            e.consume();
-
-        });
-
-        setOnMouseDragged(e -> {
-
-            if (dragging != null) {
-
-                dragging.getImage().fireEvent(e);
-
-            } else {
-
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
-                if (found != null)
-                    found.getImage().fireEvent(e);
-
-            }
-
-            e.consume();
-
-        });
-
-        setOnMousePressed(e -> {
-
-            if (dragging != null) {
-
-                dragging.getImage().fireEvent(e);
-
-            } else {
-
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getX(), (int) e.getY()));
-                if (found != null)
-                    found.getImage().fireEvent(e);
-
-            }
-
-            e.consume();
-
-        });
-
-    }
-
     public GUIPiece getGUIPieceAtSquare(Square square) {
 
         GUIPiece found = null;
@@ -452,6 +462,7 @@ public class Board extends StackPane implements BoardListener {
         // TODO Auto-generated method stub
         updateActive();
         drawPieces();
+        mp.updateMovePane();
     }
 
     @Override

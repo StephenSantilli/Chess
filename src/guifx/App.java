@@ -22,10 +22,15 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        VBox vb = new VBox();
 
         HBox hb = new HBox();
 
-        Scene s = new Scene(hb, 800, 800);
+
+        vb.getChildren().add(hb);
+        
+        
+        Scene s = new Scene(vb, 1000, 800);
         s.setFill(Color.TRANSPARENT);
 
         stage.setScene(s);
@@ -35,6 +40,7 @@ public class App extends Application {
 
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
+            hb.getChildren().add(b.getMp());
         } catch (Exception e) {
             e.printStackTrace();
         }
