@@ -551,4 +551,18 @@ public class Position {
 
     }
 
+    public ArrayList<Move> getPieceMoves(Piece piece) {
+
+        ArrayList<Move> pieceMoves = new ArrayList<Move>();
+
+        for(int i = 0; i < moves.size(); i++) {
+
+            if(moves.get(i).getPiece().equals(piece)) pieceMoves.add(moves.get(i));
+
+        }
+
+        return pieceMoves;
+        
+    }
+
 }
