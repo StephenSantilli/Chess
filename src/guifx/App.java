@@ -3,6 +3,7 @@ package guifx;
 import javafx.application.*;
 import javafx.stage.*;
 import javafx.scene.*;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -40,13 +41,17 @@ public class App extends Application {
 
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
-            hb.getChildren().add(b.getMp());
+            ScrollPane sp = new ScrollPane(b.getMp());
+            sp.setFitToWidth(true);
+            sp.setMinWidth(220);
+            hb.getChildren().add(sp);
 
             HBox.setHgrow(b, Priority.NEVER);
-            HBox.setHgrow(b.getMp(), Priority.NEVER);
+            HBox.setHgrow(sp, Priority.ALWAYS);
             
             b.setMaxWidth(b.getSquareSize() * 8);
             b.setMaxHeight(b.getSquareSize() * 8);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -62,6 +62,7 @@ public class Board extends StackPane implements BoardListener {
         game.addListener(this);
 
         this.mp = new MovePane(game);
+        mp.initMovePane();
 
         initSquares();
         getChildren().add(sqPane);
