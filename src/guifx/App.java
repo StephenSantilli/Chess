@@ -41,6 +41,12 @@ public class App extends Application {
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
             hb.getChildren().add(b.getMp());
+
+            HBox.setHgrow(b, Priority.NEVER);
+            HBox.setHgrow(b.getMp(), Priority.NEVER);
+            
+            b.setMaxWidth(b.getSquareSize() * 8);
+            b.setMaxHeight(b.getSquareSize() * 8);
         } catch (Exception e) {
             e.printStackTrace();
         }

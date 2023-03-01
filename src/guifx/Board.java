@@ -58,7 +58,6 @@ public class Board extends StackPane implements BoardListener {
 
     public Board(int width, int height) throws Exception {
 
-        
         this.game = new Game();
         game.addListener(this);
 
@@ -316,12 +315,15 @@ public class Board extends StackPane implements BoardListener {
 
                 img.setOnMouseDragged(ev -> {
 
-                    img.setX(ev.getX() - (pieceSize / 2.0));
-                    img.setY(ev.getY() - (pieceSize / 2.0));
+                    if (ev.getSceneX() >= 0 && ev.getSceneX() <= piecePane.getLayoutBounds().getMaxX())
+                        img.setX(ev.getX() - (pieceSize / 2.0));
+
+                    if (ev.getSceneY() >= 0 && ev.getSceneY() <= piecePane.getLayoutBounds().getMaxY())
+                        img.setY(ev.getY() - (pieceSize / 2.0));
 
                     clearBorder();
                     Square hoverSquare = getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY());
-                        drawBorder(getXBySquare(hoverSquare), getYBySquare(hoverSquare));
+                    drawBorder(getXBySquare(hoverSquare), getYBySquare(hoverSquare));
                     ev.consume();
 
                 });
@@ -336,7 +338,7 @@ public class Board extends StackPane implements BoardListener {
                         dragging = null;
 
                         boardUpdated();
-                        //updateActive();
+                        // updateActive();
                         ev.consume();
                         return;
 
@@ -469,6 +471,10 @@ public class Board extends StackPane implements BoardListener {
     public char promptForPromote(Move move) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'promptForPromote'");
+    }
+
+    public int getSquareSize() {
+        return squareSize;
     }
 
 }
