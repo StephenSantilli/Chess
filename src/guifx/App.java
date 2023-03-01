@@ -31,7 +31,7 @@ public class App extends Application {
         vb.getChildren().add(hb);
         
         
-        Scene s = new Scene(vb, 1000, 800);
+        Scene s = new Scene(vb, 1020, 800);
         s.setFill(Color.TRANSPARENT);
 
         stage.setScene(s);
@@ -42,6 +42,8 @@ public class App extends Application {
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
             ScrollPane sp = new ScrollPane(b.getMp());
+            b.getGame().addMoveListener(b.getMp());
+            b.getMp().initMovePane();
             sp.setFitToWidth(true);
             sp.setMinWidth(220);
             hb.getChildren().add(sp);

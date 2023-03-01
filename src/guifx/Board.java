@@ -30,6 +30,10 @@ public class Board extends StackPane implements BoardListener {
 
     private Game game;
 
+    public Game getGame() {
+        return game;
+    }
+
     private VBox sqPane;
     private Canvas sqModifierPane;
     private Canvas borderPane;
@@ -465,7 +469,6 @@ public class Board extends StackPane implements BoardListener {
         // TODO Auto-generated method stub
         updateActive();
         drawPieces();
-        mp.updateMovePane();
     }
 
     @Override

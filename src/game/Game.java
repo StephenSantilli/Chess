@@ -12,6 +12,7 @@ public class Game {
     private int currentPos;
 
     private ArrayList<BoardListener> listeners;
+    private ArrayList<BoardMoveListener> moveListeners;
 
     public void fireBoardUpdate() {
 
@@ -42,6 +43,41 @@ public class Game {
         listeners.add(listener);
     }
 
+
+    public void fireMoveMade() {
+
+        for (BoardMoveListener b : moveListeners) {
+
+            b.moveMade();
+
+        }
+
+    }
+
+    public void fireUndoMove() {
+
+        for (BoardMoveListener b : moveListeners) {
+
+            b.undoMove();
+
+        }
+
+    }
+
+    public void fireResetMoves() {
+
+        for (BoardMoveListener b : moveListeners) {
+
+            b.resetMoves();
+
+        }
+
+    }
+
+    public void addMoveListener(BoardMoveListener listener) {
+        moveListeners.add(listener);
+    }
+
     public Position getActivePos() {
         return positions.get(currentPos);
     }
@@ -58,6 +94,7 @@ public class Game {
 
         listeners = new ArrayList<BoardListener>();
         positions = new ArrayList<Position>();
+        moveListeners = new ArrayList<BoardMoveListener>();
         positions.add(new Position(this));
         currentPos = 0;
 
@@ -108,6 +145,7 @@ public class Game {
         currentPos = positions.size() - 1;
 
         fireBoardUpdate();
+        fireMoveMade();
 
     }
 
@@ -151,6 +189,7 @@ public class Game {
         currentPos = positions.size() - 1;
 
         fireBoardUpdate();
+        fireUndoMove();
 
     }
 
@@ -165,6 +204,7 @@ public class Game {
         currentPos = positions.size() - 1;
 
         fireBoardUpdate();
+        fireMoveMade();
 
     }
 
@@ -182,13 +222,13 @@ public class Game {
 
             positions.add(new Position(getActivePos(), m, this, !getActivePos().isWhite(), true));
             ++currentPos;
-
         }
-
+        
         if (currentPos == 0)
-            throw new Exception("Position import failed.");
-
+        throw new Exception("Position import failed.");
+        
         fireBoardUpdate();
+        fireResetMoves();
 
     }
 
