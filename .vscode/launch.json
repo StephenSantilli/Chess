@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Chess",
+            "request": "launch",
+            "mainClass": "guifx.Chess",
+            "projectName": "chess"
+        },
+        {
+            "type": "java",
             "name": "Launch Chess",
             "request": "launch",
             "mainClass": "gui.Chess",

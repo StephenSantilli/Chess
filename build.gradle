@@ -49,7 +49,7 @@ sourceSets {
 
 application {
     // Define the main class for the application.
-    mainClass = 'guifx.App'
+    mainClass = 'guifx.Chess'
 }
 
 tasks.named('test') {

@@ -46,6 +46,8 @@ public class MovePane extends GridPane implements BoardMoveListener {
         getColumnConstraints().clear();
         getColumnConstraints().addAll(c, c1, c2);
 
+        setVisible(true);
+
     }
 
     public void updateMovePane() {
@@ -112,7 +114,6 @@ public class MovePane extends GridPane implements BoardMoveListener {
         GridPane.setMargin(btn1, new Insets(5, 5, 5, 5));
         
         
-        if()
 
     }
 
