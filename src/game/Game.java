@@ -128,9 +128,7 @@ public class Game {
         if (valid == null)
             return;
 
-        long nt = System.nanoTime();
         Position movePosition = new Position(positions.get(currentPos), valid, this, !isWhiteTurn(true), true);
-        System.out.println(System.nanoTime() - nt);
 
         if (movePosition.isGivingCheck())
             return;

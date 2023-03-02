@@ -128,10 +128,29 @@ public class Move {
 
         this.pieceType = originPiece.getCode();
 
+        // long nt = System.nanoTime();
         this.enPassant = checkIfEnPassant(pos);
+/*         long t = System.nanoTime();
+        if (t - nt > 150)
+            System.out.println("ep: " + (t - nt)); */
+
+        // nt = System.nanoTime();
         this.capture = checkIfCapture(pos);
+/*         t = System.nanoTime();
+        if (t - nt > 150)
+            System.out.println("cap: " + (t - nt)); */
+
+        // nt = System.nanoTime();
         this.promoteType = checkIfPromote() ? '?' : '0';
+ /*        t = System.nanoTime();
+        if (t - nt > 150)
+            System.out.println("promo: " + (t - nt)); */
+
+        // nt = System.nanoTime();
         this.castle = checkIfCastle(pos);
+/*         t = System.nanoTime();
+        if (t - nt > 150)
+            System.out.println("cap: " + (t - nt)); */
 
         this.piece = pos.getPieceAtSquare(origin);
         this.capturePiece = pos.getPieceAtSquare(getCaptureSquare());
@@ -236,8 +255,7 @@ public class Move {
         if (p == null || p.getCode() != 'P')
             return false;
 
-        ArrayList<Move> moves = pos.getMoves();
-        Move prevMove = moves.get(moves.size() - 1);
+        Move prevMove = pos.getMove();
 
         if (prevMove.getMoveDistance() != 2)
             return false;
@@ -252,19 +270,24 @@ public class Move {
             return true;
 
         Piece curr = pos.getPieceAtSquare(origin);
-        Piece cap = pos.getPieceAtSquare(destination);
+        Piece cap = pos.getPieceAtSquare(getCaptureSquare());
 
         if (cap != null && cap.isWhite() == curr.isWhite())
             throw new Exception("Cannot capture your own piece.");
 
-        if (curr.getCode() == 'P' && destination.getFile() == origin.getFile() && cap != null)
-            throw new Exception("Cannot capture going forward.");
+        if (curr.getCode() == 'P') {
+            if (getCaptureSquare().getFile() == origin.getFile()) {
+                
+                if (cap != null)
+                    throw new Exception("Cannot capture going forward.");
+                else
+                    return false;
 
-        if (curr.getCode() == 'P' && destination.getFile() == origin.getFile())
-            return false;
+            } else if (getCaptureSquare().getFile() != origin.getFile() && cap == null) {
+                throw new Exception("Pawn cannot capture with no piece there.");
+            }
 
-        if (curr.getCode() == 'P' && destination.getFile() != origin.getFile() && cap == null)
-            throw new Exception("Pawn cannot capture with no piece there.");
+        }
 
         return cap != null;
 
@@ -311,7 +334,7 @@ public class Move {
             return false;
 
         if (((white && destination.getRank() != 1) || (!white && destination.getRank() != 8))
-                && (destination.getFile() != 3 || destination.getFile() != 7))
+                || (destination.getFile() != 3 || destination.getFile() != 7))
             throw new Exception("Invalid castle location.");
 
         Piece king = pos.getPieceAtSquare(origin);

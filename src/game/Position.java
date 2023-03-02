@@ -2,10 +2,18 @@ package game;
 
 import java.util.ArrayList;
 
+import javafx.concurrent.Task;
+
 public class Position {
 
+    private Piece[][] pcs;
+
     /** All of the pieces in the position. Does not include captured pieces. */
-    private ArrayList<Piece> pieces;
+    // private ArrayList<Piece> pieces;
+
+    public Piece[][] getPcs() {
+        return pcs;
+    }
 
     /**
      * All of the moves that can be made. If {@code checkForMate} is {@code true}
@@ -83,9 +91,11 @@ public class Position {
      * @return A list of the {@link Piece} objects in this position. Does not
      *         include captured pieces.
      */
-    public ArrayList<Piece> getPieces() {
-        return pieces;
-    }
+    /*
+     * public ArrayList<Piece> getPieces() {
+     * return pieces;
+     * }
+     */
 
     /**
      * @return A list of the {@link Move} objects possible in this position. If
@@ -163,63 +173,74 @@ public class Position {
      */
     public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
 
-        //TODO: OPTIMIZE THIS CONSTRUCTOR; MOST OF SLOWDOWNS ARE COMING FROM HERE.
+        // TODO: OPTIMIZE THIS CONSTRUCTOR; MOST OF SLOWDOWNS ARE COMING FROM HERE.
 
-        this.pieces = new ArrayList<Piece>();
+        // this.pieces = new ArrayList<Piece>();
+        this.pcs = new Piece[8][8];
         this.white = isWhite;
 
-        ArrayList<Piece> prevPieces = prev.getPieces();
+        Piece[][] prevPieces = prev.getPcs();
 
-        for (int i = 0; i < prevPieces.size(); i++) {
+        for (int r = 0; r < prevPieces.length; r++) {
 
-            Piece old = prevPieces.get(i);
-            Piece piece = null;
-            switch (old.getCode()) {
-                case 'P':
-                    piece = new Pawn(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                            old.hasMoved());
-                    break;
-                case 'K':
-                    piece = new King(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                            old.hasMoved());
-                    if (piece.isWhite())
-                        whiteKing = piece.getSquare();
-                    else
-                        blackKing = piece.getSquare();
+            for (int c = 0; c < prevPieces[r].length; c++) {
+                Piece old = prevPieces[r][c];
+                if (old == null)
+                    continue;
 
-                    break;
-                case 'N':
-                    piece = new Knight(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                            old.hasMoved());
-                    break;
-                case 'Q':
-                    piece = new Queen(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                            old.hasMoved());
-                    break;
-                case 'B':
-                    piece = new Bishop(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                            old.hasMoved());
-                    break;
-                case 'R':
-                    piece = new Rook(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                            old.hasMoved());
-                    break;
+                Piece piece = null;
+                switch (old.getCode()) {
+                    case 'P':
+                        piece = new Pawn(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
+                                old.hasMoved());
+                        break;
+                    case 'K':
+                        piece = new King(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
+                                old.hasMoved());
+                        if (piece.isWhite())
+                            whiteKing = piece.getSquare();
+                        else
+                            blackKing = piece.getSquare();
+
+                        break;
+                    case 'N':
+                        piece = new Knight(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
+                                old.hasMoved());
+                        break;
+                    case 'Q':
+                        piece = new Queen(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
+                                old.hasMoved());
+                        break;
+                    case 'B':
+                        piece = new Bishop(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
+                                old.hasMoved());
+                        break;
+                    case 'R':
+                        piece = new Rook(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
+                                old.hasMoved());
+                        break;
+                }
+
+                if (piece != null) {
+                    // pieces.add(piece);
+                    pcs[old.getSquare().getRank() - 1][old.getSquare().getFile() - 1] = piece;
+                }
             }
-
-            if (piece != null)
-                pieces.add(piece);
-
         }
 
         if (move.isCapture()) {
 
-            int capIndex = findPiece(move.getCaptureSquare());
-            pieces.remove(capIndex);
+            Square capSquare = move.getCaptureSquare();
+            pcs[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
+            // int capIndex = findPiece(move.getCaptureSquare());
+            // pieces.remove(capIndex);
 
         }
 
-        int movePIndex = findPiece(move.getOrigin());
-        Piece movePiece = pieces.get(movePIndex);
+        // int movePIndex = findPiece(move.getOrigin());
+        // Piece movePiece = pieces.get(movePIndex);
+        Square movePieceSq = move.getOrigin();
+        Piece movePiece = pcs[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1];
 
         if (movePiece.getCode() == 'K') {
             if (movePiece.isWhite())
@@ -228,8 +249,11 @@ public class Position {
                 blackKing = move.getDestination();
         }
 
-        movePiece.setSquare(move.getDestination());
+        Square destSq = move.getDestination();
+        movePiece.setSquare(destSq);
         movePiece.setHasMoved(true);
+        pcs[destSq.getRank() - 1][destSq.getFile() - 1] = movePiece;
+        pcs[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1] = null;
 
         if (move.isCastle()) {
 
@@ -245,21 +269,23 @@ public class Position {
             if (promoRes == 'Q' || promoRes == 'R' || promoRes == 'B' || promoRes == 'N') {
                 move.setPromoteType(promoRes);
 
-                pieces.remove(movePIndex);
+                // pieces.remove(movePIndex);
+                // setSquare(movePieceSq, null);
+
                 Square mps = movePiece.getSquare();
 
                 switch (promoRes) {
                     case 'Q':
-                        pieces.add(new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                        setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
                         break;
                     case 'R':
-                        pieces.add(new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                        setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
                         break;
                     case 'B':
-                        pieces.add(new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                        setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
                         break;
                     case 'N':
-                        pieces.add(new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                        setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
                         break;
                 }
 
@@ -284,11 +310,31 @@ public class Position {
 
         this.moves = new ArrayList<Move>();
 
-        for (int i = 0; i < pieces.size(); i++) {
+        for (int r = 0; r < pcs.length; r++) {
 
-            moves.addAll(pieces.get(i).getMoves(this));
+            for (int c = 0; c < pcs[r].length; c++) {
+                Piece p = pcs[r][c];
+                if (p == null)
+                    continue;
+
+                ArrayList<Move> pMoves = p.getMoves(this);
+                moves.addAll(pMoves);
+
+                // System.out.println("getmoves " + pieces.get(i).getCode() + " @ " +
+                // pieces.get(i).getSquare() + ": " + (System.nanoTime() - nt));
+                /*
+                 * pMoves.forEach(m -> {
+                 * System.out.print(m.getDestination() + " ");
+                 * });
+                 */
+
+                // nt = System.nanoTime();
+
+                // System.out.println("addall: " + (System.nanoTime() - nt));
+            }
 
         }
+
 
         ArrayList<Piece> ownPieces = getPiecesByAttacking(white ? whiteKing : blackKing);
         if (ownPieces.size() >= 1)
@@ -316,14 +362,20 @@ public class Position {
         int whitePoints = 0;
         int blackPoints = 0;
 
-        for (int i = 0; i < pieces.size(); i++) {
+        for (int r = 0; r < pcs.length; r++) {
 
-            Piece p = pieces.get(i);
+            for (int c = 0; c < pcs[r].length; c++) {
 
-            if (p.isWhite())
-                whitePoints += p.getPoints();
-            else
-                blackPoints += p.getPoints();
+                Piece p = pcs[r][c];
+                if (p == null)
+                    continue;
+
+                if (p.isWhite())
+                    whitePoints += p.getPoints();
+                else
+                    blackPoints += p.getPoints();
+
+            }
 
         }
 
@@ -380,14 +432,15 @@ public class Position {
      */
     private void initDefaultPosition() {
 
-        this.pieces = new ArrayList<Piece>();
+        // this.pieces = new ArrayList<Piece>();
+        pcs = new Piece[8][8];
 
         boolean color = true;
         for (int i = 0; i < 2; i++) {
 
             for (int j = 0; j < 8; j++) {
 
-                pieces.add(new Pawn(j + 1, color ? 2 : 7, color));
+                setSquare(new Square(j + 1, color ? 2 : 7), new Pawn(j + 1, color ? 2 : 7, color));
 
             }
 
@@ -397,22 +450,23 @@ public class Position {
                 whiteKing = king.getSquare();
             else
                 blackKing = king.getSquare();
-            pieces.add(king);
+
+            setSquare(king.getSquare(), king);
 
             // Rooks
-            pieces.add(new Rook(1, color ? 1 : 8, color));
-            pieces.add(new Rook(8, color ? 1 : 8, color));
+            setSquare(new Square(1, color ? 1 : 8), new Rook(1, color ? 1 : 8, color));
+            setSquare(new Square(8, color ? 1 : 8), new Rook(8, color ? 1 : 8, color));
 
             // Queen
-            pieces.add(new Queen(4, color ? 1 : 8, color));
+            setSquare(new Square(4, color ? 1 : 8), new Queen(4, color ? 1 : 8, color));
 
             // Bishops
-            pieces.add(new Bishop(3, color ? 1 : 8, color));
-            pieces.add(new Bishop(6, color ? 1 : 8, color));
+            setSquare(new Square(3, color ? 1 : 8), new Bishop(3, color ? 1 : 8, color));
+            setSquare(new Square(6, color ? 1 : 8), new Bishop(6, color ? 1 : 8, color));
 
             // Knight
-            pieces.add(new Knight(2, color ? 1 : 8, color));
-            pieces.add(new Knight(7, color ? 1 : 8, color));
+            setSquare(new Square(2, color ? 1 : 8), new Knight(2, color ? 1 : 8, color));
+            setSquare(new Square(7, color ? 1 : 8), new Knight(7, color ? 1 : 8, color));
 
             color = false;
         }
@@ -427,17 +481,25 @@ public class Position {
      *         {@code -1} if
      *         no piece is at the square.
      */
-    public int findPiece(Square s) {
+    /*
+     * public int findPiece(Square s) {
+     * 
+     * int found = -1;
+     * for (int i = 0; i < pieces.size() && found <= -1; i++) {
+     * 
+     * if (pieces.get(i).getSquare().equals(s))
+     * found = i;
+     * 
+     * }
+     * 
+     * return found;
+     * 
+     * }
+     */
 
-        int found = -1;
-        for (int i = 0; i < pieces.size() && found <= -1; i++) {
+    public void setSquare(Square s, Piece p) {
 
-            if (pieces.get(i).getSquare().equals(s))
-                found = i;
-
-        }
-
-        return found;
+        pcs[s.getRank() - 1][s.getFile() - 1] = p;
 
     }
 
@@ -449,16 +511,21 @@ public class Position {
      *         if no
      *         piece is at the square.
      */
+    /*
+     * public Piece getPieceAtSquare(Square s) {
+     * 
+     * int index = findPiece(s);
+     * 
+     * Piece piece = null;
+     * if (index >= 0)
+     * piece = pieces.get(index);
+     * 
+     * return piece;
+     * 
+     * }
+     */
     public Piece getPieceAtSquare(Square s) {
-
-        int index = findPiece(s);
-
-        Piece piece = null;
-        if (index >= 0)
-            piece = pieces.get(index);
-
-        return piece;
-
+        return pcs[s.getRank() - 1][s.getFile() - 1];
     }
 
     /**
@@ -557,14 +624,15 @@ public class Position {
 
         ArrayList<Move> pieceMoves = new ArrayList<Move>();
 
-        for(int i = 0; i < moves.size(); i++) {
+        for (int i = 0; i < moves.size(); i++) {
 
-            if(moves.get(i).getPiece().equals(piece)) pieceMoves.add(moves.get(i));
+            if (moves.get(i).getPiece().equals(piece))
+                pieceMoves.add(moves.get(i));
 
         }
 
         return pieceMoves;
-        
+
     }
 
 }

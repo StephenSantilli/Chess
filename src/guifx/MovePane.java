@@ -47,10 +47,6 @@ public class MovePane extends GridPane implements BoardMoveListener {
         getColumnConstraints().clear();
         getColumnConstraints().addAll(c, c1, c2);
 
-        Label l = new Label("1");
-        l.setVisible(false);
-        add(l, 0, 0);
-
         setVisible(true);
 
     }
@@ -84,15 +80,18 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
             Position p = g.getPositions().get(g.getPositions().size() - 1);
             Move m = p.getMove();
-            Button btn1 = new Button(m.getMoveText());
+            Button btn1 = new Button(p.getMoveString());
             btn1.setMaxWidth(Double.MAX_VALUE);
             add(btn1, m.isWhite() ? 1 : 2, (g.getPositions().size() / 2));
             GridPane.setMargin(btn1, new Insets(5, 5, 5, 5));
-            
-        });
 
-        
-        
+            if (m.isWhite()) {
+                Label l = new Label((g.getPositions().size() / 2) + ".");
+                add(l, 0, (g.getPositions().size() / 2));
+                GridPane.setMargin(l, new Insets(5, 5, 5, 5));
+            }
+
+        });
 
     }
 

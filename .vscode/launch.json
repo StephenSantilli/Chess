@@ -5,7 +5,7 @@
             "type": "java",
             "name": "Launch App",
             "request": "launch",
-            "projectName": "chess",
+            "projectName": "Chess",
             "mainClass": "guifx.Chess",
             "preLaunchTask": "gradle: compileJava"
         }

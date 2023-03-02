@@ -160,15 +160,19 @@ abstract public class Piece {
 
                 continue;
             }
+            moves.add(move);
+            if(move.isCapture()) break;
 
-            Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-            if (move.getDestination().isValid() && occupant == null)
-                moves.add(move);
-            else if (occupant != null && occupant.isWhite() != white) {
-                moves.add(move);
-                break;
-            } else
-                break;
+            /*
+             * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
+             * if (move.getDestination().isValid() && occupant == null)
+             * moves.add(move);
+             * else if (occupant != null && occupant.isWhite() != white) {
+             * moves.add(move);
+             * break;
+             * } else
+             * break;
+             */
 
         }
 
@@ -189,14 +193,19 @@ abstract public class Piece {
                     continue;
                 }
 
-                Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-                if (occupant == null)
-                    moves.add(move);
-                else if (occupant != null && occupant.isWhite() != white) {
-                    moves.add(move);
+                moves.add(move);
+                if (move.isCapture())
                     break;
-                } else
-                    break;
+                /*
+                 * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
+                 * if (occupant == null)
+                 * moves.add(move);
+                 * else if (occupant != null && occupant.isWhite() != white) {
+                 * moves.add(move);
+                 * break;
+                 * } else
+                 * break;
+                 */
 
             }
 
@@ -240,14 +249,20 @@ abstract public class Piece {
                 continue;
             }
 
-            Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-            if (move.getDestination().isValid() && occupant == null)
-                moves.add(move);
-            else if (occupant != null && occupant.isWhite() != white) {
-                moves.add(move);
+            moves.add(move);
+            if (move.isCapture())
                 break;
-            } else
-                break;
+
+            /*
+             * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
+             * if (move.getDestination().isValid() && occupant == null)
+             * moves.add(move);
+             * else if (occupant != null && occupant.isWhite() != white) {
+             * moves.add(move);
+             * break;
+             * } else
+             * break;
+             */
 
         }
 
@@ -267,14 +282,19 @@ abstract public class Piece {
                 continue;
             }
 
-            Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-            if (move.getDestination().isValid() && occupant == null)
-                moves.add(move);
-            else if (occupant != null && occupant.isWhite() != white) {
-                moves.add(move);
+            moves.add(move);
+            if (move.isCapture())
                 break;
-            } else
-                break;
+            /*
+             * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
+             * if (move.getDestination().isValid() && occupant == null)
+             * moves.add(move);
+             * else if (occupant != null && occupant.isWhite() != white) {
+             * moves.add(move);
+             * break;
+             * } else
+             * break;
+             */
 
         }
 
@@ -292,18 +312,18 @@ abstract public class Piece {
      *         does account for capturing/pieces in the way.
      */
     protected ArrayList<Move> getDiagonalMoves(int distance, Position p) {
-
+        
         ArrayList<Move> moves = new ArrayList<Move>();
-
+        
         int file = square.getFile();
         int rank = square.getRank();
-
+        
         if (distance <= 0)
-            distance = 8;
-
+        distance = 8;
+        
         boolean color = white ? true : false;
         for (int l = 0; l < 2; l++, color = !color, distance = -distance) {
-
+            
             // Up
             for (int i = 1; i < distance + 1; i++) {
 
@@ -319,14 +339,20 @@ abstract public class Piece {
                     continue;
                 }
 
-                Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-                if (move.getDestination().isValid() && occupant == null)
-                    moves.add(move);
-                else if (occupant != null && occupant.isWhite() != white) {
-                    moves.add(move);
+                moves.add(move);
+                if (move.isCapture())
                     break;
-                } else
-                    break;
+
+                /*
+                 * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
+                 * if (move.getDestination().isValid() && occupant == null)
+                 * moves.add(move);
+                 * else if (occupant != null && occupant.isWhite() != white) {
+                 * moves.add(move);
+                 * break;
+                 * } else
+                 * break;
+                 */
 
             }
 
@@ -346,14 +372,20 @@ abstract public class Piece {
                     continue;
                 }
 
-                Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-                if (move.getDestination().isValid() && occupant == null)
-                    moves.add(move);
-                else if (occupant != null && occupant.isWhite() != white) {
-                    moves.add(move);
+                moves.add(move);
+                if (move.isCapture())
                     break;
-                } else
-                    break;
+
+                /*
+                 * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
+                 * if (move.getDestination().isValid() && occupant == null)
+                 * moves.add(move);
+                 * else if (occupant != null && occupant.isWhite() != white) {
+                 * moves.add(move);
+                 * break;
+                 * } else
+                 * break;
+                 */
 
             }
 
