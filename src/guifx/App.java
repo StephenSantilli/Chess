@@ -43,16 +43,17 @@ public class App extends Application {
             hb.getChildren().add(b);
             ScrollPane sp = new ScrollPane(b.getMp());
             b.getGame().addMoveListener(b.getMp());
-            b.getMp().initMovePane();
+            //b.getMp().initMovePane();
             sp.setFitToWidth(true);
             sp.setMinWidth(220);
-            hb.getChildren().add(sp);
 
             HBox.setHgrow(b, Priority.NEVER);
             HBox.setHgrow(sp, Priority.ALWAYS);
-            
+
             b.setMaxWidth(b.getSquareSize() * 8);
             b.setMaxHeight(b.getSquareSize() * 8);
+
+            hb.getChildren().add(sp);
 
         } catch (Exception e) {
             e.printStackTrace();

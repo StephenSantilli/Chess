@@ -107,7 +107,8 @@ public class Game {
     }
 
     public void makeMove(Move m) {
-
+        
+        
         if (currentPos != positions.size() - 1)
             return;
 
@@ -127,7 +128,9 @@ public class Game {
         if (valid == null)
             return;
 
+        long nt = System.nanoTime();
         Position movePosition = new Position(positions.get(currentPos), valid, this, !isWhiteTurn(true), true);
+        System.out.println(System.nanoTime() - nt);
 
         if (movePosition.isGivingCheck())
             return;
@@ -141,8 +144,12 @@ public class Game {
         if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
             return;
 
+        
+
         positions.add(movePosition);
         currentPos = positions.size() - 1;
+
+        
 
         fireBoardUpdate();
         fireMoveMade();

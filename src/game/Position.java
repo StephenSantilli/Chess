@@ -163,6 +163,8 @@ public class Position {
      */
     public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
 
+        //TODO: OPTIMIZE THIS CONSTRUCTOR; MOST OF SLOWDOWNS ARE COMING FROM HERE.
+
         this.pieces = new ArrayList<Piece>();
         this.white = isWhite;
 

@@ -3,26 +3,11 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Chess",
-            "request": "launch",
-            "mainClass": "guifx.Chess",
-            "projectName": "chess"
-        },
-        {
-            "type": "java",
-            "name": "Launch Chess",
-            "request": "launch",
-            "mainClass": "gui.Chess",
-            "projectName": "Chess"
-        },
-        {
-            "type": "java",
             "name": "Launch App",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
             "projectName": "chess",
-            "mainClass": "guifx.App",
-            "preLaunchTask": "gradle: build"
+            "mainClass": "guifx.Chess",
+            "preLaunchTask": "gradle: compileJava"
         }
     ]
 }

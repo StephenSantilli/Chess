@@ -334,8 +334,8 @@ public class Board extends StackPane implements BoardListener {
                 });
 
                 img.setOnMouseReleased(ev -> {
-                    clearBorder();
 
+                    clearBorder();
                     if (dragging == null && (active == null
                             || (active != null && active.getPiece().getSquare()
                                     .equals(getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))))) {
@@ -358,8 +358,10 @@ public class Board extends StackPane implements BoardListener {
 
                         int cPos = game.getCurrentPos();
                         try {
+
                             game.makeMove(new Move(dragging.getPiece().getSquare(),
                                     getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos()));
+
                             dragging = null;
                             active = null;
                         } catch (Exception e) {
@@ -382,10 +384,13 @@ public class Board extends StackPane implements BoardListener {
 
                         int cPos = game.getCurrentPos();
                         try {
-                            game.makeMove(new Move(active.getPiece().getSquare(),
-                                    getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos()));
+                            Move m = new Move(active.getPiece().getSquare(),
+                                    getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos());
+
+                            game.makeMove(m);
                             dragging = null;
                             active = null;
+
                         } catch (Exception e) {
 
                         }
