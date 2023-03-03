@@ -3,7 +3,6 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
-    // id 'extra-java-module-info'
 
 }
 
@@ -12,7 +11,6 @@ repositories {
     mavenCentral()
 
 }
-
 
 javafx {
     version '17'
@@ -26,10 +24,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.2'
 
 }
-
-// extraJavaModuleInfo {
-//     automaticModule('batik-all-1.16.jar', 'org.apache.batik.transcoder')
-// }
 
 sourceSets {
     main {
