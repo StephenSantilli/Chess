@@ -111,6 +111,8 @@ public class Move {
 
     public Move(Square origin, Square destination, Position pos) throws Exception {
 
+
+
         this.origin = origin;
         this.destination = destination;
 
@@ -124,36 +126,18 @@ public class Move {
         if (originPiece == null)
             throw new Exception("There is no piece at that square.");
 
+        
         this.white = originPiece.isWhite();
-
         this.pieceType = originPiece.getCode();
-
-        // long nt = System.nanoTime();
         this.enPassant = checkIfEnPassant(pos);
-/*         long t = System.nanoTime();
-        if (t - nt > 150)
-            System.out.println("ep: " + (t - nt)); */
-
-        // nt = System.nanoTime();
         this.capture = checkIfCapture(pos);
-/*         t = System.nanoTime();
-        if (t - nt > 150)
-            System.out.println("cap: " + (t - nt)); */
-
-        // nt = System.nanoTime();
         this.promoteType = checkIfPromote() ? '?' : '0';
- /*        t = System.nanoTime();
-        if (t - nt > 150)
-            System.out.println("promo: " + (t - nt)); */
-
-        // nt = System.nanoTime();
         this.castle = checkIfCastle(pos);
-/*         t = System.nanoTime();
-        if (t - nt > 150)
-            System.out.println("cap: " + (t - nt)); */
 
-        this.piece = pos.getPieceAtSquare(origin);
+        this.piece = originPiece;
         this.capturePiece = pos.getPieceAtSquare(getCaptureSquare());
+
+
 
     }
 
@@ -277,13 +261,13 @@ public class Move {
 
         if (curr.getCode() == 'P') {
             if (getCaptureSquare().getFile() == origin.getFile()) {
-                
+
                 if (cap != null)
                     throw new Exception("Cannot capture going forward.");
                 else
                     return false;
 
-            } else if (getCaptureSquare().getFile() != origin.getFile() && cap == null) {
+            } else if (cap == null) {
                 throw new Exception("Pawn cannot capture with no piece there.");
             }
 

@@ -3,10 +3,8 @@ package PGNParser;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Class to parse a .pgn file following this specification:
@@ -293,7 +291,6 @@ public class PGNParser {
         Matcher m = Pattern.compile(TAG_REGEX).matcher(text);
 
         ArrayList<String> tags = new ArrayList<String>();
-        String t = "";
 
         while (m.find()) {
 

@@ -8,14 +8,9 @@ import game.Move;
 import game.Piece;
 import game.Position;
 import game.Square;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -300,7 +295,7 @@ public class Board extends StackPane implements BoardListener {
                 GUIPiece guiP = new GUIPiece(p, img);
                 pieces.add(guiP);
 
-                img.setOnMousePressed(ev -> {
+                img.setOnMousePressed(ev -> {  
 
                     img.toFront();
                     dragging = guiP;

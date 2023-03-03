@@ -145,9 +145,7 @@ public class Game {
         
 
         positions.add(movePosition);
-        currentPos = positions.size() - 1;
-
-        
+        currentPos = positions.size() - 1;  
 
         fireBoardUpdate();
         fireMoveMade();

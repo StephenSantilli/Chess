@@ -2,8 +2,6 @@ package game;
 
 import java.util.ArrayList;
 
-import javafx.concurrent.Task;
-
 public class Position {
 
     private Piece[][] pcs;
@@ -172,8 +170,6 @@ public class Position {
      * @param checkForMate Whether or not checkmate should be checked for.
      */
     public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
-
-        // TODO: OPTIMIZE THIS CONSTRUCTOR; MOST OF SLOWDOWNS ARE COMING FROM HERE.
 
         // this.pieces = new ArrayList<Piece>();
         this.pcs = new Piece[8][8];

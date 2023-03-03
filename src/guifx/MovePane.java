@@ -8,17 +8,11 @@ import game.BoardMoveListener;
 import game.Game;
 import game.Move;
 import javafx.application.Platform;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.control.Control;
-import javafx.scene.layout.VBox;
 
 public class MovePane extends GridPane implements BoardMoveListener {
 
