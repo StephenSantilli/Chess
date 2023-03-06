@@ -8,6 +8,8 @@ import game.Move;
 import game.Piece;
 import game.Position;
 import game.Square;
+import javafx.animation.TranslateTransition;
+import javafx.beans.property.ReadOnlyMapWrapper;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
@@ -17,6 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 public class Board extends StackPane implements BoardListener {
 
@@ -271,9 +274,10 @@ public class Board extends StackPane implements BoardListener {
 
     }
 
-    private void drawPieces() {
+    private int lastDrawnPosition = 0;
 
-        this.pieces = new ArrayList<GUIPiece>();
+    private void redrawPieces() {
+
         piecePane.getChildren().clear();
 
         for (int r = 0; r < 8; r++) {
@@ -295,7 +299,14 @@ public class Board extends StackPane implements BoardListener {
                 GUIPiece guiP = new GUIPiece(p, img);
                 pieces.add(guiP);
 
-                img.setOnMousePressed(ev -> {  
+                img.setOnMousePressed(ev -> {
+
+                    if (active != null && game.getActivePos().canPieceMoveToSquare(active.getPiece(),
+                            guiP.getPiece().getSquare())) {
+                        active.getImage().fireEvent(ev);
+                        ev.consume();
+                        return;
+                    }
 
                     img.toFront();
                     dragging = guiP;
@@ -314,6 +325,13 @@ public class Board extends StackPane implements BoardListener {
                 });
 
                 img.setOnMouseDragged(ev -> {
+
+                    if (active != null && game.getActivePos().canPieceMoveToSquare(active.getPiece(),
+                            guiP.getPiece().getSquare())) {
+                        active.getImage().fireEvent(ev);
+                        ev.consume();
+                        return;
+                    }
 
                     if (ev.getSceneX() >= 0 && ev.getSceneX() <= piecePane.getLayoutBounds().getMaxX())
                         img.setX(ev.getX() - (pieceSize / 2.0));
@@ -346,6 +364,7 @@ public class Board extends StackPane implements BoardListener {
                             .equals(getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))) {
 
                         dragging = null;
+                        boardUpdated();
 
                     }
 
@@ -382,8 +401,8 @@ public class Board extends StackPane implements BoardListener {
                             Move m = new Move(active.getPiece().getSquare(),
                                     getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos());
 
-                            game.makeMove(m);
-                            dragging = null;
+                                    dragging = null;
+                                    game.makeMove(m);
                             active = null;
 
                         } catch (Exception e) {
@@ -401,14 +420,39 @@ public class Board extends StackPane implements BoardListener {
                             dragging = null;
                         }
 
+                    } else {
+                        boardUpdated();
                     }
 
-                    boardUpdated();
                     ev.consume();
 
                 });
             }
         }
+
+        lastDrawnPosition = game.getCurrentPos();
+
+    }
+
+    private void drawPieces() {
+
+        this.pieces = new ArrayList<GUIPiece>();
+
+        if (active != null && dragging == null && Math.abs(lastDrawnPosition - game.getCurrentPos()) == 1) {
+            ImageView a = active.getImage();
+            TranslateTransition t = new TranslateTransition(Duration.millis(1000), a);
+            t.setFromX(a.getX());
+            t.setFromY(a.getY());
+            t.setToX(getXBySquare(active.getPiece().getSquare()));
+            t.setToY(getYBySquare(active.getPiece().getSquare()));
+            t.setOnFinished(e -> {
+                redrawPieces();
+            });
+
+            t.play();
+
+        } else
+            redrawPieces();
 
     }
 
