@@ -276,6 +276,30 @@ public class Board extends StackPane implements BoardListener {
 
     private int lastDrawnPosition = 0;
 
+    private void pieceAnimation(GUIPiece gp) {
+        ImageView img = gp.getImage();
+        Square origin = game.getActivePos().getMove().getOrigin();
+        Square destination = game.getActivePos().getMove().getDestination();
+
+        TranslateTransition t = new TranslateTransition(Duration.millis(250), img);
+        t.setFromX((origin.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0));
+        t.setFromY(700 - ((origin.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
+        t.setToX((destination.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0));
+        t.setToY(700 - ((destination.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
+
+
+        t.setOnFinished(e -> {
+            Square dest = game.getActivePos().getMove().getDestination();
+            ImageView i = getGUIPieceAtSquare(dest).getImage();
+            int row = dest.getRank() - 1;
+            int column = dest.getFile() - 1;
+            i.setLayoutX(column * squareSize + ((squareSize - pieceSize) / 2.0));
+            i.setLayoutY(700 - (row * squareSize) + ((squareSize - pieceSize) / 2.0));
+        });
+
+        t.play();
+    }
+
     private void redrawPieces() {
 
         piecePane.getChildren().clear();
@@ -293,11 +317,20 @@ public class Board extends StackPane implements BoardListener {
 
                 piecePane.getChildren().add(img);
 
-                img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
-                img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
-
                 GUIPiece guiP = new GUIPiece(p, img);
                 pieces.add(guiP);
+
+                if (game.getCurrentPos() > 0 && active != null
+                        && guiP.getPiece().getSquare().equals(game.getActivePos().getMove().getDestination())
+                        && dragging == null
+                        && active.getPiece().equals(game.getActivePos().getMove().getPiece()))
+                    pieceAnimation(guiP);
+                else {
+
+                    img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
+                    img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
+
+                }
 
                 img.setOnMousePressed(ev -> {
 
@@ -343,11 +376,11 @@ public class Board extends StackPane implements BoardListener {
                     Square hoverSquare = getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY());
                     drawBorder(getXBySquare(hoverSquare), getYBySquare(hoverSquare));
                     ev.consume();
-
+                    
                 });
 
                 img.setOnMouseReleased(ev -> {
-
+                    ev.consume();
                     clearBorder();
                     if (dragging == null && (active == null
                             || (active != null && active.getPiece().getSquare()
@@ -365,7 +398,8 @@ public class Board extends StackPane implements BoardListener {
 
                         dragging = null;
                         boardUpdated();
-
+                        ev.consume();
+                        return;
                     }
 
                     if (dragging != null) {
@@ -373,11 +407,11 @@ public class Board extends StackPane implements BoardListener {
                         int cPos = game.getCurrentPos();
                         try {
 
+                            dragging = null;
+                            active = null;
                             game.makeMove(new Move(dragging.getPiece().getSquare(),
                                     getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos()));
 
-                            dragging = null;
-                            active = null;
                         } catch (Exception e) {
 
                         }
@@ -401,8 +435,8 @@ public class Board extends StackPane implements BoardListener {
                             Move m = new Move(active.getPiece().getSquare(),
                                     getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), game.getActivePos());
 
-                                    dragging = null;
-                                    game.makeMove(m);
+                            dragging = null;
+                            game.makeMove(m);
                             active = null;
 
                         } catch (Exception e) {
@@ -435,24 +469,41 @@ public class Board extends StackPane implements BoardListener {
     }
 
     private void drawPieces() {
+        drawPieces(false);
+    }
+
+    private void drawPieces(boolean animate) {
 
         this.pieces = new ArrayList<GUIPiece>();
 
-        if (active != null && dragging == null && Math.abs(lastDrawnPosition - game.getCurrentPos()) == 1) {
-            ImageView a = active.getImage();
-            TranslateTransition t = new TranslateTransition(Duration.millis(1000), a);
-            t.setFromX(a.getX());
-            t.setFromY(a.getY());
-            t.setToX(getXBySquare(active.getPiece().getSquare()));
-            t.setToY(getYBySquare(active.getPiece().getSquare()));
-            t.setOnFinished(e -> {
-                redrawPieces();
-            });
-
-            t.play();
-
-        } else
-            redrawPieces();
+        /*
+         * if (active != null && dragging == null && Math.abs(lastDrawnPosition -
+         * game.getCurrentPos()) == 1) {
+         * ImageView a = active.getImage();
+         * TranslateTransition t = new TranslateTransition(Duration.millis(1000), a);
+         * t.setAutoReverse(false);
+         * 
+         * // img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
+         * // img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
+         * 
+         * t.setByX(a.getLayoutX() - ((active.getPiece().getSquare().getRank() - 1) *
+         * squareSize + ((squareSize - pieceSize) / 2.0)));
+         * t.setByY(a.getLayoutY() - (700 - ((active.getPiece().getSquare().getFile() -
+         * 1) * squareSize) + ((squareSize - pieceSize) / 2.0)));
+         * // t.setCycleCount(500);
+         * // t.setFromX(a.getX());
+         * // t.setFromY(a.getY());
+         * // t.setToX(a.getTranslateX() - getXBySquare(active.getPiece().getSquare()));
+         * // t.setToY(a.getLayoutY() - getYBySquare(active.getPiece().getSquare()));
+         * t.setOnFinished(e -> {
+         * redrawPieces();
+         * });
+         * 
+         * t.play();
+         * 
+         * } else
+         */
+        redrawPieces();
 
     }
 
