@@ -21,9 +21,7 @@ public class App extends Application {
 
         HBox hb = new HBox();
 
-
         vb.getChildren().add(hb);
-        
         
         Scene s = new Scene(vb, 1020, 800);
         s.setFill(Color.TRANSPARENT);
@@ -48,6 +46,9 @@ public class App extends Application {
             b.setMaxHeight(b.getSquareSize() * 8);
 
             hb.getChildren().add(sp);
+
+            // s.setOnKeyPressed(b.keyHandler);
+            s.setOnKeyReleased(b.keyHandler);
 
         } catch (Exception e) {
             e.printStackTrace();
