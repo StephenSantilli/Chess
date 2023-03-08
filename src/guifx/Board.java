@@ -79,6 +79,16 @@ public class Board extends StackPane {
                     boardUpdated(true, game.getPositions().get(game.getCurrentPos() - 1), game.getActivePos(), false);
                 }
 
+            } else if (e.getCode() == KeyCode.DOWN) {
+
+                game.setCurrentPos(game.getPositions().size() - 1);
+                boardUpdated();
+
+            } else if (e.getCode() == KeyCode.UP) {
+
+                game.setCurrentPos(0);
+                boardUpdated();
+
             }
 
         }
@@ -366,13 +376,15 @@ public class Board extends StackPane {
                 pieces.add(guiP);
 
                 if (animate && p1 != null && p2 != null
-                        && ((!backward && p1.getMove().getDestination().equals(p.getSquare()))
+                        && ((!backward && p2.getMove().getDestination().equals(p.getSquare()))
                                 || (backward && p1.getMove().getOrigin().equals(p.getSquare())))) {
 
-                    if(!backward) {
-                        pieceMoveAnimation(guiP, p1.getMove().getOrigin(), p1.getMove().getDestination(), p1.getMove().getCapturePiece());
+                    if (!backward) {
+                        pieceMoveAnimation(guiP, p2.getMove().getOrigin(), p2.getMove().getDestination(),
+                                p2.getMove().getCapturePiece());
                     } else {
-                        pieceMoveAnimation(guiP, p1.getMove().getDestination(), p1.getMove().getOrigin(), p1.getMove().getCapturePiece());
+                        pieceMoveAnimation(guiP, p1.getMove().getDestination(), p1.getMove().getOrigin(),
+                                p1.getMove().getCapturePiece());
                     }
 
                 } else {
@@ -517,8 +529,6 @@ public class Board extends StackPane {
                 });
             }
         }
-
-
 
     }
 

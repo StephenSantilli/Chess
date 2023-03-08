@@ -9,6 +9,7 @@ import game.Game;
 import game.Move;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
@@ -19,6 +20,8 @@ public class MovePane extends GridPane implements BoardMoveListener {
     private Game g;
 
     private ArrayList<MoveRow> rows;
+
+    private int activePos = 0;
 
     public MovePane(Game g) {
 
@@ -85,6 +88,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
                 GridPane.setMargin(l, new Insets(5, 5, 5, 5));
             }
 
+            posChanged();
         });
 
     }
@@ -97,6 +101,35 @@ public class MovePane extends GridPane implements BoardMoveListener {
     @Override
     public void resetMoves() {
         initMovePane();
+    }
+
+    @Override
+    public void posChanged() {
+
+        Platform.runLater(() -> {
+
+            for (int i = 0; i < getChildren().size(); i++) {
+
+                Node c = getChildren().get(i);
+
+                if (g.getCurrentPos() != 0 && getRowIndex(c) == (int) Math.ceil(g.getCurrentPos() / 2.0)
+                        && getColumnIndex(c) == (g.getPositions().get(g.getCurrentPos()).isWhite() ? 2 : 1)) {
+
+                    c.setStyle("-fx-background-color: #bbbbbb;");
+
+                } else if (activePos > 0 && getRowIndex(c) == (int) Math.ceil(activePos / 2.0)
+                        && getColumnIndex(c) == (g.getPositions().get(activePos).isWhite() ? 2 : 1)) {
+
+                    c.setStyle("-fx-background-color: #ffffff;");
+
+                }
+
+            }
+
+            activePos = g.getCurrentPos();
+
+        });
+
     }
 
 }

@@ -43,6 +43,15 @@ public class Game {
         listeners.add(listener);
     }
 
+    public void firePosChanged() {
+
+        for (BoardMoveListener b : moveListeners) {
+
+            b.posChanged();
+
+        }
+
+    }
 
     public void fireMoveMade() {
 
@@ -145,7 +154,7 @@ public class Game {
         
 
         positions.add(movePosition);
-        currentPos = positions.size() - 1;  
+        setCurrentPos(positions.size() - 1);  
 
         fireBoardUpdate();
         fireMoveMade();
@@ -159,7 +168,7 @@ public class Game {
 
         this.currentPos = currentPos;
 
-        fireBoardUpdate();
+        firePosChanged();
 
     }
 
@@ -189,10 +198,11 @@ public class Game {
         if (redo.getMove().getPromoteType() != '0')
             redo.getMove().setPromoteType('?');
 
-        currentPos = positions.size() - 1;
+        setCurrentPos(positions.size() - 1);
 
         fireBoardUpdate();
         fireUndoMove();
+
 
     }
 
@@ -204,7 +214,7 @@ public class Game {
             return;
 
         positions.add(redo);
-        currentPos = positions.size() - 1;
+        setCurrentPos(positions.size() - 1);
 
         fireBoardUpdate();
         fireMoveMade();
@@ -215,7 +225,7 @@ public class Game {
 
         positions = new ArrayList<Position>();
         positions.add(new Position(this));
-        currentPos = 0;
+        setCurrentPos(0);
 
         ArrayList<PGNMove> moves = PGN.getParsedMoves();
 

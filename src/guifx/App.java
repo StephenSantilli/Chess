@@ -34,7 +34,7 @@ public class App extends Application {
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
             ScrollPane sp = new ScrollPane(b.getMp());
-            // b.getGame().addMoveListener(b.getMp());
+            b.getGame().addMoveListener(b.getMp());
             //b.getMp().initMovePane();
             sp.setFitToWidth(true);
             sp.setMinWidth(220);
