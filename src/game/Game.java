@@ -73,6 +73,16 @@ public class Game {
 
     }
 
+    public void fireRedoMove() {
+
+        for (BoardMoveListener b : moveListeners) {
+
+            b.redoMove();
+
+        }
+
+    }
+
     public void fireResetMoves() {
 
         for (BoardMoveListener b : moveListeners) {
@@ -116,12 +126,14 @@ public class Game {
     }
 
     public void makeMove(Move m) {
-        
-        
+
         if (currentPos != positions.size() - 1)
             return;
 
         Position prev = positions.get(positions.size() - 1);
+
+        if (prev.getMove().getPromoteType() == '?')
+            return;
 
         if (prev.isCheckMate() || m.isWhite() != isWhiteTurn(true))
             return;
@@ -151,10 +163,8 @@ public class Game {
         if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
             return;
 
-        
-
         positions.add(movePosition);
-        setCurrentPos(positions.size() - 1);  
+        setCurrentPos(positions.size() - 1);
 
         fireBoardUpdate();
         fireMoveMade();
@@ -203,7 +213,6 @@ public class Game {
         fireBoardUpdate();
         fireUndoMove();
 
-
     }
 
     public void redoMove() {
@@ -218,6 +227,7 @@ public class Game {
 
         fireBoardUpdate();
         fireMoveMade();
+        fireRedoMove();
 
     }
 
@@ -236,10 +246,10 @@ public class Game {
             positions.add(new Position(getActivePos(), m, this, !getActivePos().isWhite(), true));
             ++currentPos;
         }
-        
+
         if (currentPos == 0)
-        throw new Exception("Position import failed.");
-        
+            throw new Exception("Position import failed.");
+
         fireBoardUpdate();
         fireResetMoves();
 

@@ -95,7 +95,30 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
     @Override
     public void undoMove() {
-        getChildren().remove(getChildren().size() - 1);
+
+        Platform.runLater(() -> {
+
+            for (int i = 0; i < getChildren().size(); i++) {
+
+                Node c = getChildren().get(i);
+
+                if (getRowIndex(c) == (int) Math.ceil((g.getCurrentPos() + 1) / 2.0)) {
+
+                    if (getColumnIndex(c) == (g.getActivePos().getRedo().isWhite() ? 2 : 1)) {
+                        getChildren().remove(c);
+                        --i;
+                    } else if (g.getActivePos().isWhite()
+                            && getColumnIndex(c) == 0) {
+                        getChildren().remove(c);
+                        --i;
+                        
+                    }
+
+                }
+
+            }
+
+        });
     }
 
     @Override
@@ -117,7 +140,8 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
                     c.setStyle("-fx-background-color: #bbbbbb;");
 
-                } else if (activePos > 0 && getRowIndex(c) == (int) Math.ceil(activePos / 2.0)
+                } else if (activePos > 0 && activePos < g.getPositions().size()
+                        && getRowIndex(c) == (int) Math.ceil(activePos / 2.0)
                         && getColumnIndex(c) == (g.getPositions().get(activePos).isWhite() ? 2 : 1)) {
 
                     c.setStyle("-fx-background-color: #ffffff;");
@@ -129,6 +153,12 @@ public class MovePane extends GridPane implements BoardMoveListener {
             activePos = g.getCurrentPos();
 
         });
+
+    }
+
+    @Override
+    public void redoMove() {
+        // TODO Auto-generated method stub
 
     }
 

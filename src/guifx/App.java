@@ -50,6 +50,10 @@ public class App extends Application {
             // s.setOnKeyPressed(b.keyHandler);
             s.setOnKeyReleased(b.keyHandler);
 
+            BarMenu menu = new BarMenu(b.getGame());
+            b.getGame().addMoveListener(menu.getGameMenu());
+            vb.getChildren().add(menu);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

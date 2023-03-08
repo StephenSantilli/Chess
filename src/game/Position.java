@@ -265,9 +265,6 @@ public class Position {
             if (promoRes == 'Q' || promoRes == 'R' || promoRes == 'B' || promoRes == 'N') {
                 move.setPromoteType(promoRes);
 
-                // pieces.remove(movePIndex);
-                // setSquare(movePieceSq, null);
-
                 Square mps = movePiece.getSquare();
 
                 switch (promoRes) {
@@ -293,6 +290,32 @@ public class Position {
 
         move.setText(prev);
         this.move = move;
+
+    }
+
+    public void setPromoType(char promo, Game game) {
+
+        Piece movePiece = move.getPiece();
+        move.setPromoteType(promo);
+        Square mps = movePiece.getSquare();
+
+        switch (promo) {
+            case 'Q':
+                setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                break;
+            case 'R':
+                setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                break;
+            case 'B':
+                setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                break;
+            case 'N':
+                setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                break;
+        }
+
+        initMoves(true, game);
+        move.setText(game.get);
 
     }
 

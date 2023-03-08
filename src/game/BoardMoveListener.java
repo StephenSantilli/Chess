@@ -8,6 +8,8 @@ public interface BoardMoveListener extends EventListener {
 
     public void undoMove();
 
+    public void redoMove();
+
     public void resetMoves();
 
     public void posChanged();

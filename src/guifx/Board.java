@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EventListener;
 
 import game.BoardListener;
+import game.BoardMoveListener;
 import game.Game;
 import game.Move;
 import game.Piece;
@@ -24,7 +25,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-public class Board extends StackPane {
+public class Board extends StackPane implements BoardMoveListener {
 
     private int pieceSize = 90;
     private int squareSize = 100;
@@ -98,7 +99,7 @@ public class Board extends StackPane {
     public Board(int width, int height) throws Exception {
 
         this.game = new Game();
-        // game.addListener(this);
+        game.addMoveListener(this);
 
         this.mp = new MovePane(game);
         mp.initMovePane();
@@ -600,6 +601,34 @@ public class Board extends StackPane {
 
     public int getSquareSize() {
         return squareSize;
+    }
+
+    @Override
+    public void moveMade() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void undoMove() {
+        boardUpdated(true, game.getActivePos().getRedo(), game.getActivePos(), true);
+    }
+
+    @Override
+    public void resetMoves() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void posChanged() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void redoMove() {
+        boardUpdated(true, game.getPositions().get(game.getCurrentPos() - 1), game.getActivePos(), false);
+
     }
 
 }
