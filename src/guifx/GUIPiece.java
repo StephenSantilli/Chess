@@ -13,11 +13,15 @@ public class GUIPiece {
     private ImageView image;
     private Board b;
 
+    private Bounds bds;
+
     public GUIPiece(Piece piece, ImageView image, Board board) {
 
         this.piece = piece;
         this.image = image;
         this.b = board;
+
+        this.bds = b.localToParent(b.getBoundsInLocal());
 
     }
 
@@ -30,9 +34,8 @@ public class GUIPiece {
     }
 
     private void setPieceX(double x) {
-        Bounds bds = b.localToScene(b.getBoundsInLocal());
+
         int relative = (int) bds.getMinX();
-        System.out.println(bds.getMinX());
 
         double ax = x - (b.getPieceSize() / 2.0) - relative;
         
@@ -41,9 +44,9 @@ public class GUIPiece {
     }
 
     private void setPieceY(double y) {
-        Bounds bds = b.localToScene(b.getBoundsInLocal());
+
         int relative = (int) bds.getMinY();
-        System.out.println(bds.getMinY());
+
         double ay = y - (b.getPieceSize() / 2.0) - relative;
 
         if (y >= bds.getMinY() && y <= bds.getMaxY())

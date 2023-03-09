@@ -42,6 +42,7 @@ public class PieceTranscoder extends ImageTranscoder {
     public ImageView getImageView() {
 
         ImageView i = new ImageView(SwingFXUtils.toFXImage(img, null));
+        i.setManaged(false);
 
         return i;
 

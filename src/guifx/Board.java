@@ -13,6 +13,7 @@ import game.Square;
 import javafx.animation.TranslateTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
@@ -54,6 +55,7 @@ public class Board extends StackPane implements BoardMoveListener {
     private ArrayList<GUIPiece> pieces;
 
     private GUIPiece dragging;
+
     public void setDragging(GUIPiece dragging) {
         this.dragging = dragging;
     }
@@ -117,11 +119,25 @@ public class Board extends StackPane implements BoardMoveListener {
 
         }
 
-    }; 
+    };
+
+    private void setMouseType(double mouseX, double mouseY) {
+
+        if (dragging != null) {
+            setCursor(Cursor.CLOSED_HAND);
+        } else if (mouseX) {
+            //TODO: SET BOUNDS HERE
+        } else if (game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY)) != null) {
+
+            setCursor(Cursor.OPEN_HAND);
+
+        } else {
+            setCursor(Cursor.DEFAULT);
+        }
+
+    }
 
     public Board(int width, int height) throws Exception {
-
-       
 
         this.game = new Game();
         game.addMoveListener(this);
@@ -145,10 +161,15 @@ public class Board extends StackPane implements BoardMoveListener {
         drawMovesPane();
 
         piecePane = new Pane();
+
         getChildren().add(piecePane);
 
         initPieceTranscoders();
         drawPieces(false, null, null);
+
+        setOnMouseMoved(e -> {
+            setMouseType(e.getSceneX(), e.getSceneY());
+        });
 
         setOnMouseReleased(e -> {
 
@@ -438,13 +459,14 @@ public class Board extends StackPane implements BoardMoveListener {
 
     }
 
-    public Square getSquareByLoc(int x, int y) {
+    public Square getSquareByLoc(double x, double y) {
 
         Bounds b = localToScene(getBoundsInLocal());
         int relativeX = (int) b.getMinX();
         int relativeY = (int) b.getMinY();
 
-        return new Square((((x - relativeX) / squareSize) + 1), (((squareSize * 8 - y + relativeY)) / squareSize) + 1);
+        return new Square(((((int) x - relativeX) / squareSize) + 1),
+                (((squareSize * 8 - (int) y + relativeY)) / squareSize) + 1);
 
     }
 
