@@ -6,6 +6,9 @@ import java.util.Scanner;
 import PGNParser.PGNParser;
 import game.BoardMoveListener;
 import game.Game;
+import javafx.event.ActionEvent;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
@@ -49,30 +52,49 @@ public class GameMenu extends Menu implements BoardMoveListener {
             chooser.setTitle("Import from PGN file");
             chooser.setSelectedExtensionFilter(new ExtensionFilter("PGN File", "pgn"));;
             File file = chooser.showOpenDialog(owner);
-            if(file != null && file.exists() && file.canRead()) {
-                try {
-                    
-                    String str = "";
-                    Scanner s = new Scanner(file);
-                    while(s.hasNextLine()) {
 
-                        str += s.nextLine() + "\n";
+            if (game.getPositions().size() > 1) {
+                Dialog<Boolean> confirm = new Dialog<Boolean>();
+                confirm.setContentText("Are you sure you want to import this position? It will overwrite your current game!");
+                confirm.getDialogPane().getButtonTypes().add(ButtonType.YES);
+                confirm.getDialogPane().getButtonTypes().add(ButtonType.NO);
+                confirm.getDialogPane().lookupButton(ButtonType.YES).addEventFilter(ActionEvent.ACTION, res -> {
 
+                    if (file != null && file.exists() && file.canRead()) {
+                        try {
+
+                            String str = "";
+                            Scanner s = new Scanner(file);
+                            while (s.hasNextLine()) {
+
+                                str += s.nextLine() + "\n";
+
+                            }
+                            s.close();
+                            PGNParser pgn = new PGNParser(str);
+
+                            game.importPosition(pgn);
+
+                        } catch (Exception ex) {
+
+                            ex.printStackTrace();
+
+                        }
+
+                    } else {
+                        System.out.println("Error reading file.");
                     }
-                    s.close();
-                    PGNParser pgn = new PGNParser(str);
-                    game.importPosition(pgn);
+                    confirm.hide();
 
-                } catch(Exception ex) {
+                });
 
-                    ex.printStackTrace();
-
-                }
-
-
-            } else {
-                System.out.println("Error reading file.");
+                confirm.getDialogPane().lookupButton(ButtonType.NO).addEventFilter(ActionEvent.ACTION, res -> {
+                    confirm.hide();
+                });
+                
+                confirm.showAndWait();
             }
+
 
         });
         gameImport.getItems().add(pgnImport);

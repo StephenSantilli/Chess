@@ -13,8 +13,11 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 
 public class MovePane extends GridPane implements BoardMoveListener {
 
@@ -25,6 +28,13 @@ public class MovePane extends GridPane implements BoardMoveListener {
     private int activePos = 0;
 
     private ScrollPane sp;
+
+    private static final String BUTTON_INACTIVE = "#ffffff";
+    private static final String BUTTON_ACTIVE = "#bbbbbb";
+    private static final String BUTTON_INACTIVE_HOVER = "#dddddd";
+    private static final String BUTTON_ACTIVE_HOVER = "#999999";
+    private static final String BUTTON_INACTIVE_CLICKED = "#cacaca";
+    private static final String BUTTON_ACTIVE_CLICKED = "#888888";
 
     public MovePane(Game g, ScrollPane sp) {
 
@@ -86,7 +96,24 @@ public class MovePane extends GridPane implements BoardMoveListener {
         Move m = p.getMove();
         Button btn1 = new Button(p.getMoveString());
         btn1.setMaxWidth(Double.MAX_VALUE);
-        btn1.setStyle("-fx-background-color: #ffffff;");
+        btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+
+        btn1.setOnMouseEntered(e -> {
+            if(btn1.getStyle().endsWith(BUTTON_INACTIVE)) {
+                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
+            } else if(btn1.getStyle().endsWith(BUTTON_ACTIVE)) {
+                btn1.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+            }
+        });
+
+        btn1.setOnMouseExited(e -> {
+            if (btn1.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
+                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+            } else if (btn1.getStyle().endsWith(BUTTON_ACTIVE_HOVER)) {
+                btn1.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
+            }
+        });
+
         btn1.setFocusTraversable(true);
 
         btn1.setOnAction(e -> {
@@ -94,6 +121,19 @@ public class MovePane extends GridPane implements BoardMoveListener {
             g.setCurrentPos(pos);
 
         });
+
+        btn1.setOnMousePressed(e -> {
+            if (btn1.getStyle().endsWith(BUTTON_INACTIVE) || btn1.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
+                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE_CLICKED);
+            }
+        });
+
+        btn1.setOnMouseReleased(e -> {
+            if (btn1.getStyle().endsWith(BUTTON_INACTIVE_CLICKED)) {
+                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+            }
+        });
+        
 
         add(btn1, m.isWhite() ? 1 : 2, row);
 
@@ -105,7 +145,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
             add(l, 0, row);
             GridPane.setMargin(l, new Insets(5, 5, 5, 5));
         }
-        
+
         posChanged(-1, -1);
 
     }
@@ -164,7 +204,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
                 if (g.getCurrentPos() != 0 && getRowIndex(c) == ((g.getCurrentPos() - 1) / 2)
                         && getColumnIndex(c) == (g.getPositions().get(g.getCurrentPos()).isWhite() ? 2 : 1)) {
 
-                    c.setStyle("-fx-background-color: #bbbbbb;");
+                    c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
                     // double perMove = 1.0 / getRowCount();
                     // sp.setVvalue(perMove * getRowIndex(c));
                     c.requestFocus();
@@ -173,7 +213,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
                         && getRowIndex(c) == ((activePos - 1) / 2)
                         && getColumnIndex(c) == (g.getPositions().get(activePos).isWhite() ? 2 : 1)) {
 
-                    c.setStyle("-fx-background-color: #ffffff;");
+                    c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
                 } if(g.getCurrentPos() == 0) {
                     sp.setVvalue(0);

@@ -82,6 +82,14 @@ public class Board extends StackPane implements BoardMoveListener {
 
                 game.setCurrentPos(0);
 
+            } else if(e.getCode() == KeyCode.ESCAPE) {
+                
+                active = null;
+                dragging = null;
+                updateActive();
+                clearBorder();
+                boardUpdated();
+                
             }
 
         }
@@ -327,7 +335,7 @@ public class Board extends StackPane implements BoardMoveListener {
         }
 
     }
-    
+
     private void pieceMoveAnimation(GUIPiece gp, Square origin, Square destination, Piece cp) {
 
         ImageView img = gp.getImage();
@@ -339,7 +347,7 @@ public class Board extends StackPane implements BoardMoveListener {
         double fromY = (700 - ((origin.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
         double toY = (700 - ((destination.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
 
-        t.setFromX(toX - fromX);
+        t.setFromX(fromX - toX);
         t.setFromY(fromY - toY);
         t.setToX(0);
         t.setToY(0);
