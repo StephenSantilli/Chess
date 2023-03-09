@@ -1,15 +1,14 @@
 package guifx;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 
-import game.BoardListener;
 import game.BoardMoveListener;
 import game.Game;
 import game.Move;
 import game.Piece;
 import game.Position;
 import game.Square;
+
 import javafx.animation.TranslateTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -20,7 +19,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -31,19 +29,17 @@ import javafx.util.Duration;
 
 public class Board extends StackPane implements BoardMoveListener {
 
+    private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
+    private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
+    private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
+    private static final Color SQUARE_PREV_MOVE = Color.rgb(238, 187, 85, .70);
+    private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
+    private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
+    
     private int pieceSize = 90;
-
-    public int getPieceSize() {
-        return pieceSize;
-    }
-
     private int squareSize = 100;
 
     private Game game;
-
-    public Game getGame() {
-        return game;
-    }
 
     private VBox sqPane;
     private Canvas sqModifierPane;
@@ -57,42 +53,10 @@ public class Board extends StackPane implements BoardMoveListener {
 
     private GUIPiece dragging;
 
-    public void setDragging(GUIPiece dragging) {
-        this.dragging = dragging;
-    }
-
-    public GUIPiece getDragging() {
-        return dragging;
-    }
-
     private GUIPiece active;
 
-    public void setActive(GUIPiece active) {
-        this.active = active;
-    }
-
-    public GUIPiece getActive() {
-        return active;
-    }
-
     private MovePane mp;
-
-    public MovePane getMp() {
-        return mp;
-    }
-
     private ScrollPane sp;
-
-    public ScrollPane getSp() {
-        return sp;
-    }
-
-    private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
-    private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
-    private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
-    private static final Color SQUARE_PREV_MOVE = Color.rgb(238, 187, 85, .70);
-    private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
-    private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
 
     public EventHandler<KeyEvent> keyHandler = new EventHandler<KeyEvent>() {
 
@@ -102,25 +66,21 @@ public class Board extends StackPane implements BoardMoveListener {
             if (e.getCode() == (KeyCode.LEFT)) {
                 if (game.getCurrentPos() > 0) {
                     game.setCurrentPos(game.getCurrentPos() - 1);
-                    boardUpdated(true, game.getPositions().get(game.getCurrentPos() + 1), game.getActivePos(), true);
                 }
 
             } else if (e.getCode() == (KeyCode.RIGHT)) {
 
                 if (game.getPositions().size() - 1 > game.getCurrentPos()) {
                     game.setCurrentPos(game.getCurrentPos() + 1);
-                    boardUpdated(true, game.getPositions().get(game.getCurrentPos() - 1), game.getActivePos(), false);
                 }
 
             } else if (e.getCode() == KeyCode.DOWN) {
 
                 game.setCurrentPos(game.getPositions().size() - 1);
-                boardUpdated();
 
             } else if (e.getCode() == KeyCode.UP) {
 
                 game.setCurrentPos(0);
-                boardUpdated();
 
             }
 
@@ -128,28 +88,11 @@ public class Board extends StackPane implements BoardMoveListener {
 
     };
 
-    private void setMouseType(double mouseX, double mouseY) {
-
-        if (dragging != null) {
-            setCursor(Cursor.CLOSED_HAND);
- 
-            //TODO: SET BOUNDS HERE
-        } else if (getSquareByLoc(mouseX, mouseY).isValid() && game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY)) != null) {
-
-            setCursor(Cursor.OPEN_HAND);
-
-        } else {
-            setCursor(Cursor.DEFAULT);
-        }
-
-    }
-
     public Board(int width, int height) throws Exception {
 
         this.game = new Game();
         game.addMoveListener(this);
-        
-        
+
         this.sp = new ScrollPane();
         this.mp = new MovePane(game, sp);
         mp.initMovePane();
@@ -158,7 +101,6 @@ public class Board extends StackPane implements BoardMoveListener {
         getGame().addMoveListener(getMp());
         sp.setFitToWidth(true);
         sp.setMinWidth(220);
-
 
         initSquares();
         getChildren().add(sqPane);
@@ -201,7 +143,6 @@ public class Board extends StackPane implements BoardMoveListener {
 
             }
             setMouseType(e.getSceneX(), e.getSceneY());
-            e.consume();
 
         });
 
@@ -220,8 +161,6 @@ public class Board extends StackPane implements BoardMoveListener {
             }
             setMouseType(e.getSceneX(), e.getSceneY());
 
-            e.consume();
-
         });
 
         setOnMousePressed(e -> {
@@ -238,8 +177,6 @@ public class Board extends StackPane implements BoardMoveListener {
 
             }
             setMouseType(e.getSceneX(), e.getSceneY());
-
-            e.consume();
 
         });
 
@@ -375,15 +312,37 @@ public class Board extends StackPane implements BoardMoveListener {
 
     }
 
+    private void setMouseType(double mouseX, double mouseY) {
+
+        if (dragging != null) {
+            setCursor(Cursor.CLOSED_HAND);
+
+        } else if (getSquareByLoc(mouseX, mouseY).isValid()
+                && game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY)) != null) {
+
+            setCursor(Cursor.OPEN_HAND);
+
+        } else {
+            setCursor(Cursor.DEFAULT);
+        }
+
+    }
+    
     private void pieceMoveAnimation(GUIPiece gp, Square origin, Square destination, Piece cp) {
+
         ImageView img = gp.getImage();
 
         TranslateTransition t = new TranslateTransition(Duration.millis(100), img);
 
-        t.setFromX((origin.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0));
-        t.setFromY(700 - ((origin.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
-        t.setToX((destination.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0));
-        t.setToY(700 - ((destination.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
+        double fromX = (origin.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0);
+        double toX = (destination.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0);
+        double fromY = (700 - ((origin.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
+        double toY = (700 - ((destination.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
+
+        t.setFromX(toX - fromX);
+        t.setFromY(fromY - toY);
+        t.setToX(0);
+        t.setToY(0);
 
         if (cp != null) {
 
@@ -392,7 +351,6 @@ public class Board extends StackPane implements BoardMoveListener {
             piecePane.getChildren().add(i);
 
             GUIPiece guiP = new GUIPiece(cp, i, this);
-            // pieces.add(guiP);
 
             i.setLayoutX(getXBySquare(cp.getSquare()) + ((squareSize - pieceSize) / 2.0));
             i.setLayoutY(((getYBySquare(cp.getSquare()))) + ((squareSize - pieceSize) / 2.0));
@@ -438,6 +396,8 @@ public class Board extends StackPane implements BoardMoveListener {
 
                 GUIPiece guiP = new GUIPiece(p, img, this);
                 pieces.add(guiP);
+                img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
+                img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
 
                 if (animate && p1 != null && p2 != null
                         && ((!backward && p2.getMove().getDestination().equals(p.getSquare()))
@@ -450,11 +410,6 @@ public class Board extends StackPane implements BoardMoveListener {
                         pieceMoveAnimation(guiP, p1.getMove().getDestination(), p1.getMove().getOrigin(),
                                 p1.getMove().getCapturePiece());
                     }
-
-                } else {
-
-                    img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
-                    img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
 
                 }
 
@@ -530,6 +485,7 @@ public class Board extends StackPane implements BoardMoveListener {
 
     public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
         updateActive();
+
         drawPieces(animate, p1, p2, backward);
         if (game.getActivePos().getMove() != null && game.getActivePos().getMove().getPromoteType() == '?') {
 
@@ -557,12 +513,12 @@ public class Board extends StackPane implements BoardMoveListener {
 
     @Override
     public void moveMade() {
-        // TODO Auto-generated method stub
+
     }
 
     @Override
     public void undoMove() {
-        boardUpdated(true, game.getActivePos().getRedo(), game.getActivePos(), true);
+
     }
 
     @Override
@@ -573,15 +529,57 @@ public class Board extends StackPane implements BoardMoveListener {
     }
 
     @Override
-    public void posChanged() {
-        // TODO Auto-generated method stub
+    public void posChanged(int old, int curr) {
+
+        Position o = null;
+        if (old > game.getPositions().size() - 1) {
+            o = game.getPositions().get(game.getPositions().size() - 1).getRedo();
+        } else {
+            o = game.getPositions().get(old);
+        }
+        Position n = game.getPositions().get(curr);
+
+        boardUpdated((int) Math.abs(old - curr) == 1, o, n, old >= curr);
 
     }
 
     @Override
     public void redoMove() {
-        boardUpdated(true, game.getPositions().get(game.getCurrentPos() - 1), game.getActivePos(), false);
 
+    }
+
+    public int getPieceSize() {
+        return pieceSize;
+    }
+
+    // Getters/Setters
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setDragging(GUIPiece dragging) {
+        this.dragging = dragging;
+    }
+
+    public GUIPiece getDragging() {
+        return dragging;
+    }
+
+    public void setActive(GUIPiece active) {
+        this.active = active;
+    }
+
+    public GUIPiece getActive() {
+        return active;
+    }
+
+    public MovePane getMp() {
+        return mp;
+    }
+
+    public ScrollPane getSp() {
+        return sp;
     }
 
 }

@@ -87,8 +87,15 @@ public class MovePane extends GridPane implements BoardMoveListener {
         Button btn1 = new Button(p.getMoveString());
         btn1.setMaxWidth(Double.MAX_VALUE);
         btn1.setStyle("-fx-background-color: #ffffff;");
-        add(btn1, m.isWhite() ? 1 : 2, row);
         btn1.setFocusTraversable(true);
+
+        btn1.setOnAction(e -> {
+
+            g.setCurrentPos(pos);
+
+        });
+
+        add(btn1, m.isWhite() ? 1 : 2, row);
 
 
         GridPane.setMargin(btn1, new Insets(5, 5, 5, 5));
@@ -98,8 +105,8 @@ public class MovePane extends GridPane implements BoardMoveListener {
             add(l, 0, row);
             GridPane.setMargin(l, new Insets(5, 5, 5, 5));
         }
-
-        posChanged();
+        
+        posChanged(-1, -1);
 
     }
 
@@ -121,7 +128,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
                 Node c = getChildren().get(i);
 
-                if (getRowIndex(c) == ((g.getCurrentPos() - 1) / 2)) {
+                if (getRowIndex(c) == ((g.getCurrentPos()) / 2)) {
 
                     if (getColumnIndex(c) == (g.getActivePos().getRedo().isWhite() ? 2 : 1)) {
                         getChildren().remove(c);
@@ -146,7 +153,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
     }
 
     @Override
-    public void posChanged() {
+    public void posChanged(int old, int curr) {
 
         Platform.runLater(() -> {
 

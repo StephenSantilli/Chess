@@ -43,11 +43,11 @@ public class Game {
         listeners.add(listener);
     }
 
-    public void firePosChanged() {
+    public void firePosChanged(int old, int curr) {
 
         for (BoardMoveListener b : moveListeners) {
 
-            b.posChanged();
+            b.posChanged(old, curr);
 
         }
 
@@ -121,7 +121,7 @@ public class Game {
 
     public void setPromo(char piece) {
 
-        if(getActivePos().getMove() != null && getActivePos().getMove().getPromoteType() == '?') {
+        if (getActivePos().getMove() != null && getActivePos().getMove().getPromoteType() == '?') {
             getActivePos().setPromoType(piece, this);
         }
 
@@ -186,9 +186,22 @@ public class Game {
         if (currentPos >= positions.size() || currentPos < 0)
             return;
 
+        int old = this.currentPos;
+
         this.currentPos = currentPos;
 
-        firePosChanged();
+        firePosChanged(old, currentPos);
+
+    }
+
+    public Position getNextPos(int currentPos) {
+
+        if (currentPos == positions.size() - 1 && positions.get(currentPos).getRedo() != null)
+            return positions.get(currentPos).getRedo();
+        else if (currentPos < positions.size() - 1)
+            return positions.get(currentPos + 1);
+        else
+            return null;
 
     }
 

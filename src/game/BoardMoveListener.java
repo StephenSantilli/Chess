@@ -12,6 +12,6 @@ public interface BoardMoveListener extends EventListener {
 
     public void resetMoves();
 
-    public void posChanged();
+    public void posChanged(int old, int curr);
 
 }

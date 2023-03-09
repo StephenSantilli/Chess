@@ -119,6 +119,7 @@ public class GUIPiece {
             image.setLayoutX(ev.getSceneX() - (b.getPieceSize() / 2.0));
             image.setLayoutY(ev.getSceneY() - (b.getPieceSize() / 2.0));
 
+
             b.clearBorder();
             b.drawBorder(b.getXBySquare(gp.getPiece().getSquare()), b.getYBySquare(gp.getPiece().getSquare()));
 

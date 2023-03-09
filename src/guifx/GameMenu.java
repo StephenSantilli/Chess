@@ -100,7 +100,7 @@ public class GameMenu extends Menu implements BoardMoveListener {
     }
 
     @Override
-    public void posChanged() {
+    public void posChanged(int old, int curr) {
         // TODO Auto-generated method stub
         undo.setDisable(!game.canUndo());
         redo.setDisable(!game.canRedo());
