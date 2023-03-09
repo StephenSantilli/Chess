@@ -3,6 +3,7 @@ package guifx;
 import game.Game;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.stage.Window;
 
 public class BarMenu extends MenuBar {
     
@@ -12,11 +13,11 @@ public class BarMenu extends MenuBar {
         return gameMenu;
     }
 
-    public BarMenu(Game g) {
+    public BarMenu(Game g, Window window) {
 
         setUseSystemMenuBar(true);
 
-        gameMenu = new GameMenu(g);
+        gameMenu = new GameMenu(g, window);
 
         getMenus().add(gameMenu);
     }

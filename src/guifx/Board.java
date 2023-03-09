@@ -16,6 +16,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -80,6 +81,12 @@ public class Board extends StackPane implements BoardMoveListener {
         return mp;
     }
 
+    private ScrollPane sp;
+
+    public ScrollPane getSp() {
+        return sp;
+    }
+
     private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
     private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
     private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
@@ -125,9 +132,9 @@ public class Board extends StackPane implements BoardMoveListener {
 
         if (dragging != null) {
             setCursor(Cursor.CLOSED_HAND);
-        } else if (mouseX) {
+ 
             //TODO: SET BOUNDS HERE
-        } else if (game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY)) != null) {
+        } else if (getSquareByLoc(mouseX, mouseY).isValid() && game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY)) != null) {
 
             setCursor(Cursor.OPEN_HAND);
 
@@ -141,9 +148,17 @@ public class Board extends StackPane implements BoardMoveListener {
 
         this.game = new Game();
         game.addMoveListener(this);
-
-        this.mp = new MovePane(game);
+        
+        
+        this.sp = new ScrollPane();
+        this.mp = new MovePane(game, sp);
         mp.initMovePane();
+        sp.setContent(mp);
+
+        getGame().addMoveListener(getMp());
+        sp.setFitToWidth(true);
+        sp.setMinWidth(220);
+
 
         initSquares();
         getChildren().add(sqPane);
@@ -185,7 +200,7 @@ public class Board extends StackPane implements BoardMoveListener {
                 }
 
             }
-
+            setMouseType(e.getSceneX(), e.getSceneY());
             e.consume();
 
         });
@@ -203,6 +218,7 @@ public class Board extends StackPane implements BoardMoveListener {
                     found.onMouseDragged(e);
 
             }
+            setMouseType(e.getSceneX(), e.getSceneY());
 
             e.consume();
 
@@ -221,6 +237,7 @@ public class Board extends StackPane implements BoardMoveListener {
                     found.onMousePressed(e);
 
             }
+            setMouseType(e.getSceneX(), e.getSceneY());
 
             e.consume();
 
@@ -274,7 +291,7 @@ public class Board extends StackPane implements BoardMoveListener {
         gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
                 movesPane.getLayoutBounds().getHeight());
 
-        if (active == null)
+        if (active == null || game.getCurrentPos() != game.getPositions().size() - 1)
             return;
 
         ArrayList<Move> pMoves = game.getActivePos().getPieceMoves(active.getPiece());
@@ -550,7 +567,8 @@ public class Board extends StackPane implements BoardMoveListener {
 
     @Override
     public void resetMoves() {
-        // TODO Auto-generated method stub
+
+        boardUpdated();
 
     }
 

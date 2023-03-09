@@ -38,9 +38,13 @@ public class GUIPiece {
         int relative = (int) bds.getMinX();
 
         double ax = x - (b.getPieceSize() / 2.0) - relative;
-        
+
         if (x >= bds.getMinX() && x <= bds.getMaxX())
             image.setLayoutX(ax);
+        else if (x < bds.getMinX()) {
+            image.setLayoutX(bds.getMinX() - (b.getPieceSize() / 2.0) - relative);
+        } else if (x > bds.getMaxX())
+            image.setLayoutX(bds.getMaxX() - (b.getPieceSize() / 2.0) - relative);
     }
 
     private void setPieceY(double y) {
@@ -49,8 +53,12 @@ public class GUIPiece {
 
         double ay = y - (b.getPieceSize() / 2.0) - relative;
 
-        if (y >= bds.getMinY() && y <= bds.getMaxY())
+        if (y >= bds.getMinY() && ay <= bds.getMaxY())
             image.setLayoutY(ay);
+        else if (y < bds.getMinY()) {
+            image.setLayoutY(bds.getMinY() - (b.getPieceSize() / 2.0) - relative);
+        } else if (y > bds.getMaxY())
+            image.setLayoutY(bds.getMaxY() - (b.getPieceSize() / 2.0) - relative);
     }
 
     public void onMouseDragged(MouseEvent ev) {

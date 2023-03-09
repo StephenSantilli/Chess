@@ -4,6 +4,7 @@ import javafx.application.*;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -33,11 +34,10 @@ public class App extends Application {
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
             
-            ScrollPane sp = new ScrollPane(b.getMp());
-            b.getGame().addMoveListener(b.getMp());
-            //b.getMp().initMovePane();
-            sp.setFitToWidth(true);
-            sp.setMinWidth(220);
+            ScrollPane sp = b.getSp();
+
+            sp.setHbarPolicy(ScrollBarPolicy.NEVER);
+            sp.setVbarPolicy(ScrollBarPolicy.NEVER);
 
             HBox.setHgrow(b, Priority.NEVER);
             HBox.setHgrow(sp, Priority.ALWAYS);
@@ -51,10 +51,10 @@ public class App extends Application {
             b.setViewOrder(0);
             sp.setViewOrder(1);
 
-            // s.setOnKeyPressed(b.keyHandler);
             s.setOnKeyReleased(b.keyHandler);
+            // s.setOnKeyReleased(b.keyHandler);
 
-            BarMenu menu = new BarMenu(b.getGame());
+            BarMenu menu = new BarMenu(b.getGame(), s.getWindow());
             b.getGame().addMoveListener(menu.getGameMenu());
             vb.getChildren().add(menu);
             vb.getChildren().add(hb);
