@@ -258,7 +258,7 @@ public class Position {
 
         }
 
-        if (checkForMate && move.getPromoteType() == '?') {
+/*         if (checkForMate && move.getPromoteType() == '?') {
 
             char promoRes = game.firePromptForPromote(move);
 
@@ -284,7 +284,7 @@ public class Position {
 
             }
 
-        }
+        } */
 
         initMoves(checkForMate, game);
 
@@ -297,7 +297,7 @@ public class Position {
 
         Piece movePiece = move.getPiece();
         move.setPromoteType(promo);
-        Square mps = movePiece.getSquare();
+        Square mps = move.getDestination();
 
         switch (promo) {
             case 'Q':
@@ -315,7 +315,8 @@ public class Position {
         }
 
         initMoves(true, game);
-        move.setText(game.get);
+        move.setText(game.getPositions().get(game.getCurrentPos() - 1));
+
 
     }
 

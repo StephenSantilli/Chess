@@ -167,7 +167,7 @@ public class Move {
         str += destination;
 
         if (promoteType != '0' && pieceType == 'P')
-            str += promoteType;
+            str += "=" + promoteType;
 
         moveText = str;
 

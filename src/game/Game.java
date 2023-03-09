@@ -119,6 +119,16 @@ public class Game {
 
     }
 
+    public void setPromo(char piece) {
+
+        if(getActivePos().getMove() != null && getActivePos().getMove().getPromoteType() == '?') {
+            getActivePos().setPromoType(piece, this);
+        }
+
+        fireBoardUpdate();
+        fireMoveMade();
+    }
+
     public boolean isWhiteTurn(boolean overall) {
 
         return positions.get(overall ? positions.size() - 1 : currentPos).isWhite();
@@ -132,7 +142,7 @@ public class Game {
 
         Position prev = positions.get(positions.size() - 1);
 
-        if (prev.getMove().getPromoteType() == '?')
+        if (prev.getMove() != null && prev.getMove().getPromoteType() == '?')
             return;
 
         if (prev.isCheckMate() || m.isWhite() != isWhiteTurn(true))
