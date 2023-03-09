@@ -88,8 +88,8 @@ public class GUIPiece {
                 b.setDragging(null);
                 b.setActive(null);
                 b.getGame().makeMove(m);
-                b.boardUpdated(true, b.getGame().getActivePos(),
-                        b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
+                // b.boardUpdated(true, b.getGame().getActivePos(),
+                //         b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
 
             } catch (Exception e) {
 
@@ -104,7 +104,7 @@ public class GUIPiece {
                     b.setActive(null);
                 }
                 b.setDragging(null);
-                b.boardUpdated(false, null, null);
+                // b.boardUpdated(false, null, null);
 
             }
 
@@ -156,10 +156,10 @@ public class GUIPiece {
 
                 Piece d = b.getDragging().getPiece();
                 b.setActive(null);
-                b.setDragging(null);
+                // b.setDragging(null);
                 b.getGame().makeMove(new Move(d.getSquare(),
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos()));
-                b.boardUpdated(false, b.getGame().getActivePos(), null);
+                // b.boardUpdated(false, b.getGame().getActivePos(), null);
 
             } catch (Exception e) {
 
@@ -189,8 +189,8 @@ public class GUIPiece {
                 b.setDragging(null);
                 b.setActive(null);
                 b.getGame().makeMove(m);
-                b.boardUpdated(true, b.getGame().getActivePos(),
-                        b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
+                // b.boardUpdated(true, b.getGame().getActivePos(),
+                        // b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
 
             } catch (Exception e) {
 

@@ -1,11 +1,6 @@
 package guifx;
 
 import game.Game;
-import game.Move;
-import game.Piece;
-import game.Position;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.ImageView;
@@ -13,13 +8,13 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 
 public class PromoteDialog extends Dialog<Character> {
-    
+
     private Game game;
 
     public PromoteDialog(Game game, int pieceSize) throws Exception {
 
         initModality(Modality.NONE);
-        
+
         this.game = game;
         boolean white = !game.getActivePos().isWhite();
         ImageView queen = new PieceTranscoder(pieceSize, white, 'Q').getImageView();
@@ -28,15 +23,15 @@ public class PromoteDialog extends Dialog<Character> {
         ImageView knight = new PieceTranscoder(pieceSize, white, 'N').getImageView();
 
         Button q = new Button("", queen);
-        q.setOnAction(e -> {
-            
+        queen.setOnMouseClicked(e -> {
+
             selection('Q');
             close();
 
         });
 
         Button r = new Button("", rook);
-        r.setOnAction(e -> {
+        rook.setOnMouseClicked(e -> {
 
             selection('R');
             close();
@@ -44,7 +39,7 @@ public class PromoteDialog extends Dialog<Character> {
         });
 
         Button b = new Button("", bishop);
-        b.setOnAction(e -> {
+        bishop.setOnMouseClicked(e -> {
 
             selection('B');
             close();
@@ -52,17 +47,24 @@ public class PromoteDialog extends Dialog<Character> {
         });
 
         Button n = new Button("", knight);
-        n.setOnAction(e -> {
+        knight.setOnMouseClicked(e -> {
 
             selection('N');
             close();
 
         });
 
+        Button undo = new Button("✕");
+        undo.setOnAction(e -> {
 
-        HBox hbox = new HBox(q, r, b, n);
+            selection('X');
+            close();
 
+        });
+
+        HBox hbox = new HBox(queen, rook, knight, bishop, undo);
         getDialogPane().setContent(hbox);
+        
 
     }
 

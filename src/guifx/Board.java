@@ -35,7 +35,7 @@ public class Board extends StackPane implements BoardMoveListener {
     private static final Color SQUARE_PREV_MOVE = Color.rgb(238, 187, 85, .70);
     private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
     private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
-    
+
     private int pieceSize = 90;
     private int squareSize = 100;
 
@@ -82,14 +82,14 @@ public class Board extends StackPane implements BoardMoveListener {
 
                 game.setCurrentPos(0);
 
-            } else if(e.getCode() == KeyCode.ESCAPE) {
-                
+            } else if (e.getCode() == KeyCode.ESCAPE) {
+
                 active = null;
                 dragging = null;
                 updateActive();
                 clearBorder();
                 boardUpdated();
-                
+
             }
 
         }
@@ -493,21 +493,28 @@ public class Board extends StackPane implements BoardMoveListener {
 
     public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
         updateActive();
-
-        drawPieces(animate, p1, p2, backward);
+        boolean ani = animate && dragging == null;
+        dragging = null;
+        drawPieces(ani, p1, p2, backward);
         if (game.getActivePos().getMove() != null && game.getActivePos().getMove().getPromoteType() == '?') {
 
             try {
+
                 PromoteDialog pD = new PromoteDialog(game, pieceSize);
                 pD.setOnCloseRequest(e -> {
-
-                    game.setPromo(pD.getResult());
+                    if(pD.getResult() == 'X') {
+                        game.undoMove();
+                    } else {
+                        game.setPromo(pD.getResult());
+                    }
                     pD.hide();
-                    boardUpdated();
+                    //boardUpdated();
 
                 });
 
                 pD.show();
+                pD.getDialogPane().getScene().getWindow().sizeToScene();
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

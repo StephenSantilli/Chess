@@ -11,37 +11,7 @@ public class Game {
 
     private int currentPos;
 
-    private ArrayList<BoardListener> listeners;
     private ArrayList<BoardMoveListener> moveListeners;
-
-    public void fireBoardUpdate() {
-
-        for (BoardListener b : listeners) {
-
-            b.boardUpdated();
-
-        }
-
-    }
-
-    public char firePromptForPromote(Move move) {
-
-        for (BoardListener b : listeners) {
-
-            char c = b.promptForPromote(move);
-
-            if (c == 'Q' || c == 'N' || c == 'B' || c == 'R')
-                return c;
-
-        }
-
-        return '?';
-
-    }
-
-    public void addListener(BoardListener listener) {
-        listeners.add(listener);
-    }
 
     public void firePosChanged(int old, int curr) {
 
@@ -111,7 +81,6 @@ public class Game {
 
     public Game() {
 
-        listeners = new ArrayList<BoardListener>();
         positions = new ArrayList<Position>();
         moveListeners = new ArrayList<BoardMoveListener>();
         positions.add(new Position(this));
@@ -125,7 +94,6 @@ public class Game {
             getActivePos().setPromoType(piece, this);
         }
 
-        fireBoardUpdate();
         fireMoveMade();
     }
 
@@ -176,7 +144,7 @@ public class Game {
         positions.add(movePosition);
         setCurrentPos(positions.size() - 1);
 
-        fireBoardUpdate();
+        //fireBoardUpdate();
         fireMoveMade();
 
     }
@@ -233,7 +201,6 @@ public class Game {
 
         setCurrentPos(positions.size() - 1);
 
-        fireBoardUpdate();
         fireUndoMove();
 
     }
@@ -248,7 +215,6 @@ public class Game {
         positions.add(redo);
         setCurrentPos(positions.size() - 1);
 
-        fireBoardUpdate();
         fireMoveMade();
         fireRedoMove();
 
@@ -273,7 +239,6 @@ public class Game {
         if (currentPos == 0)
             throw new Exception("Position import failed.");
 
-        fireBoardUpdate();
         fireResetMoves();
 
     }
