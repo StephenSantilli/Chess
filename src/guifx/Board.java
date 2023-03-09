@@ -508,7 +508,7 @@ public class Board extends StackPane implements BoardMoveListener {
                         game.setPromo(pD.getResult());
                     }
                     pD.hide();
-                    //boardUpdated();
+                    boardUpdated();
 
                 });
 

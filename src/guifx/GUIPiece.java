@@ -42,23 +42,34 @@ public class GUIPiece {
         if (x >= bds.getMinX() && x <= bds.getMaxX())
             image.setLayoutX(ax);
         else if (x < bds.getMinX()) {
-            image.setLayoutX(bds.getMinX() - (b.getPieceSize() / 2.0) - relative);
+            image.setLayoutX(bds.getMinX() - (b.getPieceSize() / 2.0));
         } else if (x > bds.getMaxX())
-            image.setLayoutX(bds.getMaxX() - (b.getPieceSize() / 2.0) - relative);
+            image.setLayoutX(bds.getMaxX() - (b.getPieceSize() / 2.0));
     }
 
     private void setPieceY(double y) {
 
         int relative = (int) bds.getMinY();
 
-        double ay = y - (b.getPieceSize() / 2.0) - relative;
+        double ay = y - (b.getPieceSize() / 2.0) + relative;
 
         if (y >= bds.getMinY() && ay <= bds.getMaxY())
             image.setLayoutY(ay);
         else if (y < bds.getMinY()) {
-            image.setLayoutY(bds.getMinY() - (b.getPieceSize() / 2.0) - relative);
+            image.setLayoutY(bds.getMinY() - (b.getPieceSize() / 2.0));
         } else if (y > bds.getMaxY())
-            image.setLayoutY(bds.getMaxY() - (b.getPieceSize() / 2.0) - relative);
+            image.setLayoutY(bds.getMaxY() - (b.getPieceSize() / 2.0));
+    }
+
+    private void setPieceSquare(Square sq) {
+
+        int relativeX = (int) bds.getMinX();
+        int relativeY = (int) bds.getMinY();
+
+        double x = b.getXBySquare(sq);
+        double ax = x - ((b.getSquareSize() - b.getPieceSize()) / 2.0) + relativeX;
+
+
     }
 
     public void onMouseDragged(MouseEvent ev) {
@@ -89,7 +100,7 @@ public class GUIPiece {
                 b.setActive(null);
                 b.getGame().makeMove(m);
                 // b.boardUpdated(true, b.getGame().getActivePos(),
-                //         b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
+                // b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
 
             } catch (Exception e) {
 
@@ -119,7 +130,6 @@ public class GUIPiece {
             image.setLayoutX(ev.getSceneX() - (b.getPieceSize() / 2.0));
             image.setLayoutY(ev.getSceneY() - (b.getPieceSize() / 2.0));
 
-
             b.clearBorder();
             b.drawBorder(b.getXBySquare(gp.getPiece().getSquare()), b.getYBySquare(gp.getPiece().getSquare()));
 
@@ -130,17 +140,20 @@ public class GUIPiece {
     public void onMouseReleased(MouseEvent ev) {
 
         b.clearBorder();
-        if (b.getDragging() == null && (b.getActive() == null
-                || (b.getActive() != null && b.getActive().getPiece().getSquare()
-                        .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))))) {
-
-            b.setDragging(null);
-
-            b.boardUpdated(false, null, null);
-            // updateActive();
-            return;
-
-        } else if (b.getActive() != null && b.getDragging() != null && b.getActive().getPiece().getSquare()
+        /*
+         * if (b.getDragging() == null && (b.getActive() == null
+         * || (b.getActive() != null && b.getActive().getPiece().getSquare()
+         * .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))))) {
+         * 
+         * b.setDragging(null);
+         * 
+         * b.boardUpdated(false, null, null);
+         * // updateActive();
+         * return;
+         * 
+         * } else
+         */
+        if (b.getActive() != null && b.getDragging() != null && b.getActive().getPiece().getSquare()
                 .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))) {
 
             b.setDragging(null);
@@ -190,7 +203,7 @@ public class GUIPiece {
                 b.setActive(null);
                 b.getGame().makeMove(m);
                 // b.boardUpdated(true, b.getGame().getActivePos(),
-                        // b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
+                // b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
 
             } catch (Exception e) {
 
