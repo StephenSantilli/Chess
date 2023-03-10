@@ -46,9 +46,9 @@ public class App extends Application {
             Taskbar taskbar = Taskbar.getTaskbar();
             try {
                 taskbar.setIconImage(Toolkit.getDefaultToolkit()
-                        .getImage(getClass().getResource("/img/icon_512x512.png").toString()));
+                        .getImage(getClass().getResource("/img/icon_512x512.png")));
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
 
