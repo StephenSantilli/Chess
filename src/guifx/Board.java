@@ -106,17 +106,9 @@ public class Board extends VBox implements BoardMoveListener {
     private GUITimer bTimer;
     private StackPane stack;
 
-    private Runnable updateTimer = new Runnable() {
-        public void run() {
-            wTimer.update();
-            bTimer.update();
-            Platform.runLater(updateTimer);
-        }
-    };
-
     public Board(int width, int height) throws Exception {
 
-        this.game = new Game(60, 0);
+        this.game = new Game(10 * 60, 0);
         game.addMoveListener(this);
 
         this.wTimer = new GUITimer(getGame(), true);
@@ -162,7 +154,7 @@ public class Board extends VBox implements BoardMoveListener {
 
         getChildren().addAll(btBox, stack, wtBox);
 
-        Platform.runLater(updateTimer);
+        timerChange(true);
 
         setOnMouseMoved(e -> {
             setMouseType(e.getSceneX(), e.getSceneY());
@@ -174,7 +166,7 @@ public class Board extends VBox implements BoardMoveListener {
                 dragging.onMouseReleased(e);
             } else {
 
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY()));
+                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(), true));
                 if (found != null)
                     found.onMouseReleased(e);
                 else if (active != null) {
@@ -219,7 +211,7 @@ public class Board extends VBox implements BoardMoveListener {
 
             } else {
 
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY()));
+                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(), true));
                 if (found != null)
                     found.onMousePressed(e);
                 else if (active != null)
@@ -493,12 +485,15 @@ public class Board extends VBox implements BoardMoveListener {
             y -= bds.getMinY();
         }
 
-        Bounds b = localToScene(getBoundsInLocal());
-        int relativeX = (int) b.getMinX();
-        int relativeY = (int) b.getMinY();
+        // Bounds b = localToScene(getBoundsInLocal());
+        // int relativeX = (int) b.getMinX();
+        // int relativeY = (int) b.getMinY();
 
-        return new Square(((((int) x - relativeX) / squareSize) + 1),
-                (((squareSize * 8 - (int) y + relativeY)) / squareSize) + 1);
+        if (x < 0 || x > squareSize * 8 || y < 0 || y > squareSize * 8)
+            return new Square(9, 9);
+
+        return new Square(((((int) x) / squareSize) + 1),
+                8 - ((int) y / squareSize));
 
     }
 
@@ -508,15 +503,15 @@ public class Board extends VBox implements BoardMoveListener {
 
     public int getXBySquare(Square sq, boolean relative) {
         int rel = 0;
-        if(relative) {
+        if (relative) {
             Bounds bds = stack.localToScene(getBoundsInParent());
             rel = (int) bds.getMinX();
-        }   
+        }
 
         return (sq.getFile() - 1) * squareSize - rel;
 
     }
-    
+
     public int getYBySquare(Square sq) {
         return getYBySquare(sq, false);
     }
@@ -572,6 +567,7 @@ public class Board extends VBox implements BoardMoveListener {
 
                 PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getActivePos().isWhite(),
                         getScene().getWindow());
+
                 pD.setOnHidden(e -> {
 
                     if (pD.getResult() == 'X') {
@@ -584,10 +580,10 @@ public class Board extends VBox implements BoardMoveListener {
 
                 });
 
-                Bounds bds = localToScreen(getBoundsInLocal());
+                Bounds bds = stack.localToScreen(getBoundsInParent());
                 pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
                 pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination())
-                        - (!game.getActivePos().isWhite() ? -squareSize : pD.getHeight()));
+                        - (!game.getActivePos().isWhite() ? -squareSize : squareSize * (4 + (1 / 3.0))));
 
                 pD.show();
                 pD.sizeToScene();
@@ -676,8 +672,8 @@ public class Board extends VBox implements BoardMoveListener {
 
     @Override
     public void timerChange(boolean white) {
-        // TODO Auto-generated method stub
-
+        wTimer.update();
+        bTimer.update();
     }
 
     @Override

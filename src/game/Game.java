@@ -79,10 +79,10 @@ public class Game {
         if (!isWhiteTurn(true))
             return whiteTimer;
         else {
-            if (whiteTimer == 0)
+            if (whiteTimer <= 0)
                 return 0;
             else
-                return whiteTimer - (System.currentTimeMillis() - getActivePos().getSystemTimeStart());
+                return whiteTimer - (System.currentTimeMillis() - positions.get(positions.size() - 1).getSystemTimeStart());
         }
     }
 
@@ -93,10 +93,10 @@ public class Game {
         if (isWhiteTurn(true))
             return blackTimer;
         else {
-            if (blackTimer == 0)
+            if (blackTimer <= 0)
                 return 0;
             else
-                return blackTimer - (System.currentTimeMillis() - getActivePos().getSystemTimeStart());
+                return blackTimer - (System.currentTimeMillis() - positions.get(positions.size() - 1).getSystemTimeStart());
         }
     }
 
@@ -149,11 +149,11 @@ public class Game {
 
         this.clockScheduler = new Timer("clockScheduler");
 
-        flipTimer();
+        flipTimer(true);
 
     }
 
-    public void flipTimer() {
+    public void flipTimer(boolean setTimer) {
 
         if (timePerSide <= -1 || getActivePos().getSystemTimeStart() > -1) {
             return;
@@ -166,11 +166,11 @@ public class Game {
 
         }
         long currentTime = System.currentTimeMillis();
-        if (getPreviousPos() != null) {
+        if (getPreviousPos() != null && setTimer) {
             if (getPreviousPos().isWhite()) {
-                whiteTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) + (timePerMove * 1000);
+                whiteTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) + (timePerMove);
             } else {
-                blackTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) + (timePerMove * 1000);
+                blackTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) + (timePerMove);
             }
             getPreviousPos().setTimerEnd(white ? whiteTimer : blackTimer);
         }
@@ -196,6 +196,7 @@ public class Game {
 
         };
 
+        fireTimerChange(isWhiteTurn(true));
         clockScheduler.schedule(flagfall, white ? whiteTimer : blackTimer);
     }
 
@@ -264,7 +265,7 @@ public class Game {
         positions.add(movePosition);
         setCurrentPos(positions.size() - 1);
 
-        flipTimer();
+        flipTimer(true);
 
         fireMoveMade();
 
@@ -315,26 +316,16 @@ public class Game {
         redo.setSystemTimeStart(-1);
         redo.setTimerEnd(-1);
 
-/*         Position prev = getPreviousPosByColor(currentPos + 1, redo.isWhite());
-        if (!redo.isWhite()) {
-
-            if (prev == null) {
-                whiteTimer = timePerSide;
-            } else {
-                whiteTimer = prev.getTimerEnd();
-            }
-
+        Position prev = getActivePos();
+        if(isWhiteTurn(true)) {
+            blackTimer = getCurrentPos() == 0 ? timePerSide : prev.getTimerEnd();
         } else {
+            whiteTimer = getCurrentPos() == 0 ? timePerSide : prev.getTimerEnd();
+        }
 
-            if (prev == null) {
-                blackTimer = timePerSide;
-            } else {
-                blackTimer = prev.getTimerEnd();
-            }
+        getActivePos().setSystemTimeStart(-1);
 
-        } */
-
-        flipTimer();
+        flipTimer(false);
         fireUndoMove();
 
     }
@@ -351,7 +342,7 @@ public class Game {
         redo.setPromoType(redo.getRedoPromote(), this);
         setCurrentPos(positions.size() - 1);
 
-        flipTimer();
+        flipTimer(true);
         fireMoveMade();
         fireRedoMove();
 

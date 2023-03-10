@@ -31,9 +31,6 @@ public class GUIPiece {
         this.b = board;
 
         this.bds = stack.localToScene(board.getBoundsInParent());
-        System.out.println(bds.getMinY());
-        System.out.println(bds.getMaxY());
-        System.out.println("Height:" + board.getwTimer().getHeight());
 
     }
 
@@ -92,7 +89,7 @@ public class GUIPiece {
                 && b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
                         clickSquare)) {
 
-            int cPos = b.getGame().getCurrentPos();
+            int cPos = b.getGame().getPositions().size() - 1;
 
             try {
 
@@ -176,7 +173,7 @@ public class GUIPiece {
 
         if (b.getDragging() == null && (b.getActive() == null
                 || (b.getActive() != null && b.getActive().getPiece().getSquare()
-                        .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))))) {
+                        .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true))))) {
 
             b.setDragging(null);
             b.updateActive();
@@ -184,7 +181,7 @@ public class GUIPiece {
             return;
 
         } else if (b.getActive() != null && b.getDragging() != null && b.getActive().getPiece().getSquare()
-                .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))) {
+                .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true))) {
 
             b.setDragging(null);
             setPieceSquare(piece.getSquare());
@@ -202,7 +199,7 @@ public class GUIPiece {
                 Piece d = b.getDragging().getPiece();
                 b.setActive(null);
                 b.getGame().makeMove(new Move(d.getSquare(),
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos()));
+                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true), b.getGame().getActivePos()));
 
             } catch (Exception e) {
 
@@ -210,7 +207,7 @@ public class GUIPiece {
 
             if (cPos == b.getGame().getCurrentPos()) {
                 GUIPiece pc = b.getGUIPieceAtSquare(
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()));
+                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));
 
                 if (pc != null) {
                     b.setActive(pc);

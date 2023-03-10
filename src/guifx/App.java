@@ -7,6 +7,7 @@ import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -29,7 +30,13 @@ public class App extends Application {
         
         Scene s = new Scene(vb);
         s.setFill(Color.TRANSPARENT);
-
+        stage.setTitle("Chess");
+        stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
+        stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));
+        stage.getIcons().add(new Image(getClass().getResource("/img/icon_32x32.png").toString()));
+        stage.getIcons().add(new Image(getClass().getResource("/img/icon_48x48.png").toString()));
+        stage.getIcons().add(new Image(getClass().getResource("/img/icon_256x256.png").toString()));
+        stage.getIcons().add(new Image(getClass().getResource("/img/icon_512x512.png").toString()));
         stage.setScene(s);
 
         try {

@@ -1,8 +1,13 @@
 package guifx;
 
 import game.Game;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 
 public class GUITimer extends Label {
 
@@ -21,7 +26,7 @@ public class GUITimer extends Label {
         long seconds = time / 1000 % 60;
         long tenths = (time - (minutes * 60 * 1000) - (seconds * 1000)) / 100;
 
-        str += (seconds < 10 ? "0" : "") + seconds;
+        str += (seconds < 10 && minutes > 0 ? "0" : "") + seconds;
         if (minutes > 0) {
             str = minutes + ":" + str;
         } else {
@@ -32,9 +37,22 @@ public class GUITimer extends Label {
 
     }
 
+    private final Timeline tl;
+
     public GUITimer(Game game, boolean white) {
 
         super(formatTime(white ? game.getWhiteTime() : game.getBlackTime()));
+
+        this.tl = new Timeline();
+        tl.setCycleCount(Timeline.INDEFINITE);
+        tl.getKeyFrames().add(
+            new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent ev) {
+                    frame();
+                }
+            })
+        );
+        
 
         setFont(new Font(getFont().getName(), 24));
 
@@ -48,13 +66,21 @@ public class GUITimer extends Label {
 
     }
 
+    public void frame() {
+        setText(formatTime(white ? game.getWhiteTime() : game.getBlackTime()));
+    }
+
     public void update() {
  
-        setText(formatTime(white ? game.getWhiteTime() : game.getBlackTime()));
-        if (game.isWhiteTurn(true) == white)
+        if (game.isWhiteTurn(true) == white) {
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
-        else
+            tl.play();
+        }
+        else {
             setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
+            tl.pause();
+            frame();
+        }
 
     }
 
