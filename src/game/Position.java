@@ -7,8 +7,6 @@ public class Position {
     private Piece[][] pcs;
 
     /** All of the pieces in the position. Does not include captured pieces. */
-    // private ArrayList<Piece> pieces;
-
     public Piece[][] getPcs() {
         return pcs;
     }
@@ -57,6 +55,34 @@ public class Position {
      * redo.
      */
     private char redoPromote;
+
+    /**
+     * The system time at the start of this position.
+     */
+    private long systemTimeStart;
+
+
+
+    /**
+     * The amount of time on the timer at the end of this position.
+     */
+    private long timerEnd;
+
+    public long getSystemTimeStart() {
+        return systemTimeStart;
+    }
+
+    public void setSystemTimeStart(long timerStart) {
+        this.systemTimeStart = timerStart;
+    }
+
+    public long getTimerEnd() {
+        return timerEnd;
+    }
+
+    public void setTimerEnd(long timerEnd) {
+        this.timerEnd = timerEnd;
+    }
 
     /**
      * @return The {@link Position} that was previously after this {@link Position}.
@@ -168,6 +194,8 @@ public class Position {
         white = true;
         initDefaultPosition();
         initMoves(true, game);
+        this.systemTimeStart = -1;
+        this.timerEnd = -1;
 
     }
 
@@ -188,6 +216,9 @@ public class Position {
         // this.pieces = new ArrayList<Piece>();
         this.pcs = new Piece[8][8];
         this.white = isWhite;
+
+        this.systemTimeStart = -1;
+        this.timerEnd = -1;
 
         Piece[][] prevPieces = prev.getPcs();
 
@@ -272,39 +303,6 @@ public class Position {
 
         }
 
-        /*
-         * if (checkForMate && move.getPromoteType() == '?') {
-         * 
-         * char promoRes = game.firePromptForPromote(move);
-         * 
-         * if (promoRes == 'Q' || promoRes == 'R' || promoRes == 'B' || promoRes == 'N')
-         * {
-         * move.setPromoteType(promoRes);
-         * 
-         * Square mps = movePiece.getSquare();
-         * 
-         * switch (promoRes) {
-         * case 'Q':
-         * setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
-         * break;
-         * case 'R':
-         * setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
-         * break;
-         * case 'B':
-         * setSquare(mps, new Bishop(mps.getFile(), mps.getRank(),
-         * movePiece.isWhite()));
-         * break;
-         * case 'N':
-         * setSquare(mps, new Knight(mps.getFile(), mps.getRank(),
-         * movePiece.isWhite()));
-         * break;
-         * }
-         * 
-         * }
-         * 
-         * }
-         */
-
         initMoves(checkForMate, game);
 
         move.setText(prev);
@@ -364,17 +362,6 @@ public class Position {
                 ArrayList<Move> pMoves = p.getMoves(this);
                 moves.addAll(pMoves);
 
-                // System.out.println("getmoves " + pieces.get(i).getCode() + " @ " +
-                // pieces.get(i).getSquare() + ": " + (System.nanoTime() - nt));
-                /*
-                 * pMoves.forEach(m -> {
-                 * System.out.print(m.getDestination() + " ");
-                 * });
-                 */
-
-                // nt = System.nanoTime();
-
-                // System.out.println("addall: " + (System.nanoTime() - nt));
             }
 
         }
@@ -433,18 +420,11 @@ public class Position {
     }
 
     /**
-     * Sets whether or not the position is check mate.
+     * Sets whether or not the position is check mate. (The color whose turn it is isn't able to make any moves and is in check.)
      * 
      * @param g The game to check.
      */
     private void setCheckMate(Game g) {
-
-        /*
-         * if (!givingCheck) {
-         * this.checkMate = false;
-         * return;
-         * }
-         */
 
         this.checkMate = true;
 
@@ -475,7 +455,6 @@ public class Position {
      */
     private void initDefaultPosition() {
 
-        // this.pieces = new ArrayList<Piece>();
         pcs = new Piece[8][8];
 
         boolean color = true;

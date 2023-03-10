@@ -10,8 +10,10 @@ import game.Position;
 import game.Square;
 
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -27,7 +29,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-public class Board extends StackPane implements BoardMoveListener {
+public class Board extends VBox implements BoardMoveListener {
 
     private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
     private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
@@ -95,11 +97,37 @@ public class Board extends StackPane implements BoardMoveListener {
         }
 
     };
+    private GUITimer wTimer;
+
+    public GUITimer getwTimer() {
+        return wTimer;
+    }
+
+    private GUITimer bTimer;
+    private StackPane stack;
+
+    private Runnable updateTimer = new Runnable() {
+        public void run() {
+            wTimer.update();
+            bTimer.update();
+            Platform.runLater(updateTimer);
+        }
+    };
 
     public Board(int width, int height) throws Exception {
 
-        this.game = new Game();
+        this.game = new Game(60, 0);
         game.addMoveListener(this);
+
+        this.wTimer = new GUITimer(getGame(), true);
+        this.bTimer = new GUITimer(getGame(), false);
+        this.game = getGame();
+        HBox wtBox = new HBox(wTimer);
+        wtBox.setAlignment(Pos.CENTER_RIGHT);
+        HBox btBox = new HBox(bTimer);
+        btBox.setAlignment(Pos.CENTER_RIGHT);
+
+        stack = new StackPane();
 
         this.sp = new ScrollPane();
         this.mp = new MovePane(game, sp);
@@ -111,26 +139,30 @@ public class Board extends StackPane implements BoardMoveListener {
         sp.setMinWidth(220);
 
         initSquares();
-        getChildren().add(sqPane);
+        stack.getChildren().add(sqPane);
 
         sqModifierPane = new Canvas(squareSize * 8, squareSize * 8);
         drawModifierSq();
-        getChildren().add(sqModifierPane);
+        stack.getChildren().add(sqModifierPane);
 
         borderPane = new Canvas(squareSize * 8, squareSize * 8);
         clearBorder();
-        getChildren().add(borderPane);
+        stack.getChildren().add(borderPane);
 
         movesPane = new Canvas(squareSize * 8, squareSize * 8);
-        getChildren().add(movesPane);
+        stack.getChildren().add(movesPane);
         drawMovesPane();
 
         piecePane = new Pane();
 
-        getChildren().add(piecePane);
+        stack.getChildren().add(piecePane);
 
         initPieceTranscoders();
         // drawPieces(false, null, null);
+
+        getChildren().addAll(btBox, stack, wtBox);
+
+        Platform.runLater(updateTimer);
 
         setOnMouseMoved(e -> {
             setMouseType(e.getSceneX(), e.getSceneY());
@@ -335,8 +367,8 @@ public class Board extends StackPane implements BoardMoveListener {
         if (dragging != null) {
             setCursor(Cursor.CLOSED_HAND);
 
-        } else if (getSquareByLoc(mouseX, mouseY).isValid()
-                && game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY)) != null) {
+        } else if (getSquareByLoc(mouseX, mouseY, true).isValid()
+                && game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY, true)) != null) {
 
             setCursor(Cursor.OPEN_HAND);
 
@@ -368,7 +400,7 @@ public class Board extends StackPane implements BoardMoveListener {
 
             piecePane.getChildren().add(i);
 
-            GUIPiece guiP = new GUIPiece(cp, i, this);
+            GUIPiece guiP = new GUIPiece(cp, i, this, stack);
 
             i.setLayoutX(getXBySquare(cp.getSquare()) + ((squareSize - pieceSize) / 2.0));
             i.setLayoutY(((getYBySquare(cp.getSquare()))) + ((squareSize - pieceSize) / 2.0));
@@ -412,7 +444,7 @@ public class Board extends StackPane implements BoardMoveListener {
 
                 piecePane.getChildren().add(img);
 
-                GUIPiece guiP = new GUIPiece(p, img, this);
+                GUIPiece guiP = new GUIPiece(p, img, this, stack);
                 pieces.add(guiP);
                 img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
                 img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
@@ -450,6 +482,16 @@ public class Board extends StackPane implements BoardMoveListener {
     }
 
     public Square getSquareByLoc(double x, double y) {
+        return getSquareByLoc(x, y, false);
+    }
+
+    public Square getSquareByLoc(double x, double y, boolean relative) {
+
+        if (relative) {
+            Bounds bds = stack.localToScene(getBoundsInParent());
+            x -= bds.getMinX();
+            y -= bds.getMinY();
+        }
 
         Bounds b = localToScene(getBoundsInLocal());
         int relativeX = (int) b.getMinX();
@@ -461,14 +503,32 @@ public class Board extends StackPane implements BoardMoveListener {
     }
 
     public int getXBySquare(Square sq) {
-
-        return (sq.getFile() - 1) * squareSize;
-
+        return getXBySquare(sq, false);
     }
 
-    public int getYBySquare(Square sq) {
+    public int getXBySquare(Square sq, boolean relative) {
+        int rel = 0;
+        if(relative) {
+            Bounds bds = stack.localToScene(getBoundsInParent());
+            rel = (int) bds.getMinX();
+        }   
 
-        return (squareSize * 7) - ((sq.getRank() - 1) * squareSize);
+        return (sq.getFile() - 1) * squareSize - rel;
+
+    }
+    
+    public int getYBySquare(Square sq) {
+        return getYBySquare(sq, false);
+    }
+
+    public int getYBySquare(Square sq, boolean relative) {
+        int rel = 0;
+        if (relative) {
+            Bounds bds = stack.localToScene(getBoundsInParent());
+            rel = (int) bds.getMinY();
+        }
+
+        return (squareSize * 7) - ((sq.getRank() - 1) * squareSize) - rel;
 
     }
 
@@ -524,14 +584,13 @@ public class Board extends StackPane implements BoardMoveListener {
 
                 });
 
-                pD.show();
-                pD.sizeToScene();
-                
                 Bounds bds = localToScreen(getBoundsInLocal());
                 pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
-                pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination()) - (!game.getActivePos().isWhite() ? -squareSize : pD.getHeight()));
-                
+                pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination())
+                        - (!game.getActivePos().isWhite() ? -squareSize : pD.getHeight()));
 
+                pD.show();
+                pD.sizeToScene();
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -613,6 +672,18 @@ public class Board extends StackPane implements BoardMoveListener {
 
     public ScrollPane getSp() {
         return sp;
+    }
+
+    @Override
+    public void timerChange(boolean white) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void flagfall(boolean white) {
+        // TODO Auto-generated method stub
+
     }
 
 }

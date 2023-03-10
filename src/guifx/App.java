@@ -1,6 +1,8 @@
 package guifx;
 
+import game.Game;
 import javafx.application.*;
+import javafx.geometry.Pos;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.ScrollPane;
@@ -15,6 +17,9 @@ public class App extends Application {
     public void onResize() {
 
     }
+
+    private GUITimer wTimer, bTimer;
+    private Game game;
 
     @Override
     public void start(Stage stage) {
@@ -40,10 +45,10 @@ public class App extends Application {
             HBox.setHgrow(b, Priority.NEVER);
             HBox.setHgrow(sp, Priority.ALWAYS);
 
-            b.setMaxWidth(b.getSquareSize() * 8);
-            b.setMaxHeight(b.getSquareSize() * 8);
-            b.setMinWidth(b.getSquareSize() * 8);
-            b.setMinHeight(b.getSquareSize() * 8);
+            // b.setMaxWidth(b.getSquareSize() * 8);
+            // b.setMaxHeight(b.getSquareSize() * 8);
+            // b.setMinWidth(b.getSquareSize() * 8);
+            // b.setMinHeight(b.getSquareSize() * 8);
 
             hb.getChildren().add(sp);
             b.setViewOrder(0);
@@ -54,8 +59,8 @@ public class App extends Application {
 
             BarMenu menu = new BarMenu(b.getGame(), s.getWindow());
             b.getGame().addMoveListener(menu.getGameMenu());
-            vb.getChildren().add(menu);
-            vb.getChildren().add(hb);
+
+            vb.getChildren().addAll(menu, hb);
 
             stage.show();
             stage.sizeToScene();
@@ -75,6 +80,8 @@ public class App extends Application {
         // gr.fillRect(50, 50, 100, 100);
 
     }
+    
+
 
     public static void main(String[] args) {
 

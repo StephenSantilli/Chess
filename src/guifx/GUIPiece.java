@@ -6,6 +6,7 @@ import game.Square;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 
 public class GUIPiece {
 
@@ -23,13 +24,16 @@ public class GUIPiece {
         return image;
     }
 
-    public GUIPiece(Piece piece, ImageView image, Board board) {
+    public GUIPiece(Piece piece, ImageView image, Board board, StackPane stack) {
 
         this.piece = piece;
         this.image = image;
         this.b = board;
 
-        this.bds = b.localToScene(b.getBoundsInParent());
+        this.bds = stack.localToScene(board.getBoundsInParent());
+        System.out.println(bds.getMinY());
+        System.out.println(bds.getMaxY());
+        System.out.println("Height:" + board.getwTimer().getHeight());
 
     }
 
@@ -82,7 +86,7 @@ public class GUIPiece {
      * @param ev The event of the mouse being pressed down.
      */
     public void onMousePressed(MouseEvent ev) {
-        Square clickSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY());
+        Square clickSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY(), true);
 
         if (b.getActive() != null
                 && b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
@@ -93,7 +97,7 @@ public class GUIPiece {
             try {
 
                 Move m = new Move(b.getActive().getPiece().getSquare(),
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos());
+                        clickSquare, b.getGame().getActivePos());
 
                 b.setDragging(null);
                 b.setActive(null);
@@ -103,8 +107,7 @@ public class GUIPiece {
             }
 
             if (cPos == b.getGame().getCurrentPos()) {
-                GUIPiece pc = b.getGUIPieceAtSquare(
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()));
+                GUIPiece pc = b.getGUIPieceAtSquare(clickSquare);
                 if (pc != null) {
                     b.setActive(pc);
                 } else {
