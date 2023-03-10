@@ -48,7 +48,6 @@ public class App extends Application {
                 taskbar.setIconImage(Toolkit.getDefaultToolkit()
                         .getImage(getClass().getResource("/img/icon_512x512.png")));
             } catch (Exception e) {
-                e.printStackTrace();
             }
         }
 
@@ -66,11 +65,6 @@ public class App extends Application {
 
             HBox.setHgrow(b, Priority.NEVER);
             HBox.setHgrow(sp, Priority.ALWAYS);
-
-            // b.setMaxWidth(b.getSquareSize() * 8);
-            // b.setMaxHeight(b.getSquareSize() * 8);
-            // b.setMinWidth(b.getSquareSize() * 8);
-            // b.setMinHeight(b.getSquareSize() * 8);
 
             hb.getChildren().add(sp);
             b.setViewOrder(0);
