@@ -13,11 +13,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 
 public class MovePane extends GridPane implements BoardMoveListener {
 
@@ -99,9 +96,9 @@ public class MovePane extends GridPane implements BoardMoveListener {
         btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
         btn1.setOnMouseEntered(e -> {
-            if(btn1.getStyle().endsWith(BUTTON_INACTIVE)) {
+            if (btn1.getStyle().endsWith(BUTTON_INACTIVE)) {
                 btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-            } else if(btn1.getStyle().endsWith(BUTTON_ACTIVE)) {
+            } else if (btn1.getStyle().endsWith(BUTTON_ACTIVE)) {
                 btn1.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
             }
         });
@@ -133,10 +130,10 @@ public class MovePane extends GridPane implements BoardMoveListener {
                 btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
             }
         });
-        
 
         add(btn1, m.isWhite() ? 1 : 2, row);
-
+        requestFocus();
+        sp.setVvalue(1);
 
         GridPane.setMargin(btn1, new Insets(5, 5, 5, 5));
 
@@ -204,18 +201,25 @@ public class MovePane extends GridPane implements BoardMoveListener {
                 if (g.getCurrentPos() != 0 && getRowIndex(c) == ((g.getCurrentPos() - 1) / 2)
                         && getColumnIndex(c) == (g.getPositions().get(g.getCurrentPos()).isWhite() ? 2 : 1)) {
 
-                    c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
-                    // double perMove = 1.0 / getRowCount();
-                    // sp.setVvalue(perMove * getRowIndex(c));
+                    if (c.isHover()) {
+                        c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+                    } else 
+                        c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
+
                     c.requestFocus();
+                    // sp.setVvalue(sp.getViewportBounds().getHeight());
 
                 } else if (activePos > 0 && activePos < g.getPositions().size()
                         && getRowIndex(c) == ((activePos - 1) / 2)
                         && getColumnIndex(c) == (g.getPositions().get(activePos).isWhite() ? 2 : 1)) {
 
-                    c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+                    if (c.isHover()) {
+                        c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
+                    } else
+                        c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
-                } if(g.getCurrentPos() == 0) {
+                }
+                if (g.getCurrentPos() == 0) {
                     sp.setVvalue(0);
                 }
 

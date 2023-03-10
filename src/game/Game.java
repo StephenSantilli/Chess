@@ -144,7 +144,6 @@ public class Game {
         positions.add(movePosition);
         setCurrentPos(positions.size() - 1);
 
-        //fireBoardUpdate();
         fireMoveMade();
 
     }
@@ -195,9 +194,10 @@ public class Game {
         positions.remove(currentPos);
 
         positions.get(currentPos - 1).setRedo(redo);
+        redo.setRedoPromote(redo.getMove().getPromoteType());
 
         if (redo.getMove().getPromoteType() != '0')
-            redo.getMove().setPromoteType('?');
+            redo.setPromoType('?', this);
 
         setCurrentPos(positions.size() - 1);
 
@@ -213,6 +213,7 @@ public class Game {
             return;
 
         positions.add(redo);
+        redo.setPromoType(redo.getRedoPromote(), this);
         setCurrentPos(positions.size() - 1);
 
         fireMoveMade();
@@ -234,6 +235,7 @@ public class Game {
 
             positions.add(new Position(getActivePos(), m, this, !getActivePos().isWhite(), true));
             ++currentPos;
+
         }
 
         if (currentPos == 0)

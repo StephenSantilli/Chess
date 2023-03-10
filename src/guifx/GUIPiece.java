@@ -15,22 +15,22 @@ public class GUIPiece {
 
     private Bounds bds;
 
-    public GUIPiece(Piece piece, ImageView image, Board board) {
-
-        this.piece = piece;
-        this.image = image;
-        this.b = board;
-
-        this.bds = b.localToParent(b.getBoundsInLocal());
-
-    }
-
     public Piece getPiece() {
         return piece;
     }
 
     public ImageView getImage() {
         return image;
+    }
+
+    public GUIPiece(Piece piece, ImageView image, Board board) {
+
+        this.piece = piece;
+        this.image = image;
+        this.b = board;
+
+        this.bds = b.localToScene(b.getBoundsInParent());
+
     }
 
     private void setPieceX(double x) {
@@ -42,36 +42,114 @@ public class GUIPiece {
         if (x >= bds.getMinX() && x <= bds.getMaxX())
             image.setLayoutX(ax);
         else if (x < bds.getMinX()) {
-            image.setLayoutX(bds.getMinX() - (b.getPieceSize() / 2.0));
+            image.setLayoutX(bds.getMinX() - (b.getPieceSize() / 2.0) - relative);
         } else if (x > bds.getMaxX())
-            image.setLayoutX(bds.getMaxX() - (b.getPieceSize() / 2.0));
+            image.setLayoutX(bds.getMaxX() - (b.getPieceSize() / 2.0) - relative);
     }
 
     private void setPieceY(double y) {
 
         int relative = (int) bds.getMinY();
 
-        double ay = y - (b.getPieceSize() / 2.0) + relative;
+        double ay = y - (b.getPieceSize() / 2.0) - relative;
 
-        if (y >= bds.getMinY() && ay <= bds.getMaxY())
+        if (y >= bds.getMinY() && y <= bds.getMaxY())
             image.setLayoutY(ay);
         else if (y < bds.getMinY()) {
-            image.setLayoutY(bds.getMinY() - (b.getPieceSize() / 2.0));
-        } else if (y > bds.getMaxY())
-            image.setLayoutY(bds.getMaxY() - (b.getPieceSize() / 2.0));
+            image.setLayoutY(bds.getMinY() - (b.getPieceSize() / 2.0) - relative);
+        } else if (y > bds.getMaxY()) {
+            image.setLayoutY(bds.getMaxY() - (b.getPieceSize() / 2.0) - relative);
+        }
+
     }
 
     private void setPieceSquare(Square sq) {
 
-        int relativeX = (int) bds.getMinX();
-        int relativeY = (int) bds.getMinY();
-
         double x = b.getXBySquare(sq);
-        double ax = x - ((b.getSquareSize() - b.getPieceSize()) / 2.0) + relativeX;
+        double ax = x + ((b.getSquareSize() - b.getPieceSize()) / 2.0);
 
+        double y = b.getYBySquare(sq);
+        double ay = y + ((b.getSquareSize() - b.getPieceSize()) / 2.0);
+
+        image.setLayoutX(ax);
+        image.setLayoutY(ay);
 
     }
 
+    /**
+     * When the mouse has been pressed down.
+     * 
+     * @param ev The event of the mouse being pressed down.
+     */
+    public void onMousePressed(MouseEvent ev) {
+        Square clickSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY());
+
+        if (b.getActive() != null
+                && b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
+                        clickSquare)) {
+
+            int cPos = b.getGame().getCurrentPos();
+
+            try {
+
+                Move m = new Move(b.getActive().getPiece().getSquare(),
+                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos());
+
+                b.setDragging(null);
+                b.setActive(null);
+                b.getGame().makeMove(m);
+
+            } catch (Exception e) {
+            }
+
+            if (cPos == b.getGame().getCurrentPos()) {
+                GUIPiece pc = b.getGUIPieceAtSquare(
+                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()));
+                if (pc != null) {
+                    b.setActive(pc);
+                } else {
+                    b.setActive(null);
+                }
+
+                b.setDragging(null);
+
+                setPieceSquare(piece.getSquare());
+
+            }
+
+        } else if (b.getActive() == null || (!b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
+                clickSquare) && !b.getActive().getPiece().equals(this.getPiece())) ||
+                clickSquare.equals(piece.getSquare())) {
+
+            image.toFront();
+            b.setActive(this);
+            b.setDragging(this);
+
+            b.updateActive();
+
+            setPieceX(ev.getSceneX());
+            setPieceY(ev.getSceneY());
+
+            b.clearBorder();
+            b.drawBorder(b.getXBySquare(getPiece().getSquare()), b.getYBySquare(getPiece().getSquare()));
+
+        } else {
+
+            b.setActive(null);
+            b.setDragging(null);
+
+            b.updateActive();
+            b.clearBorder();
+
+        }
+
+    }
+
+    /**
+     * When the mouse has been dragged (with the mouse pressed down.)
+     * 
+     * @param ev The event of the mouse being dragged.
+     */
     public void onMouseDragged(MouseEvent ev) {
 
         setPieceX(ev.getSceneX());
@@ -79,85 +157,35 @@ public class GUIPiece {
         setPieceY(ev.getSceneY());
 
         b.clearBorder();
-        Square hoverSquare = b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY());
+        Square hoverSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY());
         b.drawBorder(b.getXBySquare(hoverSquare), b.getYBySquare(hoverSquare));
 
     }
 
-    public void onMousePressed(MouseEvent ev) {
-
-        GUIPiece gp = b.getGUIPieceAtSquare(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()));
-
-        if (b.getActive() != null && gp != null
-                && b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
-                        gp.getPiece().getSquare())) {
-            int cPos = b.getGame().getCurrentPos();
-            try {
-                Move m = new Move(b.getActive().getPiece().getSquare(),
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos());
-
-                b.setDragging(null);
-                b.setActive(null);
-                b.getGame().makeMove(m);
-                // b.boardUpdated(true, b.getGame().getActivePos(),
-                // b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
-
-            } catch (Exception e) {
-
-            }
-
-            if (cPos == b.getGame().getCurrentPos()) {
-                GUIPiece pc = b.getGUIPieceAtSquare(
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()));
-                if (pc != null) {
-                    b.setActive(pc);
-                } else {
-                    b.setActive(null);
-                }
-                b.setDragging(null);
-                // b.boardUpdated(false, null, null);
-
-            }
-
-        } else {
-
-            image.toFront();
-            b.setActive(gp);
-            b.setDragging(gp);
-
-            b.updateActive();
-
-            image.setLayoutX(ev.getSceneX() - (b.getPieceSize() / 2.0));
-            image.setLayoutY(ev.getSceneY() - (b.getPieceSize() / 2.0));
-
-            b.clearBorder();
-            b.drawBorder(b.getXBySquare(gp.getPiece().getSquare()), b.getYBySquare(gp.getPiece().getSquare()));
-
-        }
-
-    }
-
+    /**
+     * When the mouse has been lifted up.
+     * 
+     * @param ev The event of the mouse being lifted up.
+     */
     public void onMouseReleased(MouseEvent ev) {
 
         b.clearBorder();
-        /*
-         * if (b.getDragging() == null && (b.getActive() == null
-         * || (b.getActive() != null && b.getActive().getPiece().getSquare()
-         * .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))))) {
-         * 
-         * b.setDragging(null);
-         * 
-         * b.boardUpdated(false, null, null);
-         * // updateActive();
-         * return;
-         * 
-         * } else
-         */
-        if (b.getActive() != null && b.getDragging() != null && b.getActive().getPiece().getSquare()
+
+        if (b.getDragging() == null && (b.getActive() == null
+                || (b.getActive() != null && b.getActive().getPiece().getSquare()
+                        .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))))) {
+
+            b.setDragging(null);
+            b.updateActive();
+
+            return;
+
+        } else if (b.getActive() != null && b.getDragging() != null && b.getActive().getPiece().getSquare()
                 .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()))) {
 
             b.setDragging(null);
-            b.boardUpdated(false, null, null);
+            setPieceSquare(piece.getSquare());
+
             return;
 
         }
@@ -165,14 +193,13 @@ public class GUIPiece {
         if (b.getDragging() != null) {
 
             int cPos = b.getGame().getCurrentPos();
+
             try {
 
                 Piece d = b.getDragging().getPiece();
                 b.setActive(null);
-                // b.setDragging(null);
                 b.getGame().makeMove(new Move(d.getSquare(),
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos()));
-                // b.boardUpdated(false, b.getGame().getActivePos(), null);
 
             } catch (Exception e) {
 
@@ -188,42 +215,12 @@ public class GUIPiece {
                     b.setActive(null);
                 }
                 b.setDragging(null);
-                b.boardUpdated(false, null, null);
-
-            }
-
-        } else if (b.getActive() != null) {
-
-            int cPos = b.getGame().getCurrentPos();
-            try {
-                Move m = new Move(b.getActive().getPiece().getSquare(),
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()), b.getGame().getActivePos());
-
-                b.setDragging(null);
-                b.setActive(null);
-                b.getGame().makeMove(m);
-                // b.boardUpdated(true, b.getGame().getActivePos(),
-                // b.getGame().getPositions().get(b.getGame().getPositions().size() - 1));
-
-            } catch (Exception e) {
-
-            }
-
-            if (cPos == b.getGame().getCurrentPos()) {
-                GUIPiece pc = b.getGUIPieceAtSquare(
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY()));
-                if (pc != null) {
-                    b.setActive(pc);
-                } else {
-                    b.setActive(null);
-                }
-                b.setDragging(null);
-                b.boardUpdated(false, null, null);
+                setPieceSquare(piece.getSquare());
 
             }
 
         } else {
-            b.boardUpdated(false, null, null);
+            setPieceSquare(piece.getSquare());
         }
 
     }

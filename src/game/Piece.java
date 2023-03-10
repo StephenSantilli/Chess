@@ -129,7 +129,7 @@ abstract public class Piece {
      * 
      * @param distance         The number of squares the piece may move. If there is
      *                         no limit, enter 0 or 8.
-     * @param b                The current {@link Board} the piece is on.
+     * @param p                The current {@link Position} the piece is on.
      * @param includeBackwards Should backwards moves be included? (e.g. not for
      *                         pawns)
      * @return A list of valid vertical moves for the piece. Does not account for
@@ -219,7 +219,7 @@ abstract public class Piece {
      * 
      * @param distance The number of squares the piece may move. If there is
      *                 no limit, enter 0 or 8.
-     * @param b        The current {@link Board} the piece is on.
+     * @param p        The current {@link Position} the piece is on.
      * @return A list of valid horizontal moves for the piece. Does not account for
      *         check, but
      *         does account for capturing/pieces in the way.
@@ -306,7 +306,7 @@ abstract public class Piece {
      * 
      * @param distance The number of squares the piece may move. If there is
      *                 no limit, enter 0 or 8.
-     * @param b        The current {@link Board} the piece is on.
+     * @param p        The current {@link Position} the piece is on.
      * @return A list of valid diagonal moves for the piece. Does not account for
      *         check, but
      *         does account for capturing/pieces in the way.

@@ -82,7 +82,7 @@ public class Square {
     /**
      * Sets the rank (row) of the square.
      * 
-     * @param file The numeric rank to set the square to.
+     * @param rank The numeric rank to set the square to.
      */
     public void setRank(int rank) {
         this.rank = rank;

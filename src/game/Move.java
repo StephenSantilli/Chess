@@ -111,8 +111,6 @@ public class Move {
 
     public Move(Square origin, Square destination, Position pos) throws Exception {
 
-
-
         this.origin = origin;
         this.destination = destination;
 
@@ -126,7 +124,6 @@ public class Move {
         if (originPiece == null)
             throw new Exception("There is no piece at that square.");
 
-        
         this.white = originPiece.isWhite();
         this.pieceType = originPiece.getCode();
         this.enPassant = checkIfEnPassant(pos);
@@ -136,8 +133,6 @@ public class Move {
 
         this.piece = originPiece;
         this.capturePiece = pos.getPieceAtSquare(getCaptureSquare());
-
-
 
     }
 
@@ -186,6 +181,10 @@ public class Move {
         int modFile = -1;
         int modRank = -1;
 
+        boolean sameFile = false;
+        boolean sameRank = false;
+        boolean other = false;
+
         for (int i = 0; i < attackers.size() && (modFile == -1 || modRank == -1); i++) {
 
             Piece a = attackers.get(i);
@@ -193,18 +192,27 @@ public class Move {
             if (a.getCode() != pieceType || a.getSquare().equals(origin))
                 continue;
 
-            if (a.getSquare().getFile() == origin.getFile()) {
-
-                modRank = origin.getRank();
-
+            if(a.getSquare().getFile() == origin.getFile()) {
+                sameFile = true;
             }
-
             if (a.getSquare().getRank() == origin.getRank()) {
-
-                modFile = origin.getFile();
-
+                sameRank = true;
             }
 
+            other = true;
+
+        }
+
+        if(sameRank) {
+            modFile = origin.getFile();
+        }
+
+        if(sameFile) {
+            modRank = origin.getRank();
+        }
+
+        if(modRank == -1 && modFile == -1 && other) {
+            modFile = origin.getFile();
         }
 
         String modifier = "";

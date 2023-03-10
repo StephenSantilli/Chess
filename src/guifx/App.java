@@ -21,8 +21,6 @@ public class App extends Application {
         VBox vb = new VBox();
 
         HBox hb = new HBox();
-
-        
         
         Scene s = new Scene(vb);
         s.setFill(Color.TRANSPARENT);
@@ -59,15 +57,19 @@ public class App extends Application {
             vb.getChildren().add(menu);
             vb.getChildren().add(hb);
 
+            stage.show();
+            stage.sizeToScene();
+
+            b.drawPieces(false, null, null);
+
+            stage.setMinHeight(stage.getHeight());
+            stage.setMinWidth(stage.getWidth());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        stage.show();
-        stage.sizeToScene();
 
-        stage.setMinHeight(stage.getHeight());
-        stage.setMinWidth(stage.getWidth());
 
 
         // gr.fillRect(50, 50, 100, 100);

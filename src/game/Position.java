@@ -53,10 +53,24 @@ public class Position {
     private Position redo;
 
     /**
+     * The promote type of the redo. May be {@code null} if there is no position to
+     * redo.
+     */
+    private char redoPromote;
+
+    /**
      * @return The {@link Position} that was previously after this {@link Position}.
      */
     public Position getRedo() {
         return redo;
+    }
+
+    public char getRedoPromote() {
+        return redoPromote;
+    }
+
+    public void setRedoPromote(char redoPromote) {
+        this.redoPromote = redoPromote;
     }
 
     /**
@@ -258,33 +272,38 @@ public class Position {
 
         }
 
-/*         if (checkForMate && move.getPromoteType() == '?') {
-
-            char promoRes = game.firePromptForPromote(move);
-
-            if (promoRes == 'Q' || promoRes == 'R' || promoRes == 'B' || promoRes == 'N') {
-                move.setPromoteType(promoRes);
-
-                Square mps = movePiece.getSquare();
-
-                switch (promoRes) {
-                    case 'Q':
-                        setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
-                        break;
-                    case 'R':
-                        setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
-                        break;
-                    case 'B':
-                        setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
-                        break;
-                    case 'N':
-                        setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
-                        break;
-                }
-
-            }
-
-        } */
+        /*
+         * if (checkForMate && move.getPromoteType() == '?') {
+         * 
+         * char promoRes = game.firePromptForPromote(move);
+         * 
+         * if (promoRes == 'Q' || promoRes == 'R' || promoRes == 'B' || promoRes == 'N')
+         * {
+         * move.setPromoteType(promoRes);
+         * 
+         * Square mps = movePiece.getSquare();
+         * 
+         * switch (promoRes) {
+         * case 'Q':
+         * setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+         * break;
+         * case 'R':
+         * setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+         * break;
+         * case 'B':
+         * setSquare(mps, new Bishop(mps.getFile(), mps.getRank(),
+         * movePiece.isWhite()));
+         * break;
+         * case 'N':
+         * setSquare(mps, new Knight(mps.getFile(), mps.getRank(),
+         * movePiece.isWhite()));
+         * break;
+         * }
+         * 
+         * }
+         * 
+         * }
+         */
 
         initMoves(checkForMate, game);
 
@@ -312,11 +331,16 @@ public class Position {
             case 'N':
                 setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
                 break;
+            case '?':
+                setSquare(mps, movePiece);
+                break;
         }
 
-        initMoves(true, game);
-        move.setText(game.getPositions().get(game.getCurrentPos() - 1));
+        if (!move.getPiece().equals(getPieceAtSquare(mps))) {
 
+            initMoves(true, game);
+            move.setText(game.getPositions().get(game.getCurrentPos() - 1));
+        }
 
     }
 
@@ -354,7 +378,6 @@ public class Position {
             }
 
         }
-
 
         ArrayList<Piece> ownPieces = getPiecesByAttacking(white ? whiteKing : blackKing);
         if (ownPieces.size() >= 1)
@@ -492,30 +515,6 @@ public class Position {
         }
 
     }
-
-    /**
-     * Finds the first occurance of a piece at the given square.
-     * 
-     * @param s The square to search for a piece at
-     * @return The index of the piece in the {@link #pieces} array. Will be
-     *         {@code -1} if
-     *         no piece is at the square.
-     */
-    /*
-     * public int findPiece(Square s) {
-     * 
-     * int found = -1;
-     * for (int i = 0; i < pieces.size() && found <= -1; i++) {
-     * 
-     * if (pieces.get(i).getSquare().equals(s))
-     * found = i;
-     * 
-     * }
-     * 
-     * return found;
-     * 
-     * }
-     */
 
     public void setSquare(Square s, Piece p) {
 

@@ -130,7 +130,7 @@ public class Board extends StackPane implements BoardMoveListener {
         getChildren().add(piecePane);
 
         initPieceTranscoders();
-        drawPieces(false, null, null);
+        // drawPieces(false, null, null);
 
         setOnMouseMoved(e -> {
             setMouseType(e.getSceneX(), e.getSceneY());
@@ -147,6 +147,11 @@ public class Board extends StackPane implements BoardMoveListener {
                     found.onMouseReleased(e);
                 else if (active != null) {
                     active.onMouseReleased(e);
+                } else {
+                    setActive(null);
+                    setDragging(null);
+                    updateActive();
+                    clearBorder();
                 }
 
             }
@@ -160,13 +165,16 @@ public class Board extends StackPane implements BoardMoveListener {
 
                 dragging.onMouseDragged(e);
 
-            } else {
-
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY()));
-                if (found != null)
-                    found.onMouseDragged(e);
-
-            }
+            } /*
+               * else {
+               * 
+               * GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(),
+               * (int) e.getSceneY()));
+               * if (found != null)
+               * found.onMouseDragged(e);
+               * 
+               * }
+               */
             setMouseType(e.getSceneX(), e.getSceneY());
 
         });
@@ -182,6 +190,8 @@ public class Board extends StackPane implements BoardMoveListener {
                 GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY()));
                 if (found != null)
                     found.onMousePressed(e);
+                else if (active != null)
+                    active.onMousePressed(e);
 
             }
             setMouseType(e.getSceneX(), e.getSceneY());
@@ -376,7 +386,7 @@ public class Board extends StackPane implements BoardMoveListener {
         t.play();
     }
 
-    private void drawPieces(boolean animate, Position p1, Position p2) {
+    void drawPieces(boolean animate, Position p1, Position p2) {
         drawPieces(animate, p1, p2, false);
     }
 
@@ -500,9 +510,11 @@ public class Board extends StackPane implements BoardMoveListener {
 
             try {
 
-                PromoteDialog pD = new PromoteDialog(game, pieceSize);
-                pD.setOnCloseRequest(e -> {
-                    if(pD.getResult() == 'X') {
+                PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getActivePos().isWhite(),
+                        getScene().getWindow());
+                pD.setOnHidden(e -> {
+
+                    if (pD.getResult() == 'X') {
                         game.undoMove();
                     } else {
                         game.setPromo(pD.getResult());
@@ -513,7 +525,13 @@ public class Board extends StackPane implements BoardMoveListener {
                 });
 
                 pD.show();
-                pD.getDialogPane().getScene().getWindow().sizeToScene();
+                pD.sizeToScene();
+                
+                Bounds bds = localToScreen(getBoundsInLocal());
+                pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
+                pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination()) - (!game.getActivePos().isWhite() ? -squareSize : pD.getHeight()));
+                
+
 
             } catch (Exception e) {
                 e.printStackTrace();
