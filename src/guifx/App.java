@@ -13,6 +13,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import java.awt.Taskbar;
+import java.awt.Toolkit;
+
 public class App extends Application {
 
     public void onResize() {
@@ -27,9 +30,10 @@ public class App extends Application {
         VBox vb = new VBox();
 
         HBox hb = new HBox();
-        
+
         Scene s = new Scene(vb);
         s.setFill(Color.TRANSPARENT);
+
         stage.setTitle("Chess");
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));
@@ -37,13 +41,24 @@ public class App extends Application {
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_48x48.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_256x256.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_512x512.png").toString()));
+
+        if (Taskbar.isTaskbarSupported()) {
+            Taskbar taskbar = Taskbar.getTaskbar();
+            try {
+                taskbar.setIconImage(Toolkit.getDefaultToolkit()
+                        .getImage(getClass().getResource("/img/icon_512x512.png").toString()));
+            } catch (Exception e) {
+
+            }
+        }
+
         stage.setScene(s);
 
         try {
 
             Board b = new Board(800, 800);
             hb.getChildren().add(b);
-            
+
             ScrollPane sp = b.getSp();
 
             sp.setHbarPolicy(ScrollBarPolicy.NEVER);
@@ -81,14 +96,9 @@ public class App extends Application {
             e.printStackTrace();
         }
 
-
-
-
         // gr.fillRect(50, 50, 100, 100);
 
     }
-    
-
 
     public static void main(String[] args) {
 
