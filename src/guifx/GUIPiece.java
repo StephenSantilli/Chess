@@ -131,7 +131,7 @@ public class GUIPiece {
             setPieceY(ev.getSceneY());
 
             b.clearBorder();
-            b.drawBorder(b.getXBySquare(getPiece().getSquare()), b.getYBySquare(getPiece().getSquare()));
+            b.drawBorder(b.getXBySquare(getPiece().getSquare(), true), b.getYBySquare(getPiece().getSquare(), true));
 
         } else {
 
@@ -157,7 +157,7 @@ public class GUIPiece {
         setPieceY(ev.getSceneY());
 
         b.clearBorder();
-        Square hoverSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY());
+        Square hoverSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY(), true);
         b.drawBorder(b.getXBySquare(hoverSquare), b.getYBySquare(hoverSquare));
 
     }

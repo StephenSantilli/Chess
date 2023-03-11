@@ -27,6 +27,10 @@ public class Game {
      */
     private int result;
 
+    public int getResult() {
+        return result;
+    }
+
     /**
      * <p>
      * The reason for the result of the game.
@@ -43,6 +47,10 @@ public class Game {
      * <li>9 - Fifty-move rule
      */
     private int resultReason;
+
+    public int getResultReason() {
+        return resultReason;
+    }
 
     /**
      * The time, in milliseconds, each side has in total. Should be {@code -1} if no
@@ -168,9 +176,9 @@ public class Game {
         long currentTime = System.currentTimeMillis();
         if (getPreviousPos() != null && setTimer) {
             if (getPreviousPos().isWhite()) {
-                whiteTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) + (timePerMove);
+                whiteTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) - (timePerMove);
             } else {
-                blackTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) + (timePerMove);
+                blackTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) - (timePerMove);
             }
             getPreviousPos().setTimerEnd(white ? whiteTimer : blackTimer);
         }

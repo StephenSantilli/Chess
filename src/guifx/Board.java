@@ -108,7 +108,7 @@ public class Board extends VBox implements BoardMoveListener {
 
     public Board(int width, int height) throws Exception {
 
-        this.game = new Game(10 * 60, 0);
+        this.game = new Game(10 * 60, 10);
         game.addMoveListener(this);
 
         this.wTimer = new GUITimer(getGame(), true);
@@ -270,7 +270,7 @@ public class Board extends VBox implements BoardMoveListener {
         gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
                 movesPane.getLayoutBounds().getHeight());
 
-        if (active == null || game.getCurrentPos() != game.getPositions().size() - 1)
+        if (active == null || game.getCurrentPos() != game.getPositions().size() - 1 || game.getResult() > 0)
             return;
 
         ArrayList<Move> pMoves = game.getActivePos().getPieceMoves(active.getPiece());
@@ -490,11 +490,12 @@ public class Board extends VBox implements BoardMoveListener {
         // int relativeY = (int) b.getMinY();
 
         if (x < 0 || x > squareSize * 8 || y < 0 || y > squareSize * 8)
-            return new Square(9, 9);
+            return new Square(-1, -1);
 
         return new Square(((((int) x) / squareSize) + 1),
                 8 - ((int) y / squareSize));
-
+        // r * squareSize + ((squareSize - pieceSize) / 2.0)
+        // 700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0)
     }
 
     public int getXBySquare(Square sq) {
@@ -523,7 +524,7 @@ public class Board extends VBox implements BoardMoveListener {
             rel = (int) bds.getMinY();
         }
 
-        return (squareSize * 7) - ((sq.getRank() - 1) * squareSize) - rel;
+        return (7 - sq.getRank()) * squareSize - rel;
 
     }
 
