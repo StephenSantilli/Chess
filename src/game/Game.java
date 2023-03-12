@@ -314,9 +314,15 @@ public class Game {
         else {
             if (whiteTimer <= 0)
                 return 0;
-            else
-                return whiteTimer
+            else {
+                long time = whiteTimer
                         - (System.currentTimeMillis() - positions.get(positions.size() - 1).getSystemTimeStart());
+
+                if (time <= 0)
+                    return 0;
+
+                return time;
+            }
         }
     }
 
@@ -329,9 +335,15 @@ public class Game {
         else {
             if (blackTimer <= 0)
                 return 0;
-            else
-                return blackTimer
+            else {
+                long time = blackTimer
                         - (System.currentTimeMillis() - positions.get(positions.size() - 1).getSystemTimeStart());
+
+                if (time <= 0)
+                    return 0;
+
+                return time;
+            }
         }
     }
 

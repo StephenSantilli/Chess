@@ -8,7 +8,7 @@ import game.Move;
 import game.Piece;
 import game.Position;
 import game.Square;
-
+import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -69,6 +69,8 @@ public class Board extends VBox implements BoardMoveListener {
     private boolean flipped;
     private boolean white;
 
+    private ArrayList<TranslateTransition> transitions;
+
     public EventHandler<KeyEvent> keyHandler = new EventHandler<KeyEvent>() {
 
         @Override
@@ -119,6 +121,8 @@ public class Board extends VBox implements BoardMoveListener {
 
         this.white = true;
         this.flipped = !white;
+
+        this.transitions = new ArrayList<TranslateTransition>();
 
         this.topTimer = new GUITimer(getGame(), !flipped);
         this.bottomTimer = new GUITimer(getGame(), flipped);
@@ -291,11 +295,12 @@ public class Board extends VBox implements BoardMoveListener {
         ArrayList<Move> pMoves = game.getActivePos().getPieceMoves(active.getPiece());
 
         gc.setFill(ATTACK_INDICATOR_COLOR);
+        gc.setStroke(ATTACK_INDICATOR_COLOR);
+        gc.setLineWidth(squareSize * 0.04);
         for (Move m : pMoves) {
 
             if (m.isCapture() && m.getCaptureSquare().equals(m.getDestination())) {
-                gc.setStroke(ATTACK_INDICATOR_COLOR);
-                gc.setLineWidth(squareSize * 0.04);
+
                 gc.strokeOval(getXBySquare(m.getDestination()) + (squareSize * 0.05),
                         getYBySquare(m.getDestination()) + (squareSize * 0.05),
                         squareSize - (squareSize * .1),
@@ -384,7 +389,7 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    private void pieceMoveAnimation(GUIPiece gp, Square origin, Square destination, Piece cp) {
+    private void pieceMoveAnimation(GUIPiece gp, Square origin, Square destination, Piece capture) {
 
         ImageView img = gp.getImage();
 
@@ -400,16 +405,16 @@ public class Board extends VBox implements BoardMoveListener {
         t.setToX(0);
         t.setToY(0);
 
-        if (cp != null) {
+        if (capture != null) {
 
-            ImageView i = getPieceTranscoder(cp).getImageView();
+            ImageView i = getPieceTranscoder(capture).getImageView();
 
             piecePane.getChildren().add(i);
 
-            GUIPiece guiP = new GUIPiece(cp, i, this, stack);
+            GUIPiece guiP = new GUIPiece(capture, i, this, stack);
 
-            i.setLayoutX(getXBySquare(cp.getSquare()) + ((squareSize - pieceSize) / 2.0));
-            i.setLayoutY(((getYBySquare(cp.getSquare()))) + ((squareSize - pieceSize) / 2.0));
+            i.setLayoutX(getXBySquare(capture.getSquare()) + ((squareSize - pieceSize) / 2.0));
+            i.setLayoutY(((getYBySquare(capture.getSquare()))) + ((squareSize - pieceSize) / 2.0));
 
             t.getNode().toFront();
 
@@ -421,7 +426,7 @@ public class Board extends VBox implements BoardMoveListener {
 
         }
 
-        t.play();
+        transitions.add(t);
     }
 
     void drawPieces(boolean animate, Position p1, Position p2) {
@@ -443,7 +448,8 @@ public class Board extends VBox implements BoardMoveListener {
 
         this.pieces = new ArrayList<GUIPiece>();
         piecePane.getChildren().clear();
-
+        transitions = new ArrayList<TranslateTransition>();
+        
         if (p2 == null)
             p2 = game.getActivePos();
 
@@ -466,22 +472,45 @@ public class Board extends VBox implements BoardMoveListener {
                 img.setLayoutY(getYBySquare(p.getSquare()) + ((squareSize - pieceSize) / 2.0));
 
                 if (animate && p1 != null && p2 != null
-                        //Either not backwards and the piece in the move of p2 is this piece
+                // Either not backwards and the piece in the move of p2 is this piece
                         && ((!backward && p2.getMove().getDestination().equals(p.getSquare()))
-                        //Or it is backwards and the piece in the move of p1 is this piece
-                                || (backward && p1.getMove().getOrigin().equals(p.getSquare())))) {
+                                // Or it is backwards and the piece in the move of p1 is this piece
+                                || (backward && p1.getMove().getOrigin().equals(p.getSquare()))
+                                || (!backward && p2.getMove().isCastle()
+                                        && p2.getMove().getRookDestination().equals(p.getSquare()))
+                                || (backward && p1.getMove().isCastle()
+                                        && p1.getMove().getRookOrigin().equals(p.getSquare())))) {
 
                     if (!backward) {
-                        pieceMoveAnimation(guiP, p2.getMove().getOrigin(), p2.getMove().getDestination(),
-                                p2.getMove().getCapturePiece());
+
+                        if (p2.getMove().isCastle() && p2.getMove().getRookDestination().equals(p.getSquare())) {
+
+                            pieceMoveAnimation(guiP, p2.getMove().getRookOrigin(),
+                                    p2.getMove().getRookDestination(),
+                                    null);
+
+                        } else
+                            pieceMoveAnimation(guiP, p2.getMove().getOrigin(), p2.getMove().getDestination(),
+                                    p2.getMove().getCapturePiece());
+
                     } else {
-                        pieceMoveAnimation(guiP, p1.getMove().getDestination(), p1.getMove().getOrigin(),
-                                p1.getMove().getCapturePiece());
+
+                        if (p1.getMove().isCastle() && p1.getMove().getRookOrigin().equals(p.getSquare())) {
+                            pieceMoveAnimation(guiP, p1.getMove().getRookDestination(), p1.getMove().getRookOrigin(),
+                                    null);
+                        } else
+                            pieceMoveAnimation(guiP, p1.getMove().getDestination(), p1.getMove().getOrigin(),
+                                    p1.getMove().getCapturePiece());
+
                     }
 
                 }
 
             }
+        }
+
+        for(TranslateTransition t : transitions) {
+            t.play();
         }
 
     }

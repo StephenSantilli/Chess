@@ -192,7 +192,7 @@ public class Move {
             if (a.getCode() != pieceType || a.getSquare().equals(origin))
                 continue;
 
-            if(a.getSquare().getFile() == origin.getFile()) {
+            if (a.getSquare().getFile() == origin.getFile()) {
                 sameFile = true;
             }
             if (a.getSquare().getRank() == origin.getRank()) {
@@ -203,15 +203,15 @@ public class Move {
 
         }
 
-        if(sameRank) {
+        if (sameRank) {
             modFile = origin.getFile();
         }
 
-        if(sameFile) {
+        if (sameFile) {
             modRank = origin.getRank();
         }
 
-        if(modRank == -1 && modFile == -1 && other) {
+        if (modRank == -1 && modFile == -1 && other) {
             modFile = origin.getFile();
         }
 
@@ -306,7 +306,7 @@ public class Move {
 
     }
 
-    public Square getRookLocation() {
+    public Square getRookOrigin() {
 
         if (!castle)
             return null;
@@ -320,9 +320,21 @@ public class Move {
 
     }
 
-    private boolean checkIfCastle(Position pos) throws Exception {
+    public Square getRookDestination() {
 
-        //TODO: NO CASTLING OUT OF CHECK OR THROUGH CHECK OR INTO CHECK
+        if (!castle)
+            return null;
+
+        boolean kingSide = destination.getFile() == 7;
+
+        int file = kingSide ? 6 : 4;
+        int rank = white ? 1 : 8;
+
+        return new Square(file, rank);
+
+    }
+
+    private boolean checkIfCastle(Position pos) throws Exception {
 
         if (pieceType != 'K' || getMoveDistance() == 1)
             return false;
@@ -344,6 +356,11 @@ public class Move {
 
         if (rook == null || rook.hasMoved())
             throw new Exception("Rook already moved, cannot castle.");
+
+        this.rook = rook;
+        
+        if (pos.isInCheck())
+            throw new Exception("Cannot castle out of check.");
 
         return true;
 

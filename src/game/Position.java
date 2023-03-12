@@ -282,7 +282,7 @@ public class Position {
                 whiteKing = move.getDestination();
             else
                 blackKing = move.getDestination();
-            
+
         }
 
         Square destSq = move.getDestination();
@@ -293,7 +293,7 @@ public class Position {
 
         if (move.isCastle()) {
 
-            Piece rook = getPieceAtSquare(move.getRookLocation());
+            Piece rook = getPieceAtSquare(move.getRookOrigin());
             rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
 
         }
@@ -350,6 +350,8 @@ public class Position {
 
         this.moves = new ArrayList<Move>();
 
+        ArrayList<Move> castleMoves = new ArrayList<Move>();
+
         for (int r = 0; r < pcs.length; r++) {
 
             for (int c = 0; c < pcs[r].length; c++) {
@@ -358,7 +360,23 @@ public class Position {
                     continue;
 
                 ArrayList<Move> pMoves = p.getMoves(this);
-                moves.addAll(pMoves);
+
+                if (p.getCode() != 'K' || p.hasMoved() == true) {
+
+                    moves.addAll(pMoves);
+
+                } else {
+
+                    for (Move m : pMoves) {
+
+                        if (m.isCastle())
+                            castleMoves.add(m);
+                        else
+                            moves.add(m);
+
+                    }
+
+                }
 
             }
 
@@ -374,8 +392,22 @@ public class Position {
 
         if (checkForMate) {
             setCheckMate(g);
-        }
 
+            for (Move c : castleMoves) {
+
+                if ((c.getRookOrigin().getFile() == 1
+                        && canPieceMoveToSquare(c.getPiece(), new Square(4, c.getOrigin().getRank())))
+                        || (c.getRookOrigin().getFile() == 8
+                                && canPieceMoveToSquare(c.getPiece(), new Square(6, c.getOrigin().getRank())))) {
+
+                    Position test = new Position(this, c, g, !c.isWhite(), false);
+                    if (!test.isGivingCheck())
+                        moves.add(c);
+
+                }
+
+            }
+        }
     }
 
     /**
