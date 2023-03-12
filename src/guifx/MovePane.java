@@ -238,15 +238,24 @@ public class MovePane extends GridPane implements BoardMoveListener {
     }
 
     @Override
-    public void timerChange(boolean white) {
+    public void gameOver() {
         // TODO Auto-generated method stub
-
     }
 
     @Override
-    public void flagfall(boolean white) {
+    public void timerChange() {
         // TODO Auto-generated method stub
-
     }
+
+    @Override
+    public void pauseGame() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void resumeGame() {
+        // TODO Auto-generated method stub
+    }
+
 
 }

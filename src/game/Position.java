@@ -61,8 +61,6 @@ public class Position {
      */
     private long systemTimeStart;
 
-
-
     /**
      * The amount of time on the timer at the end of this position.
      */
@@ -263,7 +261,6 @@ public class Position {
                 }
 
                 if (piece != null) {
-                    // pieces.add(piece);
                     pcs[old.getSquare().getRank() - 1][old.getSquare().getFile() - 1] = piece;
                 }
             }
@@ -273,21 +270,19 @@ public class Position {
 
             Square capSquare = move.getCaptureSquare();
             pcs[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
-            // int capIndex = findPiece(move.getCaptureSquare());
-            // pieces.remove(capIndex);
 
         }
 
-        // int movePIndex = findPiece(move.getOrigin());
-        // Piece movePiece = pieces.get(movePIndex);
         Square movePieceSq = move.getOrigin();
         Piece movePiece = pcs[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1];
 
         if (movePiece.getCode() == 'K') {
+
             if (movePiece.isWhite())
                 whiteKing = move.getDestination();
             else
                 blackKing = move.getDestination();
+            
         }
 
         Square destSq = move.getDestination();
@@ -303,14 +298,17 @@ public class Position {
 
         }
 
-        initMoves(checkForMate, game);
-
         move.setText(prev);
         this.move = move;
+
+        initMoves(checkForMate, game);
 
     }
 
     public void setPromoType(char promo, Game game) {
+
+        if (promo == '0')
+            return;
 
         Piece movePiece = move.getPiece();
         move.setPromoteType(promo);
@@ -420,7 +418,8 @@ public class Position {
     }
 
     /**
-     * Sets whether or not the position is check mate. (The color whose turn it is isn't able to make any moves and is in check.)
+     * Sets whether or not the position is check mate. (The color whose turn it is
+     * isn't able to make any moves and is in check.)
      * 
      * @param g The game to check.
      */

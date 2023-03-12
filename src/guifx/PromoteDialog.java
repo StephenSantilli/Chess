@@ -30,7 +30,7 @@ public class PromoteDialog extends Stage {
         return result;
     }
 
-    public PromoteDialog(int pieceSize, int squareSize, boolean white, Window owner) throws Exception {
+    public PromoteDialog(int pieceSize, int squareSize, boolean white, boolean flipped, Window owner) throws Exception {
 
         initStyle(StageStyle.UNDECORATED);
         this.result = 'X';
@@ -128,7 +128,7 @@ public class PromoteDialog extends Stage {
         // knight.setLayoutY(y);
         // bishop.setLayoutY(y);
 
-        if (white)
+        if ((white && !flipped) || (!white && flipped))
             tileP.getChildren().addAll(undo, q, r, b, n);
         else
             tileP.getChildren().addAll(n, b, r, q, undo);

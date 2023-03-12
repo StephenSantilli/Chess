@@ -2,9 +2,13 @@ package PGNParser;
 
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import game.Game;
+import game.Position;
 
 /**
  * Class to parse a .pgn file following this specification:
@@ -218,25 +222,80 @@ public class PGNParser {
 
     }
 
-    public String outputPGN() {
+    public static String millisToOutputFormat(long time) {
 
-        String str = "";
+        long hours = (time / 1000 / 60 / 60);
+        long minutes = (time / 1000 / 60 % 60);
+        long seconds = (time / 1000 / 60 % 60 % 60);
 
-        str += "[Event \"" + event + "\"]\n";
-        str += "[Site \"" + site + "\"]\n";
-        str += "[Date \"" + date + "\"]\n";
-        str += "[Round \"" + round + "\"]\n";
-        str += "[White \"" + white + "\"]\n";
-        str += "[Black \"" + black + "\"]\n";
-        str += "[Result \"" + result + "\"]\n";
+        String s = "";
 
-        for (int i = 0; i + 1 < extraTags.size(); i++) {
+        s += hours + ":";
+        
+        if(minutes < 10) {
+            s += "0";
+        }
+        s += minutes + ":";
 
-            str += "[" + extraTags.get(i) + " \"" + extraTags.get(++i) + "\"]\n";
+        if (seconds < 10) {
+            s += "0";
+        }
+        s += seconds;
+
+        return s;
+
+    }
+
+    public PGNParser(Game game, Map<String, String> tags) throws Exception {
+
+        text = "";
+        extraTags = new ArrayList<String>();
+        moves = new ArrayList<String>();
+        parsedMoves = new ArrayList<PGNMove>();
+
+        // TODO: ADD SUPPORT FOR TAGS
+
+        for (int i = 1; i < game.getPositions().size(); i++) {
+
+            Position p = game.getPositions().get(i);
+
+            String comment = null;
+
+            if(game.getTimePerSide() > 0 && p.getTimerEnd() > 0) {
+                comment = "{[%clk " + millisToOutputFormat(p.getTimerEnd()) + "]}";
+            }
+
+            parsedMoves.add(new PGNMove(p.getMoveString(), comment, null, null, null));
 
         }
 
-        str += "\n";
+    }
+
+    public String outputPGN() {
+        return outputPGN(true);
+    }
+
+    public String outputPGN(boolean includeTags) {
+
+        String str = "";
+
+        if(includeTags) {
+            str += "[Event \"" + event + "\"]\n";
+            str += "[Site \"" + site + "\"]\n";
+            str += "[Date \"" + date + "\"]\n";
+            str += "[Round \"" + round + "\"]\n";
+            str += "[White \"" + white + "\"]\n";
+            str += "[Black \"" + black + "\"]\n";
+            str += "[Result \"" + result + "\"]\n";
+
+            for (int i = 0; i + 1 < extraTags.size(); i++) {
+
+                str += "[" + extraTags.get(i) + " \"" + extraTags.get(++i) + "\"]\n";
+
+            }
+
+            str += "\n";
+        }
 
         String moveList = "";
         for (int i = 0; i < parsedMoves.size(); i++) {

@@ -10,7 +10,6 @@ import game.Position;
 import game.Square;
 
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
@@ -27,6 +26,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 public class Board extends VBox implements BoardMoveListener {
@@ -43,22 +43,31 @@ public class Board extends VBox implements BoardMoveListener {
 
     private Game game;
 
-    private VBox sqPane;
-    private Canvas sqModifierPane;
+    private StackPane stack;
+    private GUITimer topTimer;
+    private GUITimer bottomTimer;
+
+    private VBox squarePane;
+    private Canvas squareHighlightPane;
     private Canvas borderPane;
     private Pane piecePane;
     private Canvas movesPane;
 
-    private ArrayList<PieceTranscoder> transcoderPieces;
+    private MovePane movePane;
+    private ScrollPane scrollMovePane;
+
+    private BarMenu menuBar;
+    private GameMenu gameMenu;
+    private ViewMenu viewMenu;
 
     private ArrayList<GUIPiece> pieces;
-
-    private GUIPiece dragging;
+    private ArrayList<PieceTranscoder> transcoderPieces;
 
     private GUIPiece active;
+    private GUIPiece dragging;
 
-    private MovePane mp;
-    private ScrollPane sp;
+    private boolean flipped;
+    private boolean white;
 
     public EventHandler<KeyEvent> keyHandler = new EventHandler<KeyEvent>() {
 
@@ -97,64 +106,62 @@ public class Board extends VBox implements BoardMoveListener {
         }
 
     };
-    private GUITimer wTimer;
 
-    public GUITimer getwTimer() {
-        return wTimer;
-    }
-
-    private GUITimer bTimer;
-    private StackPane stack;
-
-    public Board(int width, int height) throws Exception {
+    public Board(int squareSize, BarMenu menuBar) throws Exception {
 
         this.game = new Game(10 * 60, 10);
         game.addMoveListener(this);
 
-        this.wTimer = new GUITimer(getGame(), true);
-        this.bTimer = new GUITimer(getGame(), false);
-        this.game = getGame();
-        HBox wtBox = new HBox(wTimer);
-        wtBox.setAlignment(Pos.CENTER_RIGHT);
-        HBox btBox = new HBox(bTimer);
-        btBox.setAlignment(Pos.CENTER_RIGHT);
+        this.squareSize = squareSize;
+
+        this.menuBar = menuBar;
+        initMenus();
+
+        this.white = true;
+        this.flipped = !white;
+
+        this.topTimer = new GUITimer(getGame(), !flipped);
+        this.bottomTimer = new GUITimer(getGame(), flipped);
+
+        HBox bottomTimerBox = new HBox(topTimer);
+        HBox topTimerBox = new HBox(bottomTimer);
+        bottomTimerBox.setAlignment(Pos.CENTER_RIGHT);
+        topTimerBox.setAlignment(Pos.CENTER_RIGHT);
 
         stack = new StackPane();
+        stack.setMaxWidth(squareSize * 8);
+        stack.setMaxHeight(squareSize * 8);
 
-        this.sp = new ScrollPane();
-        this.mp = new MovePane(game, sp);
-        mp.initMovePane();
-        sp.setContent(mp);
+        this.scrollMovePane = new ScrollPane();
+        scrollMovePane.setFitToWidth(true);
+        scrollMovePane.setMinWidth(220);
 
-        getGame().addMoveListener(getMp());
-        sp.setFitToWidth(true);
-        sp.setMinWidth(220);
+        this.movePane = new MovePane(game, scrollMovePane);
+        movePane.initMovePane();
+        game.addMoveListener(getMovePane());
 
+        scrollMovePane.setContent(movePane);
+
+        this.squarePane = new VBox();
         initSquares();
-        stack.getChildren().add(sqPane);
 
-        sqModifierPane = new Canvas(squareSize * 8, squareSize * 8);
-        drawModifierSq();
-        stack.getChildren().add(sqModifierPane);
+        squareHighlightPane = new Canvas(squareSize * 8, squareSize * 8);
+        drawHighlightSq();
 
         borderPane = new Canvas(squareSize * 8, squareSize * 8);
         clearBorder();
-        stack.getChildren().add(borderPane);
 
         movesPane = new Canvas(squareSize * 8, squareSize * 8);
-        stack.getChildren().add(movesPane);
         drawMovesPane();
 
         piecePane = new Pane();
-
-        stack.getChildren().add(piecePane);
-
         initPieceTranscoders();
-        // drawPieces(false, null, null);
 
-        getChildren().addAll(btBox, stack, wtBox);
+        stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
 
-        timerChange(true);
+        getChildren().addAll(topTimerBox, stack, bottomTimerBox);
+
+        timerChange();
 
         setOnMouseMoved(e -> {
             setMouseType(e.getSceneX(), e.getSceneY());
@@ -189,16 +196,8 @@ public class Board extends VBox implements BoardMoveListener {
 
                 dragging.onMouseDragged(e);
 
-            } /*
-               * else {
-               * 
-               * GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(),
-               * (int) e.getSceneY()));
-               * if (found != null)
-               * found.onMouseDragged(e);
-               * 
-               * }
-               */
+            }
+
             setMouseType(e.getSceneX(), e.getSceneY());
 
         });
@@ -224,6 +223,17 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
+    private void initMenus() {
+
+        viewMenu = new ViewMenu(this, game);
+        gameMenu = new GameMenu(this, game);
+
+        game.addMoveListener(gameMenu);
+
+        menuBar.getMenus().addAll(gameMenu, viewMenu);
+
+    }
+
     private void initPieceTranscoders() throws Exception {
 
         transcoderPieces = new ArrayList<PieceTranscoder>();
@@ -242,6 +252,11 @@ public class Board extends VBox implements BoardMoveListener {
 
         }
 
+    }
+
+    public void startGame(WindowEvent we) {
+        drawPieces(false, null, null);
+        game.startGame();
     }
 
     void clearBorder() {
@@ -294,12 +309,12 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    private void drawModifierSq() {
+    private void drawHighlightSq() {
 
-        GraphicsContext gc = sqModifierPane.getGraphicsContext2D();
+        GraphicsContext gc = squareHighlightPane.getGraphicsContext2D();
         gc.setFill(Color.TRANSPARENT);
-        gc.clearRect(0.0, 0.0, sqModifierPane.getLayoutBounds().getWidth(),
-                sqModifierPane.getLayoutBounds().getHeight());
+        gc.clearRect(0.0, 0.0, squareHighlightPane.getLayoutBounds().getWidth(),
+                squareHighlightPane.getLayoutBounds().getHeight());
 
         gc.setFill(SQUARE_PREV_MOVE);
         if (game.getCurrentPos() > 0) {
@@ -331,7 +346,6 @@ public class Board extends VBox implements BoardMoveListener {
     }
 
     private void initSquares() {
-        this.sqPane = new VBox();
 
         boolean dark = false;
         for (int r = 0; r < 8; r++) {
@@ -340,7 +354,7 @@ public class Board extends VBox implements BoardMoveListener {
 
             for (int c = 0; c < 8; c++, dark = !dark) {
 
-                Rectangle sq = new Rectangle(100, 100, dark ? SQUARE_DARK : SQUARE_LIGHT);
+                Rectangle sq = new Rectangle(squareSize, squareSize, dark ? SQUARE_DARK : SQUARE_LIGHT);
 
                 StackPane pane = new StackPane(sq);
 
@@ -349,7 +363,7 @@ public class Board extends VBox implements BoardMoveListener {
             }
             dark = !dark;
 
-            sqPane.getChildren().add(hbox);
+            squarePane.getChildren().add(hbox);
         }
 
     }
@@ -376,10 +390,10 @@ public class Board extends VBox implements BoardMoveListener {
 
         TranslateTransition t = new TranslateTransition(Duration.millis(100), img);
 
-        double fromX = (origin.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0);
-        double toX = (destination.getFile() - 1) * squareSize + ((squareSize - pieceSize) / 2.0);
-        double fromY = (700 - ((origin.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
-        double toY = (700 - ((destination.getRank() - 1) * squareSize) + ((squareSize - pieceSize) / 2.0));
+        double fromX = getXBySquare(origin) + ((squareSize - pieceSize) / 2.0);
+        double toX = getXBySquare(destination) + ((squareSize - pieceSize) / 2.0);
+        double fromY = getYBySquare(origin) + ((squareSize - pieceSize) / 2.0);
+        double toY = getYBySquare(destination) + ((squareSize - pieceSize) / 2.0);
 
         t.setFromX(fromX - toX);
         t.setFromY(fromY - toY);
@@ -414,35 +428,47 @@ public class Board extends VBox implements BoardMoveListener {
         drawPieces(animate, p1, p2, false);
     }
 
+    /**
+     * Clears the old pieces and draws new pieces on the board.
+     * 
+     * @param animate  Whether or not the move should be animated. Must be
+     *                 {@code false} if the positions are not back to back.
+     * @param p1       The position before the board was updated.
+     * @param p2       The position after the board was updated. If {@code null},
+     *                 the active position of the game will be used instead.
+     * @param backward {@code true} if {@code p2} is before {@code p1} (such as when
+     *                 undoing.)
+     */
     private void drawPieces(boolean animate, Position p1, Position p2, boolean backward) {
 
         this.pieces = new ArrayList<GUIPiece>();
         piecePane.getChildren().clear();
 
+        if (p2 == null)
+            p2 = game.getActivePos();
+
         for (int r = 0; r < 8; r++) {
 
             for (int c = 0; c < 8; c++) {
 
-                Piece p = null;
-                if (p2 != null)
-                    p = p2.getPieceAtSquare(new Square(r + 1, c + 1));
-                else
-                    p = game.getActivePos().getPieceAtSquare(new Square(r + 1, c + 1));
+                Piece p = p2.getPieceAtSquare(new Square(r + 1, c + 1));
 
                 if (p == null)
                     continue;
 
                 ImageView img = getPieceTranscoder(p).getImageView();
-
                 piecePane.getChildren().add(img);
 
                 GUIPiece guiP = new GUIPiece(p, img, this, stack);
                 pieces.add(guiP);
-                img.setLayoutX(r * squareSize + ((squareSize - pieceSize) / 2.0));
-                img.setLayoutY(700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0));
+
+                img.setLayoutX(getXBySquare(p.getSquare()) + ((squareSize - pieceSize) / 2.0));
+                img.setLayoutY(getYBySquare(p.getSquare()) + ((squareSize - pieceSize) / 2.0));
 
                 if (animate && p1 != null && p2 != null
+                        //Either not backwards and the piece in the move of p2 is this piece
                         && ((!backward && p2.getMove().getDestination().equals(p.getSquare()))
+                        //Or it is backwards and the piece in the move of p1 is this piece
                                 || (backward && p1.getMove().getOrigin().equals(p.getSquare())))) {
 
                     if (!backward) {
@@ -473,6 +499,13 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
+    public void flipBoard() {
+
+        flipped = !flipped;
+        boardUpdated();
+
+    }
+
     public Square getSquareByLoc(double x, double y) {
         return getSquareByLoc(x, y, false);
     }
@@ -485,17 +518,15 @@ public class Board extends VBox implements BoardMoveListener {
             y -= bds.getMinY();
         }
 
-        // Bounds b = localToScene(getBoundsInLocal());
-        // int relativeX = (int) b.getMinX();
-        // int relativeY = (int) b.getMinY();
-
         if (x < 0 || x > squareSize * 8 || y < 0 || y > squareSize * 8)
             return new Square(-1, -1);
 
-        return new Square(((((int) x) / squareSize) + 1),
-                8 - ((int) y / squareSize));
-        // r * squareSize + ((squareSize - pieceSize) / 2.0)
-        // 700 - (c * squareSize) + ((squareSize - pieceSize) / 2.0)
+        if (!flipped)
+            return new Square(((((int) x) / squareSize) + 1),
+                    8 - ((int) y / squareSize));
+        else
+            return new Square(8 - (((int) x) / squareSize), (int) y / squareSize + 1);
+
     }
 
     public int getXBySquare(Square sq) {
@@ -509,7 +540,10 @@ public class Board extends VBox implements BoardMoveListener {
             rel = (int) bds.getMinX();
         }
 
-        return (sq.getFile() - 1) * squareSize - rel;
+        if (!flipped)
+            return (int) (((sq.getFile() - 1) * squareSize)) - rel;
+        else
+            return (int) ((squareSize * 7) - ((sq.getFile() - 1) * squareSize)) - rel;
 
     }
 
@@ -524,7 +558,13 @@ public class Board extends VBox implements BoardMoveListener {
             rel = (int) bds.getMinY();
         }
 
-        return (7 - sq.getRank()) * squareSize - rel;
+        // img.setLayoutY((squareSize * 7) - (c * squareSize) + ((squareSize -
+        // pieceSize) / 2.0));
+        if (!flipped)
+            return (int) ((squareSize * 7) - ((sq.getRank() - 1) * squareSize)) - rel;
+        else
+            return (int) (((sq.getRank() - 1) * squareSize)) - rel;
+        // return (7 - sq.getRank()) * squareSize - rel;
 
     }
 
@@ -544,8 +584,11 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
+    /**
+     * Updates the square highlights and moves panes.
+     */
     public void updateActive() {
-        drawModifierSq();
+        drawHighlightSq();
         drawMovesPane();
     }
 
@@ -558,42 +601,61 @@ public class Board extends VBox implements BoardMoveListener {
     }
 
     public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
+
         updateActive();
+        viewMenu.boardUpdated();
+
         boolean ani = animate && dragging == null;
         dragging = null;
+
         drawPieces(ani, p1, p2, backward);
+
+        topTimer.setWhite(!flipped);
+        topTimer.update();
+
+        bottomTimer.setWhite(flipped);
+        bottomTimer.update();
+
         if (game.getActivePos().getMove() != null && game.getActivePos().getMove().getPromoteType() == '?') {
 
             try {
 
-                PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getActivePos().isWhite(),
-                        getScene().getWindow());
-
-                pD.setOnHidden(e -> {
-
-                    if (pD.getResult() == 'X') {
-                        game.undoMove();
-                    } else {
-                        game.setPromo(pD.getResult());
-                    }
-                    pD.hide();
-                    boardUpdated();
-
-                });
-
-                Bounds bds = stack.localToScreen(getBoundsInParent());
-                pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
-                pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination())
-                        - (!game.getActivePos().isWhite() ? -squareSize : squareSize * (4 + (1 / 3.0))));
-
-                pD.show();
-                pD.sizeToScene();
+                showPromoteDialog();
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
+    }
+
+    private void showPromoteDialog() throws Exception {
+
+        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getActivePos().isWhite(), flipped,
+                getScene().getWindow());
+
+        pD.setOnHidden(e -> {
+
+            if (pD.getResult() == 'X') {
+                game.undoMove();
+            } else {
+                game.setPromo(pD.getResult());
+            }
+            pD.hide();
+            boardUpdated();
+
+        });
+
+        Bounds bds = stack.localToScreen(getBoundsInParent());
+        pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
+        pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination())
+                - ((!game.getActivePos().isWhite() && !flipped) || (game.getActivePos().isWhite() && flipped)
+                        ? -squareSize
+                        : squareSize * (4 + (1 / 3.0))));
+
+        pD.show();
+        pD.sizeToScene();
+
     }
 
     public int getSquareSize() {
@@ -622,10 +684,12 @@ public class Board extends VBox implements BoardMoveListener {
 
         Position o = null;
         if (old > game.getPositions().size() - 1) {
-            o = game.getPositions().get(game.getPositions().size() - 1).getRedo();
+            if (game.getLastPos().getRedo() != null)
+                o = game.getLastPos().getRedo();
         } else {
             o = game.getPositions().get(old);
         }
+
         Position n = game.getPositions().get(curr);
 
         boardUpdated((int) Math.abs(old - curr) == 1, o, n, old >= curr);
@@ -637,11 +701,48 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
+    @Override
+    public void timerChange() {
+        topTimer.update();
+        bottomTimer.update();
+    }
+
+    @Override
+    public void gameOver() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void pauseGame() {
+        timerChange();
+    }
+
+    @Override
+    public void resumeGame() {
+        // TODO Auto-generated method stub
+    }
+
+    // Getters/Setters
+
     public int getPieceSize() {
         return pieceSize;
     }
 
-    // Getters/Setters
+    public BarMenu getMenuBar() {
+        return menuBar;
+    }
+
+    public boolean isWhite() {
+        return white;
+    }
+
+    public boolean isFlipped() {
+        return flipped;
+    }
+
+    public GUITimer getTopTimer() {
+        return topTimer;
+    }
 
     public Game getGame() {
         return game;
@@ -663,24 +764,12 @@ public class Board extends VBox implements BoardMoveListener {
         return active;
     }
 
-    public MovePane getMp() {
-        return mp;
+    public MovePane getMovePane() {
+        return movePane;
     }
 
-    public ScrollPane getSp() {
-        return sp;
-    }
-
-    @Override
-    public void timerChange(boolean white) {
-        wTimer.update();
-        bTimer.update();
-    }
-
-    @Override
-    public void flagfall(boolean white) {
-        // TODO Auto-generated method stub
-
+    public ScrollPane getScrollMovePane() {
+        return scrollMovePane;
     }
 
 }

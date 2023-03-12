@@ -322,11 +322,13 @@ public class Move {
 
     private boolean checkIfCastle(Position pos) throws Exception {
 
+        //TODO: NO CASTLING OUT OF CHECK OR THROUGH CHECK OR INTO CHECK
+
         if (pieceType != 'K' || getMoveDistance() == 1)
             return false;
 
         if (((white && destination.getRank() != 1) || (!white && destination.getRank() != 8))
-                || (destination.getFile() != 3 || destination.getFile() != 7))
+                || (destination.getFile() != 3 && destination.getFile() != 7))
             throw new Exception("Invalid castle location.");
 
         Piece king = pos.getPieceAtSquare(origin);

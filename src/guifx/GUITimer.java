@@ -15,6 +15,14 @@ public class GUITimer extends Label {
 
     private boolean white;
 
+    public boolean isWhite() {
+        return white;
+    }
+
+    public void setWhite(boolean white) {
+        this.white = white;
+    }
+
     private static final String ACTIVE_BACKGROUND = "#dddddd";
     private static final String INACTIVE_BACKGROUND = "#eeeeee";
 
@@ -46,13 +54,11 @@ public class GUITimer extends Label {
         this.tl = new Timeline();
         tl.setCycleCount(Timeline.INDEFINITE);
         tl.getKeyFrames().add(
-            new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent ev) {
-                    frame();
-                }
-            })
-        );
-        
+                new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent ev) {
+                        frame();
+                    }
+                }));
 
         setFont(new Font(getFont().getName(), 24));
 
@@ -71,15 +77,23 @@ public class GUITimer extends Label {
     }
 
     public void update() {
- 
+
         if (game.isWhiteTurn(true) == white) {
+
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
-            tl.play();
-        }
-        else {
+            if (!game.isPaused() && game.getResult() == 0)
+                tl.play();
+            else {
+                tl.pause();
+                frame();
+            }
+
+        } else {
+
             setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
             tl.pause();
             frame();
+            
         }
 
     }

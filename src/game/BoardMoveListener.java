@@ -14,12 +14,16 @@ public interface BoardMoveListener extends EventListener {
 
     public void posChanged(int old, int curr);
 
+    public void gameOver();
+
     /**
      * Event to signal the timer has switched sides.
      * @param white The side the clock is ticking down on.
      */
-    public void timerChange(boolean white);
+    public void timerChange();
 
-    public void flagfall(boolean white);
+    public void pauseGame();
+
+    public void resumeGame();
 
 }

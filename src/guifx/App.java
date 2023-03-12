@@ -2,7 +2,6 @@ package guifx;
 
 import game.Game;
 import javafx.application.*;
-import javafx.geometry.Pos;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.ScrollPane;
@@ -18,17 +17,10 @@ import java.awt.Toolkit;
 
 public class App extends Application {
 
-    public void onResize() {
-
-    }
-
-    private GUITimer wTimer, bTimer;
-    private Game game;
-
     @Override
     public void start(Stage stage) {
-        VBox vb = new VBox();
 
+        VBox vb = new VBox();
         HBox hb = new HBox();
 
         Scene s = new Scene(vb);
@@ -42,6 +34,7 @@ public class App extends Application {
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_256x256.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_512x512.png").toString()));
 
+        // Sets taskbar icon on Mac
         if (Taskbar.isTaskbarSupported()) {
             Taskbar taskbar = Taskbar.getTaskbar();
             try {
@@ -54,11 +47,14 @@ public class App extends Application {
         stage.setScene(s);
 
         try {
+            
+            BarMenu menu = new BarMenu(s.getWindow());
+            vb.getChildren().addAll(menu, hb);
 
-            Board b = new Board(800, 800);
+            Board b = new Board(100, menu);
             hb.getChildren().add(b);
 
-            ScrollPane sp = b.getSp();
+            ScrollPane sp = b.getScrollMovePane();
 
             sp.setHbarPolicy(ScrollBarPolicy.NEVER);
             sp.setVbarPolicy(ScrollBarPolicy.NEVER);
@@ -71,17 +67,22 @@ public class App extends Application {
             sp.setViewOrder(1);
 
             s.setOnKeyReleased(b.keyHandler);
-            // s.setOnKeyReleased(b.keyHandler);
 
-            BarMenu menu = new BarMenu(b.getGame(), s.getWindow());
-            b.getGame().addMoveListener(menu.getGameMenu());
 
-            vb.getChildren().addAll(menu, hb);
+            stage.setOnCloseRequest(e -> {
+
+                if (b.getGame().getResult() <= Game.RESULT_IN_PROGRESS) {
+                    b.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+                }
+
+                Platform.exit();
+
+            });
+
+            stage.setOnShown(b::startGame);
 
             stage.show();
             stage.sizeToScene();
-
-            b.drawPieces(false, null, null);
 
             stage.setMinHeight(stage.getHeight());
             stage.setMinWidth(stage.getWidth());
@@ -90,13 +91,12 @@ public class App extends Application {
             e.printStackTrace();
         }
 
-        // gr.fillRect(50, 50, 100, 100);
-
     }
 
     public static void main(String[] args) {
 
-        launch();
+        launch(args);
+        System.exit(0);
 
     }
 

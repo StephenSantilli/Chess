@@ -14,7 +14,8 @@ public class GUIPiece {
     private ImageView image;
     private Board b;
 
-    private Bounds bds;
+    private Bounds boardBounds;
+    private Bounds vBoxBounds;
 
     public Piece getPiece() {
         return piece;
@@ -30,36 +31,40 @@ public class GUIPiece {
         this.image = image;
         this.b = board;
 
-        this.bds = stack.localToScene(board.getBoundsInParent());
+        this.boardBounds = stack.localToScene(stack.getBoundsInLocal());
+        this.vBoxBounds = stack.localToScene(board.getBoundsInParent());
 
     }
 
     private void setPieceX(double x) {
 
-        int relative = (int) bds.getMinX();
+        int relative = (int) vBoxBounds.getMinX();
+        int offset = (int) boardBounds.getMinX();
 
         double ax = x - (b.getPieceSize() / 2.0) - relative;
 
-        if (x >= bds.getMinX() && x <= bds.getMaxX())
+        if (x >= boardBounds.getMinX() && x <= boardBounds.getMaxX())
             image.setLayoutX(ax);
-        else if (x < bds.getMinX()) {
-            image.setLayoutX(bds.getMinX() - (b.getPieceSize() / 2.0) - relative);
-        } else if (x > bds.getMaxX())
-            image.setLayoutX(bds.getMaxX() - (b.getPieceSize() / 2.0) - relative);
+        else if (x < boardBounds.getMinX()) {
+            image.setLayoutX(boardBounds.getMinX() - (b.getPieceSize() / 2.0) - offset);
+        } else if (x > boardBounds.getMaxX())
+            image.setLayoutX(boardBounds.getMaxX() - (b.getPieceSize() / 2.0) - offset);
     }
 
     private void setPieceY(double y) {
 
-        int relative = (int) bds.getMinY();
+        int relative = (int) vBoxBounds.getMinY();
+        int offset = (int) boardBounds.getMinY();
 
         double ay = y - (b.getPieceSize() / 2.0) - relative;
 
-        if (y >= bds.getMinY() && y <= bds.getMaxY())
+        if (y >= boardBounds.getMinY() && y <= boardBounds.getMaxY())
             image.setLayoutY(ay);
-        else if (y < bds.getMinY()) {
-            image.setLayoutY(bds.getMinY() - (b.getPieceSize() / 2.0) - relative);
-        } else if (y > bds.getMaxY()) {
-            image.setLayoutY(bds.getMaxY() - (b.getPieceSize() / 2.0) - relative);
+        else if (y < boardBounds.getMinY()) {
+            image.setLayoutY(boardBounds.getMinY() - (b.getPieceSize() / 2.0) - offset);
+        } else if (y > boardBounds.getMaxY()) {
+            image.setLayoutY(boardBounds.getMaxY() - (b.getPieceSize() / 2.0) - offset);
+
         }
 
     }
@@ -131,7 +136,7 @@ public class GUIPiece {
             setPieceY(ev.getSceneY());
 
             b.clearBorder();
-            b.drawBorder(b.getXBySquare(getPiece().getSquare(), true), b.getYBySquare(getPiece().getSquare(), true));
+            b.drawBorder(b.getXBySquare(getPiece().getSquare()), b.getYBySquare(getPiece().getSquare()));
 
         } else {
 
