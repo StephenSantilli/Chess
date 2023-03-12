@@ -545,8 +545,9 @@ public class Game {
             return;
 
         positions.add(redo);
-        currentPos++;
+        ++currentPos;
         redo.setPromoType(redo.getRedoPromote(), this);
+        --currentPos;
         setCurrentPos(positions.size() - 1);
 
         flipTimer(true, 0);
