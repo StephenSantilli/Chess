@@ -463,6 +463,7 @@ public class Game {
             } else {
                 blackTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
             }
+            //TODO fix output being wrong
             previous.setTimerEnd(white ? whiteTimer : blackTimer);
         }
 
