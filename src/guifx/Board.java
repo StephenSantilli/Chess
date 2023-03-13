@@ -10,16 +10,20 @@ import game.Position;
 import game.Square;
 import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -111,7 +115,7 @@ public class Board extends VBox implements BoardMoveListener {
 
     public Board(int squareSize, BarMenu menuBar) throws Exception {
 
-        this.game = new Game(10 * 60, 10);
+        this.game = new Game();
         game.addMoveListener(this);
 
         this.squareSize = squareSize;
@@ -124,8 +128,8 @@ public class Board extends VBox implements BoardMoveListener {
 
         this.transitions = new ArrayList<TranslateTransition>();
 
-        this.topTimer = new GUITimer(getGame(), !flipped);
-        this.bottomTimer = new GUITimer(getGame(), flipped);
+        this.topTimer = new GUITimer(this, !flipped);
+        this.bottomTimer = new GUITimer(this, flipped);
 
         HBox bottomTimerBox = new HBox(topTimer);
         HBox topTimerBox = new HBox(bottomTimer);
@@ -140,11 +144,11 @@ public class Board extends VBox implements BoardMoveListener {
         scrollMovePane.setFitToWidth(true);
         scrollMovePane.setMinWidth(220);
 
-        this.movePane = new MovePane(game, scrollMovePane);
+        this.movePane = new MovePane(this, scrollMovePane);
         movePane.initMovePane();
-        game.addMoveListener(getMovePane());
 
         scrollMovePane.setContent(movePane);
+        game.addMoveListener(getMovePane());
 
         this.squarePane = new VBox();
         initSquares();
@@ -163,6 +167,10 @@ public class Board extends VBox implements BoardMoveListener {
 
         stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
 
+        topTimerBox.setViewOrder(1);
+        bottomTimerBox.setViewOrder(1);
+        stack.setViewOrder(0);
+
         getChildren().addAll(topTimerBox, stack, bottomTimerBox);
 
         timerChange();
@@ -172,6 +180,9 @@ public class Board extends VBox implements BoardMoveListener {
         });
 
         setOnMouseReleased(e -> {
+
+            if (e.getButton() != MouseButton.PRIMARY)
+                return;
 
             if (dragging != null) {
                 dragging.onMouseReleased(e);
@@ -196,6 +207,9 @@ public class Board extends VBox implements BoardMoveListener {
 
         setOnMouseDragged(e -> {
 
+            if (e.getButton() != MouseButton.PRIMARY)
+                return;
+
             if (dragging != null) {
 
                 dragging.onMouseDragged(e);
@@ -207,6 +221,9 @@ public class Board extends VBox implements BoardMoveListener {
         });
 
         setOnMousePressed(e -> {
+
+            if (e.getButton() != MouseButton.PRIMARY)
+                return;
 
             if (dragging != null) {
 
@@ -227,10 +244,16 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
+    public void newGame() {
+
+        startGame(null);
+
+    }
+
     private void initMenus() {
 
-        viewMenu = new ViewMenu(this, game);
-        gameMenu = new GameMenu(this, game);
+        viewMenu = new ViewMenu(this);
+        gameMenu = new GameMenu(this);
 
         game.addMoveListener(gameMenu);
 
@@ -259,8 +282,27 @@ public class Board extends VBox implements BoardMoveListener {
     }
 
     public void startGame(WindowEvent we) {
-        drawPieces(false, null, null);
-        game.startGame();
+
+        GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), game);
+        settings.setOnHidden(e -> {
+
+            if (settings.getTimePerSide() > -1) {
+
+                game.stopGame();
+                game = new Game(settings.getTimePerSide(), settings.getTimePerMove());
+                game.addMoveListener(this);
+                game.addMoveListener(getMovePane());
+                game.addMoveListener(gameMenu);
+
+                game.startGame();
+                boardUpdated();
+
+            }
+
+        });
+
+        settings.showAndWait();
+
     }
 
     void clearBorder() {
@@ -449,7 +491,7 @@ public class Board extends VBox implements BoardMoveListener {
         this.pieces = new ArrayList<GUIPiece>();
         piecePane.getChildren().clear();
         transitions = new ArrayList<TranslateTransition>();
-        
+
         if (p2 == null)
             p2 = game.getActivePos();
 
@@ -509,7 +551,7 @@ public class Board extends VBox implements BoardMoveListener {
             }
         }
 
-        for(TranslateTransition t : transitions) {
+        for (TranslateTransition t : transitions) {
             t.play();
         }
 
@@ -645,6 +687,8 @@ public class Board extends VBox implements BoardMoveListener {
         bottomTimer.setWhite(flipped);
         bottomTimer.update();
 
+        gameMenu.updatePauseResume();
+
         if (game.getActivePos().getMove() != null && game.getActivePos().getMove().getPromoteType() == '?') {
 
             try {
@@ -732,13 +776,41 @@ public class Board extends VBox implements BoardMoveListener {
 
     @Override
     public void timerChange() {
-        topTimer.update();
-        bottomTimer.update();
+        Platform.runLater(() -> {
+            topTimer.update();
+            bottomTimer.update();
+        });
+
     }
 
     @Override
     public void gameOver() {
         // TODO Auto-generated method stub
+        Platform.runLater(() -> {
+            if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
+                return;
+
+            Dialog<Void> over = new Dialog<Void>();
+            over.setTitle("Game Over");
+
+            String msg = "";
+            if (game.getResult() == Game.RESULT_DRAW) {
+                msg = "Draw.";
+            } else if (game.getResult() == Game.RESULT_BLACK_WIN) {
+                msg = "Black win.";
+            } else if (game.getResult() == Game.RESULT_WHITE_WIN) {
+                msg = "White win.";
+            }
+
+            msg += game.getResultReason();
+
+            over.setContentText(msg);
+
+            over.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+
+            over.showAndWait();
+        });
+
     }
 
     @Override

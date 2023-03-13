@@ -7,19 +7,19 @@ import javafx.stage.Window;
 
 public class BarMenu extends MenuBar {
     
-    private FileMenu fileMenu;
+/*     private FileMenu fileMenu;
 
     public FileMenu getFileMenu() {
         return fileMenu;
-    }
+    } */
 
     public BarMenu(Window window) {
 
         setUseSystemMenuBar(true);
 
-        fileMenu = new FileMenu(window);
+        // fileMenu = new FileMenu(window);
 
-        getMenus().addAll(fileMenu);
+        // getMenus().addAll(fileMenu);
 
     }
     

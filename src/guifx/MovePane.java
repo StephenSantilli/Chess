@@ -18,7 +18,7 @@ import javafx.scene.layout.GridPane;
 
 public class MovePane extends GridPane implements BoardMoveListener {
 
-    private Game g;
+    private Board board;
 
     private ArrayList<MoveRow> rows;
 
@@ -33,11 +33,11 @@ public class MovePane extends GridPane implements BoardMoveListener {
     private static final String BUTTON_INACTIVE_CLICKED = "#cacaca";
     private static final String BUTTON_ACTIVE_CLICKED = "#888888";
 
-    public MovePane(Game g, ScrollPane sp) {
+    public MovePane(Board board, ScrollPane sp) {
 
         setMinWidth(220);
         setMaxWidth(Double.MAX_VALUE);
-        this.g = g;
+        this.board = board;
 
         this.sp = sp;
 
@@ -74,7 +74,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
         getChildren().clear();
         // rows = new ArrayList<MoveRow>();
 
-        for (int i = 1; i < g.getPositions().size(); i++) {
+        for (int i = 1; i < board.getGame().getPositions().size(); i++) {
 
             execMove(i);
 
@@ -83,12 +83,12 @@ public class MovePane extends GridPane implements BoardMoveListener {
     }
 
     private void execMove() {
-        execMove(g.getPositions().size() - 1);
+        execMove(board.getGame().getPositions().size() - 1);
     }
 
     private void execMove(int pos) {
 
-        Position p = g.getPositions().get(pos);
+        Position p = board.getGame().getPositions().get(pos);
         int row = ((pos - 1) / 2);
         Move m = p.getMove();
         Button btn1 = new Button(p.getMoveString());
@@ -115,7 +115,7 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
         btn1.setOnAction(e -> {
 
-            g.setCurrentPos(pos);
+            board.getGame().setCurrentPos(pos);
 
         });
 
@@ -165,12 +165,12 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
                 Node c = getChildren().get(i);
 
-                if (getRowIndex(c) == ((g.getCurrentPos()) / 2)) {
+                if (getRowIndex(c) == ((board.getGame().getCurrentPos()) / 2)) {
 
-                    if (getColumnIndex(c) == (g.getActivePos().getRedo().isWhite() ? 2 : 1)) {
+                    if (getColumnIndex(c) == (board.getGame().getActivePos().getRedo().isWhite() ? 2 : 1)) {
                         getChildren().remove(c);
                         --i;
-                    } else if (g.getActivePos().isWhite()
+                    } else if (board.getGame().getActivePos().isWhite()
                             && getColumnIndex(c) == 0) {
                         getChildren().remove(c);
                         --i;
@@ -198,8 +198,8 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
                 Node c = getChildren().get(i);
 
-                if (g.getCurrentPos() != 0 && getRowIndex(c) == ((g.getCurrentPos() - 1) / 2)
-                        && getColumnIndex(c) == (g.getPositions().get(g.getCurrentPos()).isWhite() ? 2 : 1)) {
+                if (board.getGame().getCurrentPos() != 0 && getRowIndex(c) == ((board.getGame().getCurrentPos() - 1) / 2)
+                        && getColumnIndex(c) == (board.getGame().getPositions().get(board.getGame().getCurrentPos()).isWhite() ? 2 : 1)) {
 
                     if (c.isHover()) {
                         c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
@@ -209,9 +209,9 @@ public class MovePane extends GridPane implements BoardMoveListener {
                     c.requestFocus();
                     // sp.setVvalue(sp.getViewportBounds().getHeight());
 
-                } else if (activePos > 0 && activePos < g.getPositions().size()
+                } else if (activePos > 0 && activePos < board.getGame().getPositions().size()
                         && getRowIndex(c) == ((activePos - 1) / 2)
-                        && getColumnIndex(c) == (g.getPositions().get(activePos).isWhite() ? 2 : 1)) {
+                        && getColumnIndex(c) == (board.getGame().getPositions().get(activePos).isWhite() ? 2 : 1)) {
 
                     if (c.isHover()) {
                         c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
@@ -219,13 +219,13 @@ public class MovePane extends GridPane implements BoardMoveListener {
                         c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
                 }
-                if (g.getCurrentPos() == 0) {
+                if (board.getGame().getCurrentPos() == 0) {
                     sp.setVvalue(0);
                 }
 
             }
 
-            activePos = g.getCurrentPos();
+            activePos = board.getGame().getCurrentPos();
 
         });
 

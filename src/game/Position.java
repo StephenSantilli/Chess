@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 public class Position {
 
-    private Piece[][] pcs;
+    private Piece[][] pieces;
 
     /** All of the pieces in the position. Does not include captured pieces. */
-    public Piece[][] getPcs() {
-        return pcs;
+    public Piece[][] getPieces() {
+        return pieces;
     }
 
     /**
@@ -212,13 +212,13 @@ public class Position {
     public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
 
         // this.pieces = new ArrayList<Piece>();
-        this.pcs = new Piece[8][8];
+        this.pieces = new Piece[8][8];
         this.white = isWhite;
 
         this.systemTimeStart = -1;
         this.timerEnd = -1;
 
-        Piece[][] prevPieces = prev.getPcs();
+        Piece[][] prevPieces = prev.getPieces();
 
         for (int r = 0; r < prevPieces.length; r++) {
 
@@ -261,7 +261,7 @@ public class Position {
                 }
 
                 if (piece != null) {
-                    pcs[old.getSquare().getRank() - 1][old.getSquare().getFile() - 1] = piece;
+                    pieces[old.getSquare().getRank() - 1][old.getSquare().getFile() - 1] = piece;
                 }
             }
         }
@@ -269,12 +269,12 @@ public class Position {
         if (move.isCapture()) {
 
             Square capSquare = move.getCaptureSquare();
-            pcs[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
+            pieces[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
 
         }
 
         Square movePieceSq = move.getOrigin();
-        Piece movePiece = pcs[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1];
+        Piece movePiece = pieces[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1];
 
         if (movePiece.getCode() == 'K') {
 
@@ -288,8 +288,8 @@ public class Position {
         Square destSq = move.getDestination();
         movePiece.setSquare(destSq);
         movePiece.setHasMoved(true);
-        pcs[destSq.getRank() - 1][destSq.getFile() - 1] = movePiece;
-        pcs[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1] = null;
+        pieces[destSq.getRank() - 1][destSq.getFile() - 1] = movePiece;
+        pieces[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1] = null;
 
         if (move.isCastle()) {
 
@@ -352,10 +352,10 @@ public class Position {
 
         ArrayList<Move> castleMoves = new ArrayList<Move>();
 
-        for (int r = 0; r < pcs.length; r++) {
+        for (int r = 0; r < pieces.length; r++) {
 
-            for (int c = 0; c < pcs[r].length; c++) {
-                Piece p = pcs[r][c];
+            for (int c = 0; c < pieces[r].length; c++) {
+                Piece p = pieces[r][c];
                 if (p == null)
                     continue;
 
@@ -393,19 +393,22 @@ public class Position {
         if (checkForMate) {
             setCheckMate(g);
 
-            for (Move c : castleMoves) {
+            if (this.inCheck == false) {
+                for (Move c : castleMoves) {
 
-                if ((c.getRookOrigin().getFile() == 1
-                        && canPieceMoveToSquare(c.getPiece(), new Square(4, c.getOrigin().getRank())))
-                        || (c.getRookOrigin().getFile() == 8
-                                && canPieceMoveToSquare(c.getPiece(), new Square(6, c.getOrigin().getRank())))) {
+                    if ((c.getRookOrigin().getFile() == 1
+                            && canPieceMoveToSquare(c.getPiece(), new Square(4, c.getOrigin().getRank())))
+                            ||
+                            (c.getRookOrigin().getFile() == 8
+                                    && canPieceMoveToSquare(c.getPiece(), new Square(6, c.getOrigin().getRank())))) {
 
-                    Position test = new Position(this, c, g, !c.isWhite(), false);
-                    if (!test.isGivingCheck())
-                        moves.add(c);
+                        Position test = new Position(this, c, g, !c.isWhite(), false);
+                        if (!test.isGivingCheck())
+                            moves.add(c);
+
+                    }
 
                 }
-
             }
         }
     }
@@ -422,11 +425,11 @@ public class Position {
         int whitePoints = 0;
         int blackPoints = 0;
 
-        for (int r = 0; r < pcs.length; r++) {
+        for (int r = 0; r < pieces.length; r++) {
 
-            for (int c = 0; c < pcs[r].length; c++) {
+            for (int c = 0; c < pieces[r].length; c++) {
 
-                Piece p = pcs[r][c];
+                Piece p = pieces[r][c];
                 if (p == null)
                     continue;
 
@@ -486,7 +489,7 @@ public class Position {
      */
     private void initDefaultPosition() {
 
-        pcs = new Piece[8][8];
+        pieces = new Piece[8][8];
 
         boolean color = true;
         for (int i = 0; i < 2; i++) {
@@ -528,7 +531,7 @@ public class Position {
 
     public void setSquare(Square s, Piece p) {
 
-        pcs[s.getRank() - 1][s.getFile() - 1] = p;
+        pieces[s.getRank() - 1][s.getFile() - 1] = p;
 
     }
 
@@ -554,7 +557,7 @@ public class Position {
      * }
      */
     public Piece getPieceAtSquare(Square s) {
-        return pcs[s.getRank() - 1][s.getFile() - 1];
+        return pieces[s.getRank() - 1][s.getFile() - 1];
     }
 
     /**
@@ -625,6 +628,64 @@ public class Position {
 
         return getPiecesByAttacking(getKingSquare(white)).size() > 0;
 
+    }
+
+    public boolean isInsufficientMaterial() {
+
+        ArrayList<Piece> list = getPiecesAsArray();
+
+        if (list.size() > 4)
+            return false;
+
+        //King and king
+        if (list.size() == 2)
+            return true;
+
+        for (int i = 0; i < list.size(); i++) {
+
+            if (list.get(i).getCode() == 'K') {
+                list.remove(i);
+                --i;
+            }
+
+        }
+
+        //King against king and bishop / king against king and knight
+        if (list.size() == 1 && (list.get(0).getCode() == 'B' || list.get(0).getCode() == 'N'))
+            return true;
+        else if (list.size() == 2) {
+
+            Piece one = list.get(0);
+            Piece two = list.get(1);
+
+            //King and bishop against king and bishop, with both being on squares of same color
+            if (one.isWhite() != two.isWhite()
+                    && one.getSquare().isLightSquare() == two.getSquare().isLightSquare())
+                return true;
+
+        }
+
+        return false;
+
+    }
+
+    public ArrayList<Piece> getPiecesAsArray() {
+
+        ArrayList<Piece> list = new ArrayList<Piece>();
+
+        for (int r = 0; r < 8; r++) {
+            for (int f = 0; f < 8; f++) {
+
+                Piece p = pieces[r][f];
+                if (p != null) {
+                    list.add(p);
+                }
+
+            }
+
+        }
+
+        return list;
     }
 
     /**

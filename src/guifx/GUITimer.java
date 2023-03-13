@@ -11,7 +11,7 @@ import javafx.util.Duration;
 
 public class GUITimer extends Label {
 
-    private Game game;
+    private Board board;
 
     private boolean white;
 
@@ -47,9 +47,9 @@ public class GUITimer extends Label {
 
     private final Timeline tl;
 
-    public GUITimer(Game game, boolean white) {
+    public GUITimer(Board board, boolean white) {
 
-        super(formatTime(white ? game.getWhiteTime() : game.getBlackTime()));
+        super(formatTime(white ? board.getGame().getWhiteTime() : board.getGame().getBlackTime()));
 
         this.tl = new Timeline();
         tl.setCycleCount(Timeline.INDEFINITE);
@@ -62,10 +62,10 @@ public class GUITimer extends Label {
 
         setFont(new Font(getFont().getName(), 24));
 
-        this.game = game;
+        this.board = board;
         this.white = white;
 
-        if (game.isWhiteTurn(true) == white)
+        if (board.getGame().isWhiteTurn(true) == white)
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
         else
             setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
@@ -73,15 +73,15 @@ public class GUITimer extends Label {
     }
 
     public void frame() {
-        setText(formatTime(white ? game.getWhiteTime() : game.getBlackTime()));
+        setText(formatTime(white ? board.getGame().getWhiteTime() : board.getGame().getBlackTime()));
     }
 
     public void update() {
 
-        if (game.isWhiteTurn(true) == white) {
+        if (board.getGame().isWhiteTurn(true) == white) {
 
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
-            if (!game.isPaused() && game.getResult() == 0)
+            if (!board.getGame().isPaused() && board.getGame().getResult() == 0)
                 tl.play();
             else {
                 tl.pause();

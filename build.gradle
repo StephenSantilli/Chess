@@ -39,8 +39,10 @@ sourceSets {
 application {
 
     mainClass = 'guifx.Chess'
+    applicationName = 'Chess'
     
 }
+
 
 tasks.named('test') {
 

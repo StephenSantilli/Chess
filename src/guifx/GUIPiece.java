@@ -106,7 +106,7 @@ public class GUIPiece {
                 b.getGame().makeMove(m);
 
             } catch (Exception e) {
-                e.printStackTrace();
+                // e.printStackTrace();
             }
 
             if (cPos == b.getGame().getCurrentPos()) {

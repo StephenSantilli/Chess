@@ -33,6 +33,19 @@ public class Square {
     }
 
     /**
+     * Checks if the square is a light square.
+     * 
+     * @return If the square is a light square.
+     */
+    public boolean isLightSquare() {
+
+        return ((rank % 2 == 0) && (file % 2 != 0)
+                ||
+                (rank % 2 != 0) && (file % 2 == 0));
+
+    }
+
+    /**
      * A string representation of the square, with the file as a lowercase
      * letter.<br>
      * <br>

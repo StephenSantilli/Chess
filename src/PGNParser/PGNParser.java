@@ -226,13 +226,13 @@ public class PGNParser {
 
         long hours = (time / 1000 / 60 / 60);
         long minutes = (time / 1000 / 60 % 60);
-        long seconds = (time / 1000 / 60 % 60 % 60);
+        long seconds = (time / 1000 % 60 % 60 % 60);
 
         String s = "";
 
         s += hours + ":";
-        
-        if(minutes < 10) {
+
+        if (minutes < 10) {
             s += "0";
         }
         s += minutes + ":";
@@ -261,8 +261,8 @@ public class PGNParser {
 
             String comment = null;
 
-            if(game.getTimePerSide() > 0 && p.getTimerEnd() > 0) {
-                comment = "{[%clk " + millisToOutputFormat(p.getTimerEnd()) + "]}";
+            if (game.getTimePerSide() > 0 && game.getPositions().get(i - 1).getTimerEnd() > 0) {
+                comment = "{[%clk " + millisToOutputFormat(game.getPositions().get(i - 1).getTimerEnd()) + "]}";
             }
 
             parsedMoves.add(new PGNMove(p.getMoveString(), comment, null, null, null));
@@ -279,7 +279,7 @@ public class PGNParser {
 
         String str = "";
 
-        if(includeTags) {
+        if (includeTags) {
             str += "[Event \"" + event + "\"]\n";
             str += "[Site \"" + site + "\"]\n";
             str += "[Date \"" + date + "\"]\n";

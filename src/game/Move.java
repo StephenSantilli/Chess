@@ -249,7 +249,7 @@ public class Move {
 
         Move prevMove = pos.getMove();
 
-        if (prevMove.getMoveDistance() != 2)
+        if (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile())
             return false;
 
         return true;

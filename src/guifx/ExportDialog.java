@@ -67,6 +67,10 @@ public class ExportDialog extends Stage {
 
         vb.getChildren().addAll(ta, buttons);
 
+        // ta.setPadding(new Insets(15, 15, 15, 15));
+        vb.setSpacing(5);
+        buttons.setSpacing(5);
+
         ta.setPrefColumnCount(85);
         ta.setPrefRowCount(15);
 

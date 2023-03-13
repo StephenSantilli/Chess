@@ -47,12 +47,14 @@ public class App extends Application {
         stage.setScene(s);
 
         try {
-            
             BarMenu menu = new BarMenu(s.getWindow());
-            vb.getChildren().addAll(menu, hb);
-
+            
             Board b = new Board(100, menu);
             hb.getChildren().add(b);
+            
+            // menu.getMenus().add(new FileMenu(s.getWindow(), b));
+            
+            vb.getChildren().addAll(menu, hb);
 
             ScrollPane sp = b.getScrollMovePane();
 
@@ -68,12 +70,9 @@ public class App extends Application {
 
             s.setOnKeyReleased(b.keyHandler);
 
-
             stage.setOnCloseRequest(e -> {
 
-                if (b.getGame().getResult() <= Game.RESULT_IN_PROGRESS) {
-                    b.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
-                }
+                b.getGame().stopGame();
 
                 Platform.exit();
 

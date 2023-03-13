@@ -3,6 +3,9 @@ package game;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import PGNParser.PGNMove;
 import PGNParser.PGNParser;
@@ -95,7 +98,28 @@ public class Game {
 
     private long pauseStart;
 
-    private Timer flagfallScheduler;
+    Runnable flagfall = new Runnable() {
+
+        public void run() {
+
+            Position a = getLastPos();
+            long start = a.getSystemTimeStart();
+
+            if (start <= 0)
+                return;
+
+            long current = System.currentTimeMillis();
+            if ((current - start) > (a.isWhite() ? whiteTimer : blackTimer)) {
+
+                markGameOver(isWhiteTurn(true) ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
+
+            }
+
+        }
+
+    };
+
+    private ScheduledExecutorService flagfallChecker;
 
     public Game() {
         this(-1, -1);
@@ -115,8 +139,6 @@ public class Game {
 
         this.whiteTimer = this.timePerSide;
         this.blackTimer = this.timePerSide;
-
-        this.flagfallScheduler = new Timer("Flagfall Scheduler");
 
     }
 
@@ -193,6 +215,22 @@ public class Game {
         return currentPos;
     }
 
+    /**
+     * @param timePerSide The time, in seconds, each side has at the start of the
+     *                    game.
+     */
+    public void setTimePerSide(int timePerSide) {
+        this.timePerSide = timePerSide * 1000;
+    }
+
+    /**
+     * @param timePerMove The time, in seconds, each side gets at the end of each of
+     *                    their moves.
+     */
+    public void setTimePerMove(int timePerMove) {
+        this.timePerMove = timePerMove * 1000;
+    }
+
     public void makeMove(Move m) {
 
         if (paused || result != RESULT_IN_PROGRESS) {
@@ -244,6 +282,12 @@ public class Game {
             return;
         }
 
+        if (movePosition.isInsufficientMaterial()) {
+            fireMoveMade();
+            markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
+            return;
+        }
+
         flipTimer(true, 0);
         fireMoveMade();
 
@@ -251,8 +295,30 @@ public class Game {
 
     public void startGame() {
 
+        if (paused)
+            return;
+
         result = RESULT_IN_PROGRESS;
+
+        whiteTimer = timePerSide;
+        blackTimer = timePerSide;
+
         flipTimer(true, 0);
+        if (timePerSide > 0) {
+
+            flagfallChecker = Executors.newScheduledThreadPool(1);
+            flagfallChecker.scheduleWithFixedDelay(flagfall, 10, 10, TimeUnit.MILLISECONDS);
+
+        }
+
+    }
+
+    public void stopGame() {
+        if (flagfallChecker != null) {
+
+            flagfallChecker.shutdownNow();
+
+        }
 
     }
 
@@ -272,6 +338,8 @@ public class Game {
 
         this.result = result;
         this.resultReason = resultReason;
+
+        flagfallChecker.shutdown();
 
         gameOver();
 
@@ -310,7 +378,7 @@ public class Game {
             return -1;
 
         if (!isWhiteTurn(true))
-            return whiteTimer;
+            return whiteTimer >= 0 ? whiteTimer : 0;
         else {
             if (whiteTimer <= 0)
                 return 0;
@@ -380,74 +448,47 @@ public class Game {
     public void flipTimer(boolean setTimer, long pauseTime) {
 
         if (paused || timePerSide <= -1
-                || (pauseTime <= 0 && getActivePos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS)) {
+                || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS)) {
             return;
         }
 
-        try {
-            flagfallScheduler.cancel();
-        } catch (Exception e) {
-
-        }
-
         boolean white = isWhiteTurn(true);
+        Position active = getLastPos();
+        Position previous = positions.size() - 2 >= 0 ? positions.get(positions.size() - 2) : null;
 
         long currentTime = System.currentTimeMillis();
-        if (getPreviousPos() != null && setTimer && pauseTime <= 0) {
-            if (getPreviousPos().isWhite()) {
-                whiteTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) - (timePerMove);
+        if (previous != null && setTimer && pauseTime <= 0) {
+            if (previous.isWhite()) {
+                whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
             } else {
-                blackTimer -= (currentTime - getPreviousPos().getSystemTimeStart()) - (timePerMove);
+                blackTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
             }
-            getPreviousPos().setTimerEnd(white ? whiteTimer : blackTimer);
+            previous.setTimerEnd(white ? whiteTimer : blackTimer);
         }
 
         if (pauseTime > 0) {
 
-            Position active = getActivePos();
-
             active.setSystemTimeStart(currentTime - (pauseTime - active.getSystemTimeStart()));
 
-        } else {
+        } else if (resultReason != REASON_FLAGFALL) {
 
-            getActivePos().setSystemTimeStart(currentTime);
+            active.setSystemTimeStart(currentTime);
 
         }
 
         if (result > RESULT_IN_PROGRESS) {
 
-            if (getActivePos().isWhite()) {
-                whiteTimer -= (currentTime - getActivePos().getSystemTimeStart()) - (timePerMove);
-                getActivePos().setTimerEnd(whiteTimer);
+            if (active.isWhite()) {
+                whiteTimer -= (currentTime - active.getSystemTimeStart())/* - (timePerMove) */;
+                active.setTimerEnd(whiteTimer);
             } else {
-                blackTimer -= (currentTime - getActivePos().getSystemTimeStart()) - (timePerMove);
-                getActivePos().setTimerEnd(blackTimer);
+                blackTimer -= (currentTime - active.getSystemTimeStart())/* - (timePerMove) */;
+                active.setTimerEnd(blackTimer);
             }
 
         }
 
         fireTimerChange();
-
-        if (result == RESULT_IN_PROGRESS) {
-            flagfallScheduler = new Timer("Flagfall Scheduler");
-            TimerTask flagfall = new TimerTask() {
-
-                public void run() {
-
-                    getActivePos().setTimerEnd(0);
-                    if (isWhiteTurn(true))
-                        whiteTimer = 0;
-                    else
-                        blackTimer = 0;
-
-                    markGameOver(isWhiteTurn(true) ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
-
-                }
-
-            };
-            flagfallScheduler.schedule(flagfall, white ? whiteTimer : blackTimer);
-
-        }
 
     }
 
@@ -458,12 +499,6 @@ public class Game {
 
         paused = true;
         pauseStart = System.currentTimeMillis();
-
-        try {
-            flagfallScheduler.cancel();
-        } catch (Exception e) {
-
-        }
 
         firePauseGame();
 

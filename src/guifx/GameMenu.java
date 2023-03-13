@@ -9,61 +9,69 @@ import javafx.scene.input.KeyCombination;
 
 public class GameMenu extends Menu implements BoardMoveListener {
 
-    private MenuItem undo, redo, pause, resume, export;
+    private MenuItem newGame, undo, redo, pause, resume, export;
     private Menu gameExport;
-    private Game game;
+    private Board board;
 
-    public GameMenu(Board board, Game game) {
+    public GameMenu(Board board) {
 
         super("Game");
-        this.game = game;
+        this.board = board;
+
+        MenuItem newGame = new MenuItem("New Game");
+        newGame.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+N"));
+        newGame.setOnAction(e -> {
+
+            board.newGame();
+
+        });
 
         pause = new MenuItem("Pause");
         pause.setAccelerator(KeyCombination.keyCombination("Shortcut+P"));
-        pause.setDisable(game.isPaused());
+        pause.setDisable(board.getGame().isPaused());
         pause.setOnAction(e -> {
 
-            game.pauseGame();
+            board.getGame().pauseGame();
 
         });
 
         resume = new MenuItem("Resume");
         resume.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+P"));
-        resume.setDisable(!game.isPaused());
+        resume.setDisable(!board.getGame().isPaused());
         resume.setOnAction(e -> {
 
-            game.resumeGame();
+            board.getGame().resumeGame();
 
         });
 
         undo = new MenuItem("Undo");
         undo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
-        undo.setDisable(!game.canUndo());
+        undo.setDisable(!board.getGame().canUndo());
         undo.setOnAction(e -> {
 
-            game.undoMove();
+            board.getGame().undoMove();
 
         });
 
         redo = new MenuItem("Redo");
         redo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
-        redo.setDisable(!game.canRedo());
+        redo.setDisable(!board.getGame().canRedo());
         redo.setOnAction(e -> {
-            game.redoMove();
+            board.getGame().redoMove();
         });
 
         export = new MenuItem("Export");
         export.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
         export.setOnAction(e -> {
-            
+
             ExportDialog eD = new ExportDialog(board);
 
             eD.show();
 
         });
 
-
-        getItems().addAll(pause, resume, new SeparatorMenuItem(), undo, redo, new SeparatorMenuItem(), export);
+        getItems().addAll(newGame, new SeparatorMenuItem(), pause, resume, new SeparatorMenuItem(), undo, redo,
+                new SeparatorMenuItem(), export);
 
     }
 
@@ -88,8 +96,8 @@ public class GameMenu extends Menu implements BoardMoveListener {
     @Override
     public void posChanged(int old, int curr) {
         // TODO Auto-generated method stub
-        undo.setDisable(!game.canUndo());
-        redo.setDisable(!game.canRedo());
+        undo.setDisable(!board.getGame().canUndo());
+        redo.setDisable(!board.getGame().canRedo());
     }
 
     @Override
@@ -108,10 +116,10 @@ public class GameMenu extends Menu implements BoardMoveListener {
         // TODO Auto-generated method stub
     }
 
-    private void updatePauseResume() {
+    public void updatePauseResume() {
 
-        pause.setDisable(game.isPaused());
-        resume.setDisable(!game.isPaused());
+        pause.setDisable(board.getGame().isPaused());
+        resume.setDisable(!board.getGame().isPaused());
 
     }
 

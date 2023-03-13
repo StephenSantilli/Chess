@@ -10,17 +10,15 @@ import javafx.stage.Window;
 public class ViewMenu extends Menu {
 
     private CheckMenuItem flip;
-    private Game game;
     private Board board;
 
-    public ViewMenu(Board board, Game game) {
+    public ViewMenu(Board board) {
 
         super("View");
-        this.game = game;
         this.board = board;
 
         flip = new CheckMenuItem("Flip");
-        flip.setAccelerator(KeyCombination.keyCombination("F"));
+        flip.setAccelerator(KeyCombination.keyCombination("Shortcut+F"));
         flip.setOnAction(e -> {
 
             board.flipBoard();
