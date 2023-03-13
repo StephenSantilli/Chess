@@ -1,4 +1,4 @@
-package guifx;
+package gui;
 
 public class Chess {
     

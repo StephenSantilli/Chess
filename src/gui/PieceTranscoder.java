@@ -1,4 +1,4 @@
-package guifx;
+package gui;
 
 import java.awt.image.BufferedImage;
 

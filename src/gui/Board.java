@@ -1,4 +1,4 @@
-package guifx;
+package gui;
 
 import game.BoardMoveListener;
 import game.Game;
@@ -212,6 +212,10 @@ public class Board extends VBox implements BoardMoveListener {
         return white;
     }
 
+    public StackPane getStack() {
+        return stack;
+    }
+
     public MovePane getMovePane() {
         return movePane;
     }
@@ -287,7 +291,7 @@ public class Board extends VBox implements BoardMoveListener {
     }
 
     // Actions
-    public void incPos() {
+    void incPos() {
 
         if (game.getPositions().size() - 1 > game.getCurrentPos()) {
             game.setCurrentPos(game.getCurrentPos() + 1);
@@ -295,7 +299,7 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    public void decPos() {
+    void decPos() {
 
         if (game.getCurrentPos() > 0) {
             game.setCurrentPos(game.getCurrentPos() - 1);
@@ -303,19 +307,19 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    public void goToFirstPos() {
+    void goToFirstPos() {
 
         game.setCurrentPos(0);
 
     }
 
-    public void goToLastPos() {
+    void goToLastPos() {
 
         game.setCurrentPos(game.getPositions().size() - 1);
 
     }
 
-    public void clearSelection() {
+    void clearSelection() {
 
         active = null;
         dragging = null;
@@ -325,20 +329,20 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    public void flipBoard() {
+    void flipBoard() {
 
         flipped = !flipped;
         boardUpdated();
 
     }
 
-    public void newGame() {
+    void newGame() {
 
         startGame(null);
 
     }
 
-    public void startGame(WindowEvent we) {
+    void startGame(WindowEvent we) {
 
         GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), game);
         settings.setOnHidden(e -> {
@@ -522,7 +526,7 @@ public class Board extends VBox implements BoardMoveListener {
 
             piecePane.getChildren().add(i);
 
-            GUIPiece guiP = new GUIPiece(capture, i, this, stack);
+            GUIPiece guiP = new GUIPiece(capture, i, this);
 
             i.setLayoutX(getXBySquare(capture.getSquare()) + ((squareSize - pieceSize) / 2.0));
             i.setLayoutY(((getYBySquare(capture.getSquare()))) + ((squareSize - pieceSize) / 2.0));
@@ -571,7 +575,7 @@ public class Board extends VBox implements BoardMoveListener {
                     continue;
 
                 ImageView img = getPieceTranscoder(p).getImageView();
-                GUIPiece guiP = new GUIPiece(p, img, this, stack);
+                GUIPiece guiP = new GUIPiece(p, img, this);
 
                 piecePane.getChildren().add(img);
 
@@ -630,25 +634,25 @@ public class Board extends VBox implements BoardMoveListener {
     /**
      * Updates the square highlights and moves panes.
      */
-    public void updateActive() {
+    void updateActive() {
 
         drawHighlightSq();
         drawMovesPane();
 
     }
 
-    public void updateTimers() {
+    void updateTimers() {
 
         topTimer.update();
         bottomTimer.update();
 
     }
 
-    public void boardUpdated() {
+    void boardUpdated() {
         boardUpdated(false, null, null, false);
     }
 
-    public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
+    void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
 
         updateActive();
         viewMenu.boardUpdated();

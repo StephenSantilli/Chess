@@ -1,4 +1,4 @@
-package guifx;
+package gui;
 
 import game.Move;
 import game.Piece;
@@ -25,11 +25,13 @@ public class GUIPiece {
         return image;
     }
 
-    public GUIPiece(Piece piece, ImageView image, Board board, StackPane stack) {
+    public GUIPiece(Piece piece, ImageView image, Board board) {
 
         this.piece = piece;
         this.image = image;
         this.b = board;
+
+        StackPane stack = board.getStack();
 
         this.boardBounds = stack.localToScene(stack.getBoundsInLocal());
         this.vBoxBounds = stack.localToScene(board.getBoundsInParent());
@@ -45,9 +47,9 @@ public class GUIPiece {
 
         if (x >= boardBounds.getMinX() && x <= boardBounds.getMaxX())
             image.setLayoutX(ax);
-        else if (x < boardBounds.getMinX()) {
+        else if (x < boardBounds.getMinX())
             image.setLayoutX(boardBounds.getMinX() - (b.getPieceSize() / 2.0) - offset);
-        } else if (x > boardBounds.getMaxX())
+        else if (x > boardBounds.getMaxX())
             image.setLayoutX(boardBounds.getMaxX() - (b.getPieceSize() / 2.0) - offset);
     }
 
@@ -60,12 +62,10 @@ public class GUIPiece {
 
         if (y >= boardBounds.getMinY() && y <= boardBounds.getMaxY())
             image.setLayoutY(ay);
-        else if (y < boardBounds.getMinY()) {
+        else if (y < boardBounds.getMinY())
             image.setLayoutY(boardBounds.getMinY() - (b.getPieceSize() / 2.0) - offset);
-        } else if (y > boardBounds.getMaxY()) {
+        else if (y > boardBounds.getMaxY())
             image.setLayoutY(boardBounds.getMaxY() - (b.getPieceSize() / 2.0) - offset);
-
-        }
 
     }
 
@@ -106,16 +106,14 @@ public class GUIPiece {
                 b.getGame().makeMove(m);
 
             } catch (Exception e) {
-                // e.printStackTrace();
             }
 
             if (cPos == b.getGame().getCurrentPos()) {
                 GUIPiece pc = b.getGUIPieceAtSquare(clickSquare);
-                if (pc != null) {
+                if (pc != null)
                     b.setActive(pc);
-                } else {
+                else
                     b.setActive(null);
-                }
 
                 b.setDragging(null);
 
@@ -159,11 +157,11 @@ public class GUIPiece {
     public void onMouseDragged(MouseEvent ev) {
 
         setPieceX(ev.getSceneX());
-
         setPieceY(ev.getSceneY());
 
-        b.clearBorder();
         Square hoverSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY(), true);
+
+        b.clearBorder();
         b.drawBorder(b.getXBySquare(hoverSquare), b.getYBySquare(hoverSquare));
 
     }
@@ -182,6 +180,7 @@ public class GUIPiece {
                         .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true))))) {
 
             b.setDragging(null);
+
             b.updateActive();
 
             return;
@@ -190,6 +189,7 @@ public class GUIPiece {
                 .equals(b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true))) {
 
             b.setDragging(null);
+
             setPieceSquare(piece.getSquare());
 
             return;
@@ -203,31 +203,34 @@ public class GUIPiece {
             try {
 
                 Piece d = b.getDragging().getPiece();
+
                 b.setActive(null);
+
                 b.getGame().makeMove(new Move(d.getSquare(),
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true), b.getGame().getActivePos()));
+                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true),
+                        b.getGame().getActivePos()));
 
             } catch (Exception e) {
 
             }
 
             if (cPos == b.getGame().getCurrentPos()) {
+
                 GUIPiece pc = b.getGUIPieceAtSquare(
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));
 
-                if (pc != null) {
+                if (pc != null)
                     b.setActive(pc);
-                } else {
+                else
                     b.setActive(null);
-                }
+
                 b.setDragging(null);
                 setPieceSquare(piece.getSquare());
 
             }
 
-        } else {
+        } else
             setPieceSquare(piece.getSquare());
-        }
 
     }
 

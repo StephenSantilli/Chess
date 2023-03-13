@@ -8,53 +8,13 @@ abstract public class Piece {
     protected Square square;
 
     /** The color of the piece. True if white, false if black. */
-    protected boolean white;
+    protected final boolean white;
 
     /**
      * If the piece has moved yet. Used for castling (rook and king), pawn moving
      * two squares.
      */
     protected boolean hasMoved;
-
-    /**
-     * Creates a new Piece object.
-     * 
-     * @param file  The file (column) the piece is on.
-     * @param rank  The rank (row) the piece is on.
-     * @param white Whether the piece is white or not. (True if white, false if
-     *              black)
-     */
-    public Piece(int file, int rank, boolean white) {
-
-        this.square = new Square(file, rank);
-        this.white = white;
-        hasMoved = false;
-
-    }
-
-    /**
-     * Creates a new Piece object.
-     * 
-     * @param file     The file (column) the piece is on.
-     * @param rank     The rank (row) the piece is on.
-     * @param white    Whether the piece is white or not. (True if white, false if
-     *                 black)
-     * @param hasMoved Whether or not the piece has moved.
-     */
-    public Piece(int file, int rank, boolean white, boolean hasMoved) {
-
-        this(file, rank, white);
-
-        this.hasMoved = hasMoved;
-
-    }
-
-    public boolean equals(Piece p) {
-
-        return (p.getCode() == getCode()) && isWhite() == p.isWhite() && square == p.getSquare()
-                && p.hasMoved() == hasMoved;
-
-    }
 
     /**
      * @return The {@link Square} the piece is on.
@@ -93,6 +53,51 @@ abstract public class Piece {
      */
     public void setHasMoved(boolean hasMoved) {
         this.hasMoved = hasMoved;
+    }
+
+    /**
+     * Creates a new Piece object.
+     * 
+     * @param file  The file (column) the piece is on.
+     * @param rank  The rank (row) the piece is on.
+     * @param white Whether the piece is white or not. (True if white, false if
+     *              black)
+     */
+    public Piece(int file, int rank, boolean white) {
+
+        this(file, rank, white, false);
+
+    }
+
+    /**
+     * Creates a new Piece object.
+     * 
+     * @param file     The file (column) the piece is on.
+     * @param rank     The rank (row) the piece is on.
+     * @param white    Whether the piece is white or not. (True if white, false if
+     *                 black)
+     * @param hasMoved Whether or not the piece has moved.
+     */
+    public Piece(int file, int rank, boolean white, boolean hasMoved) {
+
+        this.square = new Square(file, rank);
+        this.white = white;
+
+        this.hasMoved = hasMoved;
+
+    }
+
+    /**
+     * Checks if the given {@link Piece} object matches this {@link Piece} object.
+     * 
+     * @param p The {@link Piece} object to compare
+     * @return Whether or not the pieces are the same
+     */
+    public boolean equals(Piece p) {
+
+        return (p.getCode() == getCode()) && isWhite() == p.isWhite() && square == p.getSquare()
+                && p.hasMoved() == hasMoved;
+
     }
 
     /**
@@ -148,31 +153,26 @@ abstract public class Piece {
 
         for (int i = 1; i < distance + 1; i++) {
 
-            Move move;
+            final Move move;
+
             try {
+
                 move = new Move(square, new Square(file, white ? rank + i : rank - i), p);
+
             } catch (Exception e) {
 
                 if (e.getMessage().equals("Cannot capture your own piece.") || e.getMessage().equals(
-                        "Cannot capture going forward.")) {
+                        "Cannot capture going forward."))
                     break;
-                }
 
                 continue;
-            }
-            moves.add(move);
-            if(move.isCapture()) break;
 
-            /*
-             * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-             * if (move.getDestination().isValid() && occupant == null)
-             * moves.add(move);
-             * else if (occupant != null && occupant.isWhite() != white) {
-             * moves.add(move);
-             * break;
-             * } else
-             * break;
-             */
+            }
+
+            moves.add(move);
+
+            if (move.isCapture())
+                break;
 
         }
 
@@ -181,31 +181,24 @@ abstract public class Piece {
             distance = -distance;
             for (int i = -1; i > distance - 1; i--) {
 
-                Move move;
+                final Move move;
+
                 try {
+
                     move = new Move(square, new Square(file, white ? rank + i : rank - i), p);
+
                 } catch (Exception e) {
 
-                    if (e.getMessage().equals("Cannot capture your own piece.")) {
+                    if (e.getMessage().equals("Cannot capture your own piece."))
                         break;
-                    }
 
                     continue;
                 }
 
                 moves.add(move);
+
                 if (move.isCapture())
                     break;
-                /*
-                 * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-                 * if (occupant == null)
-                 * moves.add(move);
-                 * else if (occupant != null && occupant.isWhite() != white) {
-                 * moves.add(move);
-                 * break;
-                 * } else
-                 * break;
-                 */
 
             }
 
@@ -237,32 +230,25 @@ abstract public class Piece {
         // Right
         for (int i = 1; i < distance + 1; i++) {
 
-            Move move;
+            final Move move;
+
             try {
+
                 move = new Move(square, new Square(white ? file + i : file - i, rank), p);
+
             } catch (Exception e) {
 
-                if (e.getMessage().equals("Cannot capture your own piece.")) {
+                if (e.getMessage().equals("Cannot capture your own piece."))
                     break;
-                }
 
                 continue;
+
             }
 
             moves.add(move);
+
             if (move.isCapture())
                 break;
-
-            /*
-             * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-             * if (move.getDestination().isValid() && occupant == null)
-             * moves.add(move);
-             * else if (occupant != null && occupant.isWhite() != white) {
-             * moves.add(move);
-             * break;
-             * } else
-             * break;
-             */
 
         }
 
@@ -272,29 +258,22 @@ abstract public class Piece {
 
             Move move;
             try {
+
                 move = new Move(square, new Square(white ? file + i : file - i, rank), p);
+
             } catch (Exception e) {
 
-                if (e.getMessage().equals("Cannot capture your own piece.")) {
+                if (e.getMessage().equals("Cannot capture your own piece."))
                     break;
-                }
 
                 continue;
+
             }
 
             moves.add(move);
+
             if (move.isCapture())
                 break;
-            /*
-             * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-             * if (move.getDestination().isValid() && occupant == null)
-             * moves.add(move);
-             * else if (occupant != null && occupant.isWhite() != white) {
-             * moves.add(move);
-             * break;
-             * } else
-             * break;
-             */
 
         }
 
@@ -312,47 +291,40 @@ abstract public class Piece {
      *         does account for capturing/pieces in the way.
      */
     protected ArrayList<Move> getDiagonalMoves(int distance, Position p) {
-        
+
         ArrayList<Move> moves = new ArrayList<Move>();
-        
+
         int file = square.getFile();
         int rank = square.getRank();
-        
+
         if (distance <= 0)
-        distance = 8;
-        
+            distance = 8;
+
         boolean color = white ? true : false;
+
         for (int l = 0; l < 2; l++, color = !color, distance = -distance) {
-            
+
             // Up
             for (int i = 1; i < distance + 1; i++) {
 
-                Move move;
+                final Move move;
                 try {
+
                     move = new Move(square, new Square(color ? file + i : file - i, color ? rank + i : rank - i), p);
+
                 } catch (Exception e) {
 
-                    if (e.getMessage().equals("Cannot capture your own piece.")) {
+                    if (e.getMessage().equals("Cannot capture your own piece."))
                         break;
-                    }
 
                     continue;
+
                 }
 
                 moves.add(move);
+
                 if (move.isCapture())
                     break;
-
-                /*
-                 * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-                 * if (move.getDestination().isValid() && occupant == null)
-                 * moves.add(move);
-                 * else if (occupant != null && occupant.isWhite() != white) {
-                 * moves.add(move);
-                 * break;
-                 * } else
-                 * break;
-                 */
 
             }
 
@@ -360,32 +332,24 @@ abstract public class Piece {
             distance = -distance;
             for (int i = -1; i > distance - 1; i--) {
 
-                Move move;
+                final Move move;
                 try {
+
                     move = new Move(square, new Square(color ? file + i : file - i, color ? rank - i : rank + i), p);
+
                 } catch (Exception e) {
 
-                    if (e.getMessage().equals("Cannot capture your own piece.")) {
+                    if (e.getMessage().equals("Cannot capture your own piece."))
                         break;
-                    }
 
                     continue;
+
                 }
 
                 moves.add(move);
+
                 if (move.isCapture())
                     break;
-
-                /*
-                 * Piece occupant = p.getPieceAtSquare(move.getCaptureSquare());
-                 * if (move.getDestination().isValid() && occupant == null)
-                 * moves.add(move);
-                 * else if (occupant != null && occupant.isWhite() != white) {
-                 * moves.add(move);
-                 * break;
-                 * } else
-                 * break;
-                 */
 
             }
 

@@ -1,8 +1,6 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -459,43 +457,41 @@ public class Game {
     public void flipTimer(boolean setTimer, long pauseTime) {
 
         if (paused || timePerSide <= -1
-                || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS)) {
+                || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS))
             return;
-        }
 
-        boolean white = isWhiteTurn(true);
         Position active = getLastPos();
         Position previous = positions.size() - 2 >= 0 ? positions.get(positions.size() - 2) : null;
 
         long currentTime = System.currentTimeMillis();
         if (previous != null && setTimer && pauseTime <= 0) {
-            if (previous.isWhite()) {
+
+            if (previous.isWhite())
                 whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
-            } else {
+            else
                 blackTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
-            }
-            // TODO fix output being wrong
+
             previous.setTimerEnd(previous.isWhite() ? whiteTimer : blackTimer);
+
         }
 
-        if (pauseTime > 0) {
-
+        if (pauseTime > 0)
             active.setSystemTimeStart(currentTime - (pauseTime - active.getSystemTimeStart()));
-
-        } else if (resultReason != REASON_FLAGFALL) {
-
+        else if (resultReason != REASON_FLAGFALL)
             active.setSystemTimeStart(currentTime);
-
-        }
 
         if (result > RESULT_IN_PROGRESS) {
 
             if (active.isWhite()) {
-                whiteTimer -= (currentTime - active.getSystemTimeStart())/* - (timePerMove) */;
+
+                whiteTimer -= (currentTime - active.getSystemTimeStart());
                 active.setTimerEnd(whiteTimer);
+
             } else {
-                blackTimer -= (currentTime - active.getSystemTimeStart())/* - (timePerMove) */;
+
+                blackTimer -= (currentTime - active.getSystemTimeStart());
                 active.setTimerEnd(blackTimer);
+
             }
 
         }

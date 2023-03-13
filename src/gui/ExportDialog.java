@@ -1,4 +1,4 @@
-package guifx;
+package gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,15 +11,19 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ExportDialog extends Stage {
 
     private TextArea ta;
 
-    public ExportDialog(Board b) {
+    public ExportDialog(Board board) {
 
-        // setResizable(false);
+        initOwner(board.getScene().getWindow());
+        initModality(Modality.WINDOW_MODAL);
+
+        setResizable(false);
 
         VBox vb = new VBox();
         vb.setPadding(new Insets(15, 15, 15, 15));
@@ -30,7 +34,9 @@ public class ExportDialog extends Stage {
 
         String output = "";
         try {
-            output = b.getGame().exportPosition();
+
+            output = board.getGame().exportPosition();
+
         } catch (Exception e) {
 
             Dialog<Void> eDialog = new Dialog<Void>();
@@ -50,9 +56,11 @@ public class ExportDialog extends Stage {
 
         Button copyButton = new Button("Copy");
         copyButton.setOnAction(e -> {
+
             ClipboardContent content = new ClipboardContent();
             content.putString(ta.getText());
             Clipboard.getSystemClipboard().setContent(content);
+
         });
 
         Button okButton = new Button("Ok");
@@ -67,7 +75,6 @@ public class ExportDialog extends Stage {
 
         vb.getChildren().addAll(ta, buttons);
 
-        // ta.setPadding(new Insets(15, 15, 15, 15));
         vb.setSpacing(5);
         buttons.setSpacing(5);
 

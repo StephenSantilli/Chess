@@ -1,11 +1,8 @@
-package guifx;
+package gui;
 
-import game.Game;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.Window;
 
 public class ViewMenu extends Menu {
 

@@ -1,7 +1,6 @@
-package guifx;
+package gui;
 
 import game.BoardMoveListener;
-import game.Game;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -10,7 +9,7 @@ import javafx.scene.input.KeyCombination;
 public class GameMenu extends Menu implements BoardMoveListener {
 
     private MenuItem newGame, undo, redo, pause, resume, export;
-    private Menu gameExport;
+
     private Board board;
 
     public GameMenu(Board board) {
@@ -18,7 +17,7 @@ public class GameMenu extends Menu implements BoardMoveListener {
         super("Game");
         this.board = board;
 
-        MenuItem newGame = new MenuItem("New Game");
+        newGame = new MenuItem("New Game");
         newGame.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+N"));
         newGame.setOnAction(e -> {
 
@@ -60,7 +59,7 @@ public class GameMenu extends Menu implements BoardMoveListener {
             board.getGame().redoMove();
         });
 
-        export = new MenuItem("Export");
+        export = new MenuItem("Show PGN");
         export.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
         export.setOnAction(e -> {
 
@@ -70,50 +69,47 @@ public class GameMenu extends Menu implements BoardMoveListener {
 
         });
 
-        getItems().addAll(newGame, new SeparatorMenuItem(), pause, resume, new SeparatorMenuItem(), undo, redo,
-                new SeparatorMenuItem(), export);
+        getItems().addAll(newGame, new SeparatorMenuItem(),
+                pause, resume, new SeparatorMenuItem(),
+                undo, redo, new SeparatorMenuItem(),
+                export);
 
     }
 
     @Override
     public void moveMade() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void undoMove() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void resetMoves() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void posChanged(int old, int curr) {
-        // TODO Auto-generated method stub
         undo.setDisable(!board.getGame().canUndo());
         redo.setDisable(!board.getGame().canRedo());
     }
 
     @Override
     public void redoMove() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void gameOver() {
-        // TODO Auto-generated method stub
+
     }
 
     @Override
     public void timerChange() {
-        // TODO Auto-generated method stub
+
     }
 
     public void updatePauseResume() {

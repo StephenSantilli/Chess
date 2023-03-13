@@ -1,11 +1,10 @@
-package guifx;
+package gui;
 
 import game.Position;
 
 import java.util.ArrayList;
 
 import game.BoardMoveListener;
-import game.Game;
 import game.Move;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -233,28 +232,23 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
     @Override
     public void redoMove() {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void gameOver() {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void timerChange() {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void pauseGame() {
-        // TODO Auto-generated method stub
     }
 
     @Override
     public void resumeGame() {
-        // TODO Auto-generated method stub
     }
 
 

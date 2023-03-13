@@ -1,4 +1,4 @@
-package guifx;
+package gui;
 
 import game.Move;
 import javafx.geometry.Insets;
