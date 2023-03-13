@@ -182,6 +182,29 @@ public class Position {
         return checkMate;
     }
 
+    public boolean equals(Position compare) {
+
+        boolean same = true;
+
+        for(int r = 0; r < 8; r++) {
+
+            for(int f = 0; f < 8; f++) {
+
+                if(!pieces[r][f].equals(compare.getPieces()[r][f])) {
+
+                    same = false;
+                    break;
+
+                }
+
+            }
+
+        }
+
+        return same;
+
+    }
+
     /**
      * Creates a new {@link Position} object in the default starting position.
      * 

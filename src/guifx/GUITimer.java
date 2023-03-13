@@ -49,7 +49,7 @@ public class GUITimer extends Label {
 
     public GUITimer(Board board, boolean white) {
 
-        super(formatTime(white ? board.getGame().getWhiteTime() : board.getGame().getBlackTime()));
+        super(formatTime(board.getGame().getCurrentTimerTime(white)));
 
         this.tl = new Timeline();
         tl.setCycleCount(Timeline.INDEFINITE);
@@ -73,12 +73,12 @@ public class GUITimer extends Label {
     }
 
     public void frame() {
-        setText(formatTime(white ? board.getGame().getWhiteTime() : board.getGame().getBlackTime()));
+        setText(formatTime(board.getGame().getCurrentTimerTime(white)));
     }
 
     public void update() {
 
-        if (board.getGame().isWhiteTurn(true) == white) {
+        if (board.getGame().getCurrentCountdownPos().isWhite() == white) {
 
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
             if (!board.getGame().isPaused() && board.getGame().getResult() == 0)
@@ -93,7 +93,7 @@ public class GUITimer extends Label {
             setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
             tl.pause();
             frame();
-            
+
         }
 
     }

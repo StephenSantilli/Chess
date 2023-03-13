@@ -52,8 +52,6 @@ public class App extends Application {
             Board b = new Board(100, menu);
             hb.getChildren().add(b);
             
-            // menu.getMenus().add(new FileMenu(s.getWindow(), b));
-            
             vb.getChildren().addAll(menu, hb);
 
             ScrollPane sp = b.getScrollMovePane();
@@ -68,7 +66,7 @@ public class App extends Application {
             b.setViewOrder(0);
             sp.setViewOrder(1);
 
-            s.setOnKeyReleased(b.keyHandler);
+            s.setOnKeyReleased(b.getKeyHandler());
 
             stage.setOnCloseRequest(e -> {
 

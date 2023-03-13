@@ -1,14 +1,14 @@
 package guifx;
 
-import java.util.ArrayList;
-
 import game.BoardMoveListener;
 import game.Game;
 import game.Move;
 import game.Piece;
 import game.Position;
 import game.Square;
-import javafx.animation.ParallelTransition;
+
+import java.util.ArrayList;
+
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -24,6 +24,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -42,10 +43,19 @@ public class Board extends VBox implements BoardMoveListener {
     private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
     private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
 
-    private int pieceSize = 90;
     private int squareSize = 100;
+    private int pieceSize = 90;
 
     private Game game;
+
+    private ArrayList<GUIPiece> pieces;
+    private ArrayList<PieceTranscoder> transcoderPieces;
+
+    private GUIPiece active;
+    private GUIPiece dragging;
+
+    private boolean flipped;
+    private boolean white;
 
     private StackPane stack;
     private GUITimer topTimer;
@@ -64,54 +74,159 @@ public class Board extends VBox implements BoardMoveListener {
     private GameMenu gameMenu;
     private ViewMenu viewMenu;
 
-    private ArrayList<GUIPiece> pieces;
-    private ArrayList<PieceTranscoder> transcoderPieces;
-
-    private GUIPiece active;
-    private GUIPiece dragging;
-
-    private boolean flipped;
-    private boolean white;
-
     private ArrayList<TranslateTransition> transitions;
 
-    public EventHandler<KeyEvent> keyHandler = new EventHandler<KeyEvent>() {
+    private EventHandler<KeyEvent> keyHandler = ev -> {
 
-        @Override
-        public void handle(KeyEvent e) {
+        if (ev.getCode() == (KeyCode.LEFT)) {
 
-            if (e.getCode() == (KeyCode.LEFT)) {
-                if (game.getCurrentPos() > 0) {
-                    game.setCurrentPos(game.getCurrentPos() - 1);
-                }
+            decPos();
 
-            } else if (e.getCode() == (KeyCode.RIGHT)) {
+        } else if (ev.getCode() == (KeyCode.RIGHT)) {
 
-                if (game.getPositions().size() - 1 > game.getCurrentPos()) {
-                    game.setCurrentPos(game.getCurrentPos() + 1);
-                }
+            incPos();
 
-            } else if (e.getCode() == KeyCode.DOWN) {
+        } else if (ev.getCode() == KeyCode.DOWN) {
 
-                game.setCurrentPos(game.getPositions().size() - 1);
+            goToLastPos();
 
-            } else if (e.getCode() == KeyCode.UP) {
+        } else if (ev.getCode() == KeyCode.UP) {
 
-                game.setCurrentPos(0);
+            goToFirstPos();
 
-            } else if (e.getCode() == KeyCode.ESCAPE) {
+        } else if (ev.getCode() == KeyCode.ESCAPE) {
 
-                active = null;
-                dragging = null;
+            clearSelection();
+
+        }
+
+    };
+
+    private EventHandler<MouseEvent> mouseMoved = ev -> {
+
+        setMouseType(ev.getSceneX(), ev.getSceneY());
+
+    };
+
+    private EventHandler<MouseEvent> mouseReleased = e -> {
+
+        if (e.getButton() != MouseButton.PRIMARY)
+            return;
+
+        if (dragging != null) {
+            dragging.onMouseReleased(e);
+        } else {
+
+            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(), true));
+            if (found != null)
+                found.onMouseReleased(e);
+            else if (active != null)
+                active.onMouseReleased(e);
+            else {
+
+                setActive(null);
+                setDragging(null);
                 updateActive();
                 clearBorder();
-                boardUpdated();
 
             }
 
         }
 
+        setMouseType(e.getSceneX(), e.getSceneY());
+
     };
+
+    private EventHandler<MouseEvent> mousePressed = ev -> {
+
+        if (ev.getButton() != MouseButton.PRIMARY)
+            return;
+
+        if (dragging != null) {
+
+            dragging.onMousePressed(ev);
+
+        } else {
+
+            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));
+
+            if (found != null)
+                found.onMousePressed(ev);
+            else if (active != null)
+                active.onMousePressed(ev);
+
+        }
+        setMouseType(ev.getSceneX(), ev.getSceneY());
+
+    };
+
+    private EventHandler<MouseEvent> mouseDragged = ev -> {
+
+        if (ev.getButton() != MouseButton.PRIMARY)
+            return;
+
+        if (dragging != null) {
+
+            dragging.onMouseDragged(ev);
+
+        }
+
+        setMouseType(ev.getSceneX(), ev.getSceneY());
+
+    };
+
+    // Getters/Setters
+    public int getSquareSize() {
+        return squareSize;
+    }
+
+    public int getPieceSize() {
+        return pieceSize;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public GUIPiece getActive() {
+        return active;
+    }
+
+    public void setActive(GUIPiece active) {
+        this.active = active;
+    }
+
+    public GUIPiece getDragging() {
+        return dragging;
+    }
+
+    public void setDragging(GUIPiece dragging) {
+        this.dragging = dragging;
+    }
+
+    public boolean isFlipped() {
+        return flipped;
+    }
+
+    public boolean isWhite() {
+        return white;
+    }
+
+    public MovePane getMovePane() {
+        return movePane;
+    }
+
+    public ScrollPane getScrollMovePane() {
+        return scrollMovePane;
+    }
+
+    public BarMenu getMenuBar() {
+        return menuBar;
+    }
+
+    public EventHandler<KeyEvent> getKeyHandler() {
+        return keyHandler;
+    }
 
     public Board(int squareSize, BarMenu menuBar) throws Exception {
 
@@ -145,24 +260,15 @@ public class Board extends VBox implements BoardMoveListener {
         scrollMovePane.setMinWidth(220);
 
         this.movePane = new MovePane(this, scrollMovePane);
-        movePane.initMovePane();
-
         scrollMovePane.setContent(movePane);
-        game.addMoveListener(getMovePane());
 
         this.squarePane = new VBox();
-        initSquares();
-
         squareHighlightPane = new Canvas(squareSize * 8, squareSize * 8);
-        drawHighlightSq();
-
         borderPane = new Canvas(squareSize * 8, squareSize * 8);
-        clearBorder();
-
         movesPane = new Canvas(squareSize * 8, squareSize * 8);
-        drawMovesPane();
-
         piecePane = new Pane();
+
+        initSquares();
         initPieceTranscoders();
 
         stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
@@ -173,111 +279,62 @@ public class Board extends VBox implements BoardMoveListener {
 
         getChildren().addAll(topTimerBox, stack, bottomTimerBox);
 
-        timerChange();
+        setOnMouseMoved(mouseMoved);
+        setOnMousePressed(mousePressed);
+        setOnMouseDragged(mouseDragged);
+        setOnMouseReleased(mouseReleased);
 
-        setOnMouseMoved(e -> {
-            setMouseType(e.getSceneX(), e.getSceneY());
-        });
+    }
 
-        setOnMouseReleased(e -> {
+    // Actions
+    public void incPos() {
 
-            if (e.getButton() != MouseButton.PRIMARY)
-                return;
+        if (game.getPositions().size() - 1 > game.getCurrentPos()) {
+            game.setCurrentPos(game.getCurrentPos() + 1);
+        }
 
-            if (dragging != null) {
-                dragging.onMouseReleased(e);
-            } else {
+    }
 
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(), true));
-                if (found != null)
-                    found.onMouseReleased(e);
-                else if (active != null) {
-                    active.onMouseReleased(e);
-                } else {
-                    setActive(null);
-                    setDragging(null);
-                    updateActive();
-                    clearBorder();
-                }
+    public void decPos() {
 
-            }
-            setMouseType(e.getSceneX(), e.getSceneY());
+        if (game.getCurrentPos() > 0) {
+            game.setCurrentPos(game.getCurrentPos() - 1);
+        }
 
-        });
+    }
 
-        setOnMouseDragged(e -> {
+    public void goToFirstPos() {
 
-            if (e.getButton() != MouseButton.PRIMARY)
-                return;
+        game.setCurrentPos(0);
 
-            if (dragging != null) {
+    }
 
-                dragging.onMouseDragged(e);
+    public void goToLastPos() {
 
-            }
+        game.setCurrentPos(game.getPositions().size() - 1);
 
-            setMouseType(e.getSceneX(), e.getSceneY());
+    }
 
-        });
+    public void clearSelection() {
 
-        setOnMousePressed(e -> {
+        active = null;
+        dragging = null;
+        updateActive();
+        clearBorder();
+        boardUpdated();
 
-            if (e.getButton() != MouseButton.PRIMARY)
-                return;
+    }
 
-            if (dragging != null) {
+    public void flipBoard() {
 
-                dragging.onMousePressed(e);
-
-            } else {
-
-                GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(), true));
-                if (found != null)
-                    found.onMousePressed(e);
-                else if (active != null)
-                    active.onMousePressed(e);
-
-            }
-            setMouseType(e.getSceneX(), e.getSceneY());
-
-        });
+        flipped = !flipped;
+        boardUpdated();
 
     }
 
     public void newGame() {
 
         startGame(null);
-
-    }
-
-    private void initMenus() {
-
-        viewMenu = new ViewMenu(this);
-        gameMenu = new GameMenu(this);
-
-        game.addMoveListener(gameMenu);
-
-        menuBar.getMenus().addAll(gameMenu, viewMenu);
-
-    }
-
-    private void initPieceTranscoders() throws Exception {
-
-        transcoderPieces = new ArrayList<PieceTranscoder>();
-
-        boolean color = true;
-
-        for (int i = 0; i < 2; i++) {
-
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'Q'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'R'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'B'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'N'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'P'));
-            color = false;
-
-        }
 
     }
 
@@ -293,6 +350,7 @@ public class Board extends VBox implements BoardMoveListener {
                 game.addMoveListener(this);
                 game.addMoveListener(getMovePane());
                 game.addMoveListener(gameMenu);
+                movePane.initMovePane();
 
                 game.startGame();
                 boardUpdated();
@@ -305,20 +363,27 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
+    // Drawing
     void clearBorder() {
+
         GraphicsContext gc = borderPane.getGraphicsContext2D();
-        gc.setFill(Color.TRANSPARENT);
+
         gc.clearRect(0.0, 0.0, borderPane.getLayoutBounds().getWidth(),
                 borderPane.getLayoutBounds().getHeight());
+
     }
 
     void drawBorder(double x, double y) {
 
         clearBorder();
+
         GraphicsContext gc = borderPane.getGraphicsContext2D();
-        gc.setStroke(SQUARE_BORDER);
+
         double strokeWidth = squareSize / 20.0;
+
         gc.setLineWidth(strokeWidth);
+        gc.setStroke(SQUARE_BORDER);
+
         gc.strokeRect(x + (strokeWidth / 2.0), y + (strokeWidth / 2.0), squareSize - strokeWidth,
                 squareSize - strokeWidth);
 
@@ -327,11 +392,12 @@ public class Board extends VBox implements BoardMoveListener {
     private void drawMovesPane() {
 
         GraphicsContext gc = movesPane.getGraphicsContext2D();
-        gc.setFill(Color.TRANSPARENT);
+
         gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
                 movesPane.getLayoutBounds().getHeight());
 
-        if (active == null || game.getCurrentPos() != game.getPositions().size() - 1 || game.getResult() > 0)
+        if (active == null || game.getCurrentPos() != game.getPositions().size() - 1
+                || game.getResult() != Game.RESULT_IN_PROGRESS)
             return;
 
         ArrayList<Move> pMoves = game.getActivePos().getPieceMoves(active.getPiece());
@@ -339,18 +405,24 @@ public class Board extends VBox implements BoardMoveListener {
         gc.setFill(ATTACK_INDICATOR_COLOR);
         gc.setStroke(ATTACK_INDICATOR_COLOR);
         gc.setLineWidth(squareSize * 0.04);
+
         for (Move m : pMoves) {
+
+            int x = getXBySquare(m.getDestination(), false);
+            int y = getYBySquare(m.getDestination(), false);
 
             if (m.isCapture() && m.getCaptureSquare().equals(m.getDestination())) {
 
-                gc.strokeOval(getXBySquare(m.getDestination()) + (squareSize * 0.05),
-                        getYBySquare(m.getDestination()) + (squareSize * 0.05),
+                gc.strokeOval(x + (squareSize * 0.05),
+                        y + (squareSize * 0.05),
                         squareSize - (squareSize * .1),
                         squareSize - (squareSize * .1));
 
             } else
-                gc.fillOval(getXBySquare(m.getDestination()) + (squareSize / 3.0),
-                        getYBySquare(m.getDestination()) + (squareSize / 3.0), squareSize / 3.0, squareSize / 3.0);
+                gc.fillOval(x + (squareSize / 3.0),
+                        y + (squareSize / 3.0),
+                        squareSize / 3.0,
+                        squareSize / 3.0);
 
         }
 
@@ -359,58 +431,40 @@ public class Board extends VBox implements BoardMoveListener {
     private void drawHighlightSq() {
 
         GraphicsContext gc = squareHighlightPane.getGraphicsContext2D();
-        gc.setFill(Color.TRANSPARENT);
+
         gc.clearRect(0.0, 0.0, squareHighlightPane.getLayoutBounds().getWidth(),
                 squareHighlightPane.getLayoutBounds().getHeight());
 
         gc.setFill(SQUARE_PREV_MOVE);
+
         if (game.getCurrentPos() > 0) {
 
             Position pos = game.getActivePos();
-            // prev move origin square
+
             Square origin = pos.getMove().getOrigin();
             gc.fillRect(getXBySquare(origin), getYBySquare(origin), squareSize, squareSize);
 
-            // prev move dest square
             Square destination = pos.getMove().getDestination();
             gc.fillRect(getXBySquare(destination), getYBySquare(destination), squareSize, squareSize);
+
         }
 
         gc.setFill(SQUARE_ACTIVE);
-        // active piece square
+
         if (active != null) {
 
-            gc.fillRect(getXBySquare(active.getPiece().getSquare()), getYBySquare(
-                    active.getPiece().getSquare()), squareSize, squareSize);
+            gc.fillRect(getXBySquare(active.getPiece().getSquare()),
+                    getYBySquare(active.getPiece().getSquare()),
+                    squareSize,
+                    squareSize);
 
         } else if (dragging != null) {
 
-            gc.fillRect(getXBySquare(dragging.getPiece().getSquare()), getYBySquare(
-                    dragging.getPiece().getSquare()), squareSize, squareSize);
+            gc.fillRect(getXBySquare(dragging.getPiece().getSquare()),
+                    getYBySquare(dragging.getPiece().getSquare()),
+                    squareSize,
+                    squareSize);
 
-        }
-
-    }
-
-    private void initSquares() {
-
-        boolean dark = false;
-        for (int r = 0; r < 8; r++) {
-
-            HBox hbox = new HBox();
-
-            for (int c = 0; c < 8; c++, dark = !dark) {
-
-                Rectangle sq = new Rectangle(squareSize, squareSize, dark ? SQUARE_DARK : SQUARE_LIGHT);
-
-                StackPane pane = new StackPane(sq);
-
-                hbox.getChildren().add(pane);
-
-            }
-            dark = !dark;
-
-            squarePane.getChildren().add(hbox);
         }
 
     }
@@ -418,6 +472,7 @@ public class Board extends VBox implements BoardMoveListener {
     private void setMouseType(double mouseX, double mouseY) {
 
         if (dragging != null) {
+
             setCursor(Cursor.CLOSED_HAND);
 
         } else if (getSquareByLoc(mouseX, mouseY, true).isValid()
@@ -431,19 +486,33 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    private void pieceMoveAnimation(GUIPiece gp, Square origin, Square destination, Piece capture) {
+    /**
+     * Creates and plays an animation of a piece moving. If {@code capture} is not
+     * {@code null}, the capture
+     * piece will still show up until the animation completes.
+     * 
+     * @param guiPiece    The piece to animate
+     * @param origin      The start square of the animated piece
+     * @param destination The end square of the animated piece
+     * @param capture     The piece captured by {@code guiPiece}. Should be
+     *                    {@code null} if
+     *                    there is no piece being captured.
+     */
+    private void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture) {
 
-        ImageView img = gp.getImage();
+        ImageView img = guiPiece.getImage();
 
         TranslateTransition t = new TranslateTransition(Duration.millis(100), img);
 
         double fromX = getXBySquare(origin) + ((squareSize - pieceSize) / 2.0);
-        double toX = getXBySquare(destination) + ((squareSize - pieceSize) / 2.0);
         double fromY = getYBySquare(origin) + ((squareSize - pieceSize) / 2.0);
+
+        double toX = getXBySquare(destination) + ((squareSize - pieceSize) / 2.0);
         double toY = getYBySquare(destination) + ((squareSize - pieceSize) / 2.0);
 
         t.setFromX(fromX - toX);
         t.setFromY(fromY - toY);
+
         t.setToX(0);
         t.setToY(0);
 
@@ -471,78 +540,79 @@ public class Board extends VBox implements BoardMoveListener {
         transitions.add(t);
     }
 
-    void drawPieces(boolean animate, Position p1, Position p2) {
-        drawPieces(animate, p1, p2, false);
-    }
-
     /**
-     * Clears the old pieces and draws new pieces on the board.
+     * Clears the old pieces and draws the pieces on the board.
      * 
      * @param animate  Whether or not the move should be animated. Must be
      *                 {@code false} if the positions are not back to back.
-     * @param p1       The position before the board was updated.
-     * @param p2       The position after the board was updated. If {@code null},
+     * @param pos1     The position before the board was updated.
+     * @param pos2     The position after the board was updated. If {@code null},
      *                 the active position of the game will be used instead.
      * @param backward {@code true} if {@code p2} is before {@code p1} (such as when
      *                 undoing.)
      */
-    private void drawPieces(boolean animate, Position p1, Position p2, boolean backward) {
+    private void drawPieces(boolean animate, Position pos1, Position pos2, boolean backward) {
 
         this.pieces = new ArrayList<GUIPiece>();
-        piecePane.getChildren().clear();
         transitions = new ArrayList<TranslateTransition>();
 
-        if (p2 == null)
-            p2 = game.getActivePos();
+        piecePane.getChildren().clear();
+
+        if (pos2 == null)
+            pos2 = game.getActivePos();
 
         for (int r = 0; r < 8; r++) {
 
             for (int c = 0; c < 8; c++) {
 
-                Piece p = p2.getPieceAtSquare(new Square(r + 1, c + 1));
+                Piece p = pos2.getPieceAtSquare(new Square(r + 1, c + 1));
 
                 if (p == null)
                     continue;
 
                 ImageView img = getPieceTranscoder(p).getImageView();
+                GUIPiece guiP = new GUIPiece(p, img, this, stack);
+
                 piecePane.getChildren().add(img);
 
-                GUIPiece guiP = new GUIPiece(p, img, this, stack);
                 pieces.add(guiP);
 
                 img.setLayoutX(getXBySquare(p.getSquare()) + ((squareSize - pieceSize) / 2.0));
                 img.setLayoutY(getYBySquare(p.getSquare()) + ((squareSize - pieceSize) / 2.0));
 
-                if (animate && p1 != null && p2 != null
+                if (animate && pos1 != null && pos2 != null
                 // Either not backwards and the piece in the move of p2 is this piece
-                        && ((!backward && p2.getMove().getDestination().equals(p.getSquare()))
+                        && ((!backward && pos2.getMove().getDestination().equals(p.getSquare()))
                                 // Or it is backwards and the piece in the move of p1 is this piece
-                                || (backward && p1.getMove().getOrigin().equals(p.getSquare()))
-                                || (!backward && p2.getMove().isCastle()
-                                        && p2.getMove().getRookDestination().equals(p.getSquare()))
-                                || (backward && p1.getMove().isCastle()
-                                        && p1.getMove().getRookOrigin().equals(p.getSquare())))) {
+                                || (backward && pos1.getMove().getOrigin().equals(p.getSquare()))
+                                // Same as first term, but for castle moves.
+                                || (!backward && pos2.getMove().isCastle()
+                                        && pos2.getMove().getRookDestination().equals(p.getSquare()))
+                                // Same as second term, but for castle moves.
+                                || (backward && pos1.getMove().isCastle()
+                                        && pos1.getMove().getRookOrigin().equals(p.getSquare())))) {
 
                     if (!backward) {
 
-                        if (p2.getMove().isCastle() && p2.getMove().getRookDestination().equals(p.getSquare())) {
+                        if (pos2.getMove().isCastle() && pos2.getMove().getRookDestination().equals(p.getSquare())) {
 
-                            pieceMoveAnimation(guiP, p2.getMove().getRookOrigin(),
-                                    p2.getMove().getRookDestination(),
+                            pieceMoveAnimation(guiP, pos2.getMove().getRookOrigin(),
+                                    pos2.getMove().getRookDestination(),
                                     null);
 
                         } else
-                            pieceMoveAnimation(guiP, p2.getMove().getOrigin(), p2.getMove().getDestination(),
-                                    p2.getMove().getCapturePiece());
+                            pieceMoveAnimation(guiP, pos2.getMove().getOrigin(), pos2.getMove().getDestination(),
+                                    pos2.getMove().getCapturePiece());
 
                     } else {
 
-                        if (p1.getMove().isCastle() && p1.getMove().getRookOrigin().equals(p.getSquare())) {
-                            pieceMoveAnimation(guiP, p1.getMove().getRookDestination(), p1.getMove().getRookOrigin(),
+                        if (pos1.getMove().isCastle() && pos1.getMove().getRookOrigin().equals(p.getSquare())) {
+                            pieceMoveAnimation(guiP, pos1.getMove().getRookDestination(),
+                                    pos1.getMove().getRookOrigin(),
                                     null);
                         } else
-                            pieceMoveAnimation(guiP, p1.getMove().getDestination(), p1.getMove().getOrigin(),
-                                    p1.getMove().getCapturePiece());
+                            pieceMoveAnimation(guiP, pos1.getMove().getDestination(), pos1.getMove().getOrigin(),
+                                    pos1.getMove().getCapturePiece());
 
                     }
 
@@ -557,118 +627,25 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    public GUIPiece getGUIPieceAtSquare(Square square) {
-
-        GUIPiece found = null;
-        for (int i = 0; i < pieces.size() && found == null; i++) {
-
-            if (pieces.get(i).getPiece().getSquare().equals(square))
-                found = pieces.get(i);
-
-        }
-        return found;
-
-    }
-
-    public void flipBoard() {
-
-        flipped = !flipped;
-        boardUpdated();
-
-    }
-
-    public Square getSquareByLoc(double x, double y) {
-        return getSquareByLoc(x, y, false);
-    }
-
-    public Square getSquareByLoc(double x, double y, boolean relative) {
-
-        if (relative) {
-            Bounds bds = stack.localToScene(getBoundsInParent());
-            x -= bds.getMinX();
-            y -= bds.getMinY();
-        }
-
-        if (x < 0 || x > squareSize * 8 || y < 0 || y > squareSize * 8)
-            return new Square(-1, -1);
-
-        if (!flipped)
-            return new Square(((((int) x) / squareSize) + 1),
-                    8 - ((int) y / squareSize));
-        else
-            return new Square(8 - (((int) x) / squareSize), (int) y / squareSize + 1);
-
-    }
-
-    public int getXBySquare(Square sq) {
-        return getXBySquare(sq, false);
-    }
-
-    public int getXBySquare(Square sq, boolean relative) {
-        int rel = 0;
-        if (relative) {
-            Bounds bds = stack.localToScene(getBoundsInParent());
-            rel = (int) bds.getMinX();
-        }
-
-        if (!flipped)
-            return (int) (((sq.getFile() - 1) * squareSize)) - rel;
-        else
-            return (int) ((squareSize * 7) - ((sq.getFile() - 1) * squareSize)) - rel;
-
-    }
-
-    public int getYBySquare(Square sq) {
-        return getYBySquare(sq, false);
-    }
-
-    public int getYBySquare(Square sq, boolean relative) {
-        int rel = 0;
-        if (relative) {
-            Bounds bds = stack.localToScene(getBoundsInParent());
-            rel = (int) bds.getMinY();
-        }
-
-        // img.setLayoutY((squareSize * 7) - (c * squareSize) + ((squareSize -
-        // pieceSize) / 2.0));
-        if (!flipped)
-            return (int) ((squareSize * 7) - ((sq.getRank() - 1) * squareSize)) - rel;
-        else
-            return (int) (((sq.getRank() - 1) * squareSize)) - rel;
-        // return (7 - sq.getRank()) * squareSize - rel;
-
-    }
-
-    private PieceTranscoder getPieceTranscoder(Piece p) {
-
-        PieceTranscoder found = null;
-
-        for (int i = 0; i < transcoderPieces.size() && found == null; i++) {
-
-            PieceTranscoder pt = transcoderPieces.get(i);
-            if (pt.isColor() == p.isWhite() && pt.getPieceCode() == p.getCode())
-                found = pt;
-
-        }
-
-        return found;
-
-    }
-
     /**
      * Updates the square highlights and moves panes.
      */
     public void updateActive() {
+
         drawHighlightSq();
         drawMovesPane();
+
+    }
+
+    public void updateTimers() {
+
+        topTimer.update();
+        bottomTimer.update();
+
     }
 
     public void boardUpdated() {
-        boardUpdated(false, null, null);
-    }
-
-    public void boardUpdated(boolean animate, Position p1, Position p2) {
-        boardUpdated(animate, p1, p2, false);
+        boardUpdated(false, null, null, false);
     }
 
     public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
@@ -710,16 +687,22 @@ public class Board extends VBox implements BoardMoveListener {
         pD.setOnHidden(e -> {
 
             if (pD.getResult() == 'X') {
+
                 game.undoMove();
+
             } else {
+
                 game.setPromo(pD.getResult());
+
             }
+
             pD.hide();
             boardUpdated();
 
         });
 
         Bounds bds = stack.localToScreen(getBoundsInParent());
+
         pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
         pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination())
                 - ((!game.getActivePos().isWhite() && !flipped) || (game.getActivePos().isWhite() && flipped)
@@ -731,10 +714,164 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-    public int getSquareSize() {
-        return squareSize;
+    /**
+     * Gets the corresponding {@link PieceTranscoder} for the type and color of the
+     * piece given.
+     * 
+     * @param piece The piece to get the {@link PieceTranscoder} for
+     * @return The {@link PieceTranscoder}
+     */
+    private PieceTranscoder getPieceTranscoder(Piece piece) {
+
+        PieceTranscoder found = null;
+
+        for (int i = 0; i < transcoderPieces.size() && found == null; i++) {
+
+            PieceTranscoder pt = transcoderPieces.get(i);
+            if (pt.isColor() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
+                found = pt;
+
+        }
+
+        return found;
+
     }
 
+    public GUIPiece getGUIPieceAtSquare(Square square) {
+
+        GUIPiece found = null;
+
+        for (int i = 0; i < pieces.size() && found == null; i++) {
+
+            if (pieces.get(i).getPiece().getSquare().equals(square))
+                found = pieces.get(i);
+
+        }
+
+        return found;
+
+    }
+
+    // Calculations
+
+    /**
+     * Gets the {@link Square} that {@code x} and {@code y} fall within.
+     * 
+     * <p>
+     * If {@code relative} is {@code true}, the {@code x} and {@code y} values will
+     * be treated as coming from the outer {@link VBox} that encases the
+     * {@link Board}.
+     * 
+     * @param x        The x location
+     * @param y        The y location
+     * @param relative Whether or not to treat the {@code x} and {@code y} values as
+     *                 relative values
+     * @return The {@link Square} object
+     */
+    public Square getSquareByLoc(double x, double y, boolean relative) {
+
+        if (relative) {
+            Bounds bds = stack.localToScene(getBoundsInParent());
+            x -= bds.getMinX();
+            y -= bds.getMinY();
+        }
+
+        if (x < 0 || x > squareSize * 8 || y < 0 || y > squareSize * 8)
+            return new Square(-1, -1);
+
+        if (!flipped)
+            return new Square(((((int) x) / squareSize) + 1),
+                    8 - ((int) y / squareSize));
+        else
+            return new Square(8 - (((int) x) / squareSize), (int) y / squareSize + 1);
+
+    }
+
+    /**
+     * Gets the x location of the provided {@link Square}.
+     * 
+     * @param square The {@link Square} to get the x value for
+     * @return The x location of the top left of the {@link Square}
+     */
+    public int getXBySquare(Square square) {
+
+        return getXBySquare(square, false);
+
+    }
+
+    /**
+     * Gets the x location of the provided {@link Square}.
+     * 
+     * <p>
+     * If {@code relative} is {@code true}, the x value will be in the context of
+     * the outer {@link VBox} that encases the {@link Board}.
+     * 
+     * @param square   The {@link Square} to get the x value for
+     * @param relative Whether or not to treat the x value as relative
+     * @return The x location of the top left of the {@link Square}
+     */
+    public int getXBySquare(Square square, boolean relative) {
+
+        int rel = 0;
+
+        if (relative) {
+
+            Bounds bds = stack.localToScene(getBoundsInParent());
+
+            rel = (int) bds.getMinX();
+
+        }
+
+        if (!flipped)
+            return (int) ((square.getFile() - 1) * squareSize) - rel;
+        else
+            return (int) ((squareSize * 7) - ((square.getFile() - 1) * squareSize)) - rel;
+
+    }
+
+    /**
+     * Gets the y location of the provided {@link Square}.
+     * 
+     * @param square The {@link Square} to get the y value for
+     * @return The y location of the top left of the {@link Square}
+     */
+    public int getYBySquare(Square square) {
+
+        return getYBySquare(square, false);
+
+    }
+
+    /**
+     * Gets the y location of the provided {@link Square}.
+     * 
+     * <p>
+     * If {@code relative} is {@code true}, the y value will be in the context of
+     * the outer {@link VBox} that encases the {@link Board}.
+     * 
+     * @param square   The {@link Square} to get the y value for
+     * @param relative Whether or not to treat the y value as relative
+     * @return The y location of the top left of the {@link Square}
+     */
+    public int getYBySquare(Square square, boolean relative) {
+
+        int rel = 0;
+
+        if (relative) {
+
+            Bounds bds = stack.localToScene(getBoundsInParent());
+
+            rel = (int) bds.getMinY();
+
+        }
+
+        if (!flipped)
+            return (int) ((squareSize * 7) - ((square.getRank() - 1) * squareSize)) - rel;
+        else
+            return (int) ((square.getRank() - 1) * squareSize) - rel;
+
+    }
+
+    // Event Handlers
     @Override
     public void moveMade() {
 
@@ -776,17 +913,20 @@ public class Board extends VBox implements BoardMoveListener {
 
     @Override
     public void timerChange() {
+
         Platform.runLater(() -> {
-            topTimer.update();
-            bottomTimer.update();
+
+            updateTimers();
+
         });
 
     }
 
     @Override
     public void gameOver() {
-        // TODO Auto-generated method stub
+
         Platform.runLater(() -> {
+
             if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
                 return;
 
@@ -809,68 +949,83 @@ public class Board extends VBox implements BoardMoveListener {
             over.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
 
             over.showAndWait();
+
         });
 
     }
 
     @Override
     public void pauseGame() {
-        timerChange();
+
+        Platform.runLater(() -> {
+
+            updateTimers();
+
+        });
+
     }
 
     @Override
     public void resumeGame() {
-        // TODO Auto-generated method stub
+
     }
 
-    // Getters/Setters
+    // Initializers
+    private void initPieceTranscoders() throws Exception {
 
-    public int getPieceSize() {
-        return pieceSize;
+        transcoderPieces = new ArrayList<PieceTranscoder>();
+
+        boolean color = true;
+
+        for (int i = 0; i < 2; i++) {
+
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'Q'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'R'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'B'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'N'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'P'));
+
+            color = false;
+
+        }
+
     }
 
-    public BarMenu getMenuBar() {
-        return menuBar;
+    private void initMenus() {
+
+        viewMenu = new ViewMenu(this);
+        gameMenu = new GameMenu(this);
+
+        game.addMoveListener(gameMenu);
+
+        menuBar.getMenus().addAll(gameMenu, viewMenu);
+
     }
 
-    public boolean isWhite() {
-        return white;
-    }
+    private void initSquares() {
 
-    public boolean isFlipped() {
-        return flipped;
-    }
+        boolean dark = false;
 
-    public GUITimer getTopTimer() {
-        return topTimer;
-    }
+        for (int r = 0; r < 8; r++) {
 
-    public Game getGame() {
-        return game;
-    }
+            HBox hbox = new HBox();
 
-    public void setDragging(GUIPiece dragging) {
-        this.dragging = dragging;
-    }
+            for (int c = 0; c < 8; c++, dark = !dark) {
 
-    public GUIPiece getDragging() {
-        return dragging;
-    }
+                Rectangle sq = new Rectangle(squareSize, squareSize, dark ? SQUARE_DARK : SQUARE_LIGHT);
 
-    public void setActive(GUIPiece active) {
-        this.active = active;
-    }
+                StackPane pane = new StackPane(sq);
 
-    public GUIPiece getActive() {
-        return active;
-    }
+                hbox.getChildren().add(pane);
 
-    public MovePane getMovePane() {
-        return movePane;
-    }
+            }
 
-    public ScrollPane getScrollMovePane() {
-        return scrollMovePane;
+            dark = !dark;
+
+            squarePane.getChildren().add(hbox);
+        }
+
     }
 
 }

@@ -246,7 +246,7 @@ public class PGNParser {
 
     }
 
-    public PGNParser(Game game, Map<String, String> tags) throws Exception {
+    public PGNParser(Game game, Map<String, String> tags, boolean includeClock) throws Exception {
 
         text = "";
         extraTags = new ArrayList<String>();
@@ -261,7 +261,7 @@ public class PGNParser {
 
             String comment = null;
 
-            if (game.getTimePerSide() > 0 && game.getPositions().get(i - 1).getTimerEnd() > 0) {
+            if (includeClock && game.getTimePerSide() > 0 && game.getPositions().get(i - 1).getTimerEnd() > 0) {
                 comment = "{[%clk " + millisToOutputFormat(game.getPositions().get(i - 1).getTimerEnd()) + "]}";
             }
 

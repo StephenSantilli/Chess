@@ -98,11 +98,13 @@ public class Game {
 
     private long pauseStart;
 
+    private ScheduledExecutorService flagfallChecker;
+
     Runnable flagfall = new Runnable() {
 
         public void run() {
 
-            Position a = getLastPos();
+            Position a = getCurrentCountdownPos();
             long start = a.getSystemTimeStart();
 
             if (start <= 0)
@@ -119,18 +121,29 @@ public class Game {
 
     };
 
-    private ScheduledExecutorService flagfallChecker;
-
+    /**
+     * Initializes a new Game with no time control.
+     */
     public Game() {
         this(-1, -1);
     }
 
+    /**
+     * Initializes a new Game with the specified time control.
+     * 
+     * @param timePerSide The amount of time, in seconds, each side gets at the
+     *                    start.
+     * @param timePerMove The amount of time, in seconds, each side gets added after
+     *                    each move they make.
+     */
     public Game(int timePerSide, int timePerMove) {
 
         positions = new ArrayList<Position>();
         moveListeners = new ArrayList<BoardMoveListener>();
+
         positions.add(new Position(this));
         currentPos = 0;
+
         result = RESULT_NOT_STARTED;
         resultReason = REASON_IN_PROGRESS;
 
@@ -168,7 +181,7 @@ public class Game {
 
     public String exportPosition() throws Exception {
 
-        return new PGNParser(this, null).outputPGN(false);
+        return new PGNParser(this, null, true).outputPGN(false);
 
     }
 
@@ -288,7 +301,9 @@ public class Game {
             return;
         }
 
-        flipTimer(true, 0);
+        if (movePosition.getMove().getPromoteType() != '?')
+            flipTimer(true, 0);
+
         fireMoveMade();
 
     }
@@ -349,6 +364,7 @@ public class Game {
 
         if (getActivePos().getMove() != null && getActivePos().getMove().getPromoteType() == '?') {
             getActivePos().setPromoType(piece, this);
+            flipTimer(true, 0);
         }
 
         fireMoveMade();
@@ -369,22 +385,37 @@ public class Game {
 
     public boolean isWhiteTurn(boolean overall) {
 
-        return positions.get(overall ? positions.size() - 1 : currentPos).isWhite();
+        return (overall ? getLastPos() : getActivePos()).isWhite();
 
     }
 
-    public long getWhiteTime() {
+    public boolean isLastPosCountdown() {
+        return (getLastPos().getMove() == null || getLastPos().getMove().getPromoteType() != '?');
+    }
+
+    public Position getCurrentCountdownPos() {
+
+        return isLastPosCountdown() ? getLastPos()
+                : getPreviousPos();
+
+    }
+
+    public long getCurrentTimerTime(boolean color) {
+
         if (timePerSide <= -1)
             return -1;
 
-        if (!isWhiteTurn(true))
-            return whiteTimer >= 0 ? whiteTimer : 0;
+        Position p = getCurrentCountdownPos();
+        long timer = color ? whiteTimer : blackTimer;
+
+        if (p.isWhite() != color)
+            return timer >= 0 ? timer : 0;
         else {
-            if (whiteTimer <= 0)
+            if (timer <= 0)
                 return 0;
             else {
-                long time = whiteTimer
-                        - (System.currentTimeMillis() - positions.get(positions.size() - 1).getSystemTimeStart());
+                long time = timer
+                        - (System.currentTimeMillis() - p.getSystemTimeStart());
 
                 if (time <= 0)
                     return 0;
@@ -392,27 +423,7 @@ public class Game {
                 return time;
             }
         }
-    }
 
-    public long getBlackTime() {
-        if (timePerSide <= -1)
-            return -1;
-
-        if (isWhiteTurn(true))
-            return blackTimer;
-        else {
-            if (blackTimer <= 0)
-                return 0;
-            else {
-                long time = blackTimer
-                        - (System.currentTimeMillis() - positions.get(positions.size() - 1).getSystemTimeStart());
-
-                if (time <= 0)
-                    return 0;
-
-                return time;
-            }
-        }
     }
 
     public void gameOver() {
@@ -463,8 +474,8 @@ public class Game {
             } else {
                 blackTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
             }
-            //TODO fix output being wrong
-            previous.setTimerEnd(white ? whiteTimer : blackTimer);
+            // TODO fix output being wrong
+            previous.setTimerEnd(previous.isWhite() ? whiteTimer : blackTimer);
         }
 
         if (pauseTime > 0) {
@@ -531,6 +542,8 @@ public class Game {
         if (!canUndo())
             return;
 
+        boolean isCountdown = isLastPosCountdown();
+
         Position redo = positions.get(currentPos);
 
         positions.remove(currentPos);
@@ -546,23 +559,28 @@ public class Game {
         redo.setSystemTimeStart(-1);
         redo.setTimerEnd(-1);
 
-        Position prev = getActivePos();
-        if (isWhiteTurn(true)) {
-            blackTimer = getCurrentPos() == 0 ? timePerSide : prev.getTimerEnd();
-            whiteTimer -= timePerMove;
-        } else {
-            whiteTimer = getCurrentPos() == 0 ? timePerSide : prev.getTimerEnd();
-            blackTimer -= timePerMove;
-        }
-
         if (result > RESULT_IN_PROGRESS) {
             result = RESULT_IN_PROGRESS;
             resultReason = REASON_IN_PROGRESS;
         }
 
-        getActivePos().setSystemTimeStart(-1);
+        if (isCountdown) {
 
-        flipTimer(false, 0);
+            Position prev = getPreviousPos();
+            if (getLastPos().isWhite()) {
+                blackTimer = prev == null ? timePerSide : prev.getTimerEnd();
+                whiteTimer -= timePerMove;
+            } else {
+                whiteTimer = prev == null ? timePerSide : prev.getTimerEnd();
+                blackTimer -= timePerMove;
+            }
+
+            getLastPos().setSystemTimeStart(-1);
+
+            flipTimer(false, 0);
+
+        }
+
         fireUndoMove();
 
     }
@@ -575,7 +593,7 @@ public class Game {
 
     public void redoMove() {
 
-        Position redo = positions.get(positions.size() - 1).getRedo();
+        Position redo = getLastPos().getRedo();
 
         if (!canRedo())
             return;
@@ -586,7 +604,18 @@ public class Game {
         --currentPos;
         setCurrentPos(positions.size() - 1);
 
-        flipTimer(true, 0);
+        boolean redoTime = getPreviousPos().getTimerEnd() > 0;
+
+        if (redoTime) {
+
+            if (getPreviousPos().isWhite())
+                whiteTimer = getPreviousPos().getTimerEnd();
+            else
+                blackTimer = getPreviousPos().getTimerEnd();
+
+        }
+
+        flipTimer(!redoTime, 0);
         fireMoveMade();
         fireRedoMove();
 
