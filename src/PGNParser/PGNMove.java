@@ -34,16 +34,19 @@ public class PGNMove {
     /** The result of the game. See {@link PGNParser#result}. */
     private String gameTermination;
 
-    /** The {@code int} corresponding to the numeric annotation glyph. Will be the same as the index in {@link #NAGs}. */
+    /**
+     * The {@code int} corresponding to the numeric annotation glyph. Will be the
+     * same as the index in {@link #NAGs}.
+     */
     private int NAG;
 
     public String getTag(String key) {
 
         Matcher m = Pattern.compile("\\[\\%(?<key>[^\\s]+) (?<value>[^\\]]+)\\]").matcher(commentary);
-        
-        while(m.find()) {
 
-            if(m.group("key").equals(key)) {
+        while (m.find()) {
+
+            if (m.group("key").equals(key)) {
                 return m.group("value").trim().replaceAll("\n", "");
             }
 
@@ -59,9 +62,12 @@ public class PGNMove {
 
         str += moveText;
         str += suffix;
-        if(NAG > 5 || (suffix.equals("") && NAG > 0)) str += " $" + NAG;
-        if(!commentary.equals("")) str += " " + commentary;
-        if(!gameTermination.equals("")) str += " " + gameTermination;
+        if (NAG > 5 || (suffix.equals("") && NAG > 0))
+            str += " $" + NAG;
+        if (!commentary.equals(""))
+            str += " " + commentary;
+        if (!gameTermination.equals(""))
+            str += " " + gameTermination;
 
         return str;
 
@@ -80,8 +86,6 @@ public class PGNMove {
         this.suffix = suffix == null ? "" : suffix.trim().replaceAll("\n", " ").replaceAll("  ", " ");
 
     }
-
-
 
     public static final String[] NAGs = {
             "null annotation", "good move (traditional !)", "poor move (traditional ?)",
