@@ -119,6 +119,65 @@ public class Game {
 
     };
 
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public int getTimePerSide() {
+        return timePerSide;
+    }
+
+    public int getTimePerMove() {
+        return timePerMove;
+    }
+
+    public Position getLastPos() {
+        return positions.get(positions.size() - 1);
+    }
+
+    public Position getActivePos() {
+        return positions.get(currentPos);
+    }
+
+    public Position getPreviousPos() {
+        if (currentPos == 0)
+            return null;
+
+        return positions.get(currentPos - 1);
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    public int getResultReason() {
+        return resultReason;
+    }
+
+    public ArrayList<Position> getPositions() {
+        return positions;
+    }
+
+    public int getCurrentPos() {
+        return currentPos;
+    }
+
+    /**
+     * @param timePerSide The time, in seconds, each side has at the start of the
+     *                    game.
+     */
+    public void setTimePerSide(int timePerSide) {
+        this.timePerSide = timePerSide * 1000;
+    }
+
+    /**
+     * @param timePerMove The time, in seconds, each side gets at the end of each of
+     *                    their moves.
+     */
+    public void setTimePerMove(int timePerMove) {
+        this.timePerMove = timePerMove * 1000;
+    }
+
     /**
      * Initializes a new Game with no time control.
      */
@@ -181,65 +240,6 @@ public class Game {
 
         return new PGNParser(this, null, true).outputPGN(false);
 
-    }
-
-    public boolean isPaused() {
-        return paused;
-    }
-
-    public int getTimePerSide() {
-        return timePerSide;
-    }
-
-    public int getTimePerMove() {
-        return timePerMove;
-    }
-
-    public Position getLastPos() {
-        return positions.get(positions.size() - 1);
-    }
-
-    public Position getActivePos() {
-        return positions.get(currentPos);
-    }
-
-    public Position getPreviousPos() {
-        if (currentPos == 0)
-            return null;
-
-        return positions.get(currentPos - 1);
-    }
-
-    public int getResult() {
-        return result;
-    }
-
-    public int getResultReason() {
-        return resultReason;
-    }
-
-    public ArrayList<Position> getPositions() {
-        return positions;
-    }
-
-    public int getCurrentPos() {
-        return currentPos;
-    }
-
-    /**
-     * @param timePerSide The time, in seconds, each side has at the start of the
-     *                    game.
-     */
-    public void setTimePerSide(int timePerSide) {
-        this.timePerSide = timePerSide * 1000;
-    }
-
-    /**
-     * @param timePerMove The time, in seconds, each side gets at the end of each of
-     *                    their moves.
-     */
-    public void setTimePerMove(int timePerMove) {
-        this.timePerMove = timePerMove * 1000;
     }
 
     public void makeMove(Move m) {
