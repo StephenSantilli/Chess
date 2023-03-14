@@ -1,6 +1,10 @@
-package game;
+package game.pieces;
 
 import java.util.ArrayList;
+
+import game.Move;
+import game.Position;
+import game.Square;
 
 public class Pawn extends Piece {
 
@@ -10,10 +14,6 @@ public class Pawn extends Piece {
 
     public Pawn(int file, int rank, boolean white, boolean hasMoved) {
         super(file, rank, white, hasMoved);
-    }
-
-    public String toString() {
-        return "P";
     }
 
     public char getCode() {

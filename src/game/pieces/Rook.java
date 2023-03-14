@@ -1,6 +1,9 @@
-package game;
+package game.pieces;
 
 import java.util.ArrayList;
+
+import game.Move;
+import game.Position;
 
 public class Rook extends Piece {
 
@@ -10,10 +13,6 @@ public class Rook extends Piece {
 
     public Rook(int file, int rank, boolean white, boolean hasMoved) {
         super(file, rank, white, hasMoved);
-    }
-
-    public String toString() {
-        return "R";
     }
 
     public char getCode() {

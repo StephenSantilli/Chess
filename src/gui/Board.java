@@ -3,9 +3,9 @@ package gui;
 import game.BoardMoveListener;
 import game.Game;
 import game.Move;
-import game.Piece;
 import game.Position;
 import game.Square;
+import game.pieces.Piece;
 
 import java.util.ArrayList;
 

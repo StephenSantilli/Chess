@@ -1,6 +1,10 @@
-package game;
+package game.pieces;
 
 import java.util.ArrayList;
+
+import game.Move;
+import game.Position;
+import game.Square;
 
 public class Knight extends Piece {
 
@@ -10,12 +14,6 @@ public class Knight extends Piece {
 
     public Knight(int file, int rank, boolean white, boolean hasMoved) {
         super(file, rank, white, hasMoved);
-    }
-
-    public String toString() {
-
-        return "N";
-
     }
 
     public char getCode() {

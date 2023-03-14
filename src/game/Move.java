@@ -2,6 +2,8 @@ package game;
 
 import java.util.ArrayList;
 
+import game.pieces.Piece;
+
 public class Move {
 
     private Square origin;

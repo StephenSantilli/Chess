@@ -1,6 +1,10 @@
-package game;
+package game.pieces;
 
 import java.util.ArrayList;
+
+import game.Move;
+import game.Position;
+import game.Square;
 
 abstract public class Piece {
 

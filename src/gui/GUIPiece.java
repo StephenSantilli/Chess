@@ -1,8 +1,8 @@
 package gui;
 
 import game.Move;
-import game.Piece;
 import game.Square;
+import game.pieces.Piece;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;

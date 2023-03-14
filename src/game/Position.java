@@ -2,6 +2,14 @@ package game;
 
 import java.util.ArrayList;
 
+import game.pieces.Bishop;
+import game.pieces.King;
+import game.pieces.Knight;
+import game.pieces.Pawn;
+import game.pieces.Piece;
+import game.pieces.Queen;
+import game.pieces.Rook;
+
 public class Position {
 
     private Piece[][] pieces;
