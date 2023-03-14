@@ -40,7 +40,7 @@ sourceSets {
 application {
 
     mainClass = 'gui.Chess'
-    applicationName = 'Chess'
+    applicationName = 'ChessX'
     
 }
 
@@ -54,10 +54,11 @@ runtime {
 
     jpackage {
         mainClass = 'gui.Chess'
-        applicationName = 'Chess'
-        imageName = 'Chess'
+        applicationName = 'ChessX'
+        imageName = 'ChessX'
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
-        imageOptions += ['--icon', "resources/img/icon_256x256.png"]
+        def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
+        imageOptions += ['--icon', "resources/icon_256x256.$imgType"]
 
         installerOptions += ['--resource-dir', "resources"]
 
@@ -65,7 +66,7 @@ runtime {
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
         }
         else if (currentOs.linux) {
-            installerOptions += ['--linux-package-name', 'Chess','--linux-shortcut']
+            installerOptions += ['--linux-package-name', 'ChessX','--linux-shortcut']
         }
         else if (currentOs.macOsX) {
             installerOptions += ['--mac-package-name', 'ChessX']
