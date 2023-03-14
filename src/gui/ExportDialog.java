@@ -31,6 +31,7 @@ public class ExportDialog extends Stage {
         Scene s = new Scene(vb, 500, 400);
 
         setScene(s);
+        setTitle("Export Game");
 
         String output = "";
         try {
@@ -49,6 +50,7 @@ public class ExportDialog extends Stage {
         }
 
         ta = new TextArea(output);
+        ta.setEditable(false);
 
         VBox.setVgrow(ta, Priority.ALWAYS);
 

@@ -5,8 +5,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import PGNParser.PGNMove;
-import PGNParser.PGNParser;
+import game.PGNParser.PGNMove;
+import game.PGNParser.PGNParser;
 
 public class Game {
 
@@ -29,10 +29,20 @@ public class Game {
     public static final int REASON_FIFTY_MOVE = 9;
     public static final int REASON_OTHER = 10;
 
+    /**
+     * A list of the positions in this game, in order.
+     */
     private ArrayList<Position> positions;
 
+    /**
+     * The index of the current position being displayed. This is not necessarily
+     * the most recent position.
+     */
     private int currentPos;
 
+    /**
+     * The listeners of the move events.
+     */
     private ArrayList<BoardMoveListener> moveListeners;
 
     /**
@@ -92,58 +102,47 @@ public class Game {
      */
     private long blackTimer;
 
+    /**
+     * Whether or not the game is paused.
+     */
     private boolean paused;
 
+    /**
+     * The system time the game was paused.
+     */
     private long pauseStart;
 
+    /**
+     * The service that checks for flagfall in the background.
+     */
     private ScheduledExecutorService flagfallChecker;
 
-    Runnable flagfall = new Runnable() {
+    /**
+     * The flagfall checker task.
+     */
+    Runnable flagfall = () -> {
 
-        public void run() {
+        Position a = getCurrentCountdownPos();
+        long start = a.getSystemTimeStart();
 
-            Position a = getCurrentCountdownPos();
-            long start = a.getSystemTimeStart();
+        if (start <= 0)
+            return;
 
-            if (start <= 0)
-                return;
+        long current = System.currentTimeMillis();
+        if ((current - start) > (a.isWhite() ? whiteTimer : blackTimer)) {
 
-            long current = System.currentTimeMillis();
-            if ((current - start) > (a.isWhite() ? whiteTimer : blackTimer)) {
-
-                markGameOver(isWhiteTurn(true) ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
-
-            }
+            markGameOver(isWhiteTurn(true) ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
 
         }
 
     };
 
-    public boolean isPaused() {
-        return paused;
+    public ArrayList<Position> getPositions() {
+        return positions;
     }
 
-    public int getTimePerSide() {
-        return timePerSide;
-    }
-
-    public int getTimePerMove() {
-        return timePerMove;
-    }
-
-    public Position getLastPos() {
-        return positions.get(positions.size() - 1);
-    }
-
-    public Position getActivePos() {
-        return positions.get(currentPos);
-    }
-
-    public Position getPreviousPos() {
-        if (currentPos == 0)
-            return null;
-
-        return positions.get(currentPos - 1);
+    public int getCurrentPos() {
+        return currentPos;
     }
 
     public int getResult() {
@@ -154,12 +153,41 @@ public class Game {
         return resultReason;
     }
 
-    public ArrayList<Position> getPositions() {
-        return positions;
+    public int getTimePerSide() {
+        return timePerSide;
     }
 
-    public int getCurrentPos() {
-        return currentPos;
+    public int getTimePerMove() {
+        return timePerMove;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * @return the most recent position, the last position in the list of
+     *         positions
+     */
+    public Position getLastPos() {
+        return positions.get(positions.size() - 1);
+    }
+
+    /**
+     * @return the position at {@link #currentPos}
+     */
+    public Position getActivePos() {
+        return positions.get(currentPos);
+    }
+
+    /**
+     * @return the second to last position in the list of positions.
+     */
+    public Position getPreviousPos() {
+        if (currentPos == 0)
+            return null;
+
+        return positions.get(currentPos - 1);
     }
 
     /**

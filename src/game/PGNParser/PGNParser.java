@@ -1,4 +1,4 @@
-package PGNParser;
+package game.PGNParser;
 
 import java.io.FileReader;
 import java.util.ArrayList;

@@ -939,14 +939,45 @@ public class Board extends VBox implements BoardMoveListener {
 
             String msg = "";
             if (game.getResult() == Game.RESULT_DRAW) {
-                msg = "Draw.";
+                msg = "Draw";
             } else if (game.getResult() == Game.RESULT_BLACK_WIN) {
-                msg = "Black win.";
+                msg = "Black win";
             } else if (game.getResult() == Game.RESULT_WHITE_WIN) {
-                msg = "White win.";
+                msg = "White win";
             }
 
-            msg += game.getResultReason();
+            String reason = "";
+
+            switch (game.getResultReason()) {
+
+                case Game.REASON_CHECKMATE:
+                    reason = " by checkmate.";
+                    break;
+                case Game.REASON_FLAGFALL:
+                    reason = " by flagfall.";
+                    break;
+                case Game.REASON_DEAD_INSUFFICIENT_MATERIAL:
+                    reason = " due to insufficient material.";
+                    break;
+                case Game.REASON_DEAD_NO_POSSIBLE_MATE:
+                    reason = " due to no possible checkmate.";
+                    break;
+                case Game.REASON_FIFTY_MOVE:
+                    reason = " by fifty move rule.";
+                    break;
+                case Game.REASON_REPETITION:
+                    reason = " by repetition.";
+                    break;
+                case Game.REASON_STALEMATE:
+                    reason = " by stalemate.";
+                    break;
+                default:
+                    reason = ".";
+                    break;
+
+            }
+
+            msg += reason;
 
             over.setContentText(msg);
 

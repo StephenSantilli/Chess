@@ -1,4 +1,4 @@
-package PGNParser;
+package game.PGNParser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

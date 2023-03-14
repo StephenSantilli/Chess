@@ -138,6 +138,12 @@ public class Move {
 
     }
 
+    public Move(String move, Position pos) {
+
+        //TODO: add parsing PGN input to replace old constructor
+
+    }
+
     public void setText(Position pos) {
 
         String str = "";
@@ -368,6 +374,7 @@ public class Move {
 
     }
 
+    @Deprecated
     public Move(String move, Position pos, boolean white) throws Exception {
 
         move = move.replaceAll("O", "0");
