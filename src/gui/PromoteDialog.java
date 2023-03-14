@@ -26,13 +26,12 @@ public class PromoteDialog extends Stage {
 
     public PromoteDialog(int pieceSize, int squareSize, boolean white, boolean flipped, Window owner) throws Exception {
 
-        initStyle(StageStyle.UNDECORATED);
         this.result = 'X';
+
         initOwner(owner);
         initModality(Modality.WINDOW_MODAL);
 
-        // getDialogPane().setMaxHeight(Double.MAX_VALUE);
-        // getDialogPane().setMaxWidth(Double.MAX_VALUE);
+        initStyle(StageStyle.UNDECORATED);
 
         ImageView queen = new PieceTranscoder(pieceSize, white, 'Q').getImageView();
         ImageView rook = new PieceTranscoder(pieceSize, white, 'R').getImageView();
@@ -64,6 +63,7 @@ public class PromoteDialog extends Stage {
         knight.setLayoutY((squareSize - pieceSize) / 2.0);
 
         queen.setOnMouseClicked(e -> {
+
             e.consume();
             result = 'Q';
             close();
@@ -71,8 +71,8 @@ public class PromoteDialog extends Stage {
         });
 
         rook.setOnMouseClicked(e -> {
-            e.consume();
 
+            e.consume();
             result = 'R';
             close();
 
@@ -107,25 +107,15 @@ public class PromoteDialog extends Stage {
         HBox.setHgrow(undo, Priority.ALWAYS);
 
         VBox tileP = new VBox();
-        setScene(new Scene(tileP, squareSize, squareSize * (4 + (1/3.0))));
-/*         tileP.setPrefColumns(1);
-        tileP.setPrefRows(5); */
         tileP.setAlignment(Pos.CENTER);
-        // queen.setLayoutX(squareSize * 1);
-        // rook.setLayoutX(squareSize * 2);
-        // knight.setLayoutX(squareSize * 3);
-        // bishop.setLayoutX(squareSize * 4);
 
-        // double y = (squareSize - pieceSize) / 2.0;
-        // queen.setLayoutY(y);
-        // rook.setLayoutY(y);
-        // knight.setLayoutY(y);
-        // bishop.setLayoutY(y);
+        setScene(new Scene(tileP, squareSize, squareSize * (4 + (1 / 3.0))));
 
         if ((white && !flipped) || (!white && flipped))
             tileP.getChildren().addAll(undo, q, r, b, n);
         else
             tileP.getChildren().addAll(n, b, r, q, undo);
+
         tileP.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
         setResizable(false);
 

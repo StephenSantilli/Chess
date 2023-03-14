@@ -655,7 +655,7 @@ public class Board extends VBox implements BoardMoveListener {
     void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
 
         updateActive();
-        viewMenu.boardUpdated();
+        viewMenu.update();
 
         boolean ani = animate && dragging == null;
         dragging = null;

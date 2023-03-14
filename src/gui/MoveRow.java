@@ -14,16 +14,27 @@ import javafx.scene.paint.Color;
 public class MoveRow extends HBox {
 
     int moveNumber;
-    Move m1, m2;
+    Move move1, move2;
+
+    public int getMoveNumber() {
+        return moveNumber;
+    }
+
+    public Move getMove1() {
+        return move1;
+    }
+
+    public Move getMove2() {
+        return move2;
+    }
 
     public MoveRow(int moveNumber, Move m1, Move m2) {
 
-        //setMinWidth(200);
         setBackground(new Background(new BackgroundFill(Color.BLACK, null, getInsets())));
 
         this.moveNumber = moveNumber;
-        this.m1 = m1;
-        this.m2 = m2;
+        this.move1 = m1;
+        this.move2 = m2;
 
         Label l = new Label(moveNumber + ".");
         HBox.setMargin(l, new Insets(5, 5, 5, 5));
@@ -38,8 +49,6 @@ public class MoveRow extends HBox {
         HBox.setMargin(btn1, new Insets(5, 5, 5, 5));
         moves.setAlignment(Pos.CENTER);
 
-        
-        
         HBox.setHgrow(moves, Priority.ALWAYS);
         HBox.setHgrow(btn1, Priority.ALWAYS);
         btn1.setBackground(new Background(new BackgroundFill(Color.GREEN, null, getInsets())));
@@ -55,22 +64,10 @@ public class MoveRow extends HBox {
             moves.getChildren().add(btn2);
 
         }
+        
         getChildren().add(l);
         getChildren().add(moves);
 
-
-    }
-
-    public int getMoveNumber() {
-        return moveNumber;
-    }
-
-    public Move getM1() {
-        return m1;
-    }
-
-    public Move getM2() {
-        return m2;
     }
 
 }

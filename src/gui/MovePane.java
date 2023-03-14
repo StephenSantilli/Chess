@@ -62,8 +62,10 @@ public class MovePane extends GridPane implements BoardMoveListener {
     public void updateMovePane() {
 
         if (rows == null || rows.size() == 0) {
+
             initMovePane();
             return;
+
         }
 
     }
@@ -71,7 +73,6 @@ public class MovePane extends GridPane implements BoardMoveListener {
     public void initMovePane() {
 
         getChildren().clear();
-        // rows = new ArrayList<MoveRow>();
 
         for (int i = 1; i < board.getGame().getPositions().size(); i++) {
 
@@ -90,56 +91,59 @@ public class MovePane extends GridPane implements BoardMoveListener {
         Position p = board.getGame().getPositions().get(pos);
         int row = ((pos - 1) / 2);
         Move m = p.getMove();
-        Button btn1 = new Button(p.getMoveString());
-        btn1.setMaxWidth(Double.MAX_VALUE);
-        btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+        Button btn = new Button(p.getMoveString());
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
-        btn1.setOnMouseEntered(e -> {
-            if (btn1.getStyle().endsWith(BUTTON_INACTIVE)) {
-                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-            } else if (btn1.getStyle().endsWith(BUTTON_ACTIVE)) {
-                btn1.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+        btn.setOnMouseEntered(e -> {
+
+            if (btn.getStyle().endsWith(BUTTON_INACTIVE))
+                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
+            else if (btn.getStyle().endsWith(BUTTON_ACTIVE))
+                btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+
+        });
+
+        btn.setOnMouseExited(e -> {
+            if (btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
+                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+            } else if (btn.getStyle().endsWith(BUTTON_ACTIVE_HOVER)) {
+                btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
             }
         });
 
-        btn1.setOnMouseExited(e -> {
-            if (btn1.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
-                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
-            } else if (btn1.getStyle().endsWith(BUTTON_ACTIVE_HOVER)) {
-                btn1.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
-            }
-        });
+        btn.setFocusTraversable(true);
 
-        btn1.setFocusTraversable(true);
-
-        btn1.setOnAction(e -> {
+        btn.setOnAction(e -> {
 
             board.getGame().setCurrentPos(pos);
 
         });
 
-        btn1.setOnMousePressed(e -> {
-            if (btn1.getStyle().endsWith(BUTTON_INACTIVE) || btn1.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
-                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE_CLICKED);
+        btn.setOnMousePressed(e -> {
+            if (btn.getStyle().endsWith(BUTTON_INACTIVE) || btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
+                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE_CLICKED);
             }
         });
 
-        btn1.setOnMouseReleased(e -> {
-            if (btn1.getStyle().endsWith(BUTTON_INACTIVE_CLICKED)) {
-                btn1.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+        btn.setOnMouseReleased(e -> {
+            if (btn.getStyle().endsWith(BUTTON_INACTIVE_CLICKED)) {
+                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
             }
         });
 
-        add(btn1, m.isWhite() ? 1 : 2, row);
+        add(btn, m.isWhite() ? 1 : 2, row);
         requestFocus();
         sp.setVvalue(1);
 
-        GridPane.setMargin(btn1, new Insets(5, 5, 5, 5));
+        GridPane.setMargin(btn, new Insets(5, 5, 5, 5));
 
         if (m.isWhite()) {
+            
             Label l = new Label((row + 1) + ".");
             add(l, 0, row);
             GridPane.setMargin(l, new Insets(5, 5, 5, 5));
+
         }
 
         posChanged(-1, -1);
@@ -167,8 +171,10 @@ public class MovePane extends GridPane implements BoardMoveListener {
                 if (getRowIndex(c) == ((board.getGame().getCurrentPos()) / 2)) {
 
                     if (getColumnIndex(c) == (board.getGame().getActivePos().getRedo().isWhite() ? 2 : 1)) {
+
                         getChildren().remove(c);
                         --i;
+
                     } else if (board.getGame().getActivePos().isWhite()
                             && getColumnIndex(c) == 0) {
                         getChildren().remove(c);
@@ -197,24 +203,26 @@ public class MovePane extends GridPane implements BoardMoveListener {
 
                 Node c = getChildren().get(i);
 
-                if (board.getGame().getCurrentPos() != 0 && getRowIndex(c) == ((board.getGame().getCurrentPos() - 1) / 2)
-                        && getColumnIndex(c) == (board.getGame().getPositions().get(board.getGame().getCurrentPos()).isWhite() ? 2 : 1)) {
+                if (board.getGame().getCurrentPos() != 0
+                        && getRowIndex(c) == ((board.getGame().getCurrentPos() - 1) / 2)
+                        && getColumnIndex(
+                                c) == (board.getGame().getPositions().get(board.getGame().getCurrentPos()).isWhite() ? 2
+                                        : 1)) {
 
-                    if (c.isHover()) {
+                    if (c.isHover())
                         c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
-                    } else 
+                    else
                         c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
 
                     c.requestFocus();
-                    // sp.setVvalue(sp.getViewportBounds().getHeight());
 
                 } else if (activePos > 0 && activePos < board.getGame().getPositions().size()
                         && getRowIndex(c) == ((activePos - 1) / 2)
                         && getColumnIndex(c) == (board.getGame().getPositions().get(activePos).isWhite() ? 2 : 1)) {
 
-                    if (c.isHover()) {
+                    if (c.isHover())
                         c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-                    } else
+                    else
                         c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
                 }
@@ -250,6 +258,5 @@ public class MovePane extends GridPane implements BoardMoveListener {
     @Override
     public void resumeGame() {
     }
-
 
 }

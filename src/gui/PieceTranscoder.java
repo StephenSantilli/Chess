@@ -17,9 +17,22 @@ public class PieceTranscoder extends ImageTranscoder {
     private boolean color;
     private char pieceCode;
 
+    public BufferedImage getBufferedImage() {
+        return img;
+    }
+
+    public boolean isColor() {
+        return color;
+    }
+
+    public char getPieceCode() {
+        return pieceCode;
+    }
+
     public PieceTranscoder(int pieceSize, boolean color, char pieceCode) throws Exception {
 
         super();
+
         this.color = color;
         this.pieceCode = pieceCode;
 
@@ -50,25 +63,17 @@ public class PieceTranscoder extends ImageTranscoder {
 
     @Override
     public BufferedImage createImage(int width, int height) {
+
         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         return bi;
+
     }
 
     @Override
     public void writeImage(BufferedImage img, TranscoderOutput to) throws TranscoderException {
+
         this.img = img;
-    }
-
-    public BufferedImage getBufferedImage() {
-        return img;
-    }
-
-    public boolean isColor() {
-        return color;
-    }
-
-    public char getPieceCode() {
-        return pieceCode;
+        
     }
 
 }

@@ -26,7 +26,7 @@ public class ViewMenu extends Menu {
 
     }
 
-    public void boardUpdated() {
+    public void update() {
 
         flip.setSelected(board.isWhite() ? board.isFlipped() : !board.isFlipped());
 

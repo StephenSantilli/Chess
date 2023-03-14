@@ -37,7 +37,7 @@ public class GameSettingsDialog extends Stage {
 
         HBox perSide = new HBox();
         perSide.setSpacing(5);
-        Label perSideLabel = new Label("Time Per Side (M:S): ");
+        Label perSideLabel = new Label("Time per side (M:S): ");
         Label perSideDivider = new Label(":");
 
         Spinner<Integer> minPerSide = new Spinner<Integer>(0, 9999, 10);
@@ -50,7 +50,7 @@ public class GameSettingsDialog extends Stage {
 
         HBox perMove = new HBox();
         perMove.setSpacing(5);
-        Label perMoveLabel = new Label("Time Per Side (M:S): ");
+        Label perMoveLabel = new Label("Time added per move (M:S): ");
         Label perMoveDivider = new Label(":");
 
         IntegerSpinnerValueFactory smVF = new IntegerSpinnerValueFactory(0, 9999, 0);
