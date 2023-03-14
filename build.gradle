@@ -3,7 +3,7 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'org.beryx.runtime' version '1.12.7'
+    id 'org.beryx.runtime' version '1.13.0'
 
 }
 
@@ -47,11 +47,18 @@ application {
 runtime {
 
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    mainClassName = 'gui.Chess'
-    applicationName = 'Chess'
+
+    launcher {
+        noConsole = true
+    }
+
     jpackage {
-        
+        mainClass = 'gui.Chess'
+        applicationName = 'Chess'
+        imageName = 'Chess'
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
+        imageOptions += ['--icon', "resources/img/icon_256x256.png"]
+
         installerOptions += ['--resource-dir', "resources"]
 
         if(currentOs.windows) {
