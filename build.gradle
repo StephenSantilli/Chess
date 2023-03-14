@@ -68,7 +68,7 @@ runtime {
             installerOptions += ['--linux-package-name', 'Chess','--linux-shortcut']
         }
         else if (currentOs.macOsX) {
-            installerOptions += ['--mac-package-name', 'Chess']
+            installerOptions += ['--mac-package-name', 'ChessX']
         }
     }
 }
