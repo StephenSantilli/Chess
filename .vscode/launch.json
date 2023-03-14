@@ -1,12 +1,12 @@
 {
     "version": "0.2.0",
     "configurations": [
-    
+
         {
             "type": "java",
             "name": "Launch App",
             "request": "launch",
-            "mainClass": "guifx.Chess",
+            "mainClass": "gui.Chess",
             "preLaunchTask": "gradle: compileJava"
         }
     ]

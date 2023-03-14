@@ -38,7 +38,7 @@ sourceSets {
 
 application {
 
-    mainClass = 'guifx.Chess'
+    mainClass = 'gui.Chess'
     applicationName = 'Chess'
     
 }
