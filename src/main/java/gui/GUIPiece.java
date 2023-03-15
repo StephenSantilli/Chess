@@ -11,7 +11,7 @@ import javafx.scene.layout.StackPane;
 public class GUIPiece {
 
     private Piece piece;
-    private ImageView image;
+    private SVGPiece image;
     private Board b;
 
     private Bounds boardBounds;
@@ -21,11 +21,11 @@ public class GUIPiece {
         return piece;
     }
 
-    public ImageView getImage() {
+    public SVGPiece getImage() {
         return image;
     }
 
-    public GUIPiece(Piece piece, ImageView image, Board board) {
+    public GUIPiece(Piece piece, SVGPiece image, Board board) {
 
         this.piece = piece;
         this.image = image;

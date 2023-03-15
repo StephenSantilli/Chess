@@ -33,36 +33,31 @@ public class PromoteDialog extends Stage {
 
         initStyle(StageStyle.UNDECORATED);
 
-        ImageView queen = new PieceTranscoder(pieceSize, white, 'Q').getImageView();
-        ImageView rook = new PieceTranscoder(pieceSize, white, 'R').getImageView();
-        ImageView bishop = new PieceTranscoder(pieceSize, white, 'B').getImageView();
-        ImageView knight = new PieceTranscoder(pieceSize, white, 'N').getImageView();
-
-        Pane q = new Pane(queen);
+        SVGPiece q = new SVGPiece(pieceSize, white, 'Q');
         q.setPrefHeight(squareSize);
         q.setPrefWidth(squareSize);
-        queen.setLayoutX((squareSize - pieceSize) / 2.0);
-        queen.setLayoutY((squareSize - pieceSize) / 2.0);
+        q.setLayoutX((squareSize - pieceSize) / 2.0);
+        q.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        Pane r = new Pane(rook);
+        SVGPiece r = new SVGPiece(pieceSize, white, 'R');
         r.setPrefHeight(squareSize);
         r.setPrefWidth(squareSize);
-        rook.setLayoutX((squareSize - pieceSize) / 2.0);
-        rook.setLayoutY((squareSize - pieceSize) / 2.0);
+        r.setLayoutX((squareSize - pieceSize) / 2.0);
+        r.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        Pane b = new Pane(bishop);
+        SVGPiece b = new SVGPiece(pieceSize, white, 'B');
         b.setPrefHeight(squareSize);
         b.setPrefWidth(squareSize);
-        bishop.setLayoutX((squareSize - pieceSize) / 2.0);
-        bishop.setLayoutY((squareSize - pieceSize) / 2.0);
+        b.setLayoutX((squareSize - pieceSize) / 2.0);
+        b.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        Pane n = new Pane(knight);
+        SVGPiece n = new SVGPiece(pieceSize, white, 'N');
         n.setPrefHeight(squareSize);
         n.setPrefWidth(squareSize);
-        knight.setLayoutX((squareSize - pieceSize) / 2.0);
-        knight.setLayoutY((squareSize - pieceSize) / 2.0);
+        n.setLayoutX((squareSize - pieceSize) / 2.0);
+        n.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        queen.setOnMouseClicked(e -> {
+        q.setOnMouseClicked(e -> {
 
             e.consume();
             result = 'Q';
@@ -70,7 +65,7 @@ public class PromoteDialog extends Stage {
 
         });
 
-        rook.setOnMouseClicked(e -> {
+        r.setOnMouseClicked(e -> {
 
             e.consume();
             result = 'R';
@@ -78,7 +73,7 @@ public class PromoteDialog extends Stage {
 
         });
 
-        bishop.setOnMouseClicked(e -> {
+        b.setOnMouseClicked(e -> {
 
             e.consume();
             result = 'B';
@@ -86,7 +81,7 @@ public class PromoteDialog extends Stage {
 
         });
 
-        knight.setOnMouseClicked(e -> {
+        n.setOnMouseClicked(e -> {
 
             e.consume();
             result = 'N';

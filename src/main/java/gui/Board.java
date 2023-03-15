@@ -49,7 +49,7 @@ public class Board extends VBox implements BoardMoveListener {
     private Game game;
 
     private ArrayList<GUIPiece> pieces;
-    private ArrayList<PieceTranscoder> transcoderPieces;
+    private ArrayList<SVGPiece> svgPieces;
 
     private GUIPiece active;
     private GUIPiece dragging;
@@ -273,7 +273,7 @@ public class Board extends VBox implements BoardMoveListener {
         piecePane = new Pane();
 
         initSquares();
-        initPieceTranscoders();
+        initSVGPieces();
 
         stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
 
@@ -504,7 +504,7 @@ public class Board extends VBox implements BoardMoveListener {
      */
     private void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture) {
 
-        ImageView img = guiPiece.getImage();
+        SVGPiece img = guiPiece.getImage();
 
         TranslateTransition t = new TranslateTransition(Duration.millis(100), img);
 
@@ -522,7 +522,7 @@ public class Board extends VBox implements BoardMoveListener {
 
         if (capture != null) {
 
-            ImageView i = getPieceTranscoder(capture).getImageView();
+            SVGPiece i = getSVGPiece(capture);
 
             piecePane.getChildren().add(i);
 
@@ -574,7 +574,7 @@ public class Board extends VBox implements BoardMoveListener {
                 if (p == null)
                     continue;
 
-                ImageView img = getPieceTranscoder(p).getImageView();
+                SVGPiece img = getSVGPiece(p);
                 GUIPiece guiP = new GUIPiece(p, img, this);
 
                 piecePane.getChildren().add(img);
@@ -725,14 +725,14 @@ public class Board extends VBox implements BoardMoveListener {
      * @param piece The piece to get the {@link PieceTranscoder} for
      * @return The {@link PieceTranscoder}
      */
-    private PieceTranscoder getPieceTranscoder(Piece piece) {
+    private SVGPiece getSVGPiece(Piece piece) {
 
-        PieceTranscoder found = null;
+        SVGPiece found = null;
 
-        for (int i = 0; i < transcoderPieces.size() && found == null; i++) {
+        for (int i = 0; i < svgPieces.size() && found == null; i++) {
 
-            PieceTranscoder pt = transcoderPieces.get(i);
-            if (pt.isColor() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
+            SVGPiece pt = svgPieces.get(i);
+            if (pt.isColor() == piece.isWhite() && pt.getPieceType() == piece.getCode())
                 found = pt;
 
         }
@@ -1006,20 +1006,20 @@ public class Board extends VBox implements BoardMoveListener {
     }
 
     // Initializers
-    private void initPieceTranscoders() throws Exception {
+    private void initSVGPieces() throws Exception {
 
-        transcoderPieces = new ArrayList<PieceTranscoder>();
+        svgPieces = new ArrayList<SVGPiece>();
 
         boolean color = true;
 
         for (int i = 0; i < 2; i++) {
 
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'Q'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'R'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'B'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'N'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'P'));
+            svgPieces.add(new SVGPiece(pieceSize, color, 'K'));
+            svgPieces.add(new SVGPiece(pieceSize, color, 'Q'));
+            svgPieces.add(new SVGPiece(pieceSize, color, 'R'));
+            svgPieces.add(new SVGPiece(pieceSize, color, 'B'));
+            svgPieces.add(new SVGPiece(pieceSize, color, 'N'));
+            svgPieces.add(new SVGPiece(pieceSize, color, 'P'));
 
             color = false;
 
