@@ -16,24 +16,14 @@ repositories {
 javafx {
 
     version '19'
-    modules = [ 'javafx.controls', 'javafx.swing' ]
+    modules = [ 'javafx.graphics', 'javafx.controls', 'javafx.swing' ]
 
 }
-
-dependencies {
-
-
-
-
-
-    
-}
-
 
 sourceSets {
     main {
         java {
-            srcDirs 'src/main/java'
+            srcDirs 'src'
         }
         resources {
             srcDirs 'resources'
@@ -42,8 +32,9 @@ sourceSets {
 }
 
 application {
+
     mainModule = 'Chess'
-    mainClass = 'gui.Chess'
+    mainClass = 'gui.App'
     applicationName = 'Chess'
     
 }
