@@ -2,8 +2,8 @@ plugins {
 
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'org.beryx.runtime' version '1.12.7'
+    // id 'com.github.johnrengelman.shadow' version '7.1.2'
+    // id 'org.beryx.runtime' version '1.12.7'
 
 }
 
@@ -15,21 +15,88 @@ repositories {
 
 javafx {
 
-    version '17'
-    modules = [ 'javafx.controls', 'javafx.swing', 'javafx.graphics' ]
+    version '19'
+    modules = [ 'javafx.controls', 'javafx.swing' ]
 
 }
 
 dependencies {
 
-    implementation 'org.apache.xmlgraphics:batik-all:1.16'
+    implementation('org.apache.xmlgraphics:batik-all:1.16') /* {
+        exclude group: 'xml-apis', module: 'xml-apis'
+    } */
+    // runtimeOnly 'xml-apis:xml-apis:1.4.01'
 
+
+    
 }
+
+configurations {
+        implementation {
+        exclude group: 'java.xml', module: 'java.xml'
+    }
+}
+/* patchModules.config = [
+        // "java.xml=xml-apis-1.4.01.jar"
+        // 'xml-apis-1.4.01.jar=java.xml'
+] */
+
+// configurations.all {
+
+    // resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+    //     println 'Target: ' + details.getTarget() + ' Requested: ' + details.getRequested()
+    //     if ( details.requested.group == 'java.xml:java.xml') {
+    //         useTarget('xml-apis:xml.apis:1.4.01')
+    //     }
+    //     println 'Target: ' + details.getTarget() + ' Requested: ' + details.getRequested()
+
+            
+    //     // resolutionStrategy.capabilitiesResolution.withCapability("xml-apis:xml-apis") {
+    //     //     println 'l'
+    //     //     def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module == 'java.xml' }
+    //     //     if (toBeSelected != null) {
+    //     //         select(toBeSelected)
+    //     //     }
+    //     //     because 'use slf4j in place of log4j'
+    //     // }
+    
+    // }
+    // }
+/*         resolutionStrategy.capabilitiesResolution.withCapability("xml-apis:xml-apis") {
+            println 'test'
+            def toBeSelected = candidates.find { it.id instanceof ModuleComponentIdentifier && it.id.module == 'xml-apis' }
+            if (toBeSelected != null) {
+                select(toBeSelected)
+            }
+            because 'use slf4j in place of log4j'
+        } */
+    
+/*     resolutionStrategy.capabilitiesResolution.withCapability('xml-apis:xml-apis') {
+        println 'ye'
+        selectHighestVersion()
+    } */
+
+
+ // add dependency substitution rules
+/*  configurations.all {
+   resolutionStrategy.dependencySubstitution {
+     // Substitute project and module dependencies
+     //substitute module('java.xml:javax.xml') using module('xml-apis:xml-apis:2.0.2')
+/*      substitute project(':util') using module('org.gradle:util:3.0')
+
+     // Substitute one module dependency for another
+     substitute module('org.gradle:api:2.0') using module('org.gradle:api:2.1') 
+   }
+ } */
+
+/*     configurations.all {
+        resolutionStrategy.force 'java.xml:java.xml:latest'
+    } */
 
 sourceSets {
     main {
         java {
-            srcDirs 'src'
+            srcDirs 'src/main/java'
         }
         resources {
             srcDirs 'resources'
@@ -38,13 +105,13 @@ sourceSets {
 }
 
 application {
-
+    mainModule = 'Chess'
     mainClass = 'gui.Chess'
-    applicationName = 'ChessX'
+    applicationName = 'Chess'
     
 }
 
-runtime {
+/* runtime {
 
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
 
@@ -53,9 +120,11 @@ runtime {
     }
 
     jpackage {
+
+        applicationName = 'Chess'
+        imageName = 'Chess'
         mainClass = 'gui.Chess'
-        applicationName = 'ChessX'
-        imageName = 'ChessX'
+
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
         def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
         imageOptions += ['--icon', "resources/img/icon_256x256.$imgType"]
@@ -66,10 +135,10 @@ runtime {
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
         }
         else if (currentOs.linux) {
-            installerOptions += ['--linux-package-name', 'chessx','--linux-shortcut']
+            installerOptions += ['--linux-package-name', 'chess','--linux-shortcut']
         }
         else if (currentOs.macOsX) {
-            installerOptions += ['--mac-package-name', 'ChessX']
+            installerOptions += ['--mac-package-name', 'Chess']
         }
     }
-}
+} */
