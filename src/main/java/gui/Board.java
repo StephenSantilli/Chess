@@ -504,7 +504,7 @@ public class Board extends VBox implements BoardMoveListener {
      */
     private void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture) {
 
-        SVGPiece img = guiPiece.getImage();
+        Pane img = guiPiece.getImage();
 
         TranslateTransition t = new TranslateTransition(Duration.millis(100), img);
 
@@ -522,7 +522,7 @@ public class Board extends VBox implements BoardMoveListener {
 
         if (capture != null) {
 
-            SVGPiece i = getSVGPiece(capture);
+            Pane i = getSVGPiece(capture).getImage();
 
             piecePane.getChildren().add(i);
 
@@ -574,7 +574,7 @@ public class Board extends VBox implements BoardMoveListener {
                 if (p == null)
                     continue;
 
-                SVGPiece img = getSVGPiece(p);
+                Pane img = getSVGPiece(p).getImage();
                 GUIPiece guiP = new GUIPiece(p, img, this);
 
                 piecePane.getChildren().add(img);
