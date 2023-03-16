@@ -6,13 +6,12 @@ import game.pieces.Piece;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 public class GUIPiece {
 
     private Piece piece;
-    private Pane image;
+    private ImageView image;
     private Board b;
 
     private Bounds boardBounds;
@@ -22,11 +21,11 @@ public class GUIPiece {
         return piece;
     }
 
-    public Pane getImage() {
+    public ImageView getImage() {
         return image;
     }
 
-    public GUIPiece(Piece piece, Pane image, Board board) {
+    public GUIPiece(Piece piece, ImageView image, Board board) {
 
         this.piece = piece;
         this.image = image;

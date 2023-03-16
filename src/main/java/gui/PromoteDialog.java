@@ -33,30 +33,30 @@ public class PromoteDialog extends Stage {
 
         initStyle(StageStyle.UNDECORATED);
 
-        Pane queen = new SVGPiece(pieceSize, white, 'Q').getImage();
-        Pane rook = new SVGPiece(pieceSize, white, 'R').getImage();
-        Pane bishop = new SVGPiece(pieceSize, white, 'B').getImage();
-        Pane knight = new SVGPiece(pieceSize, white, 'N').getImage();
+        ImageView queen = new PieceTranscoder(pieceSize, white, 'Q').getImageView();
+        ImageView rook = new PieceTranscoder(pieceSize, white, 'R').getImageView();
+        ImageView bishop = new PieceTranscoder(pieceSize, white, 'B').getImageView();
+        ImageView knight = new PieceTranscoder(pieceSize, white, 'N').getImageView();
 
-        Pane q = queen;
+        Pane q = new Pane(queen);
         q.setPrefHeight(squareSize);
         q.setPrefWidth(squareSize);
         queen.setLayoutX((squareSize - pieceSize) / 2.0);
         queen.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        Pane r = rook;
+        Pane r = new Pane(rook);
         r.setPrefHeight(squareSize);
         r.setPrefWidth(squareSize);
         rook.setLayoutX((squareSize - pieceSize) / 2.0);
         rook.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        Pane b = bishop;
+        Pane b = new Pane(bishop);
         b.setPrefHeight(squareSize);
         b.setPrefWidth(squareSize);
         bishop.setLayoutX((squareSize - pieceSize) / 2.0);
         bishop.setLayoutY((squareSize - pieceSize) / 2.0);
 
-        Pane n = knight;
+        Pane n = new Pane(knight);
         n.setPrefHeight(squareSize);
         n.setPrefWidth(squareSize);
         knight.setLayoutX((squareSize - pieceSize) / 2.0);
