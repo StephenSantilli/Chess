@@ -62,7 +62,7 @@ public class SVGPiece {
     private static final String PATH_REGEX = "(?<path>(<path(( style=\"(?<style>[^\"]*)\")|( d=\"(?<line>[^\"]*)\")|[^>])*>))";
     private static final String STYLE_REGEX = "(?<key>[A-z1-9-_]*)\\:(?<value>[^;]*);?";
 
-    private void setStyle(SVGPath path, String style) {
+    public static void setStyle(Shape path, String style, double scale) {
 
         if (style == null || style.equals(""))
             return;
@@ -75,7 +75,6 @@ public class SVGPiece {
             String value = sp.group("value");
 
             switch (key) {
-
                 case "fill":
                     if (!value.equals("none"))
                         path.setFill(Color.web(value));
@@ -86,7 +85,7 @@ public class SVGPiece {
                     path.setOpacity(Double.parseDouble(value));
                     break;
                 case "fill-rule":
-                    path.setFillRule(value.equals("evenodd") ? FillRule.EVEN_ODD : FillRule.NON_ZERO);
+                    if(path instanceof SVGPath) ((SVGPath) path).setFillRule(value.equals("evenodd") ? FillRule.EVEN_ODD : FillRule.NON_ZERO);
                     break;
                 case "stroke":
                     if (!value.equals("none"))
@@ -95,7 +94,7 @@ public class SVGPiece {
                         path.setStroke(null);
                     break;
                 case "stroke-width":
-                    path.setStrokeWidth(Double.parseDouble(value));
+                    path.setStrokeWidth(Double.parseDouble(value) * scale);
                     break;
                 case "stroke-linecap":
                     path.setStrokeLineCap((value.equals("round") ? (StrokeLineCap.ROUND)
@@ -118,62 +117,14 @@ public class SVGPiece {
 
     }
 
-    private Pane groupPath(String group, String groupStyle) {
-
-        Matcher mp = Pattern.compile(PATH_REGEX).matcher(group);
-        Pane sv = new Pane();
-        while (mp.find()) {
-
-            Matcher m = Pattern.compile(GROUP_REGEX).matcher(group);
-            Pane p = new Pane();
-
-            while (m.find()) {
-
-                String gStyle = m.group("style");
-                String g = m.group("content");
-
-                p.getChildren().add(groupPath(g, gStyle));
-
-            }
-
-            SVGPath l = new SVGPath();
-            setStyle(l, groupStyle);
-            String sty = mp.group("style");
-            setStyle(l, sty);
-            String li = mp.group("line");
-            l.setContent(li);
-            sv.getChildren().add(l);
-            System.out.println((color ? "White" : "Black") + pieceType + li);
-
-        }
-
-        return sv;
-
-    }
-
-    private Pane parseSVG() {
-
-        Matcher m = Pattern.compile(GROUP_REGEX).matcher(SVG);
-        Pane p = new Pane();
-
-        while (m.find()) {
-
-            String groupStyle = m.group("style");
-            String group = m.group("content");
-
-            Matcher mp = Pattern.compile(PATH_REGEX).matcher(group);
-
-            p.getChildren().add(groupPath(group, groupStyle));
-
-        }
-
-        return p;
-
-    }
-
     public Pane getImage() {
 
-        return parseSVG();
+        SVGGroup parent = new SVGGroup(SVG, null, null, 2);
+        ArrayList<Shape> paths = parent.draw(null);
+
+        Pane pane = new Pane();
+        pane.getChildren().addAll(paths);
+        return pane;
 
     }
 
