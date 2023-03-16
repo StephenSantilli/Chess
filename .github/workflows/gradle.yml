@@ -12,26 +12,26 @@ jobs:
       fail-fast: false
     name: ${{ matrix.os }}
     steps:
-    - name: Delete Old Artifacts
-    uses: actions/github-script@v6
-    id: artifact
-    with:
-      script: |
-        const res = await github.rest.actions.listArtifactsForRepo({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-        })
-
-        res.data.artifacts
-          .forEach(({ id }) => {
-            github.rest.actions.deleteArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: id,
-            })
-          })
     - name: Git checkout
       uses: actions/checkout@v3
+    - name: Delete Old Artifacts
+      uses: actions/github-script@v6
+      id: artifact
+      with:
+        script: |
+          const res = await github.rest.actions.listArtifactsForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          })
+
+          res.data.artifacts
+            .forEach(({ id }) => {
+              github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: id,
+              })
+            })      
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
