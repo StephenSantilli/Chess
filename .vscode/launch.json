@@ -1,7 +1,13 @@
 {
     "version": "0.2.0",
     "configurations": [
-
+        {
+            "type": "java",
+            "name": "LANClient",
+            "request": "launch",
+            "mainClass": "game.LANClient",
+            "projectName": "Chess"
+        },
         {
             "type": "java",
             "name": "Launch App",

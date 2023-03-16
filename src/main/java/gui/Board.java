@@ -19,6 +19,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -1035,7 +1036,7 @@ public class Board extends VBox implements BoardMoveListener {
 
         game.addMoveListener(gameMenu);
 
-        menuBar.getMenus().addAll(gameMenu, viewMenu);
+        menuBar.getMenus().addAll(gameMenu, viewMenu, new Menu("Help"));
 
     }
 
