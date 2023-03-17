@@ -7,7 +7,6 @@ import game.Player;
 import game.Position;
 import game.Square;
 import game.LAN.Client;
-import game.LAN.LANPlayer;
 import game.pieces.Piece;
 
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class Board extends VBox implements GameListener {
     private int pieceSize = 90;
 
     private Game game;
-    private LANPlayer player;
+    // private LANPlayer player;
 
     private ArrayList<GUIPiece> pieces;
     private ArrayList<PieceTranscoder> transcoderPieces;
@@ -293,29 +292,7 @@ public class Board extends VBox implements GameListener {
         setOnMouseDragged(mouseDragged);
         setOnMouseReleased(mouseReleased);
 
-        c = new Client("stephen", onConnect);
-
     }
-
-    private Client c;
-
-    private Runnable onConnect = () -> {
-        Platform.runLater(() -> {
-            this.player = c.getPlayer();
-            this.game = player.getGame();
-            game.addMoveListener(this);
-            game.addMoveListener(getMovePane());
-            game.addMoveListener(gameMenu);
-            game.addMoveListener(player);
-            movePane.initMovePane();
-            try {
-                game.startGame(player);
-            } catch (Exception e) {
-
-            }
-            boardUpdated();
-        });
-    };
 
     // Actions
     void incPos() {

@@ -1,6 +1,8 @@
 package gui;
 
 import game.Game;
+import game.LAN.Searcher;
+import game.LAN.Server;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -34,6 +36,8 @@ public class GameSettingsDialog extends Stage {
         VBox items = new VBox();
         items.setSpacing(5);
         items.setPadding(new Insets(10, 10, 10, 10));
+        
+        Scene s = new Scene(items);
 
         HBox perSide = new HBox();
         perSide.setSpacing(5);
@@ -82,11 +86,38 @@ public class GameSettingsDialog extends Stage {
             hide();
         });
 
-        btns.getChildren().addAll(cancelButton, startButton);
+        Button createChallenge = new Button("Create Challenge");
+        createChallenge.setOnAction(e -> {
+
+            try {
+
+                Server serv = new Server("test");
+                serv.start();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+        });
+
+        Button searchForChallenge = new Button("Search for Challenge");
+        searchForChallenge.setOnAction(e -> {
+
+            try {
+
+                ChallengeSearchDialog search = new ChallengeSearchDialog(getScene().getWindow(), game);
+                search.show();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+        });
+
+        btns.getChildren().addAll(createChallenge, searchForChallenge, cancelButton, startButton);
 
         items.getChildren().addAll(perSide, perMove, btns);
 
-        Scene s = new Scene(items);
         setOnShown(e -> {
             sizeToScene();
         });
