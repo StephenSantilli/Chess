@@ -3,13 +3,14 @@ package game;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Iterator;
 
 public class LANClient {
 
-    public static final int PORT = 49269; 
+    public static final int PORT = 49265; 
 
     public static void main(String[] args) throws IOException {
 
@@ -31,17 +32,14 @@ public class LANClient {
             // String hostA = siteLocal.getHostAddress();
             // LANClient.checkHosts(hostA.substring(0, hostA.length() - 2));
 
-            Socket sock = new Socket(siteLocal, PORT);
-            sock.bind(sock.getLocalSocketAddress());
-            while(!sock.isConnected()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                }
-            }
+            ServerSocket sock = new ServerSocket(PORT);
+             System.out.println("lstie");
+
+            sock.accept();
+
 
             System.out.println("connected");
-
+            sock.close();
         }
 
     }
