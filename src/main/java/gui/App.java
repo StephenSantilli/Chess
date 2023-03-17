@@ -75,7 +75,7 @@ public class App extends Application {
 
             });
 
-            stage.setOnShown(b::startGame);
+            // stage.setOnShown(b::startGame);
 
             stage.show();
             stage.sizeToScene();

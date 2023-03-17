@@ -1,10 +1,13 @@
 package gui;
 
-import game.BoardMoveListener;
+import game.GameListener;
 import game.Game;
 import game.Move;
+import game.Player;
 import game.Position;
 import game.Square;
+import game.LAN.Client;
+import game.LAN.LANPlayer;
 import game.pieces.Piece;
 
 import java.util.ArrayList;
@@ -35,7 +38,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-public class Board extends VBox implements BoardMoveListener {
+public class Board extends VBox implements GameListener {
 
     private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
     private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
@@ -48,6 +51,7 @@ public class Board extends VBox implements BoardMoveListener {
     private int pieceSize = 90;
 
     private Game game;
+    private LANPlayer player;
 
     private ArrayList<GUIPiece> pieces;
     private ArrayList<PieceTranscoder> transcoderPieces;
@@ -289,7 +293,29 @@ public class Board extends VBox implements BoardMoveListener {
         setOnMouseDragged(mouseDragged);
         setOnMouseReleased(mouseReleased);
 
+        c = new Client("stephen", onConnect);
+
     }
+
+    private Client c;
+
+    private Runnable onConnect = () -> {
+        Platform.runLater(() -> {
+            this.player = c.getPlayer();
+            this.game = player.getGame();
+            game.addMoveListener(this);
+            game.addMoveListener(getMovePane());
+            game.addMoveListener(gameMenu);
+            game.addMoveListener(player);
+            movePane.initMovePane();
+            try {
+                game.startGame(player);
+            } catch (Exception e) {
+
+            }
+            boardUpdated();
+        });
+    };
 
     // Actions
     void incPos() {
@@ -351,15 +377,21 @@ public class Board extends VBox implements BoardMoveListener {
             if (settings.getTimePerSide() > -1) {
 
                 game.stopGame();
+
                 game = new Game(settings.getTimePerSide(), settings.getTimePerMove());
                 game.addMoveListener(this);
                 game.addMoveListener(getMovePane());
                 game.addMoveListener(gameMenu);
                 movePane.initMovePane();
 
-                game.startGame();
-                boardUpdated();
+                try {
 
+                    game.startGame();
+                    boardUpdated();
+
+                } catch (Exception ex) {
+
+                }
             }
 
         });
@@ -742,7 +774,6 @@ public class Board extends VBox implements BoardMoveListener {
 
     }
 
-
     public GUIPiece getGUIPieceAtSquare(Square square) {
 
         GUIPiece found = null;
@@ -898,17 +929,19 @@ public class Board extends VBox implements BoardMoveListener {
     @Override
     public void posChanged(int old, int curr) {
 
-        Position o = null;
-        if (old > game.getPositions().size() - 1) {
-            if (game.getLastPos().getRedo() != null)
-                o = game.getLastPos().getRedo();
-        } else {
-            o = game.getPositions().get(old);
-        }
+        Platform.runLater(() -> {
+            Position o = null;
+            if (old > game.getPositions().size() - 1) {
+                if (game.getLastPos().getRedo() != null)
+                    o = game.getLastPos().getRedo();
+            } else {
+                o = game.getPositions().get(old);
+            }
 
-        Position n = game.getPositions().get(curr);
+            Position n = game.getPositions().get(curr);
 
-        boardUpdated((int) Math.abs(old - curr) == 1, o, n, old >= curr);
+            boardUpdated((int) Math.abs(old - curr) == 1, o, n, old >= curr);
+        });
 
     }
 

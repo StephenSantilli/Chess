@@ -4,7 +4,7 @@ import game.Position;
 
 import java.util.ArrayList;
 
-import game.BoardMoveListener;
+import game.GameListener;
 import game.Move;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -15,7 +15,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
-public class MovePane extends GridPane implements BoardMoveListener {
+public class MovePane extends GridPane implements GameListener {
 
     private Board board;
 

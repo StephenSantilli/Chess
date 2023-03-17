@@ -3,6 +3,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "game.LAN.Test",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
+            "name": "Client",
+            "request": "launch",
+            "mainClass": "game.LAN.Client",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
             "name": "LANClient",
             "request": "launch",
             "mainClass": "game.LANClient",

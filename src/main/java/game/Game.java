@@ -43,7 +43,7 @@ public class Game {
     /**
      * The listeners of the move events.
      */
-    private ArrayList<BoardMoveListener> moveListeners;
+    private ArrayList<GameListener> moveListeners;
 
     /**
      * <p>
@@ -116,6 +116,9 @@ public class Game {
      * The service that checks for flagfall in the background.
      */
     private ScheduledExecutorService flagfallChecker;
+
+    private Player opponent;
+    private boolean isTwoPlayer;
 
     /**
      * The flagfall checker task.
@@ -207,14 +210,14 @@ public class Game {
     }
 
     /**
-     * Initializes a new Game with no time control.
+     * Initializes a new two-player Game with no time control.
      */
     public Game() {
         this(-1, -1);
     }
 
     /**
-     * Initializes a new Game with the specified time control.
+     * Initializes a new two-player Game with the specified time control.
      * 
      * @param timePerSide The amount of time, in seconds, each side gets at the
      *                    start.
@@ -222,9 +225,23 @@ public class Game {
      *                    each move they make.
      */
     public Game(int timePerSide, int timePerMove) {
+        this(timePerSide, timePerMove, true);
+    }
+
+    /**
+     * Initializes a new Game with the specified time control and marks if there
+     * will be an opponent.
+     * 
+     * @param timePerSide The amount of time, in seconds, each side gets at the
+     *                    start.
+     * @param timePerMove The amount of time, in seconds, each side gets added after
+     *                    each move they make.
+     * @param isTwoPlayer Whether or not there will be an opponent.
+     */
+    public Game(int timePerSide, int timePerMove, boolean isTwoPlayer) {
 
         positions = new ArrayList<Position>();
-        moveListeners = new ArrayList<BoardMoveListener>();
+        moveListeners = new ArrayList<GameListener>();
 
         positions.add(new Position(this));
         currentPos = 0;
@@ -237,6 +254,8 @@ public class Game {
 
         this.whiteTimer = this.timePerSide;
         this.blackTimer = this.timePerSide;
+
+        this.isTwoPlayer = isTwoPlayer;
 
     }
 
@@ -334,10 +353,23 @@ public class Game {
 
     }
 
-    public void startGame() {
+    public void startGame() throws Exception {
+        startGame(null);
+    }
+
+    public void startGame(Player opponent) throws Exception {
 
         if (paused)
             return;
+
+        if (!isTwoPlayer) {
+
+            if (opponent == null)
+                throw new Exception("Trying to start game without an opponent!");
+
+            this.opponent = opponent;
+
+        }
 
         result = RESULT_IN_PROGRESS;
 
@@ -645,13 +677,13 @@ public class Game {
 
     }
 
-    public void addMoveListener(BoardMoveListener listener) {
+    public void addMoveListener(GameListener listener) {
         moveListeners.add(listener);
     }
 
     public void firePosChanged(int old, int curr) {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.posChanged(old, curr);
 
@@ -661,7 +693,7 @@ public class Game {
 
     public void fireMoveMade() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.moveMade();
 
@@ -671,7 +703,7 @@ public class Game {
 
     public void fireUndoMove() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.undoMove();
 
@@ -681,7 +713,7 @@ public class Game {
 
     public void fireRedoMove() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.redoMove();
 
@@ -691,7 +723,7 @@ public class Game {
 
     public void fireResetMoves() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.resetMoves();
 
@@ -701,7 +733,7 @@ public class Game {
 
     public void fireGameOver() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.gameOver();
 
@@ -711,7 +743,7 @@ public class Game {
 
     public void fireTimerChange() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.timerChange();
 
@@ -721,7 +753,7 @@ public class Game {
 
     public void firePauseGame() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.pauseGame();
 
@@ -731,7 +763,7 @@ public class Game {
 
     public void fireResumeGame() {
 
-        for (BoardMoveListener b : moveListeners) {
+        for (GameListener b : moveListeners) {
 
             b.resumeGame();
 

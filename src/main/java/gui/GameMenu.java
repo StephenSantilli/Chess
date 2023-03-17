@@ -1,12 +1,13 @@
 package gui;
 
-import game.BoardMoveListener;
+import game.GameListener;
+import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 
-public class GameMenu extends Menu implements BoardMoveListener {
+public class GameMenu extends Menu implements GameListener {
 
     private MenuItem newGame, undo, redo, pause, resume, export;
 
@@ -93,8 +94,12 @@ public class GameMenu extends Menu implements BoardMoveListener {
 
     @Override
     public void posChanged(int old, int curr) {
-        undo.setDisable(!board.getGame().canUndo());
-        redo.setDisable(!board.getGame().canRedo());
+        Platform.runLater(() -> {
+            
+            undo.setDisable(!board.getGame().canUndo());
+            redo.setDisable(!board.getGame().canRedo());
+
+        });
     }
 
     @Override
@@ -121,12 +126,22 @@ public class GameMenu extends Menu implements BoardMoveListener {
 
     @Override
     public void pauseGame() {
-        updatePauseResume();
+
+        Platform.runLater(() -> {
+
+            updatePauseResume();
+        
+        });
+
     }
 
     @Override
     public void resumeGame() {
-        updatePauseResume();
+        Platform.runLater(() -> {
+
+            updatePauseResume();
+
+        });
     }
 
 }
