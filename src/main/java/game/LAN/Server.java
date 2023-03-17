@@ -36,7 +36,7 @@ public class Server {
         //emitThread = new Thread(emitter);
 
         listenThread.start();
-        emitThread.start();
+        //emitThread.start();
 
     }
 
