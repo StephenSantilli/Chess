@@ -13,30 +13,28 @@ public class Server {
 
     private Thread listenThread, emitThread;
 
-    private ArrayList<Host> hosts;
+    private ArrayList<Challenge> hosts;
 
-    public ArrayList<Host> getHosts() {
+    private String name;
+    private int color;
+
+    public ArrayList<Challenge> getHosts() {
         return hosts;
     }
 
-    private String name;
-
-    public Server(String name) throws Exception {
+    public Server(String name, int color) throws Exception {
 
         socket = new DatagramSocket(Client.PORT);
 
         this.name = name;
+        this.color = color;
 
-        //socket.close();
     }
 
     public void start() {
 
         listenThread = new Thread(listener);
-        //emitThread = new Thread(emitter);
-
         listenThread.start();
-        //emitThread.start();
 
     }
 
@@ -56,9 +54,11 @@ public class Server {
 
             while (true) {
                 byte[] buf = new byte[5];
-                DatagramPacket packet = new DatagramPacket(buf, 5);
+                System.out.println("listening");
+                DatagramPacket packet = new DatagramPacket(buf, 1);
                 socket.receive(packet);
-                new Thread(new ServerSender(packet.getAddress(), name)).start();
+                System.out.println(packet.getAddress());
+                new Thread(new ChallengeSender(new Challenge(name, color, packet.getAddress()), socket)).start();
             }
 
         } catch (Exception e) {

@@ -3,7 +3,7 @@ package gui;
 import java.util.ArrayList;
 
 import game.Game;
-import game.LAN.Host;
+import game.LAN.Challenge;
 import game.LAN.Searcher;
 import game.LAN.Server;
 import javafx.application.Platform;
@@ -33,7 +33,7 @@ public class ChallengeSearchDialog extends Stage {
 
     private int timePerSide, timePerMove;
 
-    private ObservableList<Host> oList;
+    private ObservableList<Challenge> oList;
 
     private Searcher searcher;
 
@@ -65,7 +65,7 @@ public class ChallengeSearchDialog extends Stage {
     public ChallengeSearchDialog(Window window, Game game) throws Exception {
 
         initOwner(window);
-        // initModality(Modality.WINDOW_MODAL);
+        initModality(Modality.WINDOW_MODAL);
 
         searcher = new Searcher();
         searcher.search();
@@ -73,19 +73,19 @@ public class ChallengeSearchDialog extends Stage {
         VBox items = new VBox();
 
         oList = FXCollections.observableArrayList();
-        TableView<Host> hostList = new TableView<Host>(oList);
-        TableColumn<Host, String> nameCol = new TableColumn<>("Name");
+        TableView<Challenge> hostList = new TableView<Challenge>(oList);
+        TableColumn<Challenge, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Host, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Host, String> p) {
+                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
+                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
                         return new ReadOnlyObjectWrapper<>(p.getValue().getName());
                     }
                 });
 
-        TableColumn<Host, String> addressCol = new TableColumn<>("Address");
+        TableColumn<Challenge, String> addressCol = new TableColumn<>("Address");
         addressCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Host, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Host, String> p) {
+                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
+                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
                         return new ReadOnlyObjectWrapper<>(p.getValue().getAddress().toString());
                     }
                 });
@@ -105,7 +105,7 @@ public class ChallengeSearchDialog extends Stage {
 
     }
 
-    private void setOList(ArrayList<Host> hosts) {
+    private void setOList(ArrayList<Challenge> hosts) {
 
         Platform.runLater(() -> {
 

@@ -1,9 +1,12 @@
 package game.LAN;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 public class Searcher {
 
@@ -13,60 +16,13 @@ public class Searcher {
 
     private Thread listenThread, emitThread;
 
-    private ArrayList<Host> hosts;
+    private ArrayList<Challenge> hosts;
 
-    public ArrayList<Host> getHosts() {
+    private InetAddress ownAddress;
+
+    public ArrayList<Challenge> getHosts() {
         return hosts;
     }
-
-    public Searcher() throws Exception {
-
-        socket = new DatagramSocket(Client.PORT);
-
-        hosts = new ArrayList<Host>();
-        // socket.close();
-    }
-
-    public void search() {
-
-        listenThread = new Thread(listener);
-        emitThread = new Thread(emitter);
-
-        listenThread.start();
-        emitThread.start();
-
-    }
-
-    public void stop() {
-
-        try {
-            socket.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private Runnable listener = () -> {
-
-        try {
-
-            while (true) {
-
-                byte[] buf = new byte[15];
-                DatagramPacket packet = new DatagramPacket(buf, 15);
-                socket.receive(packet);
-                Host add = new Host(new String(buf), packet.getAddress());
-                if (!hosts.contains(add) && !add.getName().trim().equals("c"))
-                    hosts.add(add);
-
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    };
 
     private Runnable emitter = () -> {
         try {
@@ -94,5 +50,84 @@ public class Searcher {
         }
 
     };
+
+    private Runnable listener = () -> {
+
+        try {
+
+            while (true) {
+
+                byte[] buf = new byte[15];
+                DatagramPacket packet = new DatagramPacket(buf, 100);
+                socket.receive(packet);
+
+                String value = packet.getData().toString();
+                String[] a = value.split(";");
+
+                if (a.length < 2)
+                    continue;
+
+                String name = a[0];
+                int color = Integer.parseInt(a[1]);
+
+                Challenge add = new Challenge(name, color, packet.getAddress());
+                
+                if (packet.getAddress().equals(ownAddress) && !hosts.contains(add))
+                    hosts.add(add);
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    };
+
+    public Searcher() throws Exception {
+
+        socket = new DatagramSocket(Client.PORT);
+
+        hosts = new ArrayList<Challenge>();
+
+        ownAddress = getOwnAddress();
+
+    }
+
+    public void search() {
+
+        listenThread = new Thread(listener);
+        emitThread = new Thread(emitter);
+
+        listenThread.start();
+        emitThread.start();
+
+    }
+
+    public void stop() {
+
+        try {
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private InetAddress getOwnAddress() throws IOException {
+
+        Enumeration<NetworkInterface> is = NetworkInterface.getNetworkInterfaces();
+
+        while (is.hasMoreElements()) {
+            Enumeration<InetAddress> ads = is.nextElement().getInetAddresses();
+            while (ads.hasMoreElements()) {
+                InetAddress a = ads.nextElement();
+                if (a.isSiteLocalAddress())
+                    return a;
+            }
+        }
+
+        return null;
+
+    }
 
 }
