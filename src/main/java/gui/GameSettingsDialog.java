@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 public class GameSettingsDialog extends Stage {
@@ -23,7 +24,13 @@ public class GameSettingsDialog extends Stage {
 
     private Server server;
 
-    private Button createChallenge, searchForChallenge;
+    private Button createChallenge, searchForChallenge, startButton, cancelButton;
+
+    private boolean create;
+
+    public boolean isCreate() {
+        return create;
+    }
 
     public int getTimePerMove() {
         return timePerMove;
@@ -37,6 +44,12 @@ public class GameSettingsDialog extends Stage {
 
         initOwner(window);
         initModality(Modality.WINDOW_MODAL);
+
+        setResizable(false);
+
+        getIcons().setAll(((Stage)(window)).getIcons());
+
+        create = false;
 
         server = null;
 
@@ -79,14 +92,17 @@ public class GameSettingsDialog extends Stage {
         btns.setAlignment(Pos.CENTER_RIGHT);
         btns.setSpacing(5);
 
-        Button cancelButton = new Button("Cancel");
+        cancelButton = new Button("Cancel");
         cancelButton.setOnAction(e -> {
-
 
             if (server != null) {
                 server.stop();
                 createChallenge.setDisable(false);
                 searchForChallenge.setDisable(false);
+                startButton.setDisable(false);
+                cancelButton.setText("Cancel");
+                createChallenge.setText("Create LAN Challenge");
+                sizeToScene();
 
             } else {
                 timePerSide = -1;
@@ -98,10 +114,11 @@ public class GameSettingsDialog extends Stage {
 
         });
 
-        Button startButton = new Button("Start 2-Player Game");
+        startButton = new Button("Start 2-Player Game");
         startButton.setOnAction(e -> {
             timePerSide = ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
             timePerMove = ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
+            create = true;
             hide();
         });
 
@@ -125,6 +142,12 @@ public class GameSettingsDialog extends Stage {
                     server.start();
                     createChallenge.setDisable(true);
                     searchForChallenge.setDisable(true);
+                    startButton.setDisable(true);
+
+                    createChallenge.setText("Waiting...");
+                    cancelButton.setText("Cancel Search");
+
+                    sizeToScene();
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -150,7 +173,7 @@ public class GameSettingsDialog extends Stage {
 
         });
 
-        btns.getChildren().addAll(createChallenge, searchForChallenge, cancelButton, startButton);
+        btns.getChildren().addAll(createChallenge, searchForChallenge, startButton, cancelButton);
 
         items.getChildren().addAll(perSide, perMove, btns);
 

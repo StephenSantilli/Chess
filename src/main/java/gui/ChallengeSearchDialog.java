@@ -5,24 +5,15 @@ import java.util.ArrayList;
 import game.Game;
 import game.LAN.Challenge;
 import game.LAN.Searcher;
-import game.LAN.Server;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -68,6 +59,7 @@ public class ChallengeSearchDialog extends Stage {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
+        getIcons().setAll(((Stage) (window)).getIcons());
 
         searcher = new Searcher();
         searcher.search();
@@ -78,7 +70,10 @@ public class ChallengeSearchDialog extends Stage {
 
         oList = FXCollections.observableArrayList();
         TableView<Challenge> hostList = new TableView<Challenge>(oList);
+        hostList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         TableColumn<Challenge, String> nameCol = new TableColumn<>("Name");
+        nameCol.setMaxWidth(Integer.MAX_VALUE);
         nameCol.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
                     public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
@@ -86,7 +81,41 @@ public class ChallengeSearchDialog extends Stage {
                     }
                 });
 
+        TableColumn<Challenge, String> colorCol = new TableColumn<>("Your Color");
+        colorCol.setMaxWidth(Integer.MAX_VALUE);
+
+        colorCol.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
+                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
+                        return new ReadOnlyObjectWrapper<>(
+                                p.getValue().getColor() == Challenge.CHALLENGE_RANDOM ? "Random"
+                                        : (p.getValue().getColor() == Challenge.CHALLENGE_WHITE ? "Black" : "White"));
+                    }
+                });
+
+        TableColumn<Challenge, String> sideTimeCol = new TableColumn<>("Time Per Side (s)");
+        sideTimeCol.setMaxWidth(Integer.MAX_VALUE);
+
+        sideTimeCol.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
+                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
+                        return new ReadOnlyObjectWrapper<>(p.getValue().getTimePerSide() + "");
+                    }
+                });
+
+        TableColumn<Challenge, String> moveTimeCol = new TableColumn<>("Time Added Per Move (s)");
+        moveTimeCol.setMaxWidth(Integer.MAX_VALUE);
+
+        moveTimeCol.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
+                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
+                        return new ReadOnlyObjectWrapper<>(p.getValue().getTimePerMove() + "");
+                    }
+                });
+
         TableColumn<Challenge, String> addressCol = new TableColumn<>("Address");
+        addressCol.setMaxWidth(Integer.MAX_VALUE);
+
         addressCol.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
                     public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
@@ -94,7 +123,7 @@ public class ChallengeSearchDialog extends Stage {
                     }
                 });
 
-        hostList.getColumns().setAll(nameCol, addressCol);
+        hostList.getColumns().setAll(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol);
 
         items.getChildren().add(hostList);
 

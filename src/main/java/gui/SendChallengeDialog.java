@@ -51,11 +51,12 @@ public class SendChallengeDialog extends Stage {
 
         initOwner(owner);
         initModality(Modality.APPLICATION_MODAL);
+        getIcons().setAll(((Stage) (owner)).getIcons());
 
         setResizable(false);
 
         VBox vb = new VBox();
-        vb.setPadding(new Insets(15, 15, 15, 15));
+        vb.setPadding(new Insets(10, 10, 10, 10));
         vb.setSpacing(5);
 
         Scene s = new Scene(vb);
@@ -64,6 +65,8 @@ public class SendChallengeDialog extends Stage {
         setTitle("Create LAN Challenge");
 
         HBox nameChoices = new HBox();
+        nameChoices.setSpacing(5);
+        nameChoices.setAlignment(Pos.CENTER_LEFT);
 
         Label nameLabel = new Label("Enter your name (max 15 characters):");
 
@@ -84,10 +87,13 @@ public class SendChallengeDialog extends Stage {
         nameChoices.getChildren().addAll(nameLabel, nameField);
 
         HBox colorChoices = new HBox();
+        colorChoices.setSpacing(5);
+        colorChoices.setAlignment(Pos.CENTER_LEFT);
 
         Label colorLabel = new Label("Choose a color:");
         
         ChoiceBox<String> choiceBox = new ChoiceBox<String>();
+
         choiceBox.getItems().addAll("Random", "White", "Black");
         choiceBox.setValue("Random");
         choiceBox.setOnAction(ev -> {
@@ -127,8 +133,9 @@ public class SendChallengeDialog extends Stage {
 
         });
 
-        HBox buttonBox = new HBox(cancelButton, createButton);
+        HBox buttonBox = new HBox(createButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.setSpacing(5);
         
         vb.getChildren().addAll(nameChoices, colorChoices, buttonBox);
         

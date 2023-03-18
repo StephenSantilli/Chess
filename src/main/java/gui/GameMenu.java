@@ -28,7 +28,7 @@ public class GameMenu extends Menu implements GameListener {
 
         pause = new MenuItem("Pause");
         pause.setAccelerator(KeyCombination.keyCombination("Shortcut+P"));
-        pause.setDisable(board.getGame().isPaused());
+        pause.setDisable(board.getGame() != null && board.getGame().isPaused());
         pause.setOnAction(e -> {
 
             board.getGame().pauseGame();
@@ -37,7 +37,7 @@ public class GameMenu extends Menu implements GameListener {
 
         resume = new MenuItem("Resume");
         resume.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+P"));
-        resume.setDisable(!board.getGame().isPaused());
+        resume.setDisable(board.getGame() != null && !board.getGame().isPaused());
         resume.setOnAction(e -> {
 
             board.getGame().resumeGame();
@@ -46,7 +46,7 @@ public class GameMenu extends Menu implements GameListener {
 
         undo = new MenuItem("Undo");
         undo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
-        undo.setDisable(!board.getGame().canUndo());
+        undo.setDisable(board.getGame() != null && !board.getGame().canUndo());
         undo.setOnAction(e -> {
 
             board.getGame().undoMove();
@@ -55,7 +55,7 @@ public class GameMenu extends Menu implements GameListener {
 
         redo = new MenuItem("Redo");
         redo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
-        redo.setDisable(!board.getGame().canRedo());
+        redo.setDisable(board.getGame() != null && !board.getGame().canRedo());
         redo.setOnAction(e -> {
             board.getGame().redoMove();
         });
@@ -95,7 +95,7 @@ public class GameMenu extends Menu implements GameListener {
     @Override
     public void posChanged(int old, int curr) {
         Platform.runLater(() -> {
-            
+
             undo.setDisable(!board.getGame().canUndo());
             redo.setDisable(!board.getGame().canRedo());
 
@@ -130,7 +130,7 @@ public class GameMenu extends Menu implements GameListener {
         Platform.runLater(() -> {
 
             updatePauseResume();
-        
+
         });
 
     }

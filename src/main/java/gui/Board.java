@@ -82,6 +82,9 @@ public class Board extends VBox implements GameListener {
 
     private EventHandler<KeyEvent> keyHandler = ev -> {
 
+        if (game == null)
+            return;
+
         if (ev.getCode() == (KeyCode.LEFT)) {
 
             decPos();
@@ -114,6 +117,9 @@ public class Board extends VBox implements GameListener {
 
     private EventHandler<MouseEvent> mouseReleased = e -> {
 
+        if (game == null)
+            return;
+
         if (e.getButton() != MouseButton.PRIMARY)
             return;
 
@@ -142,6 +148,9 @@ public class Board extends VBox implements GameListener {
     };
 
     private EventHandler<MouseEvent> mousePressed = ev -> {
+
+        if (game == null)
+            return;
 
         if (ev.getButton() != MouseButton.PRIMARY)
             return;
@@ -238,8 +247,8 @@ public class Board extends VBox implements GameListener {
 
     public Board(int squareSize, BarMenu menuBar) throws Exception {
 
-        this.game = new Game();
-        game.addMoveListener(this);
+        // this.game = new Game();
+        // game.addMoveListener(this);
 
         this.squareSize = squareSize;
 
@@ -351,9 +360,9 @@ public class Board extends VBox implements GameListener {
         GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), game);
         settings.setOnHidden(e -> {
 
-            if (settings.getTimePerSide() > -1) {
+            if (settings.isCreate() && settings.getTimePerSide() > -1) {
 
-                game.stopGame();
+                if(game != null) game.stopGame();
 
                 game = new Game(settings.getTimePerSide(), settings.getTimePerMove());
                 game.addMoveListener(this);
@@ -507,6 +516,11 @@ public class Board extends VBox implements GameListener {
     }
 
     private void setMouseType(double mouseX, double mouseY) {
+
+        if (game == null) {
+            setCursor(Cursor.DEFAULT);
+            return;
+        }
 
         if (dragging != null) {
 
@@ -1044,7 +1058,8 @@ public class Board extends VBox implements GameListener {
         viewMenu = new ViewMenu(this);
         gameMenu = new GameMenu(this);
 
-        game.addMoveListener(gameMenu);
+        if (game != null)
+            game.addMoveListener(gameMenu);
 
         menuBar.getMenus().addAll(gameMenu, viewMenu, new Menu("Help"));
 

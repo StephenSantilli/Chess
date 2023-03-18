@@ -13,7 +13,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class ExportDialog extends Stage {
 
@@ -23,6 +22,7 @@ public class ExportDialog extends Stage {
 
         initOwner(board.getScene().getWindow());
         initModality(Modality.WINDOW_MODAL);
+        getIcons().setAll(((Stage) (board.getScene().getWindow())).getIcons());
 
         setResizable(false);
 

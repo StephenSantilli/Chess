@@ -69,7 +69,7 @@ public class App extends Application {
 
             stage.setOnCloseRequest(e -> {
 
-                b.getGame().stopGame();
+                if(b.getGame() != null) b.getGame().stopGame();
 
                 Platform.exit();
 
