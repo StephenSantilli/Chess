@@ -95,9 +95,13 @@ public class ChallengeSearchDialog extends Stage {
         items.getChildren().add(hostList);
 
         Scene s = new Scene(items);
-        setOnShown(e -> {
+        setOnShown(we -> {
             new Thread(hostUpdateChecker).start();
             sizeToScene();
+        });
+
+        setOnHidden(we -> {
+            searcher.stop();
         });
 
         setTitle("Configure Game Settings");
