@@ -37,6 +37,8 @@ public class ChallengeSearchDialog extends Stage {
 
     private Searcher searcher;
 
+    private ArrayList<Challenge> hosts;
+
     public int getTimePerMove() {
         return timePerMove;
     }
@@ -50,8 +52,8 @@ public class ChallengeSearchDialog extends Stage {
         try {
 
             while (getScene().getWindow().isShowing()) {
-
-                setOList(searcher.getHosts());
+                hosts = searcher.getHosts();
+                setOList();
                 Thread.sleep(500);
 
             }
@@ -69,6 +71,8 @@ public class ChallengeSearchDialog extends Stage {
 
         searcher = new Searcher();
         searcher.search();
+
+        hosts = new ArrayList<Challenge>();
 
         VBox items = new VBox();
 
@@ -109,7 +113,7 @@ public class ChallengeSearchDialog extends Stage {
 
     }
 
-    private void setOList(ArrayList<Challenge> hosts) {
+    private void setOList() {
 
         Platform.runLater(() -> {
 
