@@ -15,7 +15,7 @@ public class Server {
 
     public Server(Challenge challenge) throws Exception {
 
-        socket = new DatagramSocket(Client.PORT, InetAddress.getByName("localhost"));
+        socket = new DatagramSocket(Client.PORT);
 
         this.challenge = challenge;
 
@@ -43,9 +43,9 @@ public class Server {
         try {
 
             while (true) {
-                byte[] buf = new byte[5];
+                byte[] buf = new byte[500];
                 System.out.println("listening");
-                DatagramPacket packet = new DatagramPacket(buf, 1);
+                DatagramPacket packet = new DatagramPacket(buf, 500);
                 socket.receive(packet);
                 System.out.println(packet.getAddress());
                 new Thread(new ChallengeSender(new Challenge(challenge.getName(), challenge.getColor(), challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), socket)).start();
