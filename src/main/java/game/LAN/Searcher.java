@@ -66,6 +66,7 @@ public class Searcher {
                 if (packet.getAddress().equals(ownAddress) && !hosts.contains(add))
                     hosts.add(add);
                 } catch(Exception e) {
+                    e.printStackTrace();
                     continue;
                 }
 
