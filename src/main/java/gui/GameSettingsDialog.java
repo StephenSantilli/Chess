@@ -1,6 +1,7 @@
 package gui;
 
 import game.Game;
+import game.LAN.Challenge;
 import game.LAN.Searcher;
 import game.LAN.Server;
 import javafx.geometry.Insets;
@@ -20,6 +21,10 @@ public class GameSettingsDialog extends Stage {
 
     private int timePerSide, timePerMove;
 
+    private Server server;
+
+    private Button createChallenge;
+
     public int getTimePerMove() {
         return timePerMove;
     }
@@ -33,10 +38,12 @@ public class GameSettingsDialog extends Stage {
         initOwner(window);
         initModality(Modality.WINDOW_MODAL);
 
+        server = null;
+
         VBox items = new VBox();
         items.setSpacing(5);
         items.setPadding(new Insets(10, 10, 10, 10));
-        
+
         Scene s = new Scene(items);
 
         HBox perSide = new HBox();
@@ -74,33 +81,59 @@ public class GameSettingsDialog extends Stage {
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setOnAction(e -> {
-            timePerSide = -1;
-            timePerMove = -1;
-            hide();
+
+
+            if (server != null) {
+                server.stop();
+                createChallenge.setDisable(false);
+            } else {
+                timePerSide = -1;
+                timePerMove = -1;
+
+                hide();
+
+            }
+
         });
 
-        Button startButton = new Button("Start");
+        Button startButton = new Button("Start 2-Player Game");
         startButton.setOnAction(e -> {
             timePerSide = ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
             timePerMove = ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
             hide();
         });
 
-        Button createChallenge = new Button("Create Challenge");
+        createChallenge = new Button("Create LAN Challenge");
         createChallenge.setOnAction(e -> {
 
-            try {
+            SendChallengeDialog cDialog = new SendChallengeDialog(getScene().getWindow());
 
-                Server serv = new Server("test");
-                serv.start();
+            cDialog.setOnHidden(we -> {
 
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+                if (!cDialog.isCreate())
+                    return;
+
+                timePerSide = ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
+                timePerMove = ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
+
+                try {
+
+                    server = new Server(
+                            new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null));
+                    server.start();
+                    createChallenge.setDisable(true);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            });
+
+            cDialog.show();
 
         });
 
-        Button searchForChallenge = new Button("Search for Challenge");
+        Button searchForChallenge = new Button("Search for LAN Challenge");
         searchForChallenge.setOnAction(e -> {
 
             try {

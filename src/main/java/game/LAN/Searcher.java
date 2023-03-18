@@ -61,19 +61,16 @@ public class Searcher {
                 DatagramPacket packet = new DatagramPacket(buf, 100);
                 socket.receive(packet);
 
-                String value = packet.getData().toString();
-                String[] a = value.split(";");
-
-                if (a.length < 2)
-                    continue;
-
-                String name = a[0];
-                int color = Integer.parseInt(a[1]);
-
-                Challenge add = new Challenge(name, color, packet.getAddress());
-                
+                try {
+                    Challenge add = new Challenge(packet);
                 if (packet.getAddress().equals(ownAddress) && !hosts.contains(add))
                     hosts.add(add);
+                } catch(Exception e) {
+                    continue;
+                }
+
+                
+
 
             }
 

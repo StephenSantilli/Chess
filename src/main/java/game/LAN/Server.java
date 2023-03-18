@@ -7,27 +7,17 @@ import java.util.ArrayList;
 
 public class Server {
 
-    private static final int SEARCH_RETRIES = 5;
-
     private DatagramSocket socket;
 
-    private Thread listenThread, emitThread;
+    private Thread listenThread;
 
-    private ArrayList<Challenge> hosts;
+    private Challenge challenge;
 
-    private String name;
-    private int color;
-
-    public ArrayList<Challenge> getHosts() {
-        return hosts;
-    }
-
-    public Server(String name, int color) throws Exception {
+    public Server(Challenge challenge) throws Exception {
 
         socket = new DatagramSocket(Client.PORT);
 
-        this.name = name;
-        this.color = color;
+        this.challenge = challenge;
 
     }
 
@@ -58,7 +48,7 @@ public class Server {
                 DatagramPacket packet = new DatagramPacket(buf, 1);
                 socket.receive(packet);
                 System.out.println(packet.getAddress());
-                new Thread(new ChallengeSender(new Challenge(name, color, packet.getAddress()), socket)).start();
+                new Thread(new ChallengeSender(new Challenge(challenge.getName(), challenge.getColor(), challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), socket)).start();
             }
 
         } catch (Exception e) {
