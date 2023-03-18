@@ -59,6 +59,8 @@ public class Challenge {
 
         String[] a = str.split(";");
 
+        System.out.println(str);
+
         if(a.length < 4) {
             throw new Exception("Invalid challenge.");
         }
