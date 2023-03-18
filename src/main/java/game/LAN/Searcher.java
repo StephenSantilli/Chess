@@ -61,32 +61,32 @@ public class Searcher {
                 byte[] buf = new byte[100];
                 DatagramPacket packet = new DatagramPacket(buf, 100);
                 socket.receive(packet);
-                System.out.println(new String(packet.getData()));
+
                 try {
                     Challenge add = new Challenge(packet);
                     if (!packet.getAddress().equals(ownAddress) && !hosts.contains(add))
                         hosts.add(add);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     continue;
                 }
 
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
     };
 
     public Searcher() throws Exception {
+        ownAddress = getOwnAddress();
+
+        System.out.println(ownAddress.getHostAddress());
 
         socket = new DatagramSocket(Client.PORT);
         socket.setBroadcast(true);
 
         hosts = new ArrayList<Challenge>();
 
-        ownAddress = getOwnAddress();
 
     }
 
@@ -115,7 +115,8 @@ public class Searcher {
         Enumeration<NetworkInterface> is = NetworkInterface.getNetworkInterfaces();
 
         while (is.hasMoreElements()) {
-            Enumeration<InetAddress> ads = is.nextElement().getInetAddresses();
+            NetworkInterface ifsInterface = is.nextElement();
+            Enumeration<InetAddress> ads = ifsInterface.getInetAddresses();
             while (ads.hasMoreElements()) {
                 InetAddress a = ads.nextElement();
                 if (a.isSiteLocalAddress())
