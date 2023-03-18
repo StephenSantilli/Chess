@@ -68,21 +68,22 @@ public class SendChallengeDialog extends Stage {
         nameChoices.setSpacing(5);
         nameChoices.setAlignment(Pos.CENTER_LEFT);
 
-        Label nameLabel = new Label("Enter your name (max 15 characters):");
+        Label nameLabel = new Label("Enter your name (max " + Challenge.MAX_NAME_LENGTH +  " characters):");
 
         nameField = new TextField();
         nameField.setOnAction(ev -> {
             setCreateButton();
-        }); 
+        });
 
         UnaryOperator<TextFormatter.Change> op = ev -> {
-            if(ev.getText().length() > 15) {
-                ev.setText(ev.getText().substring(0, 15));
+            int len = ev.getControlNewText().length();
+            if (len > Challenge.MAX_NAME_LENGTH) {
+                ev.setText(ev.getControlNewText().substring(0, Challenge.MAX_NAME_LENGTH));
+                ev.setRange(0, ev.getControlText().length());
             }
             return ev;
         };
         nameField.setTextFormatter(new TextFormatter<String>(op));
-        
 
         nameChoices.getChildren().addAll(nameLabel, nameField);
 
@@ -91,7 +92,7 @@ public class SendChallengeDialog extends Stage {
         colorChoices.setAlignment(Pos.CENTER_LEFT);
 
         Label colorLabel = new Label("Choose a color:");
-        
+
         ChoiceBox<String> choiceBox = new ChoiceBox<String>();
 
         choiceBox.getItems().addAll("Random", "White", "Black");
@@ -136,18 +137,16 @@ public class SendChallengeDialog extends Stage {
         HBox buttonBox = new HBox(createButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
         buttonBox.setSpacing(5);
-        
+
         vb.getChildren().addAll(nameChoices, colorChoices, buttonBox);
-        
 
     }
 
     private void setCreateButton() {
 
-        if(nameField.getText().length() <= 0) {
+        if (nameField.getText().length() <= 0) {
 
             createButton.setDisable(true);
-            
 
         }
 

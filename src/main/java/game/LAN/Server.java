@@ -32,7 +32,6 @@ public class Server {
     public void stop() {
 
         try {
-            System.out.println("Closing socket.");
             socket.close();
         } catch (Exception e) {
         }

@@ -9,7 +9,7 @@ public class Challenge {
     public static final int CHALLENGE_WHITE = 1;
     public static final int CHALLENGE_BLACK = 2;
 
-    public static final int MAX_NAME_LENGTH = 15;
+    public static final int MAX_NAME_LENGTH = 20;
 
     private String name;
 
@@ -39,9 +39,10 @@ public class Challenge {
 
     public Challenge(String name, int color, int timePerSide, int timePerMove, InetAddress address) throws Exception {
 
+        //TODO: Check for valid names (add regex filter or something)
         if (name.length() > MAX_NAME_LENGTH) {
 
-            throw new Exception("Name is too long.");
+            throw new Exception("Your name is too long.");
 
         }
 

@@ -8,11 +8,13 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -25,6 +27,12 @@ public class GameSettingsDialog extends Stage {
     private Server server;
 
     private Button createChallenge, searchForChallenge, startButton, cancelButton;
+
+    private CheckBox timeBox;
+
+    private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove;
+
+    private Label perSideLabel, perSideDivider, perMoveLabel, perMoveDivider, eLabel;
 
     private boolean create;
 
@@ -40,6 +48,20 @@ public class GameSettingsDialog extends Stage {
         return timePerSide;
     }
 
+    private void setDisabledTime() {
+
+        boolean d = timeBox.isSelected();
+        minPerSide.setDisable(d);
+        secPerSide.setDisable(d);
+        minPerMove.setDisable(d);
+        secPerMove.setDisable(d);
+        perSideLabel.setDisable(d);
+        perSideDivider.setDisable(d);
+        perMoveLabel.setDisable(d);
+        perMoveDivider.setDisable(d);
+
+    }
+
     public GameSettingsDialog(Window window, Game game) {
 
         initOwner(window);
@@ -47,7 +69,7 @@ public class GameSettingsDialog extends Stage {
 
         setResizable(false);
 
-        getIcons().setAll(((Stage)(window)).getIcons());
+        getIcons().setAll(((Stage) (window)).getIcons());
 
         create = false;
 
@@ -59,13 +81,18 @@ public class GameSettingsDialog extends Stage {
 
         Scene s = new Scene(items);
 
-        HBox perSide = new HBox();
-        perSide.setSpacing(5);
-        Label perSideLabel = new Label("Time per side (M:S): ");
-        Label perSideDivider = new Label(":");
+        timeBox = new CheckBox("Use a time control");
+        HBox checkHBox = new HBox(timeBox);
+        checkHBox.setAlignment(Pos.CENTER_LEFT);
 
-        Spinner<Integer> minPerSide = new Spinner<Integer>(0, 9999, 10);
-        Spinner<Integer> secPerSide = new Spinner<Integer>(0, 60, 0);
+        HBox perSide = new HBox();
+        perSide.setAlignment(Pos.CENTER_LEFT);
+        perSide.setSpacing(5);
+        perSideLabel = new Label("Time per side (M:S): ");
+        perSideDivider = new Label(":");
+
+        minPerSide = new Spinner<Integer>(0, 9999, 10);
+        secPerSide = new Spinner<Integer>(0, 60, 0);
 
         minPerSide.setPrefWidth(100);
         secPerSide.setPrefWidth(100);
@@ -73,20 +100,34 @@ public class GameSettingsDialog extends Stage {
         perSide.getChildren().addAll(perSideLabel, minPerSide, perSideDivider, secPerSide);
 
         HBox perMove = new HBox();
+        perMove.setAlignment(Pos.CENTER_LEFT);
+
         perMove.setSpacing(5);
-        Label perMoveLabel = new Label("Time added per move (M:S): ");
-        Label perMoveDivider = new Label(":");
+        perMoveLabel = new Label("Time added per move (M:S): ");
+        perMoveDivider = new Label(":");
 
         IntegerSpinnerValueFactory smVF = new IntegerSpinnerValueFactory(0, 9999, 0);
         IntegerSpinnerValueFactory ssVF = new IntegerSpinnerValueFactory(0, 59, 0, 1);
 
-        Spinner<Integer> minPerMove = new Spinner<Integer>(smVF);
-        Spinner<Integer> secPerMove = new Spinner<Integer>(ssVF);
+        minPerMove = new Spinner<Integer>(smVF);
+        secPerMove = new Spinner<Integer>(ssVF);
 
         minPerMove.setPrefWidth(100);
         secPerMove.setPrefWidth(100);
 
         perMove.getChildren().addAll(perMoveLabel, minPerMove, perMoveDivider, secPerMove);
+
+        timeBox.setSelected(true);
+        setDisabledTime();
+
+        timeBox.setOnAction(ev -> {
+            setDisabledTime();
+        });
+
+        eLabel = new Label("");
+        eLabel.setVisible(false);
+        eLabel.setTextFill(Color.RED);
+        HBox errorLabel = new HBox(eLabel);
 
         HBox btns = new HBox();
         btns.setAlignment(Pos.CENTER_RIGHT);
@@ -96,12 +137,14 @@ public class GameSettingsDialog extends Stage {
         cancelButton.setOnAction(e -> {
 
             if (server != null) {
+
                 server.stop();
                 createChallenge.setDisable(false);
                 searchForChallenge.setDisable(false);
                 startButton.setDisable(false);
                 cancelButton.setText("Cancel");
                 createChallenge.setText("Create LAN Challenge");
+                server = null;
                 sizeToScene();
 
             } else {
@@ -150,7 +193,9 @@ public class GameSettingsDialog extends Stage {
                     sizeToScene();
 
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    eLabel.setText(ex.getMessage());
+                    eLabel.setVisible(true);
+
                 }
 
             });
@@ -158,7 +203,7 @@ public class GameSettingsDialog extends Stage {
             cDialog.show();
 
         });
-
+        
         searchForChallenge = new Button("Search for LAN Challenge");
         searchForChallenge.setOnAction(e -> {
 
@@ -175,7 +220,7 @@ public class GameSettingsDialog extends Stage {
 
         btns.getChildren().addAll(createChallenge, searchForChallenge, startButton, cancelButton);
 
-        items.getChildren().addAll(perSide, perMove, btns);
+        items.getChildren().addAll(checkHBox, perSide, perMove, errorLabel, btns);
 
         setOnShown(e -> {
             sizeToScene();
