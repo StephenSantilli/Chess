@@ -65,7 +65,7 @@ public class ChallengeSearchDialog extends Stage {
     public ChallengeSearchDialog(Window window, Game game) throws Exception {
 
         initOwner(window);
-        initModality(Modality.WINDOW_MODAL);
+        initModality(Modality.APPLICATION_MODAL);
 
         searcher = new Searcher();
         searcher.search();
@@ -104,7 +104,7 @@ public class ChallengeSearchDialog extends Stage {
             searcher.stop();
         });
 
-        setTitle("Configure Game Settings");
+        setTitle("Search for Challenges");
         setScene(s);
 
     }

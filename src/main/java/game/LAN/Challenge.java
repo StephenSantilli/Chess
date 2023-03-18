@@ -59,13 +59,10 @@ public class Challenge {
 
         String[] a = str.split(";");
 
-        System.out.println(str);
-
         if(a.length < 4) {
             throw new Exception("Invalid challenge.");
         }
-
-
+        
         name = a[0];
         
         if(name.length() > MAX_NAME_LENGTH) throw new Exception("Invalid name length.");

@@ -50,7 +50,7 @@ public class SendChallengeDialog extends Stage {
         this.create = false;
 
         initOwner(owner);
-        initModality(Modality.WINDOW_MODAL);
+        initModality(Modality.APPLICATION_MODAL);
 
         setResizable(false);
 

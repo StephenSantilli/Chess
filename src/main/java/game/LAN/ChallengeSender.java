@@ -19,7 +19,7 @@ public class ChallengeSender implements Runnable {
     public void run() {
         try {
 
-            DatagramPacket packet = new DatagramPacket(challenge.toString().getBytes(), challenge.getName().length(),
+            DatagramPacket packet = new DatagramPacket(challenge.toString().getBytes(), challenge.toString().length(),
                     challenge.getAddress(), Client.PORT);
 
             sock.send(packet);
