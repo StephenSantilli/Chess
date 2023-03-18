@@ -15,7 +15,7 @@ public class Server {
 
     public Server(Challenge challenge) throws Exception {
 
-        socket = new DatagramSocket(Client.PORT);
+        socket = new DatagramSocket(Client.PORT, InetAddress.getByName("localhost"));
 
         this.challenge = challenge;
 
