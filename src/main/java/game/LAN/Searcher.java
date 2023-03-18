@@ -57,7 +57,7 @@ public class Searcher {
 
             while (true) {
 
-                byte[] buf = new byte[15];
+                byte[] buf = new byte[100];
                 DatagramPacket packet = new DatagramPacket(buf, 100);
                 socket.receive(packet);
 
