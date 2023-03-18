@@ -60,7 +60,7 @@ public class Searcher {
                 byte[] buf = new byte[100];
                 DatagramPacket packet = new DatagramPacket(buf, 100);
                 socket.receive(packet);
-
+                System.out.println(new String(packet.getData()));
                 try {
                     Challenge add = new Challenge(packet);
                     if (!packet.getAddress().equals(ownAddress) && !hosts.contains(add))
