@@ -23,7 +23,7 @@ public class GameSettingsDialog extends Stage {
 
     private Server server;
 
-    private Button createChallenge;
+    private Button createChallenge, searchForChallenge;
 
     public int getTimePerMove() {
         return timePerMove;
@@ -86,6 +86,8 @@ public class GameSettingsDialog extends Stage {
             if (server != null) {
                 server.stop();
                 createChallenge.setDisable(false);
+                searchForChallenge.setDisable(false);
+
             } else {
                 timePerSide = -1;
                 timePerMove = -1;
@@ -122,6 +124,7 @@ public class GameSettingsDialog extends Stage {
                             new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null));
                     server.start();
                     createChallenge.setDisable(true);
+                    searchForChallenge.setDisable(true);
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -133,7 +136,7 @@ public class GameSettingsDialog extends Stage {
 
         });
 
-        Button searchForChallenge = new Button("Search for LAN Challenge");
+        searchForChallenge = new Button("Search for LAN Challenge");
         searchForChallenge.setOnAction(e -> {
 
             try {

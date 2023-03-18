@@ -44,9 +44,9 @@ public class Server {
         try {
 
             while (true) {
-                byte[] buf = new byte[500];
+                byte[] buf = new byte[1];
                 System.out.println("listening");
-                DatagramPacket packet = new DatagramPacket(buf, 500);
+                DatagramPacket packet = new DatagramPacket(buf, 1);
                 socket.receive(packet);
                 System.out.println(packet.getAddress());
                 new Thread(new ChallengeSender(new Challenge(challenge.getName(), challenge.getColor(), challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), socket)).start();

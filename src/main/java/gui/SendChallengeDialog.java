@@ -140,6 +140,7 @@ public class SendChallengeDialog extends Stage {
         if(nameField.getText().length() <= 0) {
 
             createButton.setDisable(true);
+            
 
         }
 
