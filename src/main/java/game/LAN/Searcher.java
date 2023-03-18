@@ -29,7 +29,7 @@ public class Searcher {
         try {
             String send = "c";
             DatagramPacket packet = new DatagramPacket(send.getBytes(), send.length(),
-                    InetAddress.getByName("255.255.255.255"), Client.PORT);
+                    InetAddress.getByName("10.0.0.2"), Client.PORT);
 
             for (int i = 0; i < SEARCH_RETRIES; i++) {
 
@@ -82,6 +82,7 @@ public class Searcher {
     public Searcher() throws Exception {
 
         socket = new DatagramSocket(Client.PORT);
+        socket.setBroadcast(true);
 
         hosts = new ArrayList<Challenge>();
 

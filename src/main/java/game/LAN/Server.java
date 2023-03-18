@@ -16,6 +16,7 @@ public class Server {
     public Server(Challenge challenge) throws Exception {
 
         socket = new DatagramSocket(Client.PORT);
+        socket.setBroadcast(true);
 
         this.challenge = challenge;
 
@@ -45,7 +46,7 @@ public class Server {
 
             while (true) {
                 byte[] buf = new byte[1];
-                System.out.println("listening");
+                System.out.println("listening on " + socket.getLocalAddress());
                 DatagramPacket packet = new DatagramPacket(buf, 1);
                 socket.receive(packet);
                 System.out.println(packet.getAddress());
