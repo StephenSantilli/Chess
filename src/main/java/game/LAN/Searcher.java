@@ -80,7 +80,7 @@ public class Searcher {
 
     public Searcher() throws Exception {
 
-        socket = new DatagramSocket(Client.PORT);
+        socket = new DatagramSocket(Client.PORT, InetAddress.getByName("0.0.0.0"));
 
         hosts = new ArrayList<Challenge>();
 
