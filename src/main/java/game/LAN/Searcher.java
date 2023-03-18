@@ -78,15 +78,13 @@ public class Searcher {
     };
 
     public Searcher() throws Exception {
-        ownAddress = getOwnAddress();
 
-        System.out.println(ownAddress.getHostAddress());
+        ownAddress = getOwnAddress();
 
         socket = new DatagramSocket(Client.PORT);
         socket.setBroadcast(true);
 
         hosts = new ArrayList<Challenge>();
-
 
     }
 
