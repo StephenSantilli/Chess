@@ -55,6 +55,8 @@ public class Searcher {
 
         try {
 
+            socket.bind(ownAddress);
+
             while (true) {
 
                 byte[] buf = new byte[100];
