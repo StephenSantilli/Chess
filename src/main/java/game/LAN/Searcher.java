@@ -56,8 +56,6 @@ public class Searcher {
 
         try {
 
-            socket.bind(new InetSocketAddress(ownAddress, Client.PORT));
-
             while (true) {
 
                 byte[] buf = new byte[100];
