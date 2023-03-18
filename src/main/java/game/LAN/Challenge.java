@@ -55,7 +55,7 @@ public class Challenge {
 
     public Challenge(DatagramPacket packet) throws Exception {
 
-        String str = packet.getData().toString().trim();
+        String str = new String(packet.getData()).trim();
 
         String[] a = str.split(";");
 
