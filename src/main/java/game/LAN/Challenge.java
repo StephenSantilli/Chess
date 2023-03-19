@@ -106,7 +106,7 @@ public class Challenge {
 
     public String toString() {
 
-        String str = name + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
+        String str = version + ";" + name + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
         return str;
 
     }

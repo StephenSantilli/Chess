@@ -42,6 +42,7 @@ public class ChallengeServer {
 
         try {
             udpSocket.close();
+            tcpSocket.close();
         } catch (Exception e) {
         }
 
