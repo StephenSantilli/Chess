@@ -4,11 +4,16 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import game.PGNParser.PGNMove;
 import game.PGNParser.PGNParser;
 
 public class Game {
+
+    public static final String VERSION = Game.class.getPackage().getImplementationVersion() == null ? "DEV"
+            : Game.class
+                    .getPackage().getImplementationVersion();
 
     public static final int RESULT_NOT_STARTED = -1;
     public static final int RESULT_IN_PROGRESS = 0;
@@ -30,20 +35,18 @@ public class Game {
     public static final int REASON_OTHER = 10;
 
     /**
+     * The settings of the game.
+     */
+    private GameSettings settings;
+
+    private Player white;
+
+    private Player black;
+
+    /**
      * A list of the positions in this game, in order.
      */
     private ArrayList<Position> positions;
-
-    /**
-     * The index of the current position being displayed. This is not necessarily
-     * the most recent position.
-     */
-    private int currentPos;
-
-    /**
-     * The listeners of the move events.
-     */
-    private ArrayList<GameListener> moveListeners;
 
     /**
      * <p>
@@ -77,28 +80,24 @@ public class Game {
     private int resultReason;
 
     /**
-     * The time, in milliseconds, each side has in total. Should be {@code -1} if no
-     * time
-     * control used.
-     */
-    private int timePerSide;
-
-    /**
-     * The time, in milliseconds, each side gains per move made. Should be
-     * {@code -1} if
-     * no time control used, but {@code 0} if no timer added per move.
-     */
-    private int timePerMove;
-
-    /**
-     * The time, in milliseconds, white has left. Should be {@code -1} if no time
+     * <p>
+     * The time, in milliseconds, white has left. Will be {@code -1} if no time
      * control is being used.
+     * 
+     * <p>
+     * <b>Note:</b> If it is currently white's turn, this will not be updated until
+     * the timer is flipped.
      */
     private long whiteTimer;
 
     /**
-     * The time, in milliseconds, black has left. Should be {@code -1} if no time
+     * <p>
+     * The time, in milliseconds, black has left. Will be {@code -1} if no time
      * control is being used.
+     * 
+     * <p>
+     * <b>Note:</b> If it is currently black's turn, this will not be updated until
+     * the timer is flipped.
      */
     private long blackTimer;
 
@@ -117,9 +116,6 @@ public class Game {
      */
     private ScheduledExecutorService flagfallChecker;
 
-    private Player opponent;
-    private boolean isTwoPlayer;
-
     /**
      * The flagfall checker task.
      */
@@ -134,18 +130,18 @@ public class Game {
         long current = System.currentTimeMillis();
         if ((current - start) > (a.isWhite() ? whiteTimer : blackTimer)) {
 
-            markGameOver(isWhiteTurn(true) ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
+            markGameOver(isWhiteTurn() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
 
         }
 
     };
 
-    public ArrayList<Position> getPositions() {
-        return positions;
+    public GameSettings getSettings() {
+        return settings;
     }
 
-    public int getCurrentPos() {
-        return currentPos;
+    public ArrayList<Position> getPositions() {
+        return positions;
     }
 
     public int getResult() {
@@ -154,14 +150,6 @@ public class Game {
 
     public int getResultReason() {
         return resultReason;
-    }
-
-    public int getTimePerSide() {
-        return timePerSide;
-    }
-
-    public int getTimePerMove() {
-        return timePerMove;
     }
 
     public boolean isPaused() {
@@ -177,55 +165,19 @@ public class Game {
     }
 
     /**
-     * @return the position at {@link #currentPos}
-     */
-    public Position getActivePos() {
-        return positions.get(currentPos);
-    }
-
-    /**
      * @return the second to last position in the list of positions.
      */
     public Position getPreviousPos() {
-        if (currentPos == 0)
+
+        if (positions.size() == 1)
             return null;
 
-        return positions.get(currentPos - 1);
+        return positions.get(positions.size() - 1);
+
     }
 
-    /**
-     * @param timePerSide The time, in seconds, each side has at the start of the
-     *                    game.
-     */
-    public void setTimePerSide(int timePerSide) {
-        this.timePerSide = timePerSide * 1000;
-    }
-
-    /**
-     * @param timePerMove The time, in seconds, each side gets at the end of each of
-     *                    their moves.
-     */
-    public void setTimePerMove(int timePerMove) {
-        this.timePerMove = timePerMove * 1000;
-    }
-
-    /**
-     * Initializes a new two-player Game with no time control.
-     */
-    public Game() {
-        this(-1, -1);
-    }
-
-    /**
-     * Initializes a new two-player Game with the specified time control.
-     * 
-     * @param timePerSide The amount of time, in seconds, each side gets at the
-     *                    start.
-     * @param timePerMove The amount of time, in seconds, each side gets added after
-     *                    each move they make.
-     */
-    public Game(int timePerSide, int timePerMove) {
-        this(timePerSide, timePerMove, true);
+    public Player getPlayer(boolean white) {
+        return white ? this.white : this.black;
     }
 
     /**
@@ -238,146 +190,38 @@ public class Game {
      *                    each move they make.
      * @param isTwoPlayer Whether or not there will be an opponent.
      */
-    public Game(int timePerSide, int timePerMove, boolean isTwoPlayer) {
+    public Game(String whiteName, String blackName, GameSettings settings) {
+
+        this.white = new Player(this, true, whiteName);
+        this.black = new Player(this, false, blackName);
+
+        this.settings = settings;
 
         positions = new ArrayList<Position>();
-        moveListeners = new ArrayList<GameListener>();
 
         positions.add(new Position(this));
-        currentPos = 0;
 
         result = RESULT_NOT_STARTED;
         resultReason = REASON_IN_PROGRESS;
 
-        this.timePerSide = timePerSide * 1000;
-        this.timePerMove = timePerMove * 1000;
-
-        this.whiteTimer = this.timePerSide;
-        this.blackTimer = this.timePerSide;
-
-        this.isTwoPlayer = isTwoPlayer;
-
-    }
-
-    public void importPosition(PGNParser PGN) throws Exception {
-
-        positions = new ArrayList<Position>();
-        positions.add(new Position(this));
-        setCurrentPos(0);
-
-        ArrayList<PGNMove> moves = PGN.getParsedMoves();
-
-        for (int i = 0; i < moves.size(); i++) {
-
-            Move m = new Move(moves.get(i).getMoveText(), getActivePos(), getActivePos().isWhite());
-
-            positions.add(new Position(getActivePos(), m, this, !getActivePos().isWhite(), true));
-            ++currentPos;
-
-        }
-
-        if (currentPos == 0)
-            throw new Exception("Position import failed.");
-
-        fireResetMoves();
-
-    }
-
-    public String exportPosition() throws Exception {
-
-        return new PGNParser(this, null, true).outputPGN(false);
-
-    }
-
-    public void makeMove(Move m) {
-
-        if (paused || result != RESULT_IN_PROGRESS) {
-            return;
-        }
-
-        if (currentPos != positions.size() - 1)
-            return;
-
-        Position prev = positions.get(positions.size() - 1);
-
-        if (prev.getMove() != null && prev.getMove().getPromoteType() == '?')
-            return;
-
-        if (prev.isCheckMate() || m.isWhite() != isWhiteTurn(true))
-            return;
-
-        Move valid = null;
-        for (int i = 0; i < prev.getMoves().size(); i++) {
-            Move a = prev.getMoves().get(i);
-
-            if (a.equals(m))
-                valid = a;
-        }
-
-        if (valid == null)
-            return;
-
-        Position movePosition = new Position(positions.get(currentPos), valid, this, !isWhiteTurn(true), true);
-
-        if (movePosition.isGivingCheck())
-            return;
-
-        if (movePosition.isGivingCheck() && movePosition.isInCheck())
-            return;
-
-        if (movePosition.isGivingCheck() && !prev.isInCheck())
-            return;
-
-        if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
-            return;
-
-        positions.add(movePosition);
-        setCurrentPos(positions.size() - 1);
-
-        if (movePosition.isCheckMate()) {
-            fireMoveMade();
-            markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
-            return;
-        }
-
-        if (movePosition.isInsufficientMaterial()) {
-            fireMoveMade();
-            markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
-            return;
-        }
-
-        if (movePosition.getMove().getPromoteType() != '?')
-            flipTimer(true, 0);
-
-        fireMoveMade();
+        this.whiteTimer = settings.getTimePerSide();
+        this.blackTimer = settings.getTimePerSide();
 
     }
 
     public void startGame() throws Exception {
-        startGame(null);
-    }
-
-    public void startGame(Player opponent) throws Exception {
 
         if (paused)
             return;
 
-        if (!isTwoPlayer) {
-
-            if (opponent == null)
-                throw new Exception("Trying to start game without an opponent!");
-
-            this.opponent = opponent;
-
-        }
-
         result = RESULT_IN_PROGRESS;
 
-        whiteTimer = timePerSide;
-        blackTimer = timePerSide;
+        whiteTimer = settings.getTimePerSide();
+        blackTimer = settings.getTimePerSide();
 
         flipTimer(true, 0);
-        if (timePerSide > 0) {
+
+        if (settings.getTimePerSide() > 0) {
 
             flagfallChecker = Executors.newScheduledThreadPool(1);
             flagfallChecker.scheduleWithFixedDelay(flagfall, 10, 10, TimeUnit.MILLISECONDS);
@@ -386,28 +230,7 @@ public class Game {
 
     }
 
-    public void stopGame() {
-        if (flagfallChecker != null) {
-
-            flagfallChecker.shutdownNow();
-
-        }
-
-    }
-
-    /**
-     * Marks the game as drawn.
-     * 
-     * @param colorOfOfferer The color, {@code true} if white and {@code false} if
-     *                       black, of the side who offered the draw.
-     */
-    public void drawGame(boolean colorOfOfferer) {
-
-        markGameOver(RESULT_DRAW, colorOfOfferer ? REASON_WHITE_DRAW : REASON_BLACK_DRAW);
-
-    }
-
-    public void markGameOver(int result, int resultReason) {
+    void markGameOver(int result, int resultReason) {
 
         this.result = result;
         this.resultReason = resultReason;
@@ -418,60 +241,167 @@ public class Game {
 
     }
 
-    public void setPromo(char piece) {
+    public void stopGame() {
 
-        if (getActivePos().getMove() != null && getActivePos().getMove().getPromoteType() == '?') {
-            getActivePos().setPromoType(piece, this);
-            flipTimer(true, 0);
+        if (flagfallChecker != null)
+            flagfallChecker.shutdownNow();
+
+    }
+
+    public void importPosition(PGNParser PGN) throws Exception {
+
+        positions = new ArrayList<Position>();
+        positions.add(new Position(this));
+
+        ArrayList<PGNMove> moves = PGN.getParsedMoves();
+
+        for (int i = 0; i < moves.size(); i++) {
+
+            Move m = new Move(moves.get(i).getMoveText(), getLastPos(), getLastPos().isWhite());
+
+            positions.add(new Position(getLastPos(), m, this, !getLastPos().isWhite(), true));
+
         }
 
-        fireMoveMade();
+        if (positions.size() == 1)
+            throw new Exception("Position import failed.");
+
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
+
     }
 
-    public void setCurrentPos(int currentPos) {
+    public String exportPosition() throws Exception {
 
-        if (currentPos >= positions.size() || currentPos < 0)
+        return new PGNParser(this, null, true).outputPGN(false);
+
+    }
+
+    void makeMove(Square origin, Square destination) throws Exception {
+
+        if (paused || result != RESULT_IN_PROGRESS)
+            throw new Exception("Game is paused.");
+
+        if (result != RESULT_IN_PROGRESS)
+            throw new Exception("Game is not in progress.");
+
+        if (getLastPos().getMove() != null && getLastPos().getMove().getPromoteType() == '?')
+            throw new Exception("Awaiting promotion for the last move.");
+
+        Move valid = null;
+        for (int i = 0; valid == null && i < getLastPos().getMoves().size(); i++) {
+
+            Move a = getLastPos().getMoves().get(i);
+
+            if (a.getOrigin().equals(origin) && a.getDestination().equals(destination))
+                valid = a;
+
+        }
+
+        if (valid == null)
+            throw new Exception("Invalid move.");
+
+        Position movePosition = new Position(getLastPos(), valid, this, !isWhiteTurn(), true);
+
+        if (movePosition.isGivingCheck())
+            throw new Exception("Cannot move into check.");
+
+        if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
+            throw new Exception("Cannot capture a king.");
+
+        positions.add(movePosition);
+
+        if (movePosition.isCheckMate()) {
+            white.fireBoardUpdate();
+            black.fireBoardUpdate();
+            markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
             return;
+        }
 
-        int old = this.currentPos;
+        if (movePosition.isInsufficientMaterial()) {
+            white.fireBoardUpdate();
+            black.fireBoardUpdate();
+            markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
+            return;
+        }
 
-        this.currentPos = currentPos;
+        if (movePosition.getMove().getPromoteType() != '?')
+            flipTimer(true, 0);
 
-        firePosChanged(old, currentPos);
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 
-    public boolean isWhiteTurn(boolean overall) {
+    void setPromo(char piece) throws Exception {
 
-        return (overall ? getLastPos() : getActivePos()).isWhite();
+        if (getLastPos().getMove() != null && getLastPos().getMove().getPromoteType() == '?') {
+
+            getLastPos().setPromote(piece, this);
+            flipTimer(true, 0);
+
+        } else
+            throw new Exception("Cannot set promote type.");
+
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 
+    boolean isWhiteTurn() {
+
+        return (getLastPos().isWhite() && isCountdownWhite());
+
+    }
+
+    /**
+     * @deprecated
+     *             Use {@link #isCountdownWhite()} instead.
+     * 
+     * @return Whether or not the {@link Position} in {@link #positions} is the
+     *         one
+     *         currently counting down the timer. Will be {@code false} if waiting
+     *         for
+     *         promotion.
+     */
+    @Deprecated
     public boolean isLastPosCountdown() {
         return (getLastPos().getMove() == null || getLastPos().getMove().getPromoteType() != '?');
     }
 
+    /**
+     * @return Whether or not the timer is currently counting down for white.
+     */
+    public boolean isCountdownWhite() {
+        return (getLastPos().getMove() == null
+                || (getLastPos().getMove().getPromoteType() != '?' && !getLastPos().isWhite())
+                || getLastPos().isWhite());
+    }
+
     public Position getCurrentCountdownPos() {
 
-        return isLastPosCountdown() ? getLastPos()
+        return isCountdownWhite() == getLastPos().isWhite() ? getLastPos()
                 : getPreviousPos();
 
     }
 
-    public long getCurrentTimerTime(boolean color) {
+    public long getTimerTime(boolean color) {
 
-        if (timePerSide <= -1)
+        if (settings.getTimePerSide() <= -1)
             return -1;
 
         Position p = getCurrentCountdownPos();
+
         long timer = color ? whiteTimer : blackTimer;
 
         if (p.isWhite() != color)
             return timer >= 0 ? timer : 0;
         else {
+
             if (timer <= 0)
                 return 0;
             else {
+
                 long time = timer
                         - (System.currentTimeMillis() - p.getSystemTimeStart());
 
@@ -479,19 +409,23 @@ public class Game {
                     return 0;
 
                 return time;
+
             }
         }
 
     }
 
-    public void gameOver() {
+    private void gameOver() {
 
         if (result <= 0)
             return;
 
+        stopGame();
+
         flipTimer(true, 0);
 
-        fireGameOver();
+        white.fireGameOver();
+        black.fireGameOver();
 
     }
 
@@ -514,9 +448,12 @@ public class Game {
      * @param pauseTime The time the game was paused at, if resuming. Should be
      *                  {@code 0} otherwise.
      */
-    public void flipTimer(boolean setTimer, long pauseTime) {
+    private void flipTimer(boolean setTimer, long pauseTime) {
 
-        if (paused || timePerSide <= -1
+        if ((!isCountdownWhite() && !settings.isWhiteTimerManged())
+                || (isCountdownWhite() && !settings.isBlackTimerManaged())
+                || paused
+                || settings.getTimePerSide() <= -1
                 || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS))
             return;
 
@@ -527,9 +464,9 @@ public class Game {
         if (previous != null && setTimer && pauseTime <= 0) {
 
             if (previous.isWhite())
-                whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
+                whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove());
             else
-                blackTimer -= (currentTime - previous.getSystemTimeStart()) - (timePerMove);
+                blackTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove());
 
             previous.setTimerEnd(previous.isWhite() ? whiteTimer : blackTimer);
 
@@ -556,26 +493,28 @@ public class Game {
 
         }
 
-        fireTimerChange();
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 
-    public void pauseGame() {
+    void pauseGame() throws Exception {
 
         if (paused)
-            return;
+            throw new Exception("Game is already paused.");
 
         paused = true;
         pauseStart = System.currentTimeMillis();
 
-        firePauseGame();
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 
-    public void resumeGame() {
+    void resumeGame() throws Exception {
 
         if (!paused)
-            return;
+            throw new Exception("Game is not paused.");
 
         paused = false;
 
@@ -583,34 +522,30 @@ public class Game {
 
         pauseStart = 0;
 
-        fireResumeGame();
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 
-    public boolean canUndo() {
+    void undoMove() throws Exception {
 
-        return currentPos == positions.size() - 1 && currentPos != 0;
+        if (!settings.canUndo())
+            throw new Exception("Game settings do not allow undo/redo.");
 
-    }
-
-    public void undoMove() {
-
-        if (!canUndo())
-            return;
+        if (positions.size() <= 1)
+            throw new Exception("No move to undo.");
 
         boolean isCountdown = isLastPosCountdown();
 
-        Position redo = positions.get(currentPos);
+        Position redo = getLastPos();
 
-        positions.remove(currentPos);
+        positions.remove(positions.size() - 1);
 
-        positions.get(currentPos - 1).setRedo(redo);
+        getLastPos().setRedo(redo);
         redo.setRedoPromote(redo.getMove().getPromoteType());
 
         if (redo.getMove().getPromoteType() != '0')
-            redo.setPromoType('?', this);
-
-        setCurrentPos(positions.size() - 1);
+            redo.setPromote('?', this);
 
         redo.setSystemTimeStart(-1);
         redo.setTimerEnd(-1);
@@ -624,11 +559,11 @@ public class Game {
 
             Position prev = getPreviousPos();
             if (getLastPos().isWhite()) {
-                blackTimer = prev == null ? timePerSide : prev.getTimerEnd();
-                whiteTimer -= timePerMove;
+                blackTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
+                whiteTimer -= settings.getTimePerMove();
             } else {
-                whiteTimer = prev == null ? timePerSide : prev.getTimerEnd();
-                blackTimer -= timePerMove;
+                whiteTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
+                blackTimer -= settings.getTimePerMove();
             }
 
             getLastPos().setSystemTimeStart(-1);
@@ -637,28 +572,24 @@ public class Game {
 
         }
 
-        fireUndoMove();
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 
-    public boolean canRedo() {
+    void redoMove() throws Exception {
 
-        return currentPos == positions.size() - 1 && positions.get(currentPos).getRedo() != null;
-
-    }
-
-    public void redoMove() {
+        if (!settings.canUndo())
+            throw new Exception("Game settings do not allow undo/redo.");
 
         Position redo = getLastPos().getRedo();
 
-        if (!canRedo())
-            return;
+        if (redo == null)
+            throw new Exception("No move to redo.");
 
         positions.add(redo);
-        ++currentPos;
-        redo.setPromoType(redo.getRedoPromote(), this);
-        --currentPos;
-        setCurrentPos(positions.size() - 1);
+
+        redo.setPromote(redo.getRedoPromote(), this);
 
         boolean redoTime = getPreviousPos().getTimerEnd() > 0;
 
@@ -672,102 +603,8 @@ public class Game {
         }
 
         flipTimer(!redoTime, 0);
-        fireMoveMade();
-        fireRedoMove();
-
-    }
-
-    public void addMoveListener(GameListener listener) {
-        moveListeners.add(listener);
-    }
-
-    public void firePosChanged(int old, int curr) {
-
-        for (GameListener b : moveListeners) {
-
-            b.posChanged(old, curr);
-
-        }
-
-    }
-
-    public void fireMoveMade() {
-
-        for (GameListener b : moveListeners) {
-
-            b.moveMade();
-
-        }
-
-    }
-
-    public void fireUndoMove() {
-
-        for (GameListener b : moveListeners) {
-
-            b.undoMove();
-
-        }
-
-    }
-
-    public void fireRedoMove() {
-
-        for (GameListener b : moveListeners) {
-
-            b.redoMove();
-
-        }
-
-    }
-
-    public void fireResetMoves() {
-
-        for (GameListener b : moveListeners) {
-
-            b.resetMoves();
-
-        }
-
-    }
-
-    public void fireGameOver() {
-
-        for (GameListener b : moveListeners) {
-
-            b.gameOver();
-
-        }
-
-    }
-
-    public void fireTimerChange() {
-
-        for (GameListener b : moveListeners) {
-
-            b.timerChange();
-
-        }
-
-    }
-
-    public void firePauseGame() {
-
-        for (GameListener b : moveListeners) {
-
-            b.pauseGame();
-
-        }
-
-    }
-
-    public void fireResumeGame() {
-
-        for (GameListener b : moveListeners) {
-
-            b.resumeGame();
-
-        }
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
 
     }
 

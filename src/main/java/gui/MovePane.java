@@ -4,7 +4,6 @@ import game.Position;
 
 import java.util.ArrayList;
 
-import game.GameListener;
 import game.Move;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -15,13 +14,11 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
-public class MovePane extends GridPane implements GameListener {
+public class MovePane extends GridPane {
 
     private Board board;
 
     private ArrayList<MoveRow> rows;
-
-    private int activePos = 0;
 
     private ScrollPane sp;
 
@@ -56,6 +53,48 @@ public class MovePane extends GridPane implements GameListener {
         getColumnConstraints().addAll(c, c1, c2);
 
         setVisible(true);
+
+    }
+
+    public void boardUpdated() {
+
+        initMovePane();
+
+    }
+
+    public void posChanged(int active) {
+
+        for (int i = 0; i < getChildren().size(); i++) {
+
+            Node c = getChildren().get(i);
+
+            if (active != 0
+                    && getRowIndex(c) == ((active - 1) / 2)
+                    && getColumnIndex(
+                            c) == (board.getGame().getPositions().get(active).isWhite() ? 2
+                                    : 1)) {
+
+                if (c.isHover())
+                    c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+                else
+                    c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
+
+                c.requestFocus();
+
+            } else {
+
+                if (c.isHover())
+                    c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
+                else
+                    c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+
+            }
+
+            if (active == 0) {
+                sp.setVvalue(0);
+            }
+
+        }
 
     }
 
@@ -115,8 +154,11 @@ public class MovePane extends GridPane implements GameListener {
         btn.setFocusTraversable(true);
 
         btn.setOnAction(e -> {
-
-            board.getGame().setCurrentPos(pos);
+            
+            try {
+                board.getActivePlayer().setCurrentPos(pos);
+            } catch (Exception e1) {
+            }
 
         });
 
@@ -139,124 +181,13 @@ public class MovePane extends GridPane implements GameListener {
         GridPane.setMargin(btn, new Insets(5, 5, 5, 5));
 
         if (m.isWhite()) {
-            
+
             Label l = new Label((row + 1) + ".");
             add(l, 0, row);
             GridPane.setMargin(l, new Insets(5, 5, 5, 5));
 
         }
 
-        posChanged(-1, -1);
-
-    }
-
-    @Override
-    public void moveMade() {
-
-        Platform.runLater(() -> {
-            execMove();
-        });
-
-    }
-
-    @Override
-    public void undoMove() {
-
-        Platform.runLater(() -> {
-
-            for (int i = 0; i < getChildren().size(); i++) {
-
-                Node c = getChildren().get(i);
-
-                if (getRowIndex(c) == ((board.getGame().getCurrentPos()) / 2)) {
-
-                    if (getColumnIndex(c) == (board.getGame().getActivePos().getRedo().isWhite() ? 2 : 1)) {
-
-                        getChildren().remove(c);
-                        --i;
-
-                    } else if (board.getGame().getActivePos().isWhite()
-                            && getColumnIndex(c) == 0) {
-                        getChildren().remove(c);
-                        --i;
-
-                    }
-
-                }
-
-            }
-
-        });
-    }
-
-    @Override
-    public void resetMoves() {
-        initMovePane();
-    }
-
-    @Override
-    public void posChanged(int old, int curr) {
-
-        Platform.runLater(() -> {
-
-            for (int i = 0; i < getChildren().size(); i++) {
-
-                Node c = getChildren().get(i);
-
-                if (board.getGame().getCurrentPos() != 0
-                        && getRowIndex(c) == ((board.getGame().getCurrentPos() - 1) / 2)
-                        && getColumnIndex(
-                                c) == (board.getGame().getPositions().get(board.getGame().getCurrentPos()).isWhite() ? 2
-                                        : 1)) {
-
-                    if (c.isHover())
-                        c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
-                    else
-                        c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
-
-                    c.requestFocus();
-
-                } else if (activePos > 0 && activePos < board.getGame().getPositions().size()
-                        && getRowIndex(c) == ((activePos - 1) / 2)
-                        && getColumnIndex(c) == (board.getGame().getPositions().get(activePos).isWhite() ? 2 : 1)) {
-
-                    if (c.isHover())
-                        c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-                    else
-                        c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
-
-                }
-                if (board.getGame().getCurrentPos() == 0) {
-                    sp.setVvalue(0);
-                }
-
-            }
-
-            activePos = board.getGame().getCurrentPos();
-
-        });
-
-    }
-
-    @Override
-    public void redoMove() {
-
-    }
-
-    @Override
-    public void gameOver() {
-    }
-
-    @Override
-    public void timerChange() {
-    }
-
-    @Override
-    public void pauseGame() {
-    }
-
-    @Override
-    public void resumeGame() {
     }
 
 }

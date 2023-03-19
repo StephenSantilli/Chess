@@ -2,6 +2,7 @@ package gui;
 
 import java.util.function.UnaryOperator;
 
+import game.Player;
 import game.LAN.Challenge;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -68,17 +69,19 @@ public class SendChallengeDialog extends Stage {
         nameChoices.setSpacing(5);
         nameChoices.setAlignment(Pos.CENTER_LEFT);
 
-        Label nameLabel = new Label("Enter your name (max " + Challenge.MAX_NAME_LENGTH +  " characters):");
+        Label nameLabel = new Label("Enter your name (max " + Player.MAX_NAME_LENGTH + " characters):");
 
         nameField = new TextField();
         nameField.setOnAction(ev -> {
             setCreateButton();
         });
 
+        nameField.setText(App.prefs.get("username", "User"));
+
         UnaryOperator<TextFormatter.Change> op = ev -> {
             int len = ev.getControlNewText().length();
-            if (len > Challenge.MAX_NAME_LENGTH) {
-                ev.setText(ev.getControlNewText().substring(0, Challenge.MAX_NAME_LENGTH));
+            if (len > Player.MAX_NAME_LENGTH) {
+                ev.setText(ev.getControlNewText().substring(0, Player.MAX_NAME_LENGTH));
                 ev.setRange(0, ev.getControlText().length());
             }
             return ev;
@@ -144,11 +147,9 @@ public class SendChallengeDialog extends Stage {
 
     private void setCreateButton() {
 
-        if (nameField.getText().length() <= 0) {
-
+        if (nameField.getText().length() <= 0 || !nameField.getText().matches(Player.NAME_REGEX)
+                || nameField.getText().length() > Player.MAX_NAME_LENGTH)
             createButton.setDisable(true);
-
-        }
 
     }
 

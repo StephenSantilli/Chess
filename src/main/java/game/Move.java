@@ -23,9 +23,15 @@ public class Move {
 
     private String moveText;
 
-    public boolean equals(Move compare) {
+    @Override
+    public boolean equals(Object compare) {
 
-        return origin.equals(compare.getOrigin()) && destination.equals(compare.getDestination());
+        if (!(compare instanceof Move))
+            return false;
+
+        Move casted = (Move)(compare);
+
+        return origin.equals(casted.getOrigin()) && destination.equals(casted.getDestination());
 
     }
 
@@ -93,7 +99,7 @@ public class Move {
         return promoteType;
     }
 
-    public void setPromoteType(char promoteType) {
+    void setPromoteType(char promoteType) {
 
         if (moveText == null) {
             moveText = "" + promoteType;
@@ -140,7 +146,7 @@ public class Move {
 
     public Move(String move, Position pos) {
 
-        //TODO: add parsing PGN input to replace old constructor
+        // TODO: add parsing PGN input to replace old constructor
 
     }
 
@@ -366,7 +372,7 @@ public class Move {
             throw new Exception("Rook already moved, cannot castle.");
 
         this.rook = rook;
-        
+
         if (pos.isInCheck())
             throw new Exception("Cannot castle out of check.");
 

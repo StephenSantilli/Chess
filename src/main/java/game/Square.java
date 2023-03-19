@@ -63,9 +63,14 @@ public class Square {
      * @param compare The square to compare to.
      * @return Whether or not the file and rank match.
      */
-    public boolean equals(Square compare) {
+    @Override
+    public boolean equals(Object compare) {
 
-        return (file == compare.getFile()) && (rank == compare.getRank());
+        if(!(compare instanceof Square)) return false;
+
+        Square casted = (Square)(compare);
+
+        return (file == casted.getFile()) && (rank == casted.getRank());
 
     }
 

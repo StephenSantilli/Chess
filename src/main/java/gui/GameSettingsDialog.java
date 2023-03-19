@@ -1,9 +1,10 @@
 package gui;
 
 import game.Game;
+import game.Player;
 import game.LAN.Challenge;
-import game.LAN.Searcher;
-import game.LAN.Server;
+import game.LAN.ChallengeSearcher;
+import game.LAN.ChallengeServer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -24,7 +25,7 @@ public class GameSettingsDialog extends Stage {
 
     private int timePerSide, timePerMove;
 
-    private Server server;
+    private ChallengeServer server;
 
     private Button createChallenge, searchForChallenge, startButton, cancelButton;
 
@@ -35,9 +36,14 @@ public class GameSettingsDialog extends Stage {
     private Label perSideLabel, perSideDivider, perMoveLabel, perMoveDivider, eLabel;
 
     private boolean create;
+    private Player player;
 
     public boolean isCreate() {
         return create;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public int getTimePerMove() {
@@ -50,7 +56,7 @@ public class GameSettingsDialog extends Stage {
 
     private void setDisabledTime() {
 
-        boolean d = timeBox.isSelected();
+        boolean d = !timeBox.isSelected();
         minPerSide.setDisable(d);
         secPerSide.setDisable(d);
         minPerMove.setDisable(d);
@@ -117,7 +123,7 @@ public class GameSettingsDialog extends Stage {
 
         perMove.getChildren().addAll(perMoveLabel, minPerMove, perMoveDivider, secPerMove);
 
-        timeBox.setSelected(true);
+        timeBox.setSelected(false);
         setDisabledTime();
 
         timeBox.setOnAction(ev -> {
@@ -139,15 +145,19 @@ public class GameSettingsDialog extends Stage {
             if (server != null) {
 
                 server.stop();
+                server = null;
+
                 createChallenge.setDisable(false);
                 searchForChallenge.setDisable(false);
                 startButton.setDisable(false);
+
                 cancelButton.setText("Cancel");
                 createChallenge.setText("Create LAN Challenge");
-                server = null;
+
                 sizeToScene();
 
             } else {
+
                 timePerSide = -1;
                 timePerMove = -1;
 
@@ -159,8 +169,8 @@ public class GameSettingsDialog extends Stage {
 
         startButton = new Button("Start 2-Player Game");
         startButton.setOnAction(e -> {
-            timePerSide = ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
-            timePerMove = ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
+            timePerSide = timeBox.isSelected() ? -1 : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
+            timePerMove = timeBox.isSelected() ? -1 : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
             create = true;
             hide();
         });
@@ -175,14 +185,17 @@ public class GameSettingsDialog extends Stage {
                 if (!cDialog.isCreate())
                     return;
 
-                timePerSide = ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
-                timePerMove = ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
+                timePerSide = timeBox.isSelected() ? -1
+                        : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
+                timePerMove = timeBox.isSelected() ? -1
+                        : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
 
                 try {
 
-                    server = new Server(
+                    server = new ChallengeServer(
                             new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null));
                     server.start();
+
                     createChallenge.setDisable(true);
                     searchForChallenge.setDisable(true);
                     startButton.setDisable(true);
@@ -191,6 +204,8 @@ public class GameSettingsDialog extends Stage {
                     cancelButton.setText("Cancel Search");
 
                     sizeToScene();
+
+                    App.prefs.put("username", cDialog.getName());
 
                 } catch (Exception ex) {
                     eLabel.setText(ex.getMessage());
@@ -203,7 +218,7 @@ public class GameSettingsDialog extends Stage {
             cDialog.show();
 
         });
-        
+
         searchForChallenge = new Button("Search for LAN Challenge");
         searchForChallenge.setOnAction(e -> {
 

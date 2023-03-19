@@ -1,9 +1,11 @@
 package gui;
 
-import game.GameListener;
+import game.GameSettings;
 import game.Game;
 import game.Move;
 import game.Player;
+import game.PlayerEvent;
+import game.PlayerListener;
 import game.Position;
 import game.Square;
 import game.LAN.Client;
@@ -37,7 +39,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-public class Board extends VBox implements GameListener {
+public class Board extends VBox implements PlayerListener {
 
     private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
     private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
@@ -50,7 +52,8 @@ public class Board extends VBox implements GameListener {
     private int pieceSize = 90;
 
     private Game game;
-    // private LANPlayer player;
+    private Player player1;
+    private Player player2;
 
     private ArrayList<GUIPiece> pieces;
     private ArrayList<PieceTranscoder> transcoderPieces;
@@ -197,6 +200,33 @@ public class Board extends VBox implements GameListener {
         return pieceSize;
     }
 
+    public Player getActivePlayer() {
+
+        if (player2 != null)
+            return player1.isTurn() ? player1 : player2;
+
+        return player1;
+
+    }
+
+    public Player getInactivePlayer() {
+
+        if (player2 != null)
+            return player1.isTurn() ? player1 : player2;
+
+        return player1;
+
+    }
+
+    public Player getPlayer(boolean white) {
+
+        if (player2 == null)
+            return player1;
+
+        return white ? player1 : player2;
+
+    }
+
     public Game getGame() {
         return game;
     }
@@ -306,29 +336,41 @@ public class Board extends VBox implements GameListener {
     // Actions
     void incPos() {
 
-        if (game.getPositions().size() - 1 > game.getCurrentPos()) {
-            game.setCurrentPos(game.getCurrentPos() + 1);
+        try {
+            getActivePlayer().setCurrentPos(getActivePlayer().getCurrentPos() + 1);
+        } catch (Exception e) {
+
         }
 
     }
 
     void decPos() {
 
-        if (game.getCurrentPos() > 0) {
-            game.setCurrentPos(game.getCurrentPos() - 1);
+        try {
+            getActivePlayer().setCurrentPos(getActivePlayer().getCurrentPos() - 1);
+        } catch (Exception e) {
+
         }
 
     }
 
     void goToFirstPos() {
 
-        game.setCurrentPos(0);
+        try {
+            getActivePlayer().setCurrentPos(0);
+        } catch (Exception e) {
+
+        }
 
     }
 
     void goToLastPos() {
 
-        game.setCurrentPos(game.getPositions().size() - 1);
+        try {
+            getActivePlayer().setToLastPos();
+        } catch (Exception e) {
+
+        }
 
     }
 
@@ -362,12 +404,38 @@ public class Board extends VBox implements GameListener {
 
             if (settings.isCreate() && settings.getTimePerSide() > -1) {
 
-                if(game != null) game.stopGame();
+                if (game != null)
+                    game.stopGame();
 
-                game = new Game(settings.getTimePerSide(), settings.getTimePerMove());
-                game.addMoveListener(this);
-                game.addMoveListener(getMovePane());
-                game.addMoveListener(gameMenu);
+                if (settings.getPlayer() == null) {
+                    try {
+
+                        game = new Game("White", "Black",
+                                new GameSettings(settings.getTimePerSide(), settings.getTimePerMove(), true, true, true,
+                                        true));
+
+                        player1 = game.getPlayer(true);
+                        player2 = game.getPlayer(false);
+
+                    } catch (Exception ex) {
+                    }
+
+                } else {
+
+                    player1 = settings.getPlayer();
+                    game = player1.getGame();
+
+                }
+
+                player1.addListener(this);
+
+                if (player2 != null)
+                    player2.addListener(this);
+
+                // game.addMoveListener(this);
+                // game.addMoveListener(getMovePane());
+                // game.addMoveListener(gameMenu);
+
                 movePane.initMovePane();
 
                 try {
@@ -442,11 +510,11 @@ public class Board extends VBox implements GameListener {
         gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
                 movesPane.getLayoutBounds().getHeight());
 
-        if (active == null || game.getCurrentPos() != game.getPositions().size() - 1
-                || game.getResult() != Game.RESULT_IN_PROGRESS)
+        if (active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
             return;
 
-        ArrayList<Move> pMoves = game.getActivePos().getPieceMoves(active.getPiece());
+        ArrayList<Move> pMoves = getActivePlayer().getMoves();
+        pMoves.removeIf(m -> !m.getPiece().equals(active.getPiece()));
 
         gc.setFill(ATTACK_INDICATOR_COLOR);
         gc.setStroke(ATTACK_INDICATOR_COLOR);
@@ -483,9 +551,10 @@ public class Board extends VBox implements GameListener {
 
         gc.setFill(SQUARE_PREV_MOVE);
 
-        if (game.getCurrentPos() > 0) {
+        int currentPos = getActivePlayer().getCurrentPos();
+        if (currentPos > 0) {
 
-            Position pos = game.getActivePos();
+            Position pos = game.getPositions().get(currentPos);
 
             Square origin = pos.getMove().getOrigin();
             gc.fillRect(getXBySquare(origin), getYBySquare(origin), squareSize, squareSize);
@@ -527,7 +596,8 @@ public class Board extends VBox implements GameListener {
             setCursor(Cursor.CLOSED_HAND);
 
         } else if (getSquareByLoc(mouseX, mouseY, true).isValid()
-                && game.getActivePos().getPieceAtSquare(getSquareByLoc(mouseX, mouseY, true)) != null) {
+                && game.getPositions().get(getActivePlayer().getCurrentPos())
+                        .getPieceAtSquare(getSquareByLoc(mouseX, mouseY, true)) != null) {
 
             setCursor(Cursor.OPEN_HAND);
 
@@ -610,7 +680,7 @@ public class Board extends VBox implements GameListener {
         piecePane.getChildren().clear();
 
         if (pos2 == null)
-            pos2 = game.getActivePos();
+            pos2 = game.getPositions().get(getActivePlayer().getCurrentPos());
 
         for (int r = 0; r < 8; r++) {
 
@@ -632,7 +702,8 @@ public class Board extends VBox implements GameListener {
                 img.setLayoutY(getYBySquare(p.getSquare()) + ((squareSize - pieceSize) / 2.0));
 
                 if (animate && pos1 != null && pos2 != null
-                // Either not backwards and the piece in the move of p2 is this piece
+                        && ((!backward && pos2.getMove() != null) || (backward && pos1.getMove() != null))
+                        // Either not backwards and the piece in the move of p2 is this piece
                         && ((!backward && pos2.getMove().getDestination().equals(p.getSquare()))
                                 // Or it is backwards and the piece in the move of p1 is this piece
                                 || (backward && pos1.getMove().getOrigin().equals(p.getSquare()))
@@ -715,9 +786,10 @@ public class Board extends VBox implements GameListener {
         bottomTimer.setWhite(flipped);
         bottomTimer.update();
 
-        gameMenu.updatePauseResume();
+        gameMenu.update();
 
-        if (game.getActivePos().getMove() != null && game.getActivePos().getMove().getPromoteType() == '?') {
+        Position activePos = game.getPositions().get(getActivePlayer().getCurrentPos());
+        if (activePos.getMove() != null && activePos.getMove().getPromoteType() == '?') {
 
             try {
 
@@ -728,22 +800,29 @@ public class Board extends VBox implements GameListener {
             }
 
         }
+
     }
 
     private void showPromoteDialog() throws Exception {
 
-        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getActivePos().isWhite(), flipped,
+        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, getActivePlayer().isWhite(), flipped,
                 getScene().getWindow());
 
-        pD.setOnHidden(e -> {
+        pD.setOnHidden(ev -> {
 
             if (pD.getResult() == 'X') {
 
-                game.undoMove();
+                try {
+                    getActivePlayer().undo();
+                } catch (Exception ex) {
+                }
 
             } else {
 
-                game.setPromo(pD.getResult());
+                try {
+                    getActivePlayer().setPromote(pD.getResult());
+                } catch (Exception ex) {
+                }
 
             }
 
@@ -754,9 +833,10 @@ public class Board extends VBox implements GameListener {
 
         Bounds bds = stack.localToScreen(getBoundsInParent());
 
-        pD.setX(bds.getMinX() + getXBySquare(game.getActivePos().getMove().getDestination()));
-        pD.setY(bds.getMinY() + getYBySquare(game.getActivePos().getMove().getDestination())
-                - ((!game.getActivePos().isWhite() && !flipped) || (game.getActivePos().isWhite() && flipped)
+        Position activePos = game.getPositions().get(getActivePlayer().getCurrentPos());
+        pD.setX(bds.getMinX() + getXBySquare(activePos.getMove().getDestination()));
+        pD.setY(bds.getMinY() + getYBySquare(activePos.getMove().getDestination())
+                - ((!activePos.isWhite() && !flipped) || (activePos.isWhite() && flipped)
                         ? -squareSize
                         : squareSize * (4 + (1 / 3.0))));
 
@@ -899,61 +979,90 @@ public class Board extends VBox implements GameListener {
 
     }
 
-    // Event Handlers
-    @Override
-    public void moveMade() {
+    // Initializers
+    private void initPieceTranscoders() throws Exception {
+
+        transcoderPieces = new ArrayList<PieceTranscoder>();
+
+        boolean color = true;
+
+        for (int i = 0; i < 2; i++) {
+
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'Q'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'R'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'B'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'N'));
+            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'P'));
+
+            color = false;
+
+        }
 
     }
 
-    @Override
-    public void undoMove() {
+    private void initMenus() {
+
+        viewMenu = new ViewMenu(this);
+        gameMenu = new GameMenu(this);
+
+        menuBar.getMenus().addAll(gameMenu, viewMenu, new Menu("Help"));
 
     }
 
-    @Override
-    public void resetMoves() {
+    private void initSquares() {
 
-        boardUpdated();
+        boolean dark = false;
 
-    }
+        for (int r = 0; r < 8; r++) {
 
-    @Override
-    public void posChanged(int old, int curr) {
+            HBox hbox = new HBox();
 
-        Platform.runLater(() -> {
-            Position o = null;
-            if (old > game.getPositions().size() - 1) {
-                if (game.getLastPos().getRedo() != null)
-                    o = game.getLastPos().getRedo();
-            } else {
-                o = game.getPositions().get(old);
+            for (int c = 0; c < 8; c++, dark = !dark) {
+
+                Rectangle sq = new Rectangle(squareSize, squareSize, dark ? SQUARE_DARK : SQUARE_LIGHT);
+
+                StackPane pane = new StackPane(sq);
+
+                hbox.getChildren().add(pane);
+
             }
 
-            Position n = game.getPositions().get(curr);
+            dark = !dark;
 
-            boardUpdated((int) Math.abs(old - curr) == 1, o, n, old >= curr);
-        });
-
-    }
-
-    @Override
-    public void redoMove() {
+            squarePane.getChildren().add(hbox);
+        }
 
     }
 
+    // Event Handlers
     @Override
-    public void timerChange() {
+    public void onBoardUpdate(PlayerEvent event) {
+
+        if (event.isWhite() != getActivePlayer().isWhite())
+            return;
 
         Platform.runLater(() -> {
 
-            updateTimers();
+            if (player2 != null && player1.isTurn() == flipped) {
+                flipBoard();
+            } else {
+                boardUpdated(true, game.getPositions().get(getInactivePlayer().getCurrentPos()), game.getLastPos(),
+                        false);
+            }
+
+            movePane.boardUpdated();
+            gameMenu.update();
+            viewMenu.update();
 
         });
-
     }
 
     @Override
-    public void gameOver() {
+    public void onGameOver(PlayerEvent event) {
+
+        if (event.isWhite() != getActivePlayer().isWhite())
+            return;
 
         Platform.runLater(() -> {
 
@@ -1012,82 +1121,32 @@ public class Board extends VBox implements GameListener {
             over.showAndWait();
 
         });
-
     }
 
     @Override
-    public void pauseGame() {
+    public void onChatReceived(PlayerEvent event) {
+        // TODO Auto-generated method stub
+    }
 
+    @Override
+    public void onDrawOfferReceived(PlayerEvent event) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onPositionChanged(PlayerEvent event) {
         Platform.runLater(() -> {
 
-            updateTimers();
+            final int old = event.getOldPos();
+            final int current = event.getCurrentPos();
+
+            boardUpdated(Math.abs(old - current) == 1, game.getPositions().get(old), game.getPositions().get(current),
+                    old >= current);
+
+            movePane.posChanged(current);
+            gameMenu.update();
 
         });
-
-    }
-
-    @Override
-    public void resumeGame() {
-
-    }
-
-    // Initializers
-    private void initPieceTranscoders() throws Exception {
-
-        transcoderPieces = new ArrayList<PieceTranscoder>();
-
-        boolean color = true;
-
-        for (int i = 0; i < 2; i++) {
-
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'Q'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'R'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'B'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'N'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'P'));
-
-            color = false;
-
-        }
-
-    }
-
-    private void initMenus() {
-
-        viewMenu = new ViewMenu(this);
-        gameMenu = new GameMenu(this);
-
-        if (game != null)
-            game.addMoveListener(gameMenu);
-
-        menuBar.getMenus().addAll(gameMenu, viewMenu, new Menu("Help"));
-
-    }
-
-    private void initSquares() {
-
-        boolean dark = false;
-
-        for (int r = 0; r < 8; r++) {
-
-            HBox hbox = new HBox();
-
-            for (int c = 0; c < 8; c++, dark = !dark) {
-
-                Rectangle sq = new Rectangle(squareSize, squareSize, dark ? SQUARE_DARK : SQUARE_LIGHT);
-
-                StackPane pane = new StackPane(sq);
-
-                hbox.getChildren().add(pane);
-
-            }
-
-            dark = !dark;
-
-            squarePane.getChildren().add(hbox);
-        }
-
     }
 
 }

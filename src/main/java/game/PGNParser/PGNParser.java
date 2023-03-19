@@ -261,7 +261,7 @@ public class PGNParser {
 
             String comment = null;
 
-            if (includeClock && game.getTimePerSide() > 0 && game.getPositions().get(i - 1).getTimerEnd() > 0) {
+            if (includeClock && game.getSettings().getTimePerSide() > 0 && game.getPositions().get(i - 1).getTimerEnd() > 0) {
                 comment = "{[%clk " + millisToOutputFormat(game.getPositions().get(i - 1).getTimerEnd()) + "]}";
             }
 

@@ -11,9 +11,7 @@ public class BarMenu extends MenuBar {
     public BarMenu(Window window) {
 
         setUseSystemMenuBar(true);
-            
-
 
     }
-    
+
 }

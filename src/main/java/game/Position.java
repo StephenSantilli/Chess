@@ -190,15 +190,21 @@ public class Position {
         return checkMate;
     }
 
-    public boolean equals(Position compare) {
+    @Override
+    public boolean equals(Object compare) {
+
+        if (!(compare instanceof Position))
+            return false;
+
+        Position casted = (Position) (compare);
 
         boolean same = true;
 
-        for(int r = 0; r < 8; r++) {
+        for (int r = 0; r < 8; r++) {
 
-            for(int f = 0; f < 8; f++) {
+            for (int f = 0; f < 8; f++) {
 
-                if(!pieces[r][f].equals(compare.getPieces()[r][f])) {
+                if (!pieces[r][f].equals(casted.getPieces()[r][f])) {
 
                     same = false;
                     break;
@@ -336,13 +342,14 @@ public class Position {
 
     }
 
-    public void setPromoType(char promo, Game game) {
+    void setPromote(char promo, Game game) throws Exception {
 
-        if (promo == '0')
-            return;
+        if (promo != '?' && promo != 'Q' && promo != 'R' && promo != 'B' && promo != 'N')
+            throw new Exception("Invalid promote type.");
+
+        move.setPromoteType(promo);
 
         Piece movePiece = move.getPiece();
-        move.setPromoteType(promo);
         Square mps = move.getDestination();
 
         switch (promo) {
@@ -366,7 +373,8 @@ public class Position {
         if (!move.getPiece().equals(getPieceAtSquare(mps))) {
 
             initMoves(true, game);
-            move.setText(game.getPositions().get(game.getCurrentPos() - 1));
+            move.setText(game.getLastPos());
+
         }
 
     }
@@ -668,7 +676,7 @@ public class Position {
         if (list.size() > 4)
             return false;
 
-        //King and king
+        // King and king
         if (list.size() == 2)
             return true;
 
@@ -681,7 +689,7 @@ public class Position {
 
         }
 
-        //King against king and bishop / king against king and knight
+        // King against king and bishop / king against king and knight
         if (list.size() == 1 && (list.get(0).getCode() == 'B' || list.get(0).getCode() == 'N'))
             return true;
         else if (list.size() == 2) {
@@ -689,7 +697,8 @@ public class Position {
             Piece one = list.get(0);
             Piece two = list.get(1);
 
-            //King and bishop against king and bishop, with both being on squares of same color
+            // King and bishop against king and bishop, with both being on squares of same
+            // color
             if (one.isWhite() != two.isWhite()
                     && one.getSquare().isLightSquare() == two.getSquare().isLightSquare())
                 return true;

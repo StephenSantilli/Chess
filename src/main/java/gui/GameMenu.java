@@ -1,13 +1,12 @@
 package gui;
 
-import game.GameListener;
 import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 
-public class GameMenu extends Menu implements GameListener {
+public class GameMenu extends Menu {
 
     private MenuItem newGame, undo, redo, pause, resume, export;
 
@@ -28,36 +27,46 @@ public class GameMenu extends Menu implements GameListener {
 
         pause = new MenuItem("Pause");
         pause.setAccelerator(KeyCombination.keyCombination("Shortcut+P"));
-        pause.setDisable(board.getGame() != null && board.getGame().isPaused());
         pause.setOnAction(e -> {
 
-            board.getGame().pauseGame();
+            try {
+                board.getActivePlayer().pauseGame();
+            } catch (Exception ex) {
+            }
 
         });
 
         resume = new MenuItem("Resume");
         resume.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+P"));
-        resume.setDisable(board.getGame() != null && !board.getGame().isPaused());
         resume.setOnAction(e -> {
 
-            board.getGame().resumeGame();
+            try {
+                board.getActivePlayer().resumeGame();
+            } catch (Exception ex) {
+            }
 
         });
 
         undo = new MenuItem("Undo");
         undo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
-        undo.setDisable(board.getGame() != null && !board.getGame().canUndo());
         undo.setOnAction(e -> {
 
-            board.getGame().undoMove();
+            try {
+                board.getActivePlayer().undo();
+            } catch (Exception ex) {
+            }
 
         });
 
         redo = new MenuItem("Redo");
         redo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
-        redo.setDisable(board.getGame() != null && !board.getGame().canRedo());
         redo.setOnAction(e -> {
-            board.getGame().redoMove();
+
+            try {
+                board.getActivePlayer().redo();
+            } catch (Exception ex) {
+            }
+
         });
 
         export = new MenuItem("Show PGN");
@@ -77,71 +86,30 @@ public class GameMenu extends Menu implements GameListener {
 
     }
 
-    @Override
-    public void moveMade() {
+    public void update() {
+        
+        if (board.getGame() == null) {
 
-    }
+            pause.setDisable(true);
+            resume.setDisable(true);
 
-    @Override
-    public void undoMove() {
+            undo.setDisable(true);
+            redo.setDisable(true);
 
-    }
+            export.setDisable(true);
 
-    @Override
-    public void resetMoves() {
+        } else {
 
-    }
+            pause.setDisable(!board.getActivePlayer().canPause());
+            resume.setDisable(!board.getActivePlayer().canResume());
 
-    @Override
-    public void posChanged(int old, int curr) {
-        Platform.runLater(() -> {
+            undo.setDisable(!board.getActivePlayer().canUndo());
+            redo.setDisable(!board.getActivePlayer().canRedo());
 
-            undo.setDisable(!board.getGame().canUndo());
-            redo.setDisable(!board.getGame().canRedo());
+            export.setDisable(false);
 
-        });
-    }
+        }
 
-    @Override
-    public void redoMove() {
-
-    }
-
-    @Override
-    public void gameOver() {
-
-    }
-
-    @Override
-    public void timerChange() {
-
-    }
-
-    public void updatePauseResume() {
-
-        pause.setDisable(board.getGame().isPaused());
-        resume.setDisable(!board.getGame().isPaused());
-
-    }
-
-    @Override
-    public void pauseGame() {
-
-        Platform.runLater(() -> {
-
-            updatePauseResume();
-
-        });
-
-    }
-
-    @Override
-    public void resumeGame() {
-        Platform.runLater(() -> {
-
-            updatePauseResume();
-
-        });
     }
 
 }

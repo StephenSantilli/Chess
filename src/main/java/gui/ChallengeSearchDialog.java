@@ -4,16 +4,21 @@ import java.util.ArrayList;
 
 import game.Game;
 import game.LAN.Challenge;
-import game.LAN.Searcher;
+import game.LAN.ChallengeSearcher;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -24,11 +29,14 @@ public class ChallengeSearchDialog extends Stage {
 
     private int timePerSide, timePerMove;
 
+    private ChallengeSearcher searcher;
+
+    private Button refresh;
+
+    private TableView<Challenge> challengeTable;
+
     private ObservableList<Challenge> oList;
-
-    private Searcher searcher;
-
-    private ArrayList<Challenge> hosts;
+    private ArrayList<Challenge> challenges;
 
     public int getTimePerMove() {
         return timePerMove;
@@ -43,7 +51,8 @@ public class ChallengeSearchDialog extends Stage {
         try {
 
             while (getScene().getWindow().isShowing()) {
-                hosts = searcher.getHosts();
+
+                challenges = searcher.getChallenges();
                 setOList();
                 Thread.sleep(500);
 
@@ -55,22 +64,37 @@ public class ChallengeSearchDialog extends Stage {
 
     };
 
+    private Runnable searchDoneCallback = () -> {
+
+        Platform.runLater(() -> {
+
+            refresh.setText("Refresh");
+            refresh.setDisable(false);
+
+            challengeTable.setPlaceholder(new Label("No challenges found."));
+
+        });
+
+    };
+
     public ChallengeSearchDialog(Window window, Game game) throws Exception {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
 
-        searcher = new Searcher();
-        searcher.search();
+        searcher = new ChallengeSearcher();
 
-        hosts = new ArrayList<Challenge>();
+        challenges = new ArrayList<Challenge>();
 
         VBox items = new VBox();
+        items.setSpacing(5);
+        items.setPadding(new Insets(10, 10, 10, 10));
 
         oList = FXCollections.observableArrayList();
-        TableView<Challenge> hostList = new TableView<Challenge>(oList);
-        hostList.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        challengeTable = new TableView<Challenge>(oList);
+        challengeTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        challengeTable.setPlaceholder(new Label("Searching for challenges..."));
 
         TableColumn<Challenge, String> nameCol = new TableColumn<>("Name");
         nameCol.setMaxWidth(Integer.MAX_VALUE);
@@ -93,23 +117,26 @@ public class ChallengeSearchDialog extends Stage {
                     }
                 });
 
-        TableColumn<Challenge, String> sideTimeCol = new TableColumn<>("Time Per Side (s)");
+        TableColumn<Challenge, String> sideTimeCol = new TableColumn<>("Time Per\nSide (s)");
         sideTimeCol.setMaxWidth(Integer.MAX_VALUE);
 
         sideTimeCol.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
                     public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(p.getValue().getTimePerSide() + "");
+                        return new ReadOnlyObjectWrapper<>(
+                                p.getValue().getTimePerSide() > 0 ? (p.getValue().getTimePerSide() + "") : "-");
+
                     }
                 });
 
-        TableColumn<Challenge, String> moveTimeCol = new TableColumn<>("Time Added Per Move (s)");
+        TableColumn<Challenge, String> moveTimeCol = new TableColumn<>("Time Added\nPer Move (s)");
         moveTimeCol.setMaxWidth(Integer.MAX_VALUE);
 
         moveTimeCol.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
                     public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(p.getValue().getTimePerMove() + "");
+                        return new ReadOnlyObjectWrapper<>(
+                                p.getValue().getTimePerMove() > 0 ? (p.getValue().getTimePerMove() + "") : "-");
                     }
                 });
 
@@ -123,9 +150,43 @@ public class ChallengeSearchDialog extends Stage {
                     }
                 });
 
-        hostList.getColumns().setAll(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol);
+        challengeTable.getColumns().setAll(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol);
 
-        items.getChildren().add(hostList);
+        HBox btns = new HBox();
+        btns.setAlignment(Pos.CENTER_RIGHT);
+        btns.setSpacing(5);
+
+        Button directConnect = new Button("Direct Connect");
+        directConnect.setOnAction(ev -> {
+            // TODO: ADD DIRECT CONNECT DIALOG
+        });
+
+        refresh = new Button("Searching...");
+        refresh.setDisable(true);
+
+        refresh.setOnAction(ev -> {
+
+            try {
+
+                refresh.setText("Searching...");
+                refresh.setDisable(true);
+                
+                challengeTable.setPlaceholder(new Label("Searching for challenges..."));
+
+                searcher.stop();
+                searcher.search(searchDoneCallback);
+
+            } catch (Exception e) {
+
+            }
+
+        });
+
+        btns.getChildren().addAll(directConnect, refresh);
+
+        items.getChildren().addAll(challengeTable, btns);
+
+        searcher.search(searchDoneCallback);
 
         Scene s = new Scene(items);
         setOnShown(we -> {
@@ -134,7 +195,9 @@ public class ChallengeSearchDialog extends Stage {
         });
 
         setOnHidden(we -> {
+
             searcher.stop();
+
         });
 
         setTitle("Search for Challenges");
@@ -146,7 +209,7 @@ public class ChallengeSearchDialog extends Stage {
 
         Platform.runLater(() -> {
 
-            oList.setAll(hosts);
+            oList.setAll(challenges);
 
         });
 

@@ -91,7 +91,7 @@ public class GUIPiece {
         Square clickSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY(), true);
 
         if (b.getActive() != null
-                && b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
+                && b.getGame().getLastPos().canPieceMoveToSquare(b.getActive().getPiece(),
                         clickSquare)) {
 
             int cPos = b.getGame().getPositions().size() - 1;
@@ -99,16 +99,16 @@ public class GUIPiece {
             try {
 
                 Move m = new Move(b.getActive().getPiece().getSquare(),
-                        clickSquare, b.getGame().getActivePos());
+                        clickSquare, b.getGame().getLastPos());
 
                 b.setDragging(null);
                 b.setActive(null);
-                b.getGame().makeMove(m);
+                b.getActivePlayer().makeMove(m.getOrigin(), m.getDestination());
 
             } catch (Exception e) {
             }
 
-            if (cPos == b.getGame().getCurrentPos()) {
+            if (cPos == b.getActivePlayer().getCurrentPos()) {
                 GUIPiece pc = b.getGUIPieceAtSquare(clickSquare);
                 if (pc != null)
                     b.setActive(pc);
@@ -121,7 +121,8 @@ public class GUIPiece {
 
             }
 
-        } else if (b.getActive() == null || (!b.getGame().getActivePos().canPieceMoveToSquare(b.getActive().getPiece(),
+        } else if (b.getActive() == null || (!b.getGame().getPositions().get(b.getActivePlayer()
+                .getCurrentPos()).canPieceMoveToSquare(b.getActive().getPiece(),
                 clickSquare) && !b.getActive().getPiece().equals(this.getPiece())) ||
                 clickSquare.equals(piece.getSquare())) {
 
@@ -198,7 +199,7 @@ public class GUIPiece {
 
         if (b.getDragging() != null) {
 
-            int cPos = b.getGame().getCurrentPos();
+            int cPos = b.getActivePlayer().getCurrentPos();
 
             try {
 
@@ -206,15 +207,16 @@ public class GUIPiece {
 
                 b.setActive(null);
 
-                b.getGame().makeMove(new Move(d.getSquare(),
+                Move m = new Move(d.getSquare(),
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true),
-                        b.getGame().getActivePos()));
+                        b.getGame().getPositions().get(b.getActivePlayer().getCurrentPos()));
+                b.getActivePlayer().makeMove(m.getOrigin(), m.getDestination());
 
             } catch (Exception e) {
 
             }
 
-            if (cPos == b.getGame().getCurrentPos()) {
+            if (cPos == b.getActivePlayer().getCurrentPos()) {
 
                 GUIPiece pc = b.getGUIPieceAtSquare(
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));

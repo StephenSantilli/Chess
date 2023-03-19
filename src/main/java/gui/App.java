@@ -13,11 +13,19 @@ import javafx.scene.paint.Color;
 
 import java.awt.Taskbar;
 import java.awt.Toolkit;
+import java.util.prefs.Preferences;
+
+import game.Game;
 
 public class App extends Application {
 
+    static Preferences prefs = Preferences.userNodeForPackage(App.class);
+
     @Override
     public void start(Stage stage) {
+
+        if (prefs.get("username", null) == null)
+            prefs.put("username", "User");
 
         VBox vb = new VBox();
         HBox hb = new HBox();
@@ -25,7 +33,7 @@ public class App extends Application {
         Scene s = new Scene(vb);
         s.setFill(Color.TRANSPARENT);
 
-        stage.setTitle("Chess");
+        stage.setTitle("Chess " + Game.VERSION);
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_32x32.png").toString()));
@@ -47,10 +55,10 @@ public class App extends Application {
 
         try {
             BarMenu menu = new BarMenu(s.getWindow());
-            
+
             Board b = new Board(100, menu);
             hb.getChildren().add(b);
-            
+
             vb.getChildren().addAll(menu, hb);
 
             ScrollPane sp = b.getScrollMovePane();
@@ -69,13 +77,15 @@ public class App extends Application {
 
             stage.setOnCloseRequest(e -> {
 
-                if(b.getGame() != null) b.getGame().stopGame();
+                //TODO: save board position for resuming
+                if (b.getGame() != null)
+                    b.getGame().stopGame();
 
                 Platform.exit();
 
             });
 
-            // stage.setOnShown(b::startGame);
+            stage.setOnShown(b::startGame);
 
             stage.show();
             stage.sizeToScene();

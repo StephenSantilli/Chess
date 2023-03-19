@@ -31,6 +31,12 @@ application {
     
 }
 
+jar {
+    manifest {
+        attributes 'Implementation-Version': '0.0.1'
+    }
+}
+
 runtime {
 
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
@@ -40,11 +46,15 @@ runtime {
     }
 
     jpackage {
+
         mainClass = 'gui.Chess'
         applicationName = 'Chess'
         imageName = 'Chess'
+        appVersion = '0.0.1'
+
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
         def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
+
         imageOptions += ['--icon', "src/main/resources/img/icon_256x256.$imgType"]
 
         installerOptions += ['--resource-dir', "src/main/resources"]

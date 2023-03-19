@@ -9,24 +9,34 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-public class Searcher {
+import game.Game;
 
-    private static final int SEARCH_RETRIES = 5;
+/**
+ * Sends out a request for {@link Challenge}s on the local network.
+ */
+public class ChallengeSearcher {
+
+    private static final int SEARCH_RETRIES = 3;
+    private static final int SEARCH_MILLIS_BETWEEN = 1000;
 
     private DatagramSocket socket;
 
     private Thread listenThread, emitThread;
 
-    private ArrayList<Challenge> hosts;
+    private ArrayList<Challenge> challenges;
 
     private InetAddress ownAddress;
 
-    public ArrayList<Challenge> getHosts() {
-        return hosts;
+    private Runnable searchDoneCallback;
+
+    public ArrayList<Challenge> getChallenges() {
+        return challenges;
     }
 
     private Runnable emitter = () -> {
+
         try {
+
             String send = "c";
             DatagramPacket packet = new DatagramPacket(send.getBytes(), send.length(),
                     InetAddress.getByName("255.255.255.255"), Client.PORT);
@@ -36,11 +46,9 @@ public class Searcher {
                 try {
 
                     socket.send(packet);
-                    Thread.sleep(500);
+                    Thread.sleep(SEARCH_MILLIS_BETWEEN);
 
                 } catch (Exception e) {
-
-                    e.printStackTrace();
 
                 }
 
@@ -49,6 +57,9 @@ public class Searcher {
         } catch (Exception e) {
 
         }
+
+        if (searchDoneCallback != null)
+            searchDoneCallback.run();
 
     };
 
@@ -64,8 +75,8 @@ public class Searcher {
 
                 try {
                     Challenge add = new Challenge(packet);
-                    if (!packet.getAddress().equals(ownAddress) && !hosts.contains(add))
-                        hosts.add(add);
+                    if (add.getVersion().equals(Game.VERSION) && !packet.getAddress().equals(ownAddress) && !challenges.contains(add))
+                        challenges.add(add);
                 } catch (Exception e) {
                     continue;
                 }
@@ -77,33 +88,38 @@ public class Searcher {
 
     };
 
-    public Searcher() throws Exception {
+    public ChallengeSearcher() throws Exception {
 
         ownAddress = getOwnAddress();
+
+        challenges = new ArrayList<Challenge>();
+
+        searchDoneCallback = null;
+
+    }
+
+    public void search(Runnable searchDoneCallback) throws Exception {
+
+        this.searchDoneCallback = searchDoneCallback;
 
         socket = new DatagramSocket(Client.PORT);
         socket.setBroadcast(true);
 
-        hosts = new ArrayList<Challenge>();
-
-    }
-
-    public void search() {
+        challenges.clear();
 
         listenThread = new Thread(listener);
-        emitThread = new Thread(emitter);
-
         listenThread.start();
+
+        emitThread = new Thread(emitter);
         emitThread.start();
 
     }
 
     public void stop() {
-
         try {
             socket.close();
         } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
     }
