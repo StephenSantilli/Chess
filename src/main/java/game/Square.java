@@ -27,10 +27,10 @@ public class Square {
         this.rank = -1;
 
         if (square.length() >= 1)
-            this.file = (int) (square.toLowerCase().charAt(0)) - 96;
+            this.file = (int) (square.toLowerCase().charAt(0)) - 97;
 
         if(square.length() >= 2) 
-            this.rank = (int) (square.toLowerCase().charAt(1)) - 47;
+            this.rank = (int) (square.toLowerCase().charAt(1)) - 48;
 
     }
 
