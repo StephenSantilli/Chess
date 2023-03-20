@@ -13,7 +13,8 @@ public class Challenge {
     public static final int CHALLENGE_BLACK = 2;
 
     private String version, name;
-    private int color, timePerSide, timePerMove;
+    private int color;
+    private long timePerSide, timePerMove;
     private InetAddress address;
 
     public String getVersion() {
@@ -28,11 +29,11 @@ public class Challenge {
         return color;
     }
 
-    public int getTimePerSide() {
+    public long getTimePerSide() {
         return timePerSide;
     }
 
-    public int getTimePerMove() {
+    public long getTimePerMove() {
         return timePerMove;
     }
 
@@ -40,7 +41,7 @@ public class Challenge {
         return address;
     }
 
-    public Challenge(String name, int color, int timePerSide, int timePerMove, InetAddress address) throws Exception {
+    public Challenge(String name, int color, long timePerSide, long timePerMove, InetAddress address) throws Exception {
 
         this.version = Game.VERSION;
         this.name = name;

@@ -24,7 +24,7 @@ import javafx.stage.Window;
 
 public class GameSettingsDialog extends Stage {
 
-    private int timePerSide, timePerMove;
+    private long timePerSide, timePerMove;
 
     private ChallengeServer server;
 
@@ -47,11 +47,11 @@ public class GameSettingsDialog extends Stage {
         return player;
     }
 
-    public int getTimePerMove() {
+    public long getTimePerMove() {
         return timePerMove;
     }
 
-    public int getTimePerSide() {
+    public long getTimePerSide() {
         return timePerSide;
     }
 
@@ -243,6 +243,15 @@ public class GameSettingsDialog extends Stage {
 
                         hide();
 
+                    } else {
+                        create = true;
+                        player = search.getPlayer();
+                        search.getPlayer().getGame();
+
+                        timePerSide = search.getPlayer().getGame().getSettings().getTimePerSide();
+                        timePerMove = search.getPlayer().getGame().getSettings().getTimePerMove();
+
+                        hide();
                     }
 
                 });
