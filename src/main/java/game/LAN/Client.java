@@ -282,7 +282,7 @@ public class Client implements GameListener {
     @Override
     public void onPlayerEvent(GameEvent event) {
 
-        if(event.getType() == GameEvent.TYPE_MOVE) {
+        if(event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor) {
             send(new Message("move", event.getCurr().getMove().getOrigin().toString(), event.getCurr().getMove().getDestination().toString(), event.getCurr().getTimerEnd() + ""));
 
         }
