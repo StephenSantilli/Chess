@@ -38,7 +38,7 @@ public class Client {
         this.gameCreatedCallback = gameCreatedCallback;
 
         this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.output = new PrintWriter(socket.getOutputStream());
+        this.output = new PrintWriter(socket.getOutputStream(), true);
 
         new Thread(listener).start();
 
