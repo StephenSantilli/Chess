@@ -493,13 +493,15 @@ public class Board extends VBox implements GameListener {
             return;
 
         ArrayList<Move> pMoves = game.getLastPos().getMoves();
-        pMoves.removeIf(m -> !m.getPiece().equals(active.getPiece()));
 
         gc.setFill(ATTACK_INDICATOR_COLOR);
         gc.setStroke(ATTACK_INDICATOR_COLOR);
         gc.setLineWidth(squareSize * 0.04);
 
         for (Move m : pMoves) {
+
+            if (!m.getPiece().equals(active.getPiece()))
+                continue;
 
             int x = getXBySquare(m.getDestination(), false);
             int y = getYBySquare(m.getDestination(), false);
@@ -1023,14 +1025,11 @@ public class Board extends VBox implements GameListener {
             if (event.getType() == GameEvent.TYPE_MOVE) {
 
                 currentPos = event.getCurrIndex();
-                
+
                 if (color == TWO_PLAYER)
                     flipBoard();
 
-
                 boardUpdated(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
-
-                
 
                 movePane.boardUpdated();
                 gameMenu.update();

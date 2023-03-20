@@ -285,7 +285,12 @@ public class Client implements GameListener {
     public void onPlayerEvent(GameEvent event) {
 
         if(event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor) {
+            
             send(new Message("move", event.getCurr().getMove().getOrigin().toString(), event.getCurr().getMove().getDestination().toString(), event.getPrev().getTimerEnd() + ""));
+
+        } else if(event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.RESULT_TERMINATED) {
+
+            stop(true, "Game terminated.", false);
 
         }
 
