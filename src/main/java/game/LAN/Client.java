@@ -211,6 +211,7 @@ public class Client {
             else if (!a[2].matches(Player.NAME_REGEX))
                 stop(true, "Invalid name.", false);
             else {
+
                 long timePerSide, timePerMove;
                 try {
                     timePerSide = Long.parseLong(a[3]);
@@ -232,6 +233,7 @@ public class Client {
                 }
 
                 opponent = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
+                self = game.getPlayer(color == Challenge.CHALLENGE_WHITE);
 
                 send(new Message("start"));
 
@@ -252,6 +254,8 @@ public class Client {
     public void stop(boolean send, String reason, boolean normal) {
 
         try {
+            
+            System.out.println(reason);
 
             if (send && !normal)
                 send(new Message("error", "fatal", reason));
