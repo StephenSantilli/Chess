@@ -256,7 +256,7 @@ public class Client {
             input.close();
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
     };

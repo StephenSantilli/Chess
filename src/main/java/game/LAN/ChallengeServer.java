@@ -19,6 +19,7 @@ public class ChallengeServer {
     private ServerSocket tcpSocket;
 
     private Thread listenThread;
+    private Thread tcpThread;
 
     private Challenge challenge;
     private Runnable gameCreatedCallback;
@@ -45,6 +46,9 @@ public class ChallengeServer {
 
         listenThread = new Thread(searchListener);
         listenThread.start();
+
+        tcpThread = new Thread(connectionListener);
+        tcpThread.start();
 
     }
 
