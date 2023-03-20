@@ -58,8 +58,11 @@ public class Client {
 
     public void receive(String message) {
 
+        System.out.println(message);
+
         Message msg = new Message(message);
         String[] a = msg.getArgs();
+
 
         if (player == null) {
 
@@ -139,7 +142,7 @@ public class Client {
     }
 
     private void initMessage(String[] a) {
-
+        System.out.println("init message" + a[0]);
         if (a[0].equals("init")) {
 
             if (a[1].equals(Game.VERSION) && a[2].matches(Player.NAME_REGEX)) {
