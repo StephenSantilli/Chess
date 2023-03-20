@@ -415,6 +415,18 @@ public class Game {
 
     }
 
+    public void setTimer(boolean white, long time) {
+
+        if (settings.getTimePerSide() <= -1)
+            return;
+
+        if (white)
+            whiteTimer = time;
+        else
+            blackTimer = time;
+
+    }
+
     private void gameOver() {
 
         if (result <= 0)
@@ -451,8 +463,10 @@ public class Game {
     private void flipTimer(boolean setTimer, long pauseTime) {
 
         if ((!isCountdownWhite() && !settings.isWhiteTimerManged())
-                || (isCountdownWhite() && !settings.isBlackTimerManaged())
-                || paused
+                || (isCountdownWhite() && !settings.isBlackTimerManaged()))
+            setTimer = false;
+
+        if (paused
                 || settings.getTimePerSide() <= -1
                 || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS))
             return;

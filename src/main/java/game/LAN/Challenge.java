@@ -57,7 +57,9 @@ public class Challenge {
 
         String str = new String(packet.getData()).trim();
 
-        String[] a = str.split(";");
+        Message msg = new Message(str);
+
+        String[] a = msg.getArgs();
 
         if (a.length != 5) {
             throw new Exception("Invalid challenge.");

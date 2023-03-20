@@ -68,6 +68,14 @@ public class GameSettingsDialog extends Stage {
 
     }
 
+    private Runnable gameCreatedCallback = () -> {
+
+        player = server.getClient().getPlayer().getGame().getPlayer(!server.getClient().getPlayer().isWhite());
+
+        hide();
+
+    };
+
     public GameSettingsDialog(Window window, Game game) {
 
         initOwner(window);
@@ -193,7 +201,7 @@ public class GameSettingsDialog extends Stage {
                 try {
 
                     server = new ChallengeServer(
-                            new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null));
+                            new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null), gameCreatedCallback);
                     server.start();
 
                     createChallenge.setDisable(true);
@@ -225,7 +233,19 @@ public class GameSettingsDialog extends Stage {
             try {
 
                 ChallengeSearchDialog search = new ChallengeSearchDialog(getScene().getWindow(), game);
+                search.setOnHidden(we -> {
+                   
+                    if(search.getPlayer() != null) {
+
+                        hide();
+
+                    }
+
+                });
+                
                 search.show();
+
+                
 
             } catch (Exception ex) {
                 ex.printStackTrace();

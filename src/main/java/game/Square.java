@@ -21,6 +21,19 @@ public class Square {
 
     }
 
+    public Square(String square) {
+
+        this.file = -1;
+        this.rank = -1;
+
+        if (square.length() >= 1)
+            this.file = (int) (square.toLowerCase().charAt(0)) - 96;
+
+        if(square.length() >= 2) 
+            this.rank = (int) (square.toLowerCase().charAt(1)) - 47;
+
+    }
+
     /**
      * Checks if square is a valid board position (within bounds).
      * 
@@ -66,9 +79,10 @@ public class Square {
     @Override
     public boolean equals(Object compare) {
 
-        if(!(compare instanceof Square)) return false;
+        if (!(compare instanceof Square))
+            return false;
 
-        Square casted = (Square)(compare);
+        Square casted = (Square) (compare);
 
         return (file == casted.getFile()) && (rank == casted.getRank());
 

@@ -33,6 +33,8 @@ public class App extends Application {
         Scene s = new Scene(vb);
         s.setFill(Color.TRANSPARENT);
 
+        stage.setResizable(false);
+
         stage.setTitle("Chess " + Game.VERSION);
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));

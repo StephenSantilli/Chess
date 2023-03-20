@@ -6,7 +6,7 @@ public class Player {
 
     public static final int MAX_NAME_LENGTH = 20;
 
-    public static final String NAME_REGEX = "[A-z0-9!@#$%^&*()_\\-\\+=\"',. ?:\\/\\[\\]\\{\\}]*";
+    public static final String NAME_REGEX = "[A-z0-9!@#$%^&*()_\\-\\+=\"',. ?:\\/\\[\\]\\{\\}]{1," + MAX_NAME_LENGTH + "}";
 
     private String name;
 

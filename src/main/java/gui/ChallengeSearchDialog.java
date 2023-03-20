@@ -1,10 +1,14 @@
 package gui;
 
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import game.Game;
+import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
+import game.LAN.Client;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
@@ -16,8 +20,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -38,6 +44,10 @@ public class ChallengeSearchDialog extends Stage {
     private ObservableList<Challenge> oList;
     private ArrayList<Challenge> challenges;
 
+    private Client client;
+
+    private Player player;
+
     public int getTimePerMove() {
         return timePerMove;
     }
@@ -45,6 +55,18 @@ public class ChallengeSearchDialog extends Stage {
     public int getTimePerSide() {
         return timePerSide;
     }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    private Runnable gameCreatedCallback = () -> {
+
+        player = client.getPlayer().getGame().getPlayer(!client.getPlayer().isWhite());
+
+        hide();
+
+    };
 
     private Runnable hostUpdateChecker = () -> {
 
@@ -150,6 +172,34 @@ public class ChallengeSearchDialog extends Stage {
                     }
                 });
 
+        challengeTable.setRowFactory(tv -> {
+
+            TableRow<Challenge> row = new TableRow<>();
+            row.setOnMouseClicked(ev -> {
+                if (ev.getButton().equals(MouseButton.PRIMARY)) {
+                    if (ev.getClickCount() >= 2) {
+
+                        try {
+
+                            Socket s = new Socket();
+
+                            s.bind(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
+
+                            client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreatedCallback);
+
+                            client.sendInitMessage();
+
+                        } catch (Exception e) {
+
+                        }
+
+                    }
+                }
+            });
+            return row;
+
+        });
+
         challengeTable.getColumns().setAll(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol);
 
         HBox btns = new HBox();
@@ -170,7 +220,7 @@ public class ChallengeSearchDialog extends Stage {
 
                 refresh.setText("Searching...");
                 refresh.setDisable(true);
-                
+
                 challengeTable.setPlaceholder(new Label("Searching for challenges..."));
 
                 searcher.stop();

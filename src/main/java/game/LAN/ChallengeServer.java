@@ -8,6 +8,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import game.GameSettings;
+
 /**
  * The server to be started when a challenge is created and you are waiting for others to search for it.
  */
@@ -19,11 +21,19 @@ public class ChallengeServer {
     private Thread listenThread;
 
     private Challenge challenge;
+    private Runnable gameCreatedCallback;
 
-    public ChallengeServer(Challenge challenge) throws Exception {
+    private Client client;
+
+    public Client getClient() {
+        return client;
+    }
+
+    public ChallengeServer(Challenge challenge, Runnable gameCreatedCallback) throws Exception {
 
         this.challenge = challenge;
-
+        this.gameCreatedCallback = gameCreatedCallback;
+        
         udpSocket = new DatagramSocket(Client.PORT);
         udpSocket.setBroadcast(true);
 
@@ -56,6 +66,8 @@ public class ChallengeServer {
             while (true) {
 
                 Socket connection = tcpSocket.accept();
+
+                client = new Client(connection, challenge.getName(), challenge.getColor(), new GameSettings(challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true, true), gameCreatedCallback);
 
             }
 
