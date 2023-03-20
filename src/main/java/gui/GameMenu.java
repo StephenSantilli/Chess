@@ -21,7 +21,7 @@ public class GameMenu extends Menu {
         newGame.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+N"));
         newGame.setOnAction(e -> {
 
-            board.newGame();
+            board.startGame(null);
 
         });
 

@@ -259,11 +259,7 @@ public class GameSettingsDialog extends Stage {
                 search = new ChallengeSearchDialog(getScene().getWindow(), game, gameCreatedCallbackSearcher);
                 search.setOnHidden(we -> {
 
-                    if(search.getClient() == null) {
-
-
-
-                    }
+                    client = search.getClient();
 
                 });
 

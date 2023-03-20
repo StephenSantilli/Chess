@@ -377,12 +377,6 @@ public class Board extends VBox implements GameListener {
 
     }
 
-    void newGame() {
-
-        startGame(null);
-
-    }
-
     void startGame(WindowEvent we) {
 
         GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), game);
@@ -417,7 +411,7 @@ public class Board extends VBox implements GameListener {
 
                     color = settings.getClient().isOppColor() ? BLACK : WHITE;
 
-                    if (settings.getClient().isOppColor())
+                    if (color == BLACK)
                         flipBoard();
 
                     boardUpdated();
