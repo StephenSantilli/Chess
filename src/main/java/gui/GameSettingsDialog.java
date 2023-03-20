@@ -72,8 +72,8 @@ public class GameSettingsDialog extends Stage {
     private Runnable gameCreatedCallback = () -> {
 
         Platform.runLater(() -> {
-            player = server.getClient().getPlayer().getGame().getPlayer(!server.getClient().getPlayer().isWhite());
-
+            player = server.getClient().getOpponent().getGame().getPlayer(!server.getClient().getOpponent().isWhite());
+            create = true;
             hide();
         });
 

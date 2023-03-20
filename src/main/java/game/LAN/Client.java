@@ -23,10 +23,11 @@ public class Client {
     private int color;
     private Runnable gameCreatedCallback;
 
-    private Player player;
+    private Player opponent;
+    private Player self;
 
-    public Player getPlayer() {
-        return player;
+    public Player getOpponent() {
+        return opponent;
     }
 
     private Runnable listener = () -> {
@@ -91,7 +92,7 @@ public class Client {
         Message msg = new Message(message);
         String[] a = msg.getArgs();
 
-        if (player == null) {
+        if (opponent == null) {
 
             initMessage(a);
 
@@ -99,10 +100,10 @@ public class Client {
 
             if (a[0].equals("started")) {
 
-                if (player.getGame().getResult() == Game.RESULT_NOT_STARTED) {
+                if (opponent.getGame().getResult() == Game.RESULT_NOT_STARTED) {
 
                     try {
-                        player.getGame().startGame();
+                        opponent.getGame().startGame();
                     } catch (Exception e) {
                         stop(true, "Error starting game.", false);
                     }
@@ -112,10 +113,10 @@ public class Client {
 
             } else if (a[0].equals("start")) {
 
-                if (player.getGame().getResult() == Game.RESULT_NOT_STARTED) {
+                if (opponent.getGame().getResult() == Game.RESULT_NOT_STARTED) {
 
                     try {
-                        player.getGame().startGame();
+                        opponent.getGame().startGame();
                         send(new Message("started"));
                     } catch (Exception e) {
                         stop(true, "Error starting game.", false);
@@ -130,7 +131,7 @@ public class Client {
                 Square destination = new Square(a[2]);
 
                 long timerEnd = -1;
-                if (player.getGame().getSettings().getTimePerSide() > 0) {
+                if (opponent.getGame().getSettings().getTimePerSide() > 0) {
                     if (a.length >= 4)
                         timerEnd = Long.parseLong(a[3]);
                     else {
@@ -150,9 +151,9 @@ public class Client {
 
                 try {
 
-                    player.makeMove(origin, destination);
+                    opponent.makeMove(origin, destination);
 
-                    player.getGame().setTimer(player.isWhite(), timerEnd);
+                    opponent.getGame().setTimer(opponent.isWhite(), timerEnd);
 
                 } catch (Exception e) {
                     stop(true, "Invalid move.", true);
@@ -181,7 +182,7 @@ public class Client {
                 Game game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a[2],
                         color == Challenge.CHALLENGE_BLACK ? name : a[2], settings);
 
-                player = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
+                opponent = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
 
                 send(new Message("ready",
                         color == Challenge.CHALLENGE_WHITE ? Challenge.CHALLENGE_BLACK + ""
@@ -230,7 +231,7 @@ public class Client {
                     return;
                 }
 
-                player = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
+                opponent = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
 
                 send(new Message("start"));
 
