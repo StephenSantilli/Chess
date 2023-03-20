@@ -408,7 +408,7 @@ public class Board extends VBox implements GameListener {
                 } else {
 
                     game = settings.getClient().getGame();
-
+                    game.addListener(this);
                     color = settings.getClient().isOppColor() ? BLACK : WHITE;
 
                     if (color == BLACK)

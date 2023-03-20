@@ -67,10 +67,12 @@ public class Client implements GameListener {
         this.gameCreatedCallback = gameCreatedCallback;
 
         try {
+
             this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.output = new PrintWriter(socket.getOutputStream(), true);
 
             new Thread(listener).start();
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -186,11 +188,11 @@ public class Client implements GameListener {
                 game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a[2],
                         color == Challenge.CHALLENGE_BLACK ? name : a[2], settings);
 
-                
+                oppColor = color != Challenge.CHALLENGE_WHITE;
 
                 send(new Message("ready",
-                        color == Challenge.CHALLENGE_WHITE ? Challenge.CHALLENGE_BLACK + ""
-                                : Challenge.CHALLENGE_WHITE + "",
+                        (color == Challenge.CHALLENGE_WHITE ? (Challenge.CHALLENGE_BLACK + "")
+                                : (Challenge.CHALLENGE_WHITE) + ""),
                         name,
                         settings.getTimePerSide() + "",
                         settings.getTimePerMove() + ""));
@@ -230,6 +232,7 @@ public class Client implements GameListener {
                     game = new Game(white ? name : a[2],
                             !white ? name : a[2],
                             new GameSettings(timePerSide, timePerMove, false, false, !white, white));
+                    oppColor = !white;
                 } catch (Exception e) {
                     stop(true, "Unable to initialize game.", false);
                     return;
