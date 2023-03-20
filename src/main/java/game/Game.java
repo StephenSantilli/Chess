@@ -174,7 +174,7 @@ public class Game {
         if (positions.size() == 1)
             return null;
 
-        return positions.get(positions.size() - 1);
+        return positions.get(positions.size() - 2);
 
     }
 
