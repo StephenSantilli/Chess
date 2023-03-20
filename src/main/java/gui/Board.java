@@ -440,19 +440,19 @@ public class Board extends VBox implements PlayerListener {
                     player1.addListener(this);
 
                     game = player1.getGame();
+
+                    if (!player1.isWhite())
+                        flipBoard();
+
                     boardUpdated();
 
                 }
-
-
-
 
                 // game.addMoveListener(this);
                 // game.addMoveListener(getMovePane());
                 // game.addMoveListener(gameMenu);
 
                 movePane.initMovePane();
-
 
             }
 
