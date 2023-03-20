@@ -29,7 +29,31 @@ public class Client {
         return player;
     }
 
-    public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback) throws Exception {
+    private Runnable listener = () -> {
+
+        try {
+
+            String line = input.readLine();
+
+            while (line != null) {
+
+                receive(line);
+                line = input.readLine();
+
+            }
+
+            input.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    };
+
+    public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
+            throws Exception {
+
+        System.out.println("eeee");
 
         this.socket = socket;
         this.name = name;
@@ -37,10 +61,14 @@ public class Client {
         this.settings = settings;
         this.gameCreatedCallback = gameCreatedCallback;
 
-        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.output = new PrintWriter(socket.getOutputStream(), true);
+        try {
+            this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.output = new PrintWriter(socket.getOutputStream(), true);
 
-        new Thread(listener).start();
+            new Thread(listener).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -48,7 +76,7 @@ public class Client {
 
         send(new Message("init", Game.VERSION, name));
 
-    } 
+    }
 
     public void send(Message message) {
 
@@ -62,7 +90,6 @@ public class Client {
 
         Message msg = new Message(message);
         String[] a = msg.getArgs();
-
 
         if (player == null) {
 
@@ -120,7 +147,7 @@ public class Client {
                 if (!destination.isValid()) {
                     stop(true, "Destination square invalid.", true);
                 }
-                
+
                 try {
 
                     player.makeMove(origin, destination);
@@ -164,7 +191,7 @@ public class Client {
                         settings.getTimePerMove() + ""));
 
                 gameCreatedCallback.run();
-                
+
             } else {
 
                 if (!a[1].equals(Game.VERSION))
@@ -235,30 +262,9 @@ public class Client {
             socket.close();
 
         } catch (Exception e) {
-            
+
         }
 
     }
-
-    private Runnable listener = () -> {
-
-        try {
-
-            String line = input.readLine();
-
-            while (line != null) {
-
-                receive(line);
-                line = input.readLine();
-
-            }
-
-            input.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    };
 
 }

@@ -5,6 +5,7 @@ import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
 import game.LAN.ChallengeServer;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -70,9 +71,11 @@ public class GameSettingsDialog extends Stage {
 
     private Runnable gameCreatedCallback = () -> {
 
-        player = server.getClient().getPlayer().getGame().getPlayer(!server.getClient().getPlayer().isWhite());
+        Platform.runLater(() -> {
+            player = server.getClient().getPlayer().getGame().getPlayer(!server.getClient().getPlayer().isWhite());
 
-        hide();
+            hide();
+        });
 
     };
 
@@ -201,7 +204,8 @@ public class GameSettingsDialog extends Stage {
                 try {
 
                     server = new ChallengeServer(
-                            new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null), gameCreatedCallback);
+                            new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null),
+                            gameCreatedCallback);
                     server.start();
 
                     createChallenge.setDisable(true);
@@ -234,18 +238,16 @@ public class GameSettingsDialog extends Stage {
 
                 ChallengeSearchDialog search = new ChallengeSearchDialog(getScene().getWindow(), game);
                 search.setOnHidden(we -> {
-                   
-                    if(search.getPlayer() != null) {
+
+                    if (search.getPlayer() != null) {
 
                         hide();
 
                     }
 
                 });
-                
-                search.show();
 
-                
+                search.show();
 
             } catch (Exception ex) {
                 ex.printStackTrace();

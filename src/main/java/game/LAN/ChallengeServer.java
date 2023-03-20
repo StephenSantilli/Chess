@@ -66,7 +66,6 @@ public class ChallengeServer {
 
         try {
 
-            tcpSocket.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), Client.PORT));
             while (true) {
 
                 Socket connection = tcpSocket.accept();
