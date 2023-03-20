@@ -176,21 +176,23 @@ public class ChallengeSearchDialog extends Stage {
 
             TableRow<Challenge> row = new TableRow<>();
             row.setOnMouseClicked(ev -> {
+
                 if (ev.getButton().equals(MouseButton.PRIMARY)) {
+
                     if (ev.getClickCount() >= 2) {
 
                         try {
 
                             Socket s = new Socket();
 
-                            s.bind(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
+                            s.connect(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
 
                             client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreatedCallback);
 
                             client.sendInitMessage();
 
                         } catch (Exception e) {
-
+                            e.printStackTrace();
                         }
 
                     }
