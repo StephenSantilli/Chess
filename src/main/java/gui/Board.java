@@ -444,7 +444,7 @@ public class Board extends VBox implements PlayerListener {
                     boardUpdated();
 
                 } catch (Exception ex) {
-
+                    ex.printStackTrace();
                 }
             }
 

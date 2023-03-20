@@ -62,8 +62,12 @@ public class ChallengeSearchDialog extends Stage {
 
     private Runnable gameCreatedCallback = () -> {
 
+<<<<<<< HEAD
         Platform.runLater(() -> {
             player = client.getPlayer().getGame().getPlayer(!client.getPlayer().isWhite());
+=======
+        player = client.getOpponent().getGame().getPlayer(!client.getOpponent().isWhite());
+>>>>>>> 6e5baa3331866c6c40192149914d9b165dc5e938
 
             hide();
         });
