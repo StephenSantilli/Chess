@@ -239,6 +239,7 @@ public class Client implements GameListener {
 
                 } catch (Exception e) {
                     stop(true, "Unable to initialize game.", false);
+                    
                     return;
                 }
 
@@ -273,7 +274,7 @@ public class Client implements GameListener {
             output.close();
             socket.close();
 
-            game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+            // game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
         } catch (Exception e) {
 

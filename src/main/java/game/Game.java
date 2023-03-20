@@ -419,8 +419,8 @@ public class Game {
      */
     private void flipTimer(boolean setTimer, long pauseTime) {
 
-        if ((!isCountdownWhite() && !settings.isWhiteTimerManged())
-                || (isCountdownWhite() && !settings.isBlackTimerManaged()))
+        if ((isCountdownWhite() && !settings.isWhiteTimerManged())
+                || (!isCountdownWhite() && !settings.isBlackTimerManaged()))
             setTimer = false;
 
         if (paused
