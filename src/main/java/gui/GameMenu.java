@@ -30,7 +30,7 @@ public class GameMenu extends Menu {
         pause.setOnAction(e -> {
 
             try {
-                board.getActivePlayer().pauseGame();
+                board.getGame().pause();
             } catch (Exception ex) {
             }
 
@@ -41,7 +41,7 @@ public class GameMenu extends Menu {
         resume.setOnAction(e -> {
 
             try {
-                board.getActivePlayer().resumeGame();
+                board.getGame().resume();
             } catch (Exception ex) {
             }
 
@@ -52,7 +52,7 @@ public class GameMenu extends Menu {
         undo.setOnAction(e -> {
 
             try {
-                board.getActivePlayer().undo();
+                board.getGame().undo();
             } catch (Exception ex) {
             }
 
@@ -63,7 +63,7 @@ public class GameMenu extends Menu {
         redo.setOnAction(e -> {
 
             try {
-                board.getActivePlayer().redo();
+                board.getGame().redo();
             } catch (Exception ex) {
             }
 
@@ -100,11 +100,11 @@ public class GameMenu extends Menu {
 
         } else {
 
-            pause.setDisable(!board.getActivePlayer().canPause());
-            resume.setDisable(!board.getActivePlayer().canResume());
+            pause.setDisable(!board.getGame().canPause());
+            resume.setDisable(!board.getGame().canResume());
 
-            undo.setDisable(!board.getActivePlayer().canUndo());
-            redo.setDisable(!board.getActivePlayer().canRedo());
+            undo.setDisable(!board.getGame().canUndo());
+            redo.setDisable(!board.getGame().canRedo());
 
             export.setDisable(false);
 

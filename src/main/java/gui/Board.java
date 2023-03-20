@@ -4,8 +4,8 @@ import game.GameSettings;
 import game.Game;
 import game.Move;
 import game.Player;
-import game.PlayerEvent;
-import game.PlayerListener;
+import game.GameEvent;
+import game.GameListener;
 import game.Position;
 import game.Square;
 import game.LAN.Client;
@@ -39,7 +39,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-public class Board extends VBox implements PlayerListener {
+public class Board extends VBox implements GameListener {
 
     private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
     private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
@@ -48,12 +48,14 @@ public class Board extends VBox implements PlayerListener {
     private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
     private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
 
+    public static final int TWO_PLAYER = 0;
+    public static final int WHITE = 1;
+    public static final int BLACK = 2;
+
     private int squareSize = 100;
     private int pieceSize = 90;
 
     private Game game;
-    private Player player1;
-    private Player player2;
 
     private ArrayList<GUIPiece> pieces;
     private ArrayList<PieceTranscoder> transcoderPieces;
@@ -62,7 +64,13 @@ public class Board extends VBox implements PlayerListener {
     private GUIPiece dragging;
 
     private boolean flipped;
-    private boolean white;
+    private int color;
+
+    private int currentPos;
+
+    public int getCurrentPos() {
+        return currentPos;
+    }
 
     private StackPane stack;
     private GUITimer topTimer;
@@ -200,33 +208,6 @@ public class Board extends VBox implements PlayerListener {
         return pieceSize;
     }
 
-    public Player getActivePlayer() {
-
-        if (player2 != null)
-            return player1.isTurn() ? player1 : player2;
-
-        return player1;
-
-    }
-
-    public Player getInactivePlayer() {
-
-        if (player2 != null)
-            return player1.isTurn() ? player1 : player2;
-
-        return player1;
-
-    }
-
-    public Player getPlayer(boolean white) {
-
-        if (player2 == null)
-            return player1;
-
-        return white ? player1 : player2;
-
-    }
-
     public Game getGame() {
         return game;
     }
@@ -251,8 +232,8 @@ public class Board extends VBox implements PlayerListener {
         return flipped;
     }
 
-    public boolean isWhite() {
-        return white;
+    public int getColor() {
+        return color;
     }
 
     public StackPane getStack() {
@@ -285,8 +266,8 @@ public class Board extends VBox implements PlayerListener {
         this.menuBar = menuBar;
         initMenus();
 
-        this.white = true;
-        this.flipped = !white;
+        this.color = 0;
+        this.flipped = false;
 
         this.transitions = new ArrayList<TranslateTransition>();
 
@@ -333,12 +314,26 @@ public class Board extends VBox implements PlayerListener {
 
     }
 
+    public void setCurrentPos(int pos) {
+
+        int old = currentPos;
+
+        currentPos = pos;
+
+        boardUpdated(Math.abs(pos - old) == 1, game.getPositions().get(old), game.getPositions().get(currentPos),
+                old > currentPos);
+
+        movePane.posChanged(currentPos);
+        gameMenu.update();
+
+    }
+
     // Actions
     void incPos() {
 
-        try {
-            getActivePlayer().setCurrentPos(getActivePlayer().getCurrentPos() + 1);
-        } catch (Exception e) {
+        if (currentPos + 1 < game.getPositions().size()) {
+
+            setCurrentPos(currentPos + 1);
 
         }
 
@@ -346,31 +341,22 @@ public class Board extends VBox implements PlayerListener {
 
     void decPos() {
 
-        try {
-            getActivePlayer().setCurrentPos(getActivePlayer().getCurrentPos() - 1);
-        } catch (Exception e) {
+        if (currentPos - 1 >= 0) {
 
+            setCurrentPos(currentPos - 1);
         }
 
     }
 
     void goToFirstPos() {
 
-        try {
-            getActivePlayer().setCurrentPos(0);
-        } catch (Exception e) {
-
-        }
+        setCurrentPos(0);
 
     }
 
     void goToLastPos() {
 
-        try {
-            getActivePlayer().setToLastPos();
-        } catch (Exception e) {
-
-        }
+        setCurrentPos(game.getPositions().size() - 1);
 
     }
 
@@ -405,27 +391,18 @@ public class Board extends VBox implements PlayerListener {
             if (settings.isCreate() && settings.getTimePerSide() > -1) {
 
                 if (game != null)
-                    game.stopGame();
+                    game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
-                if (settings.getPlayer() == null) {
+                if (settings.getClient() == null) {
                     try {
+
+                        color = TWO_PLAYER;
 
                         game = new Game("White", "Black",
                                 new GameSettings(settings.getTimePerSide(), settings.getTimePerMove(), true, true, true,
                                         true));
 
-                        player1 = game.getPlayer(true);
-                        player2 = game.getPlayer(false);
-
-                    } catch (Exception ex) {
-                    }
-
-                    player1.addListener(this);
-
-                    if (player2 != null)
-                        player2.addListener(this);
-
-                    try {
+                        game.addListener(this);
 
                         game.startGame();
                         boardUpdated();
@@ -436,12 +413,11 @@ public class Board extends VBox implements PlayerListener {
 
                 } else {
 
-                    player1 = settings.getPlayer();
-                    player1.addListener(this);
+                    game = settings.getClient().getGame();
 
-                    game = player1.getGame();
+                    color = settings.getClient().isOppColor() ? BLACK : WHITE;
 
-                    if (!player1.isWhite())
+                    if (settings.getClient().isOppColor())
                         flipBoard();
 
                     boardUpdated();
@@ -521,7 +497,7 @@ public class Board extends VBox implements PlayerListener {
         if (active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
             return;
 
-        ArrayList<Move> pMoves = getActivePlayer().getMoves();
+        ArrayList<Move> pMoves = game.getLastPos().getMoves();
         pMoves.removeIf(m -> !m.getPiece().equals(active.getPiece()));
 
         gc.setFill(ATTACK_INDICATOR_COLOR);
@@ -559,7 +535,6 @@ public class Board extends VBox implements PlayerListener {
 
         gc.setFill(SQUARE_PREV_MOVE);
 
-        int currentPos = getActivePlayer().getCurrentPos();
         if (currentPos > 0) {
 
             Position pos = game.getPositions().get(currentPos);
@@ -604,7 +579,7 @@ public class Board extends VBox implements PlayerListener {
             setCursor(Cursor.CLOSED_HAND);
 
         } else if (getSquareByLoc(mouseX, mouseY, true).isValid()
-                && game.getPositions().get(getActivePlayer().getCurrentPos())
+                && game.getPositions().get(currentPos)
                         .getPieceAtSquare(getSquareByLoc(mouseX, mouseY, true)) != null) {
 
             setCursor(Cursor.OPEN_HAND);
@@ -688,7 +663,7 @@ public class Board extends VBox implements PlayerListener {
         piecePane.getChildren().clear();
 
         if (pos2 == null)
-            pos2 = game.getPositions().get(getActivePlayer().getCurrentPos());
+            pos2 = game.getPositions().get(currentPos);
 
         for (int r = 0; r < 8; r++) {
 
@@ -796,7 +771,7 @@ public class Board extends VBox implements PlayerListener {
 
         gameMenu.update();
 
-        Position activePos = game.getPositions().get(getActivePlayer().getCurrentPos());
+        Position activePos = game.getPositions().get(currentPos);
         if (activePos.getMove() != null && activePos.getMove().getPromoteType() == '?') {
 
             try {
@@ -813,7 +788,7 @@ public class Board extends VBox implements PlayerListener {
 
     private void showPromoteDialog() throws Exception {
 
-        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, getActivePlayer().isWhite(), flipped,
+        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getLastPos().isWhite(), flipped,
                 getScene().getWindow());
 
         pD.setOnHidden(ev -> {
@@ -821,14 +796,14 @@ public class Board extends VBox implements PlayerListener {
             if (pD.getResult() == 'X') {
 
                 try {
-                    getActivePlayer().undo();
+                    game.undo();
                 } catch (Exception ex) {
                 }
 
             } else {
 
                 try {
-                    getActivePlayer().setPromote(pD.getResult());
+                    game.setPromote(pD.getResult());
                 } catch (Exception ex) {
                 }
 
@@ -841,7 +816,7 @@ public class Board extends VBox implements PlayerListener {
 
         Bounds bds = stack.localToScreen(getBoundsInParent());
 
-        Position activePos = game.getPositions().get(getActivePlayer().getCurrentPos());
+        Position activePos = game.getPositions().get(currentPos);
         pD.setX(bds.getMinX() + getXBySquare(activePos.getMove().getDestination()));
         pD.setY(bds.getMinY() + getYBySquare(activePos.getMove().getDestination())
                 - ((!activePos.isWhite() && !flipped) || (activePos.isWhite() && flipped)
@@ -1044,117 +1019,88 @@ public class Board extends VBox implements PlayerListener {
     }
 
     // Event Handlers
-    @Override
-    public void onBoardUpdate(PlayerEvent event) {
 
-        if (event.isWhite() != getActivePlayer().isWhite())
-            return;
+    @Override
+    public void onPlayerEvent(GameEvent event) {
 
         Platform.runLater(() -> {
 
-            if (player2 != null && player1.isTurn() == flipped) {
-                flipBoard();
-            } else {
-                boardUpdated(true, game.getPositions().get(getInactivePlayer().getCurrentPos()), game.getLastPos(),
-                        false);
+            if (event.getType() == GameEvent.TYPE_MOVE) {
+
+                currentPos = event.getCurrIndex();
+                
+                if (color == TWO_PLAYER)
+                    flipBoard();
+
+
+                boardUpdated(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
+
+                
+
+                movePane.boardUpdated();
+                gameMenu.update();
+                viewMenu.update();
+
+            } else if (event.getType() == GameEvent.TYPE_OVER) {
+
+                if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
+                    return;
+
+                Dialog<Void> over = new Dialog<Void>();
+                over.setTitle("Game Over");
+
+                String msg = "";
+                if (game.getResult() == Game.RESULT_DRAW) {
+                    msg = "Draw";
+                } else if (game.getResult() == Game.RESULT_BLACK_WIN) {
+                    msg = "Black win";
+                } else if (game.getResult() == Game.RESULT_WHITE_WIN) {
+                    msg = "White win";
+                }
+
+                String reason = "";
+
+                switch (game.getResultReason()) {
+
+                    case Game.REASON_CHECKMATE:
+                        reason = " by checkmate.";
+                        break;
+                    case Game.REASON_FLAGFALL:
+                        reason = " by flagfall.";
+                        break;
+                    case Game.REASON_DEAD_INSUFFICIENT_MATERIAL:
+                        reason = " due to insufficient material.";
+                        break;
+                    case Game.REASON_DEAD_NO_POSSIBLE_MATE:
+                        reason = " due to no possible checkmate.";
+                        break;
+                    case Game.REASON_FIFTY_MOVE:
+                        reason = " by fifty move rule.";
+                        break;
+                    case Game.REASON_REPETITION:
+                        reason = " by repetition.";
+                        break;
+                    case Game.REASON_STALEMATE:
+                        reason = " by stalemate.";
+                        break;
+                    default:
+                        reason = ".";
+                        break;
+
+                }
+
+                msg += reason;
+
+                over.setContentText(msg);
+
+                over.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+
+                over.showAndWait();
+
             }
 
-            movePane.boardUpdated();
-            gameMenu.update();
-            viewMenu.update();
-
         });
-    }
 
-    @Override
-    public void onGameOver(PlayerEvent event) {
-
-        if (event.isWhite() != getActivePlayer().isWhite())
-            return;
-
-        Platform.runLater(() -> {
-
-            if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
-                return;
-
-            Dialog<Void> over = new Dialog<Void>();
-            over.setTitle("Game Over");
-
-            String msg = "";
-            if (game.getResult() == Game.RESULT_DRAW) {
-                msg = "Draw";
-            } else if (game.getResult() == Game.RESULT_BLACK_WIN) {
-                msg = "Black win";
-            } else if (game.getResult() == Game.RESULT_WHITE_WIN) {
-                msg = "White win";
-            }
-
-            String reason = "";
-
-            switch (game.getResultReason()) {
-
-                case Game.REASON_CHECKMATE:
-                    reason = " by checkmate.";
-                    break;
-                case Game.REASON_FLAGFALL:
-                    reason = " by flagfall.";
-                    break;
-                case Game.REASON_DEAD_INSUFFICIENT_MATERIAL:
-                    reason = " due to insufficient material.";
-                    break;
-                case Game.REASON_DEAD_NO_POSSIBLE_MATE:
-                    reason = " due to no possible checkmate.";
-                    break;
-                case Game.REASON_FIFTY_MOVE:
-                    reason = " by fifty move rule.";
-                    break;
-                case Game.REASON_REPETITION:
-                    reason = " by repetition.";
-                    break;
-                case Game.REASON_STALEMATE:
-                    reason = " by stalemate.";
-                    break;
-                default:
-                    reason = ".";
-                    break;
-
-            }
-
-            msg += reason;
-
-            over.setContentText(msg);
-
-            over.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
-
-            over.showAndWait();
-
-        });
-    }
-
-    @Override
-    public void onChatReceived(PlayerEvent event) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void onDrawOfferReceived(PlayerEvent event) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void onPositionChanged(PlayerEvent event) {
-        Platform.runLater(() -> {
-
-            final int old = event.getOldPos();
-            final int current = event.getCurrentPos();
-
-            boardUpdated(Math.abs(old - current) == 1, game.getPositions().get(old), game.getPositions().get(current),
-                    old >= current);
-
-            movePane.posChanged(current);
-            gameMenu.update();
-
-        });
     }
 
 }

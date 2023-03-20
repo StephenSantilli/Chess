@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
-public class SendChallengeDialog extends Stage {
+public class ChallengeSendDialog extends Stage {
 
     private String name;
     private int color;
@@ -46,7 +46,7 @@ public class SendChallengeDialog extends Stage {
         return create;
     }
 
-    public SendChallengeDialog(Window owner) {
+    public ChallengeSendDialog(Window owner) {
 
         this.create = false;
 

@@ -48,6 +48,8 @@ public class Game {
      */
     private ArrayList<Position> positions;
 
+    private ArrayList<GameListener> listeners;
+
     /**
      * <p>
      * The result of the game.
@@ -192,8 +194,8 @@ public class Game {
      */
     public Game(String whiteName, String blackName, GameSettings settings) {
 
-        this.white = new Player(this, true, whiteName);
-        this.black = new Player(this, false, blackName);
+        this.white = new Player(whiteName);
+        this.black = new Player(blackName);
 
         this.settings = settings;
 
@@ -206,6 +208,8 @@ public class Game {
 
         this.whiteTimer = settings.getTimePerSide();
         this.blackTimer = settings.getTimePerSide();
+
+        this.listeners = new ArrayList<GameListener>();
 
     }
 
@@ -228,59 +232,34 @@ public class Game {
 
         }
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(GameEvent.STARTED);
 
     }
 
-    void markGameOver(int result, int resultReason) {
+    public void markGameOver(int result, int resultReason) {
 
         this.result = result;
         this.resultReason = resultReason;
-
-        flagfallChecker.shutdown();
 
         gameOver();
 
     }
 
-    public void stopGame() {
+    private void gameOver() {
+
+        if (result <= 0)
+            return;
 
         if (flagfallChecker != null)
             flagfallChecker.shutdownNow();
 
-    }
+        flipTimer(true, 0);
 
-    public void importPosition(PGNParser PGN) throws Exception {
-
-        positions = new ArrayList<Position>();
-        positions.add(new Position(this));
-
-        ArrayList<PGNMove> moves = PGN.getParsedMoves();
-
-        for (int i = 0; i < moves.size(); i++) {
-
-            Move m = new Move(moves.get(i).getMoveText(), getLastPos(), getLastPos().isWhite());
-
-            positions.add(new Position(getLastPos(), m, this, !getLastPos().isWhite(), true));
-
-        }
-
-        if (positions.size() == 1)
-            throw new Exception("Position import failed.");
-
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(GameEvent.OVER);
 
     }
 
-    public String exportPosition() throws Exception {
-
-        return new PGNParser(this, null, true).outputPGN(false);
-
-    }
-
-    void makeMove(Square origin, Square destination) throws Exception {
+    public void makeMove(Square origin, Square destination) throws Exception {
 
         if (paused || result != RESULT_IN_PROGRESS)
             throw new Exception("Game is paused.");
@@ -314,29 +293,34 @@ public class Game {
 
         positions.add(movePosition);
 
+        int posNumber = positions.size() - 1;
+
         if (movePosition.isCheckMate()) {
-            white.fireBoardUpdate();
-            black.fireBoardUpdate();
+
+            fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 2, posNumber - 1, getPreviousPos(), getLastPos()));
+
             markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
             return;
+
         }
 
         if (movePosition.isInsufficientMaterial()) {
-            white.fireBoardUpdate();
-            black.fireBoardUpdate();
+
+            fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 2, posNumber - 1, getPreviousPos(), getLastPos()));
+
             markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
             return;
+
         }
 
         if (movePosition.getMove().getPromoteType() != '?')
             flipTimer(true, 0);
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 2, posNumber - 1, getPreviousPos(), getLastPos()));
 
     }
 
-    void setPromo(char piece) throws Exception {
+    public void setPromote(char piece) throws Exception {
 
         if (getLastPos().getMove() != null && getLastPos().getMove().getPromoteType() == '?') {
 
@@ -346,30 +330,14 @@ public class Game {
         } else
             throw new Exception("Cannot set promote type.");
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 1, positions.size() - 1, getLastPos(), getLastPos()));
 
     }
 
     boolean isWhiteTurn() {
 
-        return (getLastPos().isWhite() && isCountdownWhite());
+        return getLastPos().isWhite() && isCountdownWhite();
 
-    }
-
-    /**
-     * @deprecated
-     *             Use {@link #isCountdownWhite()} instead.
-     * 
-     * @return Whether or not the {@link Position} in {@link #positions} is the
-     *         one
-     *         currently counting down the timer. Will be {@code false} if waiting
-     *         for
-     *         promotion.
-     */
-    @Deprecated
-    public boolean isLastPosCountdown() {
-        return (getLastPos().getMove() == null || getLastPos().getMove().getPromoteType() != '?');
     }
 
     /**
@@ -427,20 +395,6 @@ public class Game {
             whiteTimer = time;
         else
             blackTimer = time;
-
-    }
-
-    private void gameOver() {
-
-        if (result <= 0)
-            return;
-
-        stopGame();
-
-        flipTimer(true, 0);
-
-        white.fireGameOver();
-        black.fireGameOver();
 
     }
 
@@ -510,12 +464,15 @@ public class Game {
 
         }
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+    }
+
+    public boolean canPause() {
+
+        return settings.canPause() && !isPaused();
 
     }
 
-    void pauseGame() throws Exception {
+    public void pause() throws Exception {
 
         if (paused)
             throw new Exception("Game is already paused.");
@@ -523,12 +480,17 @@ public class Game {
         paused = true;
         pauseStart = System.currentTimeMillis();
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(GameEvent.PAUSED);
 
     }
 
-    void resumeGame() throws Exception {
+    public boolean canResume() {
+
+        return settings.canPause() && isPaused();
+
+    }
+
+    public void resume() throws Exception {
 
         if (!paused)
             throw new Exception("Game is not paused.");
@@ -539,12 +501,17 @@ public class Game {
 
         pauseStart = 0;
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(GameEvent.RESUMED);
 
     }
 
-    void undoMove() throws Exception {
+    public boolean canUndo() {
+
+        return settings.canUndo() && positions.size() > 1;
+
+    }
+
+    public void undo() throws Exception {
 
         if (!settings.canUndo())
             throw new Exception("Game settings do not allow undo/redo.");
@@ -552,7 +519,7 @@ public class Game {
         if (positions.size() <= 1)
             throw new Exception("No move to undo.");
 
-        boolean isCountdown = isLastPosCountdown();
+        boolean isCountdown = isCountdownWhite() == getLastPos().isWhite();
 
         Position redo = getLastPos();
 
@@ -589,12 +556,17 @@ public class Game {
 
         }
 
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size(), positions.size() - 1, redo, getLastPos()));
 
     }
 
-    void redoMove() throws Exception {
+    public boolean canRedo() {
+
+        return settings.canUndo() && getLastPos().getRedo() != null;
+
+    }
+
+    public void redo() throws Exception {
 
         if (!settings.canUndo())
             throw new Exception("Game settings do not allow undo/redo.");
@@ -620,8 +592,52 @@ public class Game {
         }
 
         flipTimer(!redoTime, 0);
-        white.fireBoardUpdate();
-        black.fireBoardUpdate();
+
+        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 2, positions.size() - 1, getPreviousPos(), getLastPos()));
+
+    }
+
+    public void addListener(GameListener listener) {
+
+        listeners.add(listener);
+
+    }
+
+    public void fireEvent(GameEvent event) {
+
+        for (GameListener listener : listeners) {
+
+            listener.onPlayerEvent(event);
+
+        }
+
+    }
+
+    public void importPosition(PGNParser PGN) throws Exception {
+
+        positions = new ArrayList<Position>();
+        positions.add(new Position(this));
+
+        ArrayList<PGNMove> moves = PGN.getParsedMoves();
+
+        for (int i = 0; i < moves.size(); i++) {
+
+            Move m = new Move(moves.get(i).getMoveText(), getLastPos(), getLastPos().isWhite());
+
+            positions.add(new Position(getLastPos(), m, this, !getLastPos().isWhite(), true));
+
+        }
+
+        if (positions.size() == 1)
+            throw new Exception("Position import failed.");
+
+        fireEvent(GameEvent.IMPORTED);
+
+    }
+
+    public String exportPosition() throws Exception {
+
+        return new PGNParser(this, null, true).outputPGN(false);
 
     }
 

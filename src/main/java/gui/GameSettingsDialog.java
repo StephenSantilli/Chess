@@ -5,6 +5,7 @@ import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
 import game.LAN.ChallengeServer;
+import game.LAN.Client;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -39,14 +40,14 @@ public class GameSettingsDialog extends Stage {
     private ChallengeSearchDialog search;
 
     private boolean create;
-    private Player player;
+    private Client client;
 
     public boolean isCreate() {
         return create;
     }
 
-    public Player getPlayer() {
-        return player;
+    public Client getClient() {
+        return client;
     }
 
     public long getTimePerMove() {
@@ -74,9 +75,8 @@ public class GameSettingsDialog extends Stage {
     private Runnable gameCreatedCallbackServer = () -> {
 
         Platform.runLater(() -> {
-            player = server.getClient().getOpponent().getGame().getPlayer(!server.getClient().getOpponent().isWhite());
+            client = server.getClient();
             create = true;
-            System.out.println("fddfdddf");
             hide();
         });
 
@@ -85,12 +85,12 @@ public class GameSettingsDialog extends Stage {
     private Runnable gameCreatedCallbackSearcher = () -> {
 
         Platform.runLater(() -> {
-            player = search.getClient().getSelf();
+            client = search.getClient();
             create = true;
             System.out.println("fddfdddf");
 
-            timePerSide = player.getGame().getSettings().getTimePerSide();
-            timePerMove = player.getGame().getSettings().getTimePerMove();
+            timePerSide = client.getGame().getSettings().getTimePerSide();
+            timePerMove = client.getGame().getSettings().getTimePerMove();
             hide();
 
         });
@@ -107,8 +107,8 @@ public class GameSettingsDialog extends Stage {
         getIcons().setAll(((Stage) (window)).getIcons());
 
         create = false;
-
         server = null;
+        client = null;
 
         VBox items = new VBox();
         items.setSpacing(5);
@@ -198,16 +198,18 @@ public class GameSettingsDialog extends Stage {
 
         startButton = new Button("Start 2-Player Game");
         startButton.setOnAction(e -> {
+
             timePerSide = timeBox.isSelected() ? -1 : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
             timePerMove = timeBox.isSelected() ? -1 : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
             create = true;
             hide();
+
         });
 
         createChallenge = new Button("Create LAN Challenge");
         createChallenge.setOnAction(e -> {
 
-            SendChallengeDialog cDialog = new SendChallengeDialog(getScene().getWindow());
+            ChallengeSendDialog cDialog = new ChallengeSendDialog(getScene().getWindow());
 
             cDialog.setOnHidden(we -> {
 
@@ -257,9 +259,9 @@ public class GameSettingsDialog extends Stage {
                 search = new ChallengeSearchDialog(getScene().getWindow(), game, gameCreatedCallbackSearcher);
                 search.setOnHidden(we -> {
 
-                    if (search.getPlayer() != null) {
+                    if(search.getClient() == null) {
 
-                    } else {
+
 
                     }
 

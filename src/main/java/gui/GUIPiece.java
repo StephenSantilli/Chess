@@ -103,12 +103,12 @@ public class GUIPiece {
 
                 b.setDragging(null);
                 b.setActive(null);
-                b.getActivePlayer().makeMove(m.getOrigin(), m.getDestination());
+                b.getGame().makeMove(m.getOrigin(), m.getDestination());
 
             } catch (Exception e) {
             }
 
-            if (cPos == b.getActivePlayer().getCurrentPos()) {
+            if (cPos == b.getCurrentPos()) {
                 GUIPiece pc = b.getGUIPieceAtSquare(clickSquare);
                 if (pc != null)
                     b.setActive(pc);
@@ -121,8 +121,7 @@ public class GUIPiece {
 
             }
 
-        } else if (b.getActive() == null || (!b.getGame().getPositions().get(b.getActivePlayer()
-                .getCurrentPos()).canPieceMoveToSquare(b.getActive().getPiece(),
+        } else if (b.getActive() == null || (!b.getGame().getPositions().get(b.getCurrentPos()).canPieceMoveToSquare(b.getActive().getPiece(),
                 clickSquare) && !b.getActive().getPiece().equals(this.getPiece())) ||
                 clickSquare.equals(piece.getSquare())) {
 
@@ -199,7 +198,7 @@ public class GUIPiece {
 
         if (b.getDragging() != null) {
 
-            int cPos = b.getActivePlayer().getCurrentPos();
+            int cPos = b.getCurrentPos();
 
             try {
 
@@ -209,14 +208,14 @@ public class GUIPiece {
 
                 Move m = new Move(d.getSquare(),
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true),
-                        b.getGame().getPositions().get(b.getActivePlayer().getCurrentPos()));
-                b.getActivePlayer().makeMove(m.getOrigin(), m.getDestination());
+                        b.getGame().getPositions().get(b.getCurrentPos()));
+                b.getGame().makeMove(m.getOrigin(), m.getDestination());
 
             } catch (Exception e) {
 
             }
 
-            if (cPos == b.getActivePlayer().getCurrentPos()) {
+            if (cPos == b.getCurrentPos()) {
 
                 GUIPiece pc = b.getGUIPieceAtSquare(
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));

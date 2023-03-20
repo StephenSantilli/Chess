@@ -8,9 +8,11 @@ import java.net.Socket;
 import game.Game;
 import game.GameSettings;
 import game.Player;
+import game.GameEvent;
+import game.GameListener;
 import game.Square;
 
-public class Client {
+public class Client implements GameListener {
 
     public static final int PORT = 49265;
 
@@ -23,15 +25,15 @@ public class Client {
     private int color;
     private Runnable gameCreatedCallback;
 
-    private Player opponent;
-    private Player self;
+    private Game game;
+    private boolean oppColor;
 
-    public Player getSelf() {
-        return self;
+    public boolean isOppColor() {
+        return oppColor;
     }
 
-    public Player getOpponent() {
-        return opponent;
+    public Game getGame() {
+        return game;
     }
 
     private Runnable listener = () -> {
@@ -57,8 +59,6 @@ public class Client {
 
     public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
             throws Exception {
-
-        System.out.println("eeee");
 
         this.socket = socket;
         this.name = name;
@@ -96,7 +96,7 @@ public class Client {
         Message msg = new Message(message);
         String[] a = msg.getArgs();
 
-        if (opponent == null) {
+        if (game == null) {
 
             initMessage(a);
 
@@ -104,10 +104,10 @@ public class Client {
 
             if (a[0].equals("started")) {
 
-                if (opponent.getGame().getResult() == Game.RESULT_NOT_STARTED) {
+                if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
                     try {
-                        opponent.getGame().startGame();
+                        game.startGame();
                     } catch (Exception e) {
                         stop(true, "Error starting game.", false);
                     }
@@ -117,10 +117,10 @@ public class Client {
 
             } else if (a[0].equals("start")) {
 
-                if (opponent.getGame().getResult() == Game.RESULT_NOT_STARTED) {
+                if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
                     try {
-                        opponent.getGame().startGame();
+                        game.startGame();
                         send(new Message("started"));
                     } catch (Exception e) {
                         stop(true, "Error starting game.", false);
@@ -135,7 +135,7 @@ public class Client {
                 Square destination = new Square(a[2]);
 
                 long timerEnd = -1;
-                if (opponent.getGame().getSettings().getTimePerSide() > 0) {
+                if (game.getSettings().getTimePerSide() > 0) {
                     if (a.length >= 4)
                         timerEnd = Long.parseLong(a[3]);
                     else {
@@ -155,9 +155,9 @@ public class Client {
 
                 try {
 
-                    opponent.makeMove(origin, destination);
+                    game.makeMove(origin, destination);
 
-                    opponent.getGame().setTimer(opponent.isWhite(), timerEnd);
+                    game.setTimer(oppColor, timerEnd);
 
                 } catch (Exception e) {
                     stop(true, "Invalid move.", true);
@@ -183,10 +183,10 @@ public class Client {
                     color = Math.round(Math.random()) == 0 ? Challenge.CHALLENGE_WHITE
                             : Challenge.CHALLENGE_BLACK;
 
-                Game game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a[2],
+                game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a[2],
                         color == Challenge.CHALLENGE_BLACK ? name : a[2], settings);
 
-                opponent = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
+                
 
                 send(new Message("ready",
                         color == Challenge.CHALLENGE_WHITE ? Challenge.CHALLENGE_BLACK + ""
@@ -226,7 +226,6 @@ public class Client {
                 }
 
                 boolean white = a[1].equals(Challenge.CHALLENGE_WHITE + "");
-                Game game;
                 try {
                     game = new Game(white ? name : a[2],
                             !white ? name : a[2],
@@ -235,9 +234,6 @@ public class Client {
                     stop(true, "Unable to initialize game.", false);
                     return;
                 }
-
-                opponent = game.getPlayer(color != Challenge.CHALLENGE_WHITE);
-                self = game.getPlayer(color == Challenge.CHALLENGE_WHITE);
 
                 send(new Message("start"));
 
@@ -275,5 +271,14 @@ public class Client {
         }
 
     }
+
+    @Override
+    public void onPlayerEvent(GameEvent event) {
+
+
+
+    }
+
+    
 
 }

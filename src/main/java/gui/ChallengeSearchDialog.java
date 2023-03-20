@@ -35,7 +35,6 @@ public class ChallengeSearchDialog extends Stage {
 
     private int timePerSide, timePerMove;
 
-    private ChallengeSearcher searcher;
 
     private Button refresh;
 
@@ -44,6 +43,7 @@ public class ChallengeSearchDialog extends Stage {
     private ObservableList<Challenge> oList;
     private ArrayList<Challenge> challenges;
 
+    private ChallengeSearcher searcher;
     private Client client;
 
     public Client getClient() {
@@ -178,7 +178,7 @@ public class ChallengeSearchDialog extends Stage {
                     if (ev.getClickCount() >= 2) {
 
                         try {
-
+                            
                             Socket s = new Socket();
 
                             s.connect(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
@@ -187,6 +187,8 @@ public class ChallengeSearchDialog extends Stage {
 
                             client.sendInitMessage();
 
+                            hide();
+
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -194,6 +196,7 @@ public class ChallengeSearchDialog extends Stage {
                     }
                 }
             });
+
             return row;
 
         });
@@ -238,14 +241,16 @@ public class ChallengeSearchDialog extends Stage {
 
         Scene s = new Scene(items);
         setOnShown(we -> {
+
             new Thread(hostUpdateChecker).start();
             sizeToScene();
+
         });
 
         setOnHidden(we -> {
-            System.out.println("dddddddddd");
+
+            System.out.println("Searcher stopping...");
             searcher.stop();
-            // hide();
 
         });
 

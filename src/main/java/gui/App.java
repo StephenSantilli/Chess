@@ -81,7 +81,7 @@ public class App extends Application {
 
                 //TODO: save board position for resuming
                 if (b.getGame() != null)
-                    b.getGame().stopGame();
+                    b.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
                 Platform.exit();
 

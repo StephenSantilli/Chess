@@ -156,7 +156,7 @@ public class MovePane extends GridPane {
         btn.setOnAction(e -> {
             
             try {
-                board.getActivePlayer().setCurrentPos(pos);
+                board.setCurrentPos(pos);
             } catch (Exception e1) {
             }
 
