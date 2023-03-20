@@ -56,6 +56,7 @@ public class Board extends VBox implements GameListener {
     private int pieceSize = 90;
 
     private Game game;
+    private Client client;
 
     private ArrayList<GUIPiece> pieces;
     private ArrayList<PieceTranscoder> transcoderPieces;
@@ -410,7 +411,7 @@ public class Board extends VBox implements GameListener {
                     game = settings.getClient().getGame();
                     game.addListener(this);
                     color = settings.getClient().isOppColor() ? BLACK : WHITE;
-
+                    client = settings.getClient();
                     if (color == BLACK)
                         flipBoard();
 

@@ -77,6 +77,7 @@ public class GameSettingsDialog extends Stage {
         Platform.runLater(() -> {
             client = server.getClient();
             create = true;
+            server.stop();
             hide();
         });
 
@@ -91,6 +92,7 @@ public class GameSettingsDialog extends Stage {
 
             timePerSide = client.getGame().getSettings().getTimePerSide();
             timePerMove = client.getGame().getSettings().getTimePerMove();
+
             hide();
 
         });
