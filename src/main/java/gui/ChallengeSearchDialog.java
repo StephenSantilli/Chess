@@ -46,6 +46,10 @@ public class ChallengeSearchDialog extends Stage {
 
     private Client client;
 
+    public Client getClient() {
+        return client;
+    }
+
     private Player player;
 
     public int getTimePerMove() {
@@ -59,16 +63,6 @@ public class ChallengeSearchDialog extends Stage {
     public Player getPlayer() {
         return player;
     }
-
-    private Runnable gameCreatedCallback = () -> {
-        
-        Platform.runLater(() -> {
-            player = client.getOpponent().getGame().getPlayer(!client.getOpponent().isWhite());
-
-            hide();
-        });
-
-    };
 
     private Runnable hostUpdateChecker = () -> {
 
@@ -101,7 +95,7 @@ public class ChallengeSearchDialog extends Stage {
 
     };
 
-    public ChallengeSearchDialog(Window window, Game game) throws Exception {
+    public ChallengeSearchDialog(Window window, Game game, Runnable gameCreatedCallback) throws Exception {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
@@ -249,8 +243,9 @@ public class ChallengeSearchDialog extends Stage {
         });
 
         setOnHidden(we -> {
-
+            System.out.println("dddddddddd");
             searcher.stop();
+            // hide();
 
         });
 

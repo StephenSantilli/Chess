@@ -26,6 +26,10 @@ public class Client {
     private Player opponent;
     private Player self;
 
+    public Player getSelf() {
+        return self;
+    }
+
     public Player getOpponent() {
         return opponent;
     }

@@ -36,6 +36,8 @@ public class GameSettingsDialog extends Stage {
 
     private Label perSideLabel, perSideDivider, perMoveLabel, perMoveDivider, eLabel;
 
+    private ChallengeSearchDialog search;
+
     private boolean create;
     private Player player;
 
@@ -69,12 +71,28 @@ public class GameSettingsDialog extends Stage {
 
     }
 
-    private Runnable gameCreatedCallback = () -> {
+    private Runnable gameCreatedCallbackServer = () -> {
 
         Platform.runLater(() -> {
             player = server.getClient().getOpponent().getGame().getPlayer(!server.getClient().getOpponent().isWhite());
             create = true;
+            System.out.println("fddfdddf");
             hide();
+        });
+
+    };
+
+    private Runnable gameCreatedCallbackSearcher = () -> {
+
+        Platform.runLater(() -> {
+            player = search.getClient().getSelf();
+            create = true;
+            System.out.println("fddfdddf");
+
+            timePerSide = player.getGame().getSettings().getTimePerSide();
+            timePerMove = player.getGame().getSettings().getTimePerMove();
+            hide();
+
         });
 
     };
@@ -205,7 +223,7 @@ public class GameSettingsDialog extends Stage {
 
                     server = new ChallengeServer(
                             new Challenge(cDialog.getName(), cDialog.getColor(), timePerSide, timePerMove, null),
-                            gameCreatedCallback);
+                            gameCreatedCallbackServer);
                     server.start();
 
                     createChallenge.setDisable(true);
@@ -236,22 +254,13 @@ public class GameSettingsDialog extends Stage {
 
             try {
 
-                ChallengeSearchDialog search = new ChallengeSearchDialog(getScene().getWindow(), game);
+                search = new ChallengeSearchDialog(getScene().getWindow(), game, gameCreatedCallbackSearcher);
                 search.setOnHidden(we -> {
 
                     if (search.getPlayer() != null) {
 
-                        hide();
-
                     } else {
-                        create = true;
-                        player = search.getPlayer();
-                        search.getPlayer().getGame();
 
-                        timePerSide = search.getPlayer().getGame().getSettings().getTimePerSide();
-                        timePerMove = search.getPlayer().getGame().getSettings().getTimePerMove();
-
-                        hide();
                     }
 
                 });

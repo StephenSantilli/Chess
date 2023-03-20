@@ -437,7 +437,10 @@ public class Board extends VBox implements PlayerListener {
                 } else {
 
                     player1 = settings.getPlayer();
+                    player1.addListener(this);
+
                     game = player1.getGame();
+                    boardUpdated();
 
                 }
 
