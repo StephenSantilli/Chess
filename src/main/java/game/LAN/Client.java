@@ -245,6 +245,7 @@ public class Client {
 
             while (line != null) {
 
+                receive(line);
                 line = input.readLine();
 
             }
