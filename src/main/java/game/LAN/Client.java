@@ -72,7 +72,7 @@ public class Client implements GameListener {
             this.output = new PrintWriter(socket.getOutputStream(), true);
 
             new Thread(listener).start();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,7 +176,7 @@ public class Client implements GameListener {
     }
 
     private void initMessage(String[] a) {
-        //System.out.println("init message" + a[0]);
+        // System.out.println("init message" + a[0]);
         if (a[0].equals("init")) {
 
             if (a[1].equals(Game.VERSION) && a[2].matches(Player.NAME_REGEX)) {
@@ -187,6 +187,8 @@ public class Client implements GameListener {
 
                 game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a[2],
                         color == Challenge.CHALLENGE_BLACK ? name : a[2], settings);
+
+                game.addListener(this);
 
                 oppColor = color != Challenge.CHALLENGE_WHITE;
 
@@ -233,6 +235,8 @@ public class Client implements GameListener {
                             !white ? name : a[2],
                             new GameSettings(timePerSide, timePerMove, false, false, !white, white));
                     oppColor = !white;
+                    game.addListener(this);
+
                 } catch (Exception e) {
                     stop(true, "Unable to initialize game.", false);
                     return;
@@ -257,7 +261,7 @@ public class Client implements GameListener {
     public void stop(boolean send, String reason, boolean normal) {
 
         try {
-            
+
             System.out.println(reason);
 
             if (send && !normal)
@@ -278,10 +282,11 @@ public class Client implements GameListener {
     @Override
     public void onPlayerEvent(GameEvent event) {
 
+        if(event.getType() == GameEvent.TYPE_MOVE) {
+            send(new Message("move", event.getCurr().getMove().getOrigin().toString(), event.getCurr().getMove().getDestination().toString(), event.getCurr().getTimerEnd() + ""));
 
+        }
 
     }
-
-    
 
 }
