@@ -170,7 +170,7 @@ public class Client {
     }
 
     private void initMessage(String[] a) {
-        System.out.println("init message" + a[0]);
+        //System.out.println("init message" + a[0]);
         if (a[0].equals("init")) {
 
             if (a[1].equals(Game.VERSION) && a[2].matches(Player.NAME_REGEX)) {

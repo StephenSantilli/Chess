@@ -228,6 +228,9 @@ public class Game {
 
         }
 
+        white.fireBoardUpdate();
+        black.fireBoardUpdate();
+
     }
 
     void markGameOver(int result, int resultReason) {

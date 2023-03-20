@@ -420,6 +420,20 @@ public class Board extends VBox implements PlayerListener {
                     } catch (Exception ex) {
                     }
 
+                    player1.addListener(this);
+
+                    if (player2 != null)
+                        player2.addListener(this);
+
+                    try {
+
+                        game.startGame();
+                        boardUpdated();
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
                 } else {
 
                     player1 = settings.getPlayer();
@@ -427,10 +441,8 @@ public class Board extends VBox implements PlayerListener {
 
                 }
 
-                player1.addListener(this);
 
-                if (player2 != null)
-                    player2.addListener(this);
+
 
                 // game.addMoveListener(this);
                 // game.addMoveListener(getMovePane());
@@ -438,14 +450,7 @@ public class Board extends VBox implements PlayerListener {
 
                 movePane.initMovePane();
 
-                try {
 
-                    game.startGame();
-                    boardUpdated();
-
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
             }
 
         });
