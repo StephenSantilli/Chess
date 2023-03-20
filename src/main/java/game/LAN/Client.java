@@ -162,7 +162,7 @@ public class Client implements GameListener {
                     game.setTimer(oppColor, timerEnd);
 
                 } catch (Exception e) {
-                    stop(true, "Invalid move.", true);
+                    stop(true, "Invalid move. " + e.getMessage(), true);
                 }
 
             } else if (a[0].equals("terminate")) {
