@@ -169,6 +169,34 @@ public class Client implements GameListener {
                 stop(false, "Opponent disconnected.", false);
             } else if (a[0].equals("error") && a[1].equals("fatal")) {
                 stop(false, a[2], false);
+            } else if (a[0].equals("draw")) {
+
+                try {
+                    game.sendDrawOffer(oppColor);
+                } catch (Exception e) {
+                    send(new Message("error", "normal", "Cannot offer a draw right now."));
+                }
+
+            } else if (a[0].equals("drawaccept")) {
+
+                if (game.getCurrentCountdownPos().getDrawOfferer() != (oppColor ? 2 : 1)) {
+
+                    send(new Message("error", "normal", "No draw offer was sent."));
+                    return;
+
+                }
+                try {
+
+                    game.acceptDrawOffer(oppColor);
+                } catch (Exception e) {
+                    stop(true, "Cannot accept draw offer.", false);
+                }
+
+            } else if (a[0].equals("resign")) {
+
+                game.markGameOver(!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN,
+                        Game.REASON_RESIGNATION);
+
             }
 
         }
@@ -239,7 +267,7 @@ public class Client implements GameListener {
 
                 } catch (Exception e) {
                     stop(true, "Unable to initialize game.", false);
-                    
+
                     return;
                 }
 
@@ -264,7 +292,7 @@ public class Client implements GameListener {
         try {
 
             System.out.println(reason);
-            
+
             if (send && !normal)
                 send(new Message("error", "fatal", reason));
             else if (send)
@@ -285,13 +313,31 @@ public class Client implements GameListener {
     @Override
     public void onPlayerEvent(GameEvent event) {
 
-        if(event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor) {
-            
-            send(new Message("move", event.getCurr().getMove().getOrigin().toString(), event.getCurr().getMove().getDestination().toString(), event.getPrev().getTimerEnd() + ""));
+        if (event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor
+                && game.isCountdownWhite() == event.getCurr().isWhite()) {
 
-        } else if(event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.RESULT_TERMINATED) {
+            send(new Message("move", event.getCurr().getMove().getOrigin().toString(),
+                    event.getCurr().getMove().getDestination().toString(), event.getPrev().getTimerEnd() + ""));
+
+        } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.RESULT_TERMINATED) {
 
             stop(true, "Game terminated.", false);
+
+        } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER && game.getCurrentCountdownPos().getDrawOfferer() != 0
+                && (game.getCurrentCountdownPos().getDrawOfferer() == 1) != oppColor) {
+
+            send(new Message("draw"));
+
+        } else if (event.getType() == GameEvent.TYPE_OVER
+                && game.getResult() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW : Game.REASON_BLACK_OFFERED_DRAW)) {
+
+            send(new Message("drawaccept"));
+
+        } else if (event.getType() == GameEvent.TYPE_OVER
+                && game.getResult() == (!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN)
+                && game.getResultReason() == Game.REASON_RESIGNATION) {
+
+            send(new Message("resign"));
 
         }
 

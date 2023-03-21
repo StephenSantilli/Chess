@@ -25,14 +25,15 @@ public class Game {
     public static final int REASON_IN_PROGRESS = 0;
     public static final int REASON_CHECKMATE = 1;
     public static final int REASON_FLAGFALL = 2;
-    public static final int REASON_WHITE_DRAW = 3;
-    public static final int REASON_BLACK_DRAW = 4;
+    public static final int REASON_WHITE_OFFERED_DRAW = 3;
+    public static final int REASON_BLACK_OFFERED_DRAW = 4;
     public static final int REASON_STALEMATE = 5;
     public static final int REASON_DEAD_INSUFFICIENT_MATERIAL = 6;
     public static final int REASON_DEAD_NO_POSSIBLE_MATE = 7;
     public static final int REASON_REPETITION = 8;
     public static final int REASON_FIFTY_MOVE = 9;
-    public static final int REASON_OTHER = 10;
+    public static final int REASON_RESIGNATION = 10;
+    public static final int REASON_OTHER = 11;
 
     /**
      * The settings of the game.
@@ -236,6 +237,34 @@ public class Game {
 
     }
 
+    public boolean canDrawOffer() {
+
+        return result == RESULT_IN_PROGRESS && getCurrentCountdownPos().getDrawOfferer() == 0;
+
+    }
+
+    public void acceptDrawOffer(boolean accepter) throws Exception {
+
+        if (result != RESULT_IN_PROGRESS)
+            throw new Exception("Game is not in progress.");
+
+        if (getCurrentCountdownPos().getDrawOfferer() != (!accepter ? 1 : 2))
+            throw new Exception("No draw offer or being accepted by wrong color.");
+
+        markGameOver(RESULT_DRAW, !accepter ? REASON_WHITE_OFFERED_DRAW : REASON_BLACK_OFFERED_DRAW);
+
+    }
+
+    public void sendDrawOffer(boolean offerer) throws Exception {
+
+        if (!canDrawOffer())
+            throw new Exception("Cannot offer a draw.");
+
+        getCurrentCountdownPos().setDrawOfferer(offerer ? 1 : 2);
+        fireEvent(GameEvent.DRAW_OFFER);
+
+    }
+
     public void markGameOver(int result, int resultReason) {
 
         this.result = result;
@@ -335,7 +364,7 @@ public class Game {
 
     }
 
-    boolean isWhiteTurn() {
+    public boolean isWhiteTurn() {
 
         return getLastPos().isWhite() && isCountdownWhite();
 
@@ -520,7 +549,7 @@ public class Game {
 
     public void undo() throws Exception {
 
-        if (!settings.canUndo())
+        if (!settings.canUndo() && isCountdownWhite() == getLastPos().isWhite())
             throw new Exception("Game settings do not allow undo/redo.");
 
         if (positions.size() <= 1)

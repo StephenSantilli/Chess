@@ -74,6 +74,16 @@ public class Position {
      */
     private long timerEnd;
 
+    /**
+     * The color of who offered the draw. If multiple draw offers, will only include last.
+     * 
+     * <ul>
+     * <li>0 - No draw offer
+     * <li>1 - White offered
+     * <li>2 - Black offered
+     */
+    private int drawOfferer;
+
     public long getSystemTimeStart() {
         return systemTimeStart;
     }
@@ -190,6 +200,14 @@ public class Position {
         return checkMate;
     }
 
+    public int getDrawOfferer() {
+        return drawOfferer;
+    }
+
+    public void setDrawOfferer(int drawOfferer) {
+        this.drawOfferer = drawOfferer;
+    }
+
     @Override
     public boolean equals(Object compare) {
 
@@ -254,6 +272,8 @@ public class Position {
 
         this.systemTimeStart = -1;
         this.timerEnd = -1;
+
+        this.drawOfferer = 0;
 
         Piece[][] prevPieces = prev.getPieces();
 

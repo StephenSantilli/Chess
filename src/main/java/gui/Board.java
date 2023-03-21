@@ -21,6 +21,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
@@ -89,6 +90,8 @@ public class Board extends VBox implements GameListener {
     private BarMenu menuBar;
     private GameMenu gameMenu;
     private ViewMenu viewMenu;
+
+    private DrawDialog drawDialog;
 
     private ArrayList<TranslateTransition> transitions;
 
@@ -1051,6 +1054,26 @@ public class Board extends VBox implements GameListener {
                 gameMenu.update();
                 viewMenu.update();
 
+            } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER) {
+
+                drawDialog = new DrawDialog(this, game.getPlayer(client.isOppColor()).getName());
+
+                drawDialog.setOnHidden(ev -> {
+
+                    if (drawDialog.isAccept()) {
+
+                        try {
+                            game.acceptDrawOffer(color == WHITE);
+                        } catch (Exception e) {
+
+                        }
+
+                    }
+
+                });
+
+                drawDialog.show();
+
             } else if (event.getType() == GameEvent.TYPE_OVER) {
 
                 if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
@@ -1092,6 +1115,9 @@ public class Board extends VBox implements GameListener {
                         break;
                     case Game.REASON_STALEMATE:
                         reason = " by stalemate.";
+                        break;
+                    case Game.REASON_RESIGNATION:
+                        reason = " by resignation.";
                         break;
                     default:
                         reason = ".";

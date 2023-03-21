@@ -1,5 +1,6 @@
 package gui;
 
+import game.Game;
 import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -8,7 +9,7 @@ import javafx.scene.input.KeyCombination;
 
 public class GameMenu extends Menu {
 
-    private MenuItem newGame, undo, redo, pause, resume, export;
+    private MenuItem newGame, undo, redo, resign, drawOffer, pause, resume, showPgn;
 
     private Board board;
 
@@ -69,9 +70,44 @@ public class GameMenu extends Menu {
 
         });
 
-        export = new MenuItem("Show PGN");
-        export.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
-        export.setOnAction(e -> {
+        resign = new MenuItem("Resign");
+        resign.setOnAction(e -> {
+
+            if (board.getColor() == Board.TWO_PLAYER) {
+
+                board.getGame().markGameOver(
+                        board.getGame().isWhiteTurn() ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
+                        Game.REASON_RESIGNATION);
+                return;
+
+            }
+
+            board.getGame().markGameOver(
+                    board.getColor() == Board.WHITE ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
+                    Game.REASON_RESIGNATION);
+
+        });
+
+        drawOffer = new MenuItem("Offer Draw");
+        drawOffer.setOnAction(e -> {
+
+            if (board.getColor() == Board.TWO_PLAYER) {
+
+                board.getGame().markGameOver(
+                        Game.RESULT_DRAW,
+                        board.getGame().isWhiteTurn() ? Game.REASON_WHITE_OFFERED_DRAW
+                                : Game.REASON_BLACK_OFFERED_DRAW);
+                return;
+
+            }
+
+
+
+        });
+
+        showPgn = new MenuItem("Show PGN");
+        showPgn.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
+        showPgn.setOnAction(e -> {
 
             ExportDialog eD = new ExportDialog(board);
 
@@ -82,12 +118,12 @@ public class GameMenu extends Menu {
         getItems().addAll(newGame, new SeparatorMenuItem(),
                 pause, resume, new SeparatorMenuItem(),
                 undo, redo, new SeparatorMenuItem(),
-                export);
+                showPgn);
 
     }
 
     public void update() {
-        
+
         if (board.getGame() == null) {
 
             pause.setDisable(true);
@@ -96,7 +132,10 @@ public class GameMenu extends Menu {
             undo.setDisable(true);
             redo.setDisable(true);
 
-            export.setDisable(true);
+            resign.setDisable(true);
+            drawOffer.setDisable(true);
+
+            showPgn.setDisable(true);
 
         } else {
 
@@ -106,7 +145,10 @@ public class GameMenu extends Menu {
             undo.setDisable(!board.getGame().canUndo());
             redo.setDisable(!board.getGame().canRedo());
 
-            export.setDisable(false);
+            resign.setDisable(board.getGame().getResult() != Game.RESULT_IN_PROGRESS);
+            drawOffer.setDisable(board.getGame().canDrawOffer());
+
+            showPgn.setDisable(false);
 
         }
 
