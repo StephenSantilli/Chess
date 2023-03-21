@@ -257,6 +257,19 @@ public class Board extends VBox implements GameListener {
         return keyHandler;
     }
 
+    public boolean isTurn() {
+
+        if (color == TWO_PLAYER)
+            return true;
+
+        if(color == BLACK && !game.isCountdownWhite()) return true;
+        if(color == WHITE && !game.isCountdownWhite()) return true;
+
+        return false;
+
+
+    }
+
     public Board(int squareSize, BarMenu menuBar) throws Exception {
 
         // this.game = new Game();
@@ -489,7 +502,7 @@ public class Board extends VBox implements GameListener {
         gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
                 movesPane.getLayoutBounds().getHeight());
 
-        if (active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
+        if (!isTurn() || active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
             return;
 
         ArrayList<Move> pMoves = game.getLastPos().getMoves();

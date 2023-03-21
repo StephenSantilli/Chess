@@ -103,7 +103,8 @@ public class GUIPiece {
 
                 b.setDragging(null);
                 b.setActive(null);
-                b.getGame().makeMove(m.getOrigin(), m.getDestination());
+                if (b.isTurn())
+                    b.getGame().makeMove(m.getOrigin(), m.getDestination());
 
             } catch (Exception e) {
             }
@@ -121,8 +122,10 @@ public class GUIPiece {
 
             }
 
-        } else if (b.getActive() == null || (!b.getGame().getPositions().get(b.getCurrentPos()).canPieceMoveToSquare(b.getActive().getPiece(),
-                clickSquare) && !b.getActive().getPiece().equals(this.getPiece())) ||
+        } else if (b.getActive() == null
+                || (!b.getGame().getPositions().get(b.getCurrentPos()).canPieceMoveToSquare(b.getActive().getPiece(),
+                        clickSquare) && !b.getActive().getPiece().equals(this.getPiece()))
+                ||
                 clickSquare.equals(piece.getSquare())) {
 
             image.toFront();
@@ -209,7 +212,8 @@ public class GUIPiece {
                 Move m = new Move(d.getSquare(),
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true),
                         b.getGame().getPositions().get(b.getCurrentPos()));
-                b.getGame().makeMove(m.getOrigin(), m.getDestination());
+                if (b.isTurn())
+                    b.getGame().makeMove(m.getOrigin(), m.getDestination());
 
             } catch (Exception e) {
 
