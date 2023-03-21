@@ -9,6 +9,7 @@ import javafx.animation.TranslateTransition;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 public class GUIPiece {
@@ -74,10 +75,12 @@ public class GUIPiece {
         this.image = image;
         this.b = board;
 
-        StackPane stack = board.getStack();
+        Pane stack = board.getPiecePane();
 
         this.boardBounds = stack.localToScene(stack.getBoundsInLocal());
         this.vBoxBounds = stack.localToScene(board.getBoundsInParent());
+
+        this.promoteResponse = '0';
 
     }
 
@@ -174,9 +177,10 @@ public class GUIPiece {
                         // b.getChildren().remove(active.getImage());
 
                         if (m.getCaptureSquare() != null)
-                            b.getPiecePane().getChildren().remove(b.getGUIPieceAtSquare(m.getCaptureSquare()).getImage());
+                            b.getPiecePane().getChildren()
+                                    .remove(b.getGUIPieceAtSquare(m.getCaptureSquare()).getImage());
 
-                            active.setPieceSquare(clickSquare);
+                        active.setPieceSquare(clickSquare);
                         b.pieceMoveAnimation(active, m.getOrigin(), m.getDestination(), m.getCapturePiece(), callback);
                         for (TranslateTransition t : ts) {
 
@@ -190,6 +194,7 @@ public class GUIPiece {
                 }
 
             } catch (Exception e) {
+                e.printStackTrace();
             }
 
             if (promoteMove == null && cPos == b.getCurrentPos()) {
@@ -318,22 +323,20 @@ public class GUIPiece {
                 }
 
             } catch (Exception e) {
+                if (promoteMove == null && cPos == b.getCurrentPos()) {
 
-            }
+                    GUIPiece pc = b.getGUIPieceAtSquare(
+                            b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));
 
-            if (promoteMove == null && cPos == b.getCurrentPos()) {
+                    if (pc != null)
+                        b.setActive(pc);
+                    else
+                        b.setActive(null);
 
-                GUIPiece pc = b.getGUIPieceAtSquare(
-                        b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));
+                    b.setDragging(null);
+                    setPieceSquare(piece.getSquare());
 
-                if (pc != null)
-                    b.setActive(pc);
-                else
-                    b.setActive(null);
-
-                b.setDragging(null);
-                setPieceSquare(piece.getSquare());
-
+                }
             }
 
         } else

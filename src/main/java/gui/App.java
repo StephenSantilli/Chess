@@ -1,6 +1,7 @@
 package gui;
 
 import javafx.application.*;
+import javafx.geometry.Insets;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.ScrollPane;
@@ -11,6 +12,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import java.awt.FontMetrics;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.util.prefs.Preferences;
@@ -27,14 +29,7 @@ public class App extends Application {
         if (prefs.get("username", null) == null)
             prefs.put("username", "User");
 
-        VBox vb = new VBox();
-        HBox hb = new HBox();
-
-        Scene s = new Scene(vb);
-        s.setFill(Color.TRANSPARENT);
-
-        stage.setResizable(false);
-
+        // stage.setResizable(false);
         stage.setTitle("Chess " + Game.VERSION);
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));
@@ -53,6 +48,13 @@ public class App extends Application {
             }
         }
 
+        VBox vb = new VBox();
+        HBox hb = new HBox();
+
+        Scene s = new Scene(vb);
+        s.setFill(Color.TRANSPARENT);
+        s.getStylesheets().add(getClass().getResource("/css/style.css").toString());
+
         stage.setScene(s);
 
         try {
@@ -69,7 +71,9 @@ public class App extends Application {
             sp.setVbarPolicy(ScrollBarPolicy.NEVER);
 
             HBox.setHgrow(b, Priority.NEVER);
-            HBox.setHgrow(sp, Priority.ALWAYS);
+            // HBox.setHgrow(sp, Priority.ALWAYS);
+
+            // hb.setPadding(new Insets(5,5,5,5));
 
             hb.getChildren().add(sp);
             b.setViewOrder(0);

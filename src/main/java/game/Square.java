@@ -21,16 +21,18 @@ public class Square {
 
     }
 
-    public Square(String square) {
+    public Square(String square) throws Exception {
 
-        this.file = -1;
-        this.rank = -1;
+        square = square.toLowerCase().trim();
 
-        if (square.length() >= 1)
-            this.file = (int) (square.toLowerCase().charAt(0)) - 96;
+        if (!square.matches("[a-h][1-8]"))
+            throw new Exception("Square format invalid.");
 
-        if(square.length() >= 2) 
-            this.rank = (int) (square.toLowerCase().charAt(1)) - 48;
+        this.file = (int) (square.toLowerCase().charAt(0)) - 96;
+        this.rank = (int) (square.toLowerCase().charAt(1)) - 48;
+
+        if (!isValid())
+            throw new Exception("Invalid square.");
 
     }
 

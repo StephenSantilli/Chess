@@ -18,7 +18,7 @@ public class Client implements GameListener {
     public static final int PORT = 49265;
 
     private Socket socket;
-    
+
     private BufferedReader input;
     private PrintWriter output;
 
@@ -84,7 +84,7 @@ public class Client implements GameListener {
 
     public void sendInitMessage() {
 
-        send(new Message("init", Game.VERSION, name));
+        send(new InitMessage(Game.VERSION, name));
 
     }
 
@@ -99,106 +99,91 @@ public class Client implements GameListener {
         System.out.println(message);
 
         Message msg = new Message(message);
-        ArrayList<String> a = msg.getArgs();
 
         if (game == null) {
 
-            initMessage(a);
+            initMessage(msg);
 
         } else {
 
-            if (msg.equals(Message.STARTED)) {
+            if (msg.equals(Message.STARTED) || msg.equals(Message.START)) {
 
                 if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
                     try {
+
                         game.startGame();
+
+                        if (msg.equals(Message.START))
+                            send(Message.STARTED);
+
                     } catch (Exception e) {
-                        stop(true, "Error starting game.", false);
+                        stop(new ErrorMessage(ErrorMessage.FATAL, "Error starting game."));
                     }
 
                 } else
-                    stop(true, "Game already started.", false);
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Game already started."));
 
-            } else if (msg.equals(Message.START)) {
-
-                if (game.getResult() == Game.RESULT_NOT_STARTED) {
-
-                    try {
-                        game.startGame();
-                        send(Message.STARTED);
-                    } catch (Exception e) {
-                        stop(true, "Error starting game.", false);
-                    }
-
-                } else
-                    stop(true, "Game already started.", false);
-
-            } else if (a.get(0).equals("move")) {
-
-                if (a.size() < 5)
-                    stop(true, "Invalid move format.", false);
-
-                Square origin = new Square(a.get(1));
-                Square destination = new Square(a.get(2));
-
-                char promoteType = a.get(3).charAt(0);
-
-                long timerEnd = -1;
-                if (game.getSettings().getTimePerSide() > 0) {
-                    if (a.size() >= 5)
-                        timerEnd = Long.parseLong(a.get(4));
-                    else {
-                        stop(true, "Move timer not sent.", false);
-                        return;
-                    }
-                }
-
-                if (!origin.isValid()) {
-                    stop(true, "Origin square invalid.", true);
-                    return;
-                }
-
-                if (!destination.isValid()) {
-                    stop(true, "Destination square invalid.", true);
-                }
+            } else if (msg.getArgs().get(0).equals("move")) {
 
                 try {
 
-                    game.makeMove(origin, destination, promoteType);
+                    MoveMessage moveMsg = new MoveMessage(msg.toString());
 
-                    game.setTimer(oppColor, timerEnd);
+                    try {
+
+                        game.makeMove(moveMsg.getOrigin(), moveMsg.getDestination(), moveMsg.getPromoteType());
+
+                        game.setTimer(oppColor, moveMsg.getTimerEnd());
+
+                    } catch (Exception e) {
+                        stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move: " + e.getMessage()));
+                    }
 
                 } catch (Exception e) {
-                    stop(true, "Invalid move. " + e.getMessage(), false);
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move message: " + e.getMessage()));
                 }
 
             } else if (msg.equals(Message.TERMINATE)) {
-                stop(false, "Opponent disconnected.", false);
-            } else if (a.get(0).equals("error") && a.get(1).equals("fatal")) {
-                stop(false, a.get(2), false);
+
+                stop(new ErrorMessage(ErrorMessage.NORMAL, "Opponent disconnected."));
+
+            } else if (msg.getArgs().get(0).equals("error")) {
+
+                try {
+
+                    ErrorMessage eMsg = new ErrorMessage(msg.toString());
+
+                    if (eMsg.getSeverity() == ErrorMessage.FATAL)
+                        stop();
+
+                } catch (Exception e) {
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid error message: " + e.getMessage()));
+                }
+
             } else if (msg.equals(Message.DRAW_OFFER)) {
 
                 try {
                     game.sendDrawOffer(oppColor);
                 } catch (Exception e) {
-                    send(new Message("error", "normal", "Cannot offer a draw right now."));
+                    send(new ErrorMessage(ErrorMessage.NORMAL, "Cannot offer a draw right now."));
                 }
 
             } else if (msg.equals(Message.DRAW_ACCEPT)) {
 
                 if (game.getLastPos().getDrawOfferer() != (oppColor ? 2 : 1)) {
 
-                    send(new Message("error", "normal", "No draw offer was sent."));
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "No draw offer was sent."));
                     return;
 
                 }
+
                 try {
 
                     game.acceptDrawOffer();
 
                 } catch (Exception e) {
-                    stop(true, "Cannot accept draw offer.", false);
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Cannot accept draw offer."));
                 }
 
             } else if (msg.equals(Message.RESIGN)) {
@@ -212,107 +197,96 @@ public class Client implements GameListener {
 
     }
 
-    private void initMessage(ArrayList<String> a) {
+    private void initMessage(Message msg) {
 
-        if (a.get(0).equals("init")) {
+        if (msg.getArgs().get(0).equals("init")) {
 
-            if (a.get(1).equals(Game.VERSION) && a.get(2).matches(Player.NAME_REGEX)) {
+            InitMessage iMsg = null;
+            try {
 
-                if (color == Challenge.CHALLENGE_RANDOM)
-                    color = Math.round(Math.random()) == 0 ? Challenge.CHALLENGE_WHITE
-                            : Challenge.CHALLENGE_BLACK;
+                iMsg = new InitMessage(msg.toString());
 
-                game = new Game(color == Challenge.CHALLENGE_WHITE ? name
-                        : a.get(
-                                2),
-                        color == Challenge.CHALLENGE_BLACK ? name : a.get(2), settings);
+            } catch (Exception e) {
 
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid init message: " + e.getMessage()));
+                return;
+
+            }
+
+            if (!iMsg.getVersion().equals(Game.VERSION)) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Version mismatch."));
+                return;
+            }
+
+            if (color == Challenge.CHALLENGE_RANDOM)
+                color = Math.round(Math.random()) == 0 ? Challenge.CHALLENGE_WHITE
+                        : Challenge.CHALLENGE_BLACK;
+
+            game = new Game(color == Challenge.CHALLENGE_WHITE ? name : iMsg.getName(),
+                    color == Challenge.CHALLENGE_BLACK ? name : iMsg.getName(),
+                    settings);
+
+            game.addListener(this);
+
+            oppColor = color != Challenge.CHALLENGE_WHITE;
+
+            send(new Message("ready",
+                    (color == Challenge.CHALLENGE_WHITE ? (Challenge.CHALLENGE_BLACK + "")
+                            : (Challenge.CHALLENGE_WHITE) + ""),
+                    name,
+                    settings.getTimePerSide() + "",
+                    settings.getTimePerMove() + ""));
+
+            gameCreatedCallback.run();
+
+        } else if (msg.getArgs().get(0).equals("ready")) {
+
+            ReadyMessage rMsg = null;
+            try {
+                rMsg = new ReadyMessage(msg.toString());
+            } catch (Exception e) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid ready message."));
+                return;
+            }
+
+            boolean white = rMsg.getOppColor() == Challenge.CHALLENGE_WHITE;
+            try {
+
+                game = new Game(white ? name : rMsg.getName(),
+                        !white ? name : rMsg.getName(),
+                        new GameSettings(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
+                oppColor = !white;
                 game.addListener(this);
 
-                oppColor = color != Challenge.CHALLENGE_WHITE;
+            } catch (Exception e) {
 
-                send(new Message("ready",
-                        (color == Challenge.CHALLENGE_WHITE ? (Challenge.CHALLENGE_BLACK + "")
-                                : (Challenge.CHALLENGE_WHITE) + ""),
-                        name,
-                        settings.getTimePerSide() + "",
-                        settings.getTimePerMove() + ""));
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to initialize game."));
 
-                gameCreatedCallback.run();
-
-            } else {
-
-                if (!a.get(1).equals(Game.VERSION))
-                    stop(true, "Version mismatch", false);
-                else if (!a.get(2).matches(Player.NAME_REGEX))
-                    stop(true, "Invalid name.", false);
-
+                return;
             }
 
-        } else if (a.get(0).equals("ready")) {
+            send(new Message("start"));
 
-            if (a.size() != 5)
-                stop(true, "Invalid argument length.", false);
-            else if (!a.get(1).equals(Challenge.CHALLENGE_WHITE + "")
-                    && !a.get(1).equals(Challenge.CHALLENGE_BLACK + ""))
-                stop(true, "Invalid color.", false);
-            else if (!a.get(2).matches(Player.NAME_REGEX))
-                stop(true, "Invalid name.", false);
-            else {
-
-                long timePerSide, timePerMove;
-                try {
-                    timePerSide = Long.parseLong(a.get(3));
-                    timePerMove = Long.parseLong(a.get(4));
-                } catch (Exception e) {
-                    stop(true, "Invalid time per side or time per move.", false);
-                    return;
-                }
-
-                boolean white = a.get(1).equals(Challenge.CHALLENGE_WHITE + "");
-                try {
-                    game = new Game(white ? name
-                            : a.get(
-                                    2),
-                            !white ? name
-                                    : a.get(
-                                            2),
-                            new GameSettings(timePerSide, timePerMove, false, false, !white, white));
-                    oppColor = !white;
-                    game.addListener(this);
-
-                } catch (Exception e) {
-                    stop(true, "Unable to initialize game.", false);
-
-                    return;
-                }
-
-                send(new Message("start"));
-
-                gameCreatedCallback.run();
-
-            }
+            gameCreatedCallback.run();
 
         } else {
-            send(new Message("error", "normal", "Initialization/ready message expected."));
+            stop(new ErrorMessage(ErrorMessage.FATAL, "Intialization/ready message expected."));
         }
 
     }
 
     public void stop() {
-        stop(false, null, false);
+        stop(null);
     }
 
-    public void stop(boolean send, String reason, boolean normal) {
+    public void stop(Message reason) {
 
         try {
 
             System.out.println("Stopping because: " + reason);
 
-            if (send && !normal)
-                send(new Message("error", "fatal", reason));
-            else if (send)
-                send(Message.TERMINATE);
+            if (reason != null)
+                send(reason);
 
             input.close();
             output.close();
@@ -338,12 +312,12 @@ public class Client implements GameListener {
                         event.getPrev().getTimerEnd()));
 
             } catch (Exception e) {
-                stop(true, "Move error.", false);
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Error sending move."));
             }
 
         } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.RESULT_TERMINATED) {
 
-            stop(true, "Game terminated.", false);
+            stop(new ErrorMessage(ErrorMessage.FATAL, "Game terminated."));
 
         } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER && game.getLastPos().getDrawOfferer() != 0
                 && (game.getLastPos().getDrawOfferer() == 1) != oppColor) {

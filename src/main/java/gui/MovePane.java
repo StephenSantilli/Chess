@@ -31,22 +31,24 @@ public class MovePane extends GridPane {
 
     public MovePane(Board board, ScrollPane sp) {
 
-        setMinWidth(220);
+        setId("movePane");
+
+        // setMinWidth(220);
         setMaxWidth(Double.MAX_VALUE);
         this.board = board;
 
         this.sp = sp;
 
         ColumnConstraints c = new ColumnConstraints();
-        c.setPercentWidth(20);
+        c.setPercentWidth(15);
         c.setFillWidth(false);
 
         ColumnConstraints c1 = new ColumnConstraints();
-        c1.setPercentWidth(40);
+        c1.setPercentWidth(42.5);
         c1.setFillWidth(true);
 
         ColumnConstraints c2 = new ColumnConstraints();
-        c2.setPercentWidth(40);
+        c2.setPercentWidth(42.5);
         c2.setFillWidth(true);
 
         getColumnConstraints().clear();
@@ -74,19 +76,21 @@ public class MovePane extends GridPane {
                             c) == (board.getGame().getPositions().get(active).isWhite() ? 2
                                     : 1)) {
 
-                if (c.isHover())
-                    c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
-                else
-                    c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
+                // if (c.isHover())
+                // c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+                // else
+                // c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
+                c.setId("movePaneButtonActive");
 
                 c.requestFocus();
 
-            } else {
+            } else if (getColumnIndex(c) != 0) {
+                c.setId("movePaneButton");
 
-                if (c.isHover())
-                    c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-                else
-                    c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+                // if (c.isHover())
+                // c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
+                // else
+                // c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
             }
 
@@ -121,10 +125,6 @@ public class MovePane extends GridPane {
 
     }
 
-    private void execMove() {
-        execMove(board.getGame().getPositions().size() - 1);
-    }
-
     private void execMove(int pos) {
 
         Position p = board.getGame().getPositions().get(pos);
@@ -132,29 +132,33 @@ public class MovePane extends GridPane {
         Move m = p.getMove();
         Button btn = new Button(p.getMoveString());
         btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setStyle("-fx-background-color: " + (board.getCurrentPos() == pos ? BUTTON_ACTIVE : BUTTON_INACTIVE));
+        // btn.setStyle("-fx-background-color: " + (board.getCurrentPos() == pos ?
+        // BUTTON_ACTIVE : BUTTON_INACTIVE));
+        btn.setId("movePaneButton");
 
-        btn.setOnMouseEntered(e -> {
-
-            if (btn.getStyle().endsWith(BUTTON_INACTIVE))
-                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-            else if (btn.getStyle().endsWith(BUTTON_ACTIVE))
-                btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
-
-        });
-
-        btn.setOnMouseExited(e -> {
-            if (btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
-                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
-            } else if (btn.getStyle().endsWith(BUTTON_ACTIVE_HOVER)) {
-                btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
-            }
-        });
+        /*
+         * btn.setOnMouseEntered(e -> {
+         * 
+         * if (btn.getStyle().endsWith(BUTTON_INACTIVE))
+         * btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
+         * else if (btn.getStyle().endsWith(BUTTON_ACTIVE))
+         * btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
+         * 
+         * });
+         * 
+         * btn.setOnMouseExited(e -> {
+         * if (btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
+         * btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+         * } else if (btn.getStyle().endsWith(BUTTON_ACTIVE_HOVER)) {
+         * btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
+         * }
+         * });
+         */
 
         btn.setFocusTraversable(true);
 
         btn.setOnAction(e -> {
-            
+
             try {
                 board.setCurrentPos(pos);
             } catch (Exception e1) {
@@ -162,29 +166,32 @@ public class MovePane extends GridPane {
 
         });
 
-        btn.setOnMousePressed(e -> {
-            if (btn.getStyle().endsWith(BUTTON_INACTIVE) || btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
-                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE_CLICKED);
-            }
-        });
+        // btn.setOnMousePressed(e -> {
+        // if (btn.getStyle().endsWith(BUTTON_INACTIVE) ||
+        // btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
+        // btn.setId("movePaneButtonClicked");
+        // }
+        // });
 
-        btn.setOnMouseReleased(e -> {
-            if (btn.getStyle().endsWith(BUTTON_INACTIVE_CLICKED)) {
-                btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
-            }
-        });
+        // btn.setOnMouseReleased(e -> {
+        // if (btn.getStyle().endsWith(BUTTON_INACTIVE_CLICKED)) {
+        // btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+        // }
+        // });
 
         add(btn, m.isWhite() ? 1 : 2, row);
         requestFocus();
         sp.setVvalue(1);
 
-        GridPane.setMargin(btn, new Insets(5, 5, 5, 5));
+        // GridPane.setMargin(btn, new Insets(5, 5, 5, 5));
 
         if (m.isWhite()) {
 
             Label l = new Label((row + 1) + ".");
+            l.setId("movePaneLabel");
+
             add(l, 0, row);
-            GridPane.setMargin(l, new Insets(5, 5, 5, 5));
+            // GridPane.setMargin(l, new Insets(5, 5, 5, 5));
 
         }
 

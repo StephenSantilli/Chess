@@ -256,6 +256,7 @@ public class Position {
         initMoves(true, game);
         this.systemTimeStart = -1;
         this.timerEnd = -1;
+        this.capturedPieces = new ArrayList<Piece>();
 
     }
 

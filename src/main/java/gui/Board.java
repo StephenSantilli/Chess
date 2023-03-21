@@ -17,6 +17,7 @@ import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -24,6 +25,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -33,6 +35,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -42,8 +46,10 @@ import javafx.util.Duration;
 
 public class Board extends VBox implements GameListener {
 
-    private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
-    private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
+    // private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
+    private static final Color SQUARE_DARK = Color.web("#698269");
+    // private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
+    private static final Color SQUARE_LIGHT = Color.web("#F0EBCE");
     private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
     private static final Color SQUARE_PREV_MOVE = Color.rgb(238, 187, 85, .70);
     private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
@@ -73,6 +79,9 @@ public class Board extends VBox implements GameListener {
     private StackPane stack;
     private GUITimer topTimer;
     private GUITimer bottomTimer;
+
+    private Label topName;
+    private Label bottomName;
 
     private VBox squarePane;
     private Canvas squareHighlightPane;
@@ -289,6 +298,8 @@ public class Board extends VBox implements GameListener {
         // this.game = new Game();
         // game.addMoveListener(this);
 
+        setId("board");
+
         this.squareSize = squareSize;
 
         this.menuBar = menuBar;
@@ -302,10 +313,35 @@ public class Board extends VBox implements GameListener {
         this.topTimer = new GUITimer(this, !flipped);
         this.bottomTimer = new GUITimer(this, flipped);
 
+        topName = new Label();
+        topName.setId("nameLabel");
+
+        bottomName = new Label();
+        bottomName.setId("nameLabel");
+
+        HBox topNameBox = new HBox(topName);
+        topNameBox.setAlignment(Pos.CENTER_LEFT);
+
+        HBox bottomNameBox = new HBox(bottomName);
+        bottomNameBox.setAlignment(Pos.CENTER_LEFT);
+
         HBox bottomTimerBox = new HBox(topTimer);
-        HBox topTimerBox = new HBox(bottomTimer);
         bottomTimerBox.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox topTimerBox = new HBox(bottomTimer);
         topTimerBox.setAlignment(Pos.CENTER_RIGHT);
+
+        Region topSpace = new Region();
+        HBox.setHgrow(topSpace, Priority.ALWAYS);
+
+        Region bottomSpace = new Region();
+        HBox.setHgrow(bottomSpace, Priority.ALWAYS);
+
+        HBox topBox = new HBox(topNameBox, topSpace, topTimerBox);
+        topBox.setId("infoBox");
+
+        HBox bottomBox = new HBox(bottomNameBox, bottomSpace, bottomTimerBox);
+        bottomBox.setId("infoBox");
 
         stack = new StackPane();
         stack.setMaxWidth(squareSize * 8);
@@ -313,12 +349,17 @@ public class Board extends VBox implements GameListener {
 
         this.scrollMovePane = new ScrollPane();
         scrollMovePane.setFitToWidth(true);
+        scrollMovePane.setFitToHeight(true);
+
         scrollMovePane.setMinWidth(220);
 
         this.movePane = new MovePane(this, scrollMovePane);
         scrollMovePane.setContent(movePane);
 
         this.squarePane = new VBox();
+        squarePane.setId("squarePane");
+        squarePane.setId("squarePane");
+
         squareHighlightPane = new Canvas(squareSize * 8, squareSize * 8);
         borderPane = new Canvas(squareSize * 8, squareSize * 8);
         movesPane = new Canvas(squareSize * 8, squareSize * 8);
@@ -327,13 +368,15 @@ public class Board extends VBox implements GameListener {
         initSquares();
         initPieceTranscoders();
 
+
         stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
+        stack.setId("stack");
 
         topTimerBox.setViewOrder(1);
         bottomTimerBox.setViewOrder(1);
         stack.setViewOrder(0);
 
-        getChildren().addAll(topTimerBox, stack, bottomTimerBox);
+        getChildren().addAll(topBox, stack, bottomBox);
 
         setOnMouseMoved(mouseMoved);
         setOnMousePressed(mousePressed);
@@ -826,6 +869,9 @@ public class Board extends VBox implements GameListener {
         bottomTimer.setWhite(flipped);
         bottomTimer.update();
 
+        topName.setText(game.getPlayer(flipped).getName());
+        bottomName.setText(game.getPlayer(!flipped).getName());
+
         gameMenu.update();
         drawMovesPane();
 
@@ -904,7 +950,7 @@ public class Board extends VBox implements GameListener {
     public Square getSquareByLoc(double x, double y, boolean relative) {
 
         if (relative) {
-            Bounds bds = stack.localToScene(getBoundsInParent());
+            Bounds bds = piecePane.localToScene(getBoundsInParent());
             x -= bds.getMinX();
             y -= bds.getMinY();
         }
@@ -1069,8 +1115,8 @@ public class Board extends VBox implements GameListener {
 
             if (event.getType() == GameEvent.TYPE_MOVE) {
 
+
                 currentPos = event.getCurrIndex();
-                movePane.posChanged(currentPos);
 
                 // if (color == TWO_PLAYER)
                 // flipBoard();
@@ -1078,6 +1124,8 @@ public class Board extends VBox implements GameListener {
                 boardUpdated(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 
                 movePane.boardUpdated();
+                movePane.posChanged(currentPos);
+
                 gameMenu.update();
                 viewMenu.update();
 

@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
@@ -16,9 +17,6 @@ public class GUITimer extends Label {
 
     private final Timeline tl;
 
-    private static final String ACTIVE_BACKGROUND = "#dddddd";
-    private static final String INACTIVE_BACKGROUND = "#eeeeee";
-
     public boolean isWhite() {
         return white;
     }
@@ -30,6 +28,10 @@ public class GUITimer extends Label {
     public GUITimer(Board board, boolean white) {
 
         super(formatTime(board.getGame() == null ? 0 : board.getGame().getTimerTime(white)));
+
+        setId("guitimer");
+
+        setMinWidth(100);
 
         this.tl = new Timeline();
         tl.setCycleCount(Timeline.INDEFINITE);
@@ -45,10 +47,12 @@ public class GUITimer extends Label {
         this.board = board;
         this.white = white;
 
+        
+
         if (board.getGame() != null && board.getGame().getLastPos().isWhite() == white)
-            setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
+            setId("guitimeractive");
         else
-            setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
+            setId("guitimer");
 
     }
 
@@ -56,7 +60,8 @@ public class GUITimer extends Label {
 
         if (board.getGame().getLastPos().isWhite() == white) {
 
-            setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
+            setId("guitimeractive");
+
             if (!board.getGame().isPaused() && board.getGame().getResult() == 0)
                 tl.play();
             else {
@@ -66,7 +71,8 @@ public class GUITimer extends Label {
 
         } else {
 
-            setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
+            setId("guitimer");
+
             tl.pause();
             frame();
 
