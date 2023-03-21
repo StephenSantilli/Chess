@@ -124,7 +124,7 @@ public class Game {
      */
     Runnable flagfall = () -> {
 
-        Position a = getCurrentCountdownPos();
+        Position a = getLastPos();
         long start = a.getSystemTimeStart();
 
         if (start <= 0)
@@ -133,7 +133,7 @@ public class Game {
         long current = System.currentTimeMillis();
         if ((current - start) > (a.isWhite() ? whiteTimer : blackTimer)) {
 
-            markGameOver(isWhiteTurn() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
+            markGameOver(getLastPos().isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
 
         }
 
@@ -239,19 +239,20 @@ public class Game {
 
     public boolean canDrawOffer() {
 
-        return result == RESULT_IN_PROGRESS && getCurrentCountdownPos().getDrawOfferer() == 0;
+        return result == RESULT_IN_PROGRESS && getLastPos().getDrawOfferer() == 0;
 
     }
 
-    public void acceptDrawOffer(boolean accepter) throws Exception {
+    public void acceptDrawOffer() throws Exception {
 
         if (result != RESULT_IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
-        if (getCurrentCountdownPos().getDrawOfferer() != (!accepter ? 1 : 2))
-            throw new Exception("No draw offer or being accepted by wrong color.");
+        if (getLastPos().getDrawOfferer() == 0)
+            throw new Exception("No draw offer.");
 
-        markGameOver(RESULT_DRAW, !accepter ? REASON_WHITE_OFFERED_DRAW : REASON_BLACK_OFFERED_DRAW);
+        markGameOver(RESULT_DRAW, (getLastPos().getDrawOfferer() == 1) ? REASON_WHITE_OFFERED_DRAW
+                : REASON_BLACK_OFFERED_DRAW);
 
     }
 
@@ -260,7 +261,7 @@ public class Game {
         if (!canDrawOffer())
             throw new Exception("Cannot offer a draw.");
 
-        getCurrentCountdownPos().setDrawOfferer(offerer ? 1 : 2);
+        getLastPos().setDrawOfferer(offerer ? 1 : 2);
         fireEvent(GameEvent.DRAW_OFFER);
 
     }
@@ -269,12 +270,6 @@ public class Game {
 
         this.result = result;
         this.resultReason = resultReason;
-
-        gameOver();
-
-    }
-
-    private void gameOver() {
 
         if (result <= 0)
             return;
@@ -288,16 +283,13 @@ public class Game {
 
     }
 
-    public void makeMove(Square origin, Square destination) throws Exception {
+    public void makeMove(Square origin, Square destination, char promoteType) throws Exception {
 
         if (paused || result != RESULT_IN_PROGRESS)
             throw new Exception("Game is paused.");
 
         if (result != RESULT_IN_PROGRESS)
             throw new Exception("Game is not in progress.");
-
-        if (getLastPos().getMove() != null && getLastPos().getMove().getPromoteType() == '?')
-            throw new Exception("Awaiting promotion for the last move.");
 
         Move valid = null;
         for (int i = 0; valid == null && i < getLastPos().getMoves().size(); i++) {
@@ -312,7 +304,11 @@ public class Game {
         if (valid == null)
             throw new Exception("Invalid move.");
 
-        Position movePosition = new Position(getLastPos(), valid, this, !isWhiteTurn(), true);
+        if (valid.getPromoteType() == '?'
+                && (promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N'))
+            throw new Exception("Invalid promotion type.");
+
+        Position movePosition = new Position(getLastPos(), valid, this, !getLastPos().isWhite(), true, promoteType);
 
         if (movePosition.isGivingCheck())
             throw new Exception("Cannot move into check.");
@@ -349,55 +345,12 @@ public class Game {
 
     }
 
-    public void setPromote(char piece) throws Exception {
-
-        if (getLastPos().getMove() != null && getLastPos().getMove().getPromoteType() == '?') {
-
-            getLastPos().setPromote(piece, this);
-            flipTimer(true, 0);
-
-        } else
-            throw new Exception("Cannot set promote type.");
-
-        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 1, positions.size() - 1, getLastPos(),
-                getLastPos()));
-
-    }
-
-    public boolean isWhiteTurn() {
-
-        return getLastPos().isWhite() && isCountdownWhite();
-
-    }
-
-    /**
-     * @return Whether or not the timer is currently counting down for white.
-     */
-    public boolean isCountdownWhite() {
-
-        if (getLastPos().getMove() == null)
-            return getLastPos().isWhite();
-
-        if (getLastPos().getMove().getPromoteType() == '?')
-            return !getLastPos().isWhite();
-
-        return getLastPos().isWhite();
-
-    }
-
-    public Position getCurrentCountdownPos() {
-
-        return isCountdownWhite() == getLastPos().isWhite() ? getLastPos()
-                : getPreviousPos();
-
-    }
-
     public long getTimerTime(boolean color) {
 
         if (settings.getTimePerSide() <= -1)
             return -1;
 
-        Position p = getCurrentCountdownPos();
+        Position p = getLastPos();
 
         long timer = color ? whiteTimer : blackTimer;
 
@@ -455,8 +408,8 @@ public class Game {
      */
     private void flipTimer(boolean setTimer, long pauseTime) {
 
-        if ((isCountdownWhite() && !settings.isWhiteTimerManged())
-                || (!isCountdownWhite() && !settings.isBlackTimerManaged()))
+        if ((getLastPos().isWhite() && !settings.isWhiteTimerManged())
+                || (!getLastPos().isWhite() && !settings.isBlackTimerManaged()))
             setTimer = false;
 
         if (paused
@@ -464,10 +417,8 @@ public class Game {
                 || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS))
             return;
 
-        // TODO: shouldn't this be getCurrentCoundownPos()?
         Position active = getLastPos();
-        // TODO: IF YOU CHANGE ABOVE DON'T FORGET TO UPDATE THIS TOO
-        Position previous = positions.size() - 2 >= 0 ? positions.get(positions.size() - 2) : null;
+        Position previous = getPreviousPos();
 
         long currentTime = System.currentTimeMillis();
         if (previous != null && setTimer && pauseTime <= 0) {
@@ -551,13 +502,11 @@ public class Game {
 
     public void undo() throws Exception {
 
-        if (!settings.canUndo() && isCountdownWhite() == getLastPos().isWhite())
+        if (!settings.canUndo())
             throw new Exception("Game settings do not allow undo/redo.");
 
         if (positions.size() <= 1)
             throw new Exception("No move to undo.");
-
-        boolean isCountdown = isCountdownWhite() == getLastPos().isWhite();
 
         Position redo = getLastPos();
 
@@ -567,7 +516,7 @@ public class Game {
         redo.setRedoPromote(redo.getMove().getPromoteType());
 
         if (redo.getMove().getPromoteType() != '0')
-            redo.setPromote('?', this);
+            redo.setPromote('?', null);
 
         redo.setSystemTimeStart(-1);
         redo.setTimerEnd(-1);
@@ -577,22 +526,18 @@ public class Game {
             resultReason = REASON_IN_PROGRESS;
         }
 
-        if (isCountdown) {
-
-            Position prev = getPreviousPos();
-            if (getLastPos().isWhite()) {
-                blackTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
-                whiteTimer -= settings.getTimePerMove();
-            } else {
-                whiteTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
-                blackTimer -= settings.getTimePerMove();
-            }
-
-            getLastPos().setSystemTimeStart(-1);
-
-            flipTimer(false, 0);
-
+        Position prev = getPreviousPos();
+        if (getLastPos().isWhite()) {
+            blackTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
+            whiteTimer -= settings.getTimePerMove();
+        } else {
+            whiteTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
+            blackTimer -= settings.getTimePerMove();
         }
+
+        getLastPos().setSystemTimeStart(-1);
+
+        flipTimer(false, 0);
 
         fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size(), positions.size() - 1, redo, getLastPos()));
 
@@ -654,23 +599,27 @@ public class Game {
 
     public void importPosition(PGNParser PGN) throws Exception {
 
-        positions = new ArrayList<Position>();
-        positions.add(new Position(this));
-
-        ArrayList<PGNMove> moves = PGN.getParsedMoves();
-
-        for (int i = 0; i < moves.size(); i++) {
-
-            Move m = new Move(moves.get(i).getMoveText(), getLastPos(), getLastPos().isWhite());
-
-            positions.add(new Position(getLastPos(), m, this, !getLastPos().isWhite(), true));
-
-        }
-
-        if (positions.size() == 1)
-            throw new Exception("Position import failed.");
-
-        fireEvent(GameEvent.IMPORTED);
+        /*
+         * positions = new ArrayList<Position>();
+         * positions.add(new Position(this));
+         * 
+         * ArrayList<PGNMove> moves = PGN.getParsedMoves();
+         * 
+         * for (int i = 0; i < moves.size(); i++) {
+         * 
+         * Move m = new Move(moves.get(i).getMoveText(), getLastPos(),
+         * getLastPos().isWhite());
+         * 
+         * positions.add(new Position(getLastPos(), m, this, !getLastPos().isWhite(),
+         * true));
+         * 
+         * }
+         * 
+         * if (positions.size() == 1)
+         * throw new Exception("Position import failed.");
+         * 
+         * fireEvent(GameEvent.IMPORTED);
+         */
 
     }
 

@@ -70,10 +70,6 @@ public class Board extends VBox implements GameListener {
 
     private int currentPos;
 
-    public int getCurrentPos() {
-        return currentPos;
-    }
-
     private StackPane stack;
     private GUITimer topTimer;
     private GUITimer bottomTimer;
@@ -82,6 +78,7 @@ public class Board extends VBox implements GameListener {
     private Canvas squareHighlightPane;
     private Canvas borderPane;
     private Pane piecePane;
+
     private Canvas movesPane;
 
     private MovePane movePane;
@@ -94,6 +91,10 @@ public class Board extends VBox implements GameListener {
     private DrawDialog drawDialog;
 
     private ArrayList<TranslateTransition> transitions;
+
+    public ArrayList<TranslateTransition> getTransitions() {
+        return transitions;
+    }
 
     private EventHandler<KeyEvent> keyHandler = ev -> {
 
@@ -204,6 +205,15 @@ public class Board extends VBox implements GameListener {
     };
 
     // Getters/Setters
+
+    public int getCurrentPos() {
+        return currentPos;
+    }
+
+    public Pane getPiecePane() {
+        return piecePane;
+    }
+
     public int getSquareSize() {
         return squareSize;
     }
@@ -265,9 +275,9 @@ public class Board extends VBox implements GameListener {
         if (color == TWO_PLAYER)
             return true;
 
-        if (color == BLACK && !game.isCountdownWhite())
+        if (color == BLACK && !game.getLastPos().isWhite())
             return true;
-        if (color == WHITE && game.isCountdownWhite())
+        if (color == WHITE && game.getLastPos().isWhite())
             return true;
 
         return false;
@@ -616,7 +626,23 @@ public class Board extends VBox implements GameListener {
      *                    {@code null} if
      *                    there is no piece being captured.
      */
-    private void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture) {
+    void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture) {
+        pieceMoveAnimation(guiPiece, origin, destination, capture, null);
+    }
+
+    /**
+     * Creates and plays an animation of a piece moving. If {@code capture} is not
+     * {@code null}, the capture
+     * piece will still show up until the animation completes.
+     * 
+     * @param guiPiece    The piece to animate
+     * @param origin      The start square of the animated piece
+     * @param destination The end square of the animated piece
+     * @param capture     The piece captured by {@code guiPiece}. Should be
+     *                    {@code null} if
+     *                    there is no piece being captured.
+     */
+    void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture, Runnable callback) {
 
         ImageView img = guiPiece.getImage();
 
@@ -647,9 +673,22 @@ public class Board extends VBox implements GameListener {
 
             t.getNode().toFront();
 
+            Runnable cb = callback;
             t.setOnFinished(e -> {
 
                 piecePane.getChildren().remove(guiP.getImage());
+
+                if (cb != null)
+                    cb.run();
+
+            });
+
+        } else {
+            Runnable cb = callback;
+            t.setOnFinished(e -> {
+
+                if (cb != null)
+                    cb.run();
 
             });
 
@@ -775,6 +814,10 @@ public class Board extends VBox implements GameListener {
         boolean ani = animate && dragging == null;
         dragging = null;
 
+        if (game.getLastPos().getMove() != null && game.getLastPos().getMove().getPromoteType() != '0'
+                && (color == TWO_PLAYER || game.getLastPos().isWhite() != (color == WHITE)))
+            ani = false;
+
         drawPieces(ani, p1, p2, backward);
 
         topTimer.setWhite(!flipped);
@@ -786,57 +829,41 @@ public class Board extends VBox implements GameListener {
         gameMenu.update();
         drawMovesPane();
 
-        Position activePos = game.getPositions().get(currentPos);
-        if (activePos.getMove() != null && activePos.getMove().getPromoteType() == '?') {
+        // Position activePos = game.getPositions().get(currentPos);
+        // if (activePos.getMove() != null && activePos.getMove().getPromoteType() ==
+        // '?') {
 
-            try {
+        // try {
 
-                showPromoteDialog();
+        // showPromoteDialog();
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        // } catch (Exception e) {
+        // e.printStackTrace();
+        // }
 
-        }
+        // }
 
     }
 
-    private void showPromoteDialog() throws Exception {
+    public void showPromoteDialog(Square square, boolean white, GUIPiece callback) throws Exception {
 
-        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, !game.getLastPos().isWhite(), flipped,
+        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, white, flipped,
                 getScene().getWindow());
 
         pD.setOnHidden(ev -> {
 
-            if (pD.getResult() == 'X') {
-
-                try {
-                    game.undo();
-                } catch (Exception ex) {
-                }
-
-            } else {
-
-                try {
-                    game.setPromote(pD.getResult());
-                } catch (Exception ex) {
-                }
-
-            }
-
-            pD.hide();
-            boardUpdated();
+            callback.setPromoteResponse(pD.getResult());
+            callback.getPromoteCallback().run();
 
         });
 
-        Bounds bds = stack.localToScreen(getBoundsInParent());
+        Bounds bds = stack.localToScreen(stack.getBoundsInParent());
 
-        Position activePos = game.getPositions().get(currentPos);
-        pD.setX(bds.getMinX() + getXBySquare(activePos.getMove().getDestination()));
-        pD.setY(bds.getMinY() + getYBySquare(activePos.getMove().getDestination())
-                - ((!activePos.isWhite() && !flipped) || (activePos.isWhite() && flipped)
-                        ? -squareSize
-                        : squareSize * (4 + (1 / 3.0))));
+        pD.setX(bds.getMinX() + getXBySquare(square, true));
+        pD.setY(bds.getMinY() + getYBySquare(square, true)
+                - ((!white && flipped) || (white && !flipped)
+                        ? (-squareSize)
+                        : (squareSize) * (4 + (1 / 3.0))));
 
         pD.show();
         pD.sizeToScene();
@@ -1045,8 +1072,8 @@ public class Board extends VBox implements GameListener {
                 currentPos = event.getCurrIndex();
                 movePane.posChanged(currentPos);
 
-                if (color == TWO_PLAYER)
-                    flipBoard();
+                // if (color == TWO_PLAYER)
+                // flipBoard();
 
                 boardUpdated(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 
@@ -1056,7 +1083,7 @@ public class Board extends VBox implements GameListener {
 
             } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER) {
 
-                if ((color == WHITE || color == BLACK) && game.getCurrentCountdownPos().getDrawOfferer() == color)
+                if ((color == WHITE || color == BLACK) && game.getLastPos().getDrawOfferer() == color)
                     return;
 
                 drawDialog = new DrawDialog(this, game.getPlayer(client.isOppColor()).getName());
@@ -1066,7 +1093,7 @@ public class Board extends VBox implements GameListener {
                     if (drawDialog.isAccept()) {
 
                         try {
-                            game.acceptDrawOffer(color == WHITE);
+                            game.acceptDrawOffer();
                         } catch (Exception e) {
 
                         }

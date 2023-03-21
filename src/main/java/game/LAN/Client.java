@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import game.Game;
 import game.GameSettings;
@@ -96,7 +97,7 @@ public class Client implements GameListener {
         System.out.println(message);
 
         Message msg = new Message(message);
-        String[] a = msg.getArgs();
+        ArrayList<String> a = msg.getArgs();
 
         if (game == null) {
 
@@ -104,7 +105,7 @@ public class Client implements GameListener {
 
         } else {
 
-            if (a[0].equals("started")) {
+            if (a.get(0).equals("started")) {
 
                 if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
@@ -117,7 +118,7 @@ public class Client implements GameListener {
                 } else
                     stop(true, "Game already started.", false);
 
-            } else if (a[0].equals("start")) {
+            } else if (a.get(0).equals("start")) {
 
                 if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
@@ -131,17 +132,22 @@ public class Client implements GameListener {
                 } else
                     stop(true, "Game already started.", false);
 
-            } else if (a[0].equals("move")) {
+            } else if (a.get(0).equals("move")) {
 
-                Square origin = new Square(a[1]);
-                Square destination = new Square(a[2]);
+                if (a.size() < 5)
+                    stop(true, "Invalid move format.", false);
+
+                Square origin = new Square(a.get(1));
+                Square destination = new Square(a.get(2));
+
+                char promoteType = a.get(3).charAt(0);
 
                 long timerEnd = -1;
                 if (game.getSettings().getTimePerSide() > 0) {
-                    if (a.length >= 4)
-                        timerEnd = Long.parseLong(a[3]);
+                    if (a.size() >= 5)
+                        timerEnd = Long.parseLong(a.get(4));
                     else {
-                        stop(true, "Move timer not sent.", true);
+                        stop(true, "Move timer not sent.", false);
                         return;
                     }
                 }
@@ -157,19 +163,19 @@ public class Client implements GameListener {
 
                 try {
 
-                    game.makeMove(origin, destination);
+                    game.makeMove(origin, destination, promoteType);
 
                     game.setTimer(oppColor, timerEnd);
 
                 } catch (Exception e) {
-                    stop(true, "Invalid move. " + e.getMessage(), true);
+                    stop(true, "Invalid move. " + e.getMessage(), false);
                 }
 
-            } else if (a[0].equals("terminate")) {
+            } else if (a.get(0).equals("terminate")) {
                 stop(false, "Opponent disconnected.", false);
-            } else if (a[0].equals("error") && a[1].equals("fatal")) {
-                stop(false, a[2], false);
-            } else if (a[0].equals("draw")) {
+            } else if (a.get(0).equals("error") && a.get(1).equals("fatal")) {
+                stop(false, a.get(2), false);
+            } else if (a.get(0).equals("draw")) {
 
                 try {
                     game.sendDrawOffer(oppColor);
@@ -177,9 +183,9 @@ public class Client implements GameListener {
                     send(new Message("error", "normal", "Cannot offer a draw right now."));
                 }
 
-            } else if (a[0].equals("drawaccept")) {
+            } else if (a.get(0).equals("drawaccept")) {
 
-                if (game.getCurrentCountdownPos().getDrawOfferer() != (oppColor ? 2 : 1)) {
+                if (game.getLastPos().getDrawOfferer() != (oppColor ? 2 : 1)) {
 
                     send(new Message("error", "normal", "No draw offer was sent."));
                     return;
@@ -187,12 +193,13 @@ public class Client implements GameListener {
                 }
                 try {
 
-                    game.acceptDrawOffer(oppColor);
+                    game.acceptDrawOffer();
+
                 } catch (Exception e) {
                     stop(true, "Cannot accept draw offer.", false);
                 }
 
-            } else if (a[0].equals("resign")) {
+            } else if (a.get(0).equals("resign")) {
 
                 game.markGameOver(!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN,
                         Game.REASON_RESIGNATION);
@@ -203,18 +210,19 @@ public class Client implements GameListener {
 
     }
 
-    private void initMessage(String[] a) {
-        // System.out.println("init message" + a[0]);
-        if (a[0].equals("init")) {
+    private void initMessage(ArrayList<String> a) {
 
-            if (a[1].equals(Game.VERSION) && a[2].matches(Player.NAME_REGEX)) {
+        if (a.get(0).equals("init")) {
+
+            if (a.get(1).equals(Game.VERSION) && a.get(2).matches(Player.NAME_REGEX)) {
 
                 if (color == Challenge.CHALLENGE_RANDOM)
                     color = Math.round(Math.random()) == 0 ? Challenge.CHALLENGE_WHITE
                             : Challenge.CHALLENGE_BLACK;
 
-                game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a[2],
-                        color == Challenge.CHALLENGE_BLACK ? name : a[2], settings);
+                game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a.get(
+                        2),
+                        color == Challenge.CHALLENGE_BLACK ? name : a.get(2), settings);
 
                 game.addListener(this);
 
@@ -231,36 +239,38 @@ public class Client implements GameListener {
 
             } else {
 
-                if (!a[1].equals(Game.VERSION))
+                if (!a.get(1).equals(Game.VERSION))
                     stop(true, "Version mismatch", false);
-                else if (!a[2].matches(Player.NAME_REGEX))
+                else if (!a.get(2).matches(Player.NAME_REGEX))
                     stop(true, "Invalid name.", false);
 
             }
 
-        } else if (a[0].equals("ready")) {
+        } else if (a.get(0).equals("ready")) {
 
-            if (a.length != 5)
+            if (a.size() != 5)
                 stop(true, "Invalid argument length.", false);
-            else if (!a[1].equals(Challenge.CHALLENGE_WHITE + "") && !a[1].equals(Challenge.CHALLENGE_BLACK + ""))
+            else if (!a.get(1).equals(Challenge.CHALLENGE_WHITE + "") && !a.get(1).equals(Challenge.CHALLENGE_BLACK + ""))
                 stop(true, "Invalid color.", false);
-            else if (!a[2].matches(Player.NAME_REGEX))
+            else if (!a.get(2).matches(Player.NAME_REGEX))
                 stop(true, "Invalid name.", false);
             else {
 
                 long timePerSide, timePerMove;
                 try {
-                    timePerSide = Long.parseLong(a[3]);
-                    timePerMove = Long.parseLong(a[4]);
+                    timePerSide = Long.parseLong(a.get(3));
+                    timePerMove = Long.parseLong(a.get(4));
                 } catch (Exception e) {
                     stop(true, "Invalid time per side or time per move.", false);
                     return;
                 }
 
-                boolean white = a[1].equals(Challenge.CHALLENGE_WHITE + "");
+                boolean white = a.get(1).equals(Challenge.CHALLENGE_WHITE + "");
                 try {
-                    game = new Game(white ? name : a[2],
-                            !white ? name : a[2],
+                    game = new Game(white ? name : a.get(
+                            2),
+                            !white ? name : a.get(
+                                    2),
                             new GameSettings(timePerSide, timePerMove, false, false, !white, white));
                     oppColor = !white;
                     game.addListener(this);
@@ -313,8 +323,7 @@ public class Client implements GameListener {
     @Override
     public void onPlayerEvent(GameEvent event) {
 
-        if (event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor
-                && game.isCountdownWhite() == event.getCurr().isWhite()) {
+        if (event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor) {
 
             send(new Message("move", event.getCurr().getMove().getOrigin().toString(),
                     event.getCurr().getMove().getDestination().toString(), event.getPrev().getTimerEnd() + ""));
@@ -323,13 +332,14 @@ public class Client implements GameListener {
 
             stop(true, "Game terminated.", false);
 
-        } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER && game.getCurrentCountdownPos().getDrawOfferer() != 0
-                && (game.getCurrentCountdownPos().getDrawOfferer() == 1) != oppColor) {
+        } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER && game.getLastPos().getDrawOfferer() != 0
+                && (game.getLastPos().getDrawOfferer() == 1) != oppColor) {
 
             send(new Message("draw"));
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResultReason() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW : Game.REASON_BLACK_OFFERED_DRAW)) {
+                && game.getResultReason() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW
+                        : Game.REASON_BLACK_OFFERED_DRAW)) {
 
             send(new Message("drawaccept"));
 

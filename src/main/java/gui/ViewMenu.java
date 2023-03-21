@@ -38,12 +38,12 @@ public class ViewMenu extends Menu {
         } else {
 
             flip.setDisable(false);
-            if(board.getColor() == Board.WHITE) {
+            if (board.getColor() == Board.WHITE) {
                 flip.setSelected(board.isFlipped());
-            } else if(board.getColor() == Board.BLACK) {
+            } else if (board.getColor() == Board.BLACK) {
                 flip.setSelected(!board.isFlipped());
-            } else if(board.getColor() == Board.TWO_PLAYER) {
-                flip.setSelected(!board.isFlipped() == board.getGame().isCountdownWhite());
+            } else if (board.getColor() == Board.TWO_PLAYER) {
+                flip.setSelected(!board.isFlipped() == board.getGame().getLastPos().isWhite());
             }
 
         }

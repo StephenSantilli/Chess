@@ -1,8 +1,11 @@
 package gui;
 
+import java.util.ArrayList;
+
 import game.Move;
 import game.Square;
 import game.pieces.Piece;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -16,6 +19,46 @@ public class GUIPiece {
 
     private Bounds boardBounds;
     private Bounds vBoxBounds;
+
+    private char promoteResponse;
+    private Move promoteMove;
+
+    private Runnable promoteCallback = () -> {
+
+        if (promoteMove == null || promoteResponse == '0')
+            return;
+
+        if (promoteResponse == 'X') {
+
+            b.boardUpdated();
+            promoteResponse = '0';
+            promoteMove = null;
+
+        }
+
+        else {
+
+            try {
+                b.getGame().makeMove(promoteMove.getOrigin(), promoteMove.getDestination(), promoteResponse);
+            } catch (Exception e) {
+
+            }
+
+        }
+
+    };
+
+    public Runnable getPromoteCallback() {
+        return promoteCallback;
+    }
+
+    public char getPromoteResponse() {
+        return promoteResponse;
+    }
+
+    public void setPromoteResponse(char promoteResponse) {
+        this.promoteResponse = promoteResponse;
+    }
 
     public Piece getPiece() {
         return piece;
@@ -98,18 +141,58 @@ public class GUIPiece {
 
             try {
 
+                GUIPiece active = b.getActive();
+
                 Move m = new Move(b.getActive().getPiece().getSquare(),
                         clickSquare, b.getGame().getLastPos());
 
                 b.setDragging(null);
                 b.setActive(null);
-                if (b.isTurn())
-                    b.getGame().makeMove(m.getOrigin(), m.getDestination());
+
+                if (b.isTurn()) {
+
+                    promoteResponse = '0';
+
+                    if (m.getPromoteType() == '?') {
+
+                        promoteMove = m;
+
+                        Runnable callback = () -> {
+
+                            try {
+
+                                b.showPromoteDialog(m.getDestination(), m.isWhite(), this);
+
+                            } catch (Exception e) {
+
+                            }
+
+                        };
+
+                        ArrayList<TranslateTransition> ts = b.getTransitions();
+                        ts.clear();
+                        // b.getChildren().remove(active.getImage());
+
+                        if (m.getCaptureSquare() != null)
+                            b.getPiecePane().getChildren().remove(b.getGUIPieceAtSquare(m.getCaptureSquare()).getImage());
+
+                            active.setPieceSquare(clickSquare);
+                        b.pieceMoveAnimation(active, m.getOrigin(), m.getDestination(), m.getCapturePiece(), callback);
+                        for (TranslateTransition t : ts) {
+
+                            t.play();
+
+                        }
+
+                    } else
+                        b.getGame().makeMove(m.getOrigin(), m.getDestination(), '0');
+
+                }
 
             } catch (Exception e) {
             }
 
-            if (cPos == b.getCurrentPos()) {
+            if (promoteMove == null && cPos == b.getCurrentPos()) {
                 GUIPiece pc = b.getGUIPieceAtSquare(clickSquare);
                 if (pc != null)
                     b.setActive(pc);
@@ -158,7 +241,8 @@ public class GUIPiece {
      * @param ev The event of the mouse being dragged.
      */
     public void onMouseDragged(MouseEvent ev) {
-
+        if (promoteMove != null)
+            return;
         setPieceX(ev.getSceneX());
         setPieceY(ev.getSceneY());
 
@@ -175,6 +259,9 @@ public class GUIPiece {
      * @param ev The event of the mouse being lifted up.
      */
     public void onMouseReleased(MouseEvent ev) {
+
+        if (promoteMove != null)
+            return;
 
         b.clearBorder();
 
@@ -212,14 +299,29 @@ public class GUIPiece {
                 Move m = new Move(d.getSquare(),
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true),
                         b.getGame().getPositions().get(b.getCurrentPos()));
-                if (b.isTurn())
-                    b.getGame().makeMove(m.getOrigin(), m.getDestination());
+
+                if (b.isTurn()) {
+
+                    promoteResponse = '0';
+
+                    if (m.getPromoteType() == '?') {
+
+                        promoteMove = m;
+                        // b.pieceMoveAnimation(b.getDragging(), m.getOrigin(), m.getDestination(),
+                        // m.getCapturePiece());
+                        setPieceSquare(m.getDestination());
+                        b.showPromoteDialog(m.getDestination(), m.isWhite(), this);
+
+                    } else
+                        b.getGame().makeMove(m.getOrigin(), m.getDestination(), '0');
+
+                }
 
             } catch (Exception e) {
 
             }
 
-            if (cPos == b.getCurrentPos()) {
+            if (promoteMove == null && cPos == b.getCurrentPos()) {
 
                 GUIPiece pc = b.getGUIPieceAtSquare(
                         b.getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));

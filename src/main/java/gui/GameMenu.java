@@ -76,7 +76,7 @@ public class GameMenu extends Menu {
             if (board.getColor() == Board.TWO_PLAYER) {
 
                 board.getGame().markGameOver(
-                        board.getGame().isWhiteTurn() ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
+                        board.getGame().getLastPos().isWhite() ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
                         Game.REASON_RESIGNATION);
                 return;
 
@@ -95,7 +95,7 @@ public class GameMenu extends Menu {
 
                 board.getGame().markGameOver(
                         Game.RESULT_DRAW,
-                        board.getGame().isWhiteTurn() ? Game.REASON_WHITE_OFFERED_DRAW
+                        board.getGame().getLastPos().isWhite() ? Game.REASON_WHITE_OFFERED_DRAW
                                 : Game.REASON_BLACK_OFFERED_DRAW);
                 return;
 

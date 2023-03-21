@@ -75,7 +75,8 @@ public class Position {
     private long timerEnd;
 
     /**
-     * The color of who offered the draw. If multiple draw offers, will only include last.
+     * The color of who offered the draw. If multiple draw offers, will only include
+     * last.
      * 
      * <ul>
      * <li>0 - No draw offer
@@ -264,7 +265,8 @@ public class Position {
      *                     made.
      * @param checkForMate Whether or not checkmate should be checked for.
      */
-    public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
+    public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate, char promoteType)
+            throws Exception {
 
         // this.pieces = new ArrayList<Piece>();
         this.pieces = new Piece[8][8];
@@ -352,6 +354,34 @@ public class Position {
 
             Piece rook = getPieceAtSquare(move.getRookOrigin());
             rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
+
+        }
+
+        if (move.getPromoteType() == '?' && checkForMate) {
+
+            if (promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N')
+                throw new Exception("Invalid promote type.");
+
+            move.setPromoteType(promoteType);
+            Square mps = move.getDestination();
+
+            switch (promoteType) {
+                case 'Q':
+                    setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'R':
+                    setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'B':
+                    setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'N':
+                    setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case '?':
+                    setSquare(mps, movePiece);
+                    break;
+            }
 
         }
 
@@ -461,9 +491,14 @@ public class Position {
                             (c.getRookOrigin().getFile() == 8
                                     && canPieceMoveToSquare(c.getPiece(), new Square(6, c.getOrigin().getRank())))) {
 
-                        Position test = new Position(this, c, g, !c.isWhite(), false);
-                        if (!test.isGivingCheck())
-                            moves.add(c);
+                        try {
+                            Position test = new Position(this, c, g, !c.isWhite(), false, '0');
+
+                            if (!test.isGivingCheck())
+                                moves.add(c);
+                        } catch (Exception e) {
+
+                        }
 
                     }
 
@@ -531,12 +566,16 @@ public class Position {
                 continue;
             }
 
-            Position test = new Position(this, m, g, !white, false);
-            if (!test.isGivingCheck())
-                checkMate = false;
-            else {
-                moves.remove(i);
-                --i;
+            try {
+                Position test = new Position(this, m, g, !white, false, '0');
+                if (!test.isGivingCheck())
+                    checkMate = false;
+                else {
+                    moves.remove(i);
+                    --i;
+                }
+            } catch (Exception e) {
+
             }
 
         }

@@ -2,6 +2,7 @@ package game.LAN;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 import game.Game;
 import game.Player;
@@ -60,30 +61,30 @@ public class Challenge {
 
         Message msg = new Message(str);
 
-        String[] a = msg.getArgs();
+        ArrayList<String> a = msg.getArgs();
 
-        if (a.length != 5) {
+        if (a.size() != 5) {
             throw new Exception("Invalid challenge.");
         }
 
-        version = a[0];
+        version = a.get(0);
 
-        name = a[1];
+        name = a.get(1);
 
         try {
-            color = Integer.parseInt(a[2]);
+            color = Integer.parseInt(a.get(2));
         } catch (Exception e) {
             throw new Exception("Invalid color.");
         }
 
         try {
-            timePerSide = Integer.parseInt(a[3]);
+            timePerSide = Integer.parseInt(a.get(3));
         } catch (Exception e) {
             throw new Exception("Invalid time per side.");
         }
 
         try {
-            timePerMove = Integer.parseInt(a[4]);
+            timePerMove = Integer.parseInt(a.get(4));
         } catch (Exception e) {
             throw new Exception("Invalid time per move.");
         }

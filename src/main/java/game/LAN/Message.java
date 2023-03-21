@@ -1,44 +1,45 @@
 package game.LAN;
 
+import java.util.ArrayList;
+
 public class Message {
-    
-    private String text;
-    
-    private String[] args;
 
-    public String getText() {
-        return text;
-    }
+    private ArrayList<String> args;
 
-    public String[] getArgs() {
+    public ArrayList<String> getArgs() {
         return args;
     }
 
     public Message(String text) {
 
-        this.text = text;
+        this.args = new ArrayList<String>();
 
-        args = text.split("(?<!\\\\);");
+        String[] split = text.split("(?<!\\\\);");
 
-        for(int i = 0; i < args.length; i++) {
-            args[i] = args[i].replaceAll("\\\\;", ";");
+        for (int i = 0; i < split.length; i++) {
+            args.add(split[i].replaceAll("\\\\;", ";"));
         }
 
     }
 
-    public Message(String... args) {
+    public Message(String... split) {
 
-        this.args = args;
-        this.text = "";
+        this.args = new ArrayList<String>();
 
-        for (int i = 0; i < args.length; i++) {
-            text += args[i].replaceAll(";", "\\;") + ";";
+        for (int i = 0; i < split.length; i++) {
+            args.add(split[i].replaceAll("\\\\;", ";"));
         }
-        
+
     }
 
     @Override
     public String toString() {
+
+        String text = "";
+
+        for (int i = 0; i < args.size(); i++) {
+            text += args.get(i).replaceAll(";", "\\;") + ";";
+        }
 
         return text;
 

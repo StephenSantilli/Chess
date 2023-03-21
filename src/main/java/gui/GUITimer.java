@@ -45,7 +45,7 @@ public class GUITimer extends Label {
         this.board = board;
         this.white = white;
 
-        if (board.getGame() != null && board.getGame().isCountdownWhite() == white)
+        if (board.getGame() != null && board.getGame().getLastPos().isWhite() == white)
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
         else
             setStyle("-fx-background-color:" + INACTIVE_BACKGROUND);
@@ -54,7 +54,7 @@ public class GUITimer extends Label {
 
     public void update() {
 
-        if (board.getGame().getCurrentCountdownPos().isWhite() == white) {
+        if (board.getGame().getLastPos().isWhite() == white) {
 
             setStyle("-fx-background-color:" + ACTIVE_BACKGROUND);
             if (!board.getGame().isPaused() && board.getGame().getResult() == 0)
