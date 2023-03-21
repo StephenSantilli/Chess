@@ -263,7 +263,7 @@ public class Board extends VBox implements GameListener {
             return true;
 
         if(color == BLACK && !game.isCountdownWhite()) return true;
-        if(color == WHITE && !game.isCountdownWhite()) return true;
+        if(color == WHITE && game.isCountdownWhite()) return true;
 
         return false;
 
