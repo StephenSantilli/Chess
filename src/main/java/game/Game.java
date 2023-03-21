@@ -330,7 +330,8 @@ public class Game {
         } else
             throw new Exception("Cannot set promote type.");
 
-        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 1, positions.size() - 1, getLastPos(), getLastPos()));
+        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 1, positions.size() - 1, getLastPos(),
+                getLastPos()));
 
     }
 
@@ -344,9 +345,15 @@ public class Game {
      * @return Whether or not the timer is currently counting down for white.
      */
     public boolean isCountdownWhite() {
-        return (getLastPos().getMove() == null
-                || (getLastPos().getMove().getPromoteType() != '?' && !getLastPos().isWhite())
-                || getLastPos().isWhite());
+
+        if (getLastPos().getMove() == null)
+            return getLastPos().isWhite();
+
+        if (getLastPos().getMove().getPromoteType() == '?')
+            return !getLastPos().isWhite();
+
+        return getLastPos().isWhite();
+        
     }
 
     public Position getCurrentCountdownPos() {
@@ -593,7 +600,8 @@ public class Game {
 
         flipTimer(!redoTime, 0);
 
-        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 2, positions.size() - 1, getPreviousPos(), getLastPos()));
+        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 2, positions.size() - 1, getPreviousPos(),
+                getLastPos()));
 
     }
 
