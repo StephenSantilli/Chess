@@ -46,7 +46,7 @@ public class MoveMessage extends Message {
         destination = new Square(args.get(2));
 
         promoteType = args.get(3).charAt(0);
-        if (promoteType != '0' || promoteType != 'Q' || promoteType != 'R' || promoteType != 'B' || promoteType != 'N')
+        if (promoteType != '0' && promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N')
             throw new Exception("Invalid promote type.");
 
         timerEnd = Long.parseLong(args.get(4));
