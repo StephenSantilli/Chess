@@ -132,7 +132,7 @@ public class MovePane extends GridPane {
         Move m = p.getMove();
         Button btn = new Button(p.getMoveString());
         btn.setMaxWidth(Double.MAX_VALUE);
-        btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
+        btn.setStyle("-fx-background-color: " + (board.getCurrentPos() == pos ? BUTTON_ACTIVE : BUTTON_INACTIVE));
 
         btn.setOnMouseEntered(e -> {
 

@@ -262,11 +262,12 @@ public class Board extends VBox implements GameListener {
         if (color == TWO_PLAYER)
             return true;
 
-        if(color == BLACK && !game.isCountdownWhite()) return true;
-        if(color == WHITE && game.isCountdownWhite()) return true;
+        if (color == BLACK && !game.isCountdownWhite())
+            return true;
+        if (color == WHITE && game.isCountdownWhite())
+            return true;
 
         return false;
-
 
     }
 
@@ -780,6 +781,7 @@ public class Board extends VBox implements GameListener {
         bottomTimer.update();
 
         gameMenu.update();
+        drawMovesPane();
 
         Position activePos = game.getPositions().get(currentPos);
         if (activePos.getMove() != null && activePos.getMove().getPromoteType() == '?') {
@@ -1038,6 +1040,7 @@ public class Board extends VBox implements GameListener {
             if (event.getType() == GameEvent.TYPE_MOVE) {
 
                 currentPos = event.getCurrIndex();
+                movePane.posChanged(currentPos);
 
                 if (color == TWO_PLAYER)
                     flipBoard();
