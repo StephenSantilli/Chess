@@ -101,8 +101,6 @@ public class GameMenu extends Menu {
 
             }
 
-
-
         });
 
         showPgn = new MenuItem("Show PGN");
@@ -118,6 +116,7 @@ public class GameMenu extends Menu {
         getItems().addAll(newGame, new SeparatorMenuItem(),
                 pause, resume, new SeparatorMenuItem(),
                 undo, redo, new SeparatorMenuItem(),
+                resign, drawOffer, new SeparatorMenuItem(),
                 showPgn);
 
     }
