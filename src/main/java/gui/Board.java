@@ -1056,6 +1056,9 @@ public class Board extends VBox implements GameListener {
 
             } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER) {
 
+                if ((color == WHITE || color == BLACK) && game.getCurrentCountdownPos().getDrawOfferer() == color)
+                    return;
+
                 drawDialog = new DrawDialog(this, game.getPlayer(client.isOppColor()).getName());
 
                 drawDialog.setOnHidden(ev -> {

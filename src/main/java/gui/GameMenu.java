@@ -101,6 +101,13 @@ public class GameMenu extends Menu {
 
             }
 
+            try {
+
+                board.getGame().sendDrawOffer(board.getColor() == Board.WHITE);
+            } catch (Exception ex) {
+
+            }
+
         });
 
         showPgn = new MenuItem("Show PGN");
@@ -145,7 +152,7 @@ public class GameMenu extends Menu {
             redo.setDisable(!board.getGame().canRedo());
 
             resign.setDisable(board.getGame().getResult() != Game.RESULT_IN_PROGRESS);
-            drawOffer.setDisable(board.getGame().canDrawOffer());
+            drawOffer.setDisable(!board.getGame().canDrawOffer());
 
             showPgn.setDisable(false);
 

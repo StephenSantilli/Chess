@@ -329,7 +329,7 @@ public class Client implements GameListener {
             send(new Message("draw"));
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResult() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW : Game.REASON_BLACK_OFFERED_DRAW)) {
+                && game.getResultReason() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW : Game.REASON_BLACK_OFFERED_DRAW)) {
 
             send(new Message("drawaccept"));
 
