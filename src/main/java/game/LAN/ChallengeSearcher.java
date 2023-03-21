@@ -107,10 +107,10 @@ public class ChallengeSearcher {
 
         challenges.clear();
 
-        listenThread = new Thread(listener);
+        listenThread = new Thread(listener, "Searcher Listener");
         listenThread.start();
 
-        emitThread = new Thread(emitter);
+        emitThread = new Thread(emitter, "Searcher Emitter");
         emitThread.start();
 
     }

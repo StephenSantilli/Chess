@@ -14,10 +14,7 @@ public class Position {
 
     private Piece[][] pieces;
 
-    /** All of the pieces in the position. Does not include captured pieces. */
-    public Piece[][] getPieces() {
-        return pieces;
-    }
+    private ArrayList<Piece> capturedPieces;
 
     /**
      * All of the moves that can be made. If {@code checkForMate} is {@code true}
@@ -84,6 +81,15 @@ public class Position {
      * <li>2 - Black offered
      */
     private int drawOfferer;
+
+    /** All of the pieces in the position. Does not include captured pieces. */
+    public Piece[][] getPieces() {
+        return pieces;
+    }
+
+    public ArrayList<Piece> getCapturedPieces() {
+        return capturedPieces;
+    }
 
     public long getSystemTimeStart() {
         return systemTimeStart;
@@ -279,6 +285,10 @@ public class Position {
 
         Piece[][] prevPieces = prev.getPieces();
 
+        this.capturedPieces = new ArrayList<Piece>();
+
+        capturedPieces.addAll(prev.getCapturedPieces());
+
         for (int r = 0; r < prevPieces.length; r++) {
 
             for (int c = 0; c < prevPieces[r].length; c++) {
@@ -328,6 +338,8 @@ public class Position {
         if (move.isCapture()) {
 
             Square capSquare = move.getCaptureSquare();
+
+            capturedPieces.add(pieces[capSquare.getRank() - 1][capSquare.getFile() - 1]);
             pieces[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
 
         }
@@ -508,45 +520,6 @@ public class Position {
     }
 
     /**
-     * Calculates the amount of points the given color has.
-     * 
-     * @param white True if checking for white's points
-     * @return The point delta of the color chosen. Will be 0 if color has less
-     *         material.
-     */
-    public int getCapturedPoints(boolean white) {
-
-        int whitePoints = 0;
-        int blackPoints = 0;
-
-        for (int r = 0; r < pieces.length; r++) {
-
-            for (int c = 0; c < pieces[r].length; c++) {
-
-                Piece p = pieces[r][c];
-                if (p == null)
-                    continue;
-
-                if (p.isWhite())
-                    whitePoints += p.getPoints();
-                else
-                    blackPoints += p.getPoints();
-
-            }
-
-        }
-
-        if (white && blackPoints > whitePoints || !white && whitePoints > blackPoints)
-            return 0;
-
-        if (white)
-            return whitePoints - blackPoints;
-        else
-            return blackPoints - whitePoints;
-
-    }
-
-    /**
      * Sets whether or not the position is check mate. (The color whose turn it is
      * isn't able to make any moves and is in check.)
      * 
@@ -624,6 +597,30 @@ public class Position {
 
             color = false;
         }
+
+    }
+
+    /**
+     * Gets the point total of the pieces that {@code white} has captured.
+     * 
+     * @param white The color of the capturer, or the opposite of the pieces that
+     *              were captured.
+     * @return A point total of the pieces captured.
+     */
+    public int getCapturedPiecePoints(boolean white) {
+
+        int points = 0;
+
+        for (Piece cap : capturedPieces) {
+
+            if (cap.isWhite() == white)
+                continue;
+
+            points += cap.getPoints();
+
+        }
+
+        return points;
 
     }
 

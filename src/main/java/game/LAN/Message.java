@@ -4,10 +4,38 @@ import java.util.ArrayList;
 
 public class Message {
 
-    private ArrayList<String> args;
+    public static final Message DRAW_OFFER = new Message("draw");
+    public static final Message DRAW_ACCEPT = new Message("drawaccept");
+    public static final Message RESIGN = new Message("resign");
+    public static final Message TERMINATE = new Message("terminate");
+    public static final Message START = new Message("start");
+    public static final Message STARTED = new Message("started");
+
+    protected ArrayList<String> args;
 
     public ArrayList<String> getArgs() {
         return args;
+    }
+
+    @Override
+    public boolean equals(Object compare) {
+
+        if (!(compare instanceof Message))
+            return false;
+
+        Message casted = (Message) (compare);
+
+        boolean same = args.size() == casted.getArgs().size();
+
+        for (int i = 0; same && i < args.size(); i++) {
+
+            if (!args.get(i).equals(casted.getArgs().get(i)))
+                same = false;
+
+        }
+
+        return same;
+
     }
 
     public Message(String text) {

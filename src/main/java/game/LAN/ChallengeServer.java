@@ -44,10 +44,10 @@ public class ChallengeServer {
 
     public void start() {
 
-        listenThread = new Thread(searchListener);
+        listenThread = new Thread(searchListener, "Server Listener");
         listenThread.start();
 
-        tcpThread = new Thread(connectionListener);
+        tcpThread = new Thread(connectionListener, "Server Emitter");
         tcpThread.start();
 
     }
@@ -91,7 +91,7 @@ public class ChallengeServer {
                 udpSocket.receive(packet);
 
                 new Thread(new ChallengeSender(new Challenge(challenge.getName(), challenge.getColor(),
-                        challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), udpSocket)).start();
+                        challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), udpSocket), "Challenge Sender").start();
 
             }
 

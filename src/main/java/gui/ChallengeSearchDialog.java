@@ -242,7 +242,7 @@ public class ChallengeSearchDialog extends Stage {
         Scene s = new Scene(items);
         setOnShown(we -> {
 
-            new Thread(hostUpdateChecker).start();
+            new Thread(hostUpdateChecker, "Host Update Checker").start();
             sizeToScene();
 
         });

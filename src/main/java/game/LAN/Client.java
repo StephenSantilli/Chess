@@ -18,12 +18,14 @@ public class Client implements GameListener {
     public static final int PORT = 49265;
 
     private Socket socket;
+    
     private BufferedReader input;
     private PrintWriter output;
 
     private String name;
-    private GameSettings settings;
     private int color;
+    private GameSettings settings;
+
     private Runnable gameCreatedCallback;
 
     private Game game;
@@ -72,7 +74,7 @@ public class Client implements GameListener {
             this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.output = new PrintWriter(socket.getOutputStream(), true);
 
-            new Thread(listener).start();
+            new Thread(listener, "Game Client Listener").start();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +107,7 @@ public class Client implements GameListener {
 
         } else {
 
-            if (a.get(0).equals("started")) {
+            if (msg.equals(Message.STARTED)) {
 
                 if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
@@ -118,13 +120,13 @@ public class Client implements GameListener {
                 } else
                     stop(true, "Game already started.", false);
 
-            } else if (a.get(0).equals("start")) {
+            } else if (msg.equals(Message.START)) {
 
                 if (game.getResult() == Game.RESULT_NOT_STARTED) {
 
                     try {
                         game.startGame();
-                        send(new Message("started"));
+                        send(Message.STARTED);
                     } catch (Exception e) {
                         stop(true, "Error starting game.", false);
                     }
@@ -171,11 +173,11 @@ public class Client implements GameListener {
                     stop(true, "Invalid move. " + e.getMessage(), false);
                 }
 
-            } else if (a.get(0).equals("terminate")) {
+            } else if (msg.equals(Message.TERMINATE)) {
                 stop(false, "Opponent disconnected.", false);
             } else if (a.get(0).equals("error") && a.get(1).equals("fatal")) {
                 stop(false, a.get(2), false);
-            } else if (a.get(0).equals("draw")) {
+            } else if (msg.equals(Message.DRAW_OFFER)) {
 
                 try {
                     game.sendDrawOffer(oppColor);
@@ -183,7 +185,7 @@ public class Client implements GameListener {
                     send(new Message("error", "normal", "Cannot offer a draw right now."));
                 }
 
-            } else if (a.get(0).equals("drawaccept")) {
+            } else if (msg.equals(Message.DRAW_ACCEPT)) {
 
                 if (game.getLastPos().getDrawOfferer() != (oppColor ? 2 : 1)) {
 
@@ -199,7 +201,7 @@ public class Client implements GameListener {
                     stop(true, "Cannot accept draw offer.", false);
                 }
 
-            } else if (a.get(0).equals("resign")) {
+            } else if (msg.equals(Message.RESIGN)) {
 
                 game.markGameOver(!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN,
                         Game.REASON_RESIGNATION);
@@ -220,8 +222,9 @@ public class Client implements GameListener {
                     color = Math.round(Math.random()) == 0 ? Challenge.CHALLENGE_WHITE
                             : Challenge.CHALLENGE_BLACK;
 
-                game = new Game(color == Challenge.CHALLENGE_WHITE ? name : a.get(
-                        2),
+                game = new Game(color == Challenge.CHALLENGE_WHITE ? name
+                        : a.get(
+                                2),
                         color == Challenge.CHALLENGE_BLACK ? name : a.get(2), settings);
 
                 game.addListener(this);
@@ -250,7 +253,8 @@ public class Client implements GameListener {
 
             if (a.size() != 5)
                 stop(true, "Invalid argument length.", false);
-            else if (!a.get(1).equals(Challenge.CHALLENGE_WHITE + "") && !a.get(1).equals(Challenge.CHALLENGE_BLACK + ""))
+            else if (!a.get(1).equals(Challenge.CHALLENGE_WHITE + "")
+                    && !a.get(1).equals(Challenge.CHALLENGE_BLACK + ""))
                 stop(true, "Invalid color.", false);
             else if (!a.get(2).matches(Player.NAME_REGEX))
                 stop(true, "Invalid name.", false);
@@ -267,10 +271,12 @@ public class Client implements GameListener {
 
                 boolean white = a.get(1).equals(Challenge.CHALLENGE_WHITE + "");
                 try {
-                    game = new Game(white ? name : a.get(
-                            2),
-                            !white ? name : a.get(
+                    game = new Game(white ? name
+                            : a.get(
                                     2),
+                            !white ? name
+                                    : a.get(
+                                            2),
                             new GameSettings(timePerSide, timePerMove, false, false, !white, white));
                     oppColor = !white;
                     game.addListener(this);
@@ -301,18 +307,19 @@ public class Client implements GameListener {
 
         try {
 
-            System.out.println(reason);
+            System.out.println("Stopping because: " + reason);
 
             if (send && !normal)
                 send(new Message("error", "fatal", reason));
             else if (send)
-                send(new Message("terminate"));
+                send(Message.TERMINATE);
 
             input.close();
             output.close();
             socket.close();
 
-            // game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+            if (game != null && game.getResult() == Game.RESULT_IN_PROGRESS)
+                game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
         } catch (Exception e) {
 
@@ -324,9 +331,15 @@ public class Client implements GameListener {
     public void onPlayerEvent(GameEvent event) {
 
         if (event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor) {
+            try {
 
-            send(new Message("move", event.getCurr().getMove().getOrigin().toString(),
-                    event.getCurr().getMove().getDestination().toString(), event.getPrev().getTimerEnd() + ""));
+                send(new MoveMessage(event.getCurr().getMove().getOrigin(),
+                        event.getCurr().getMove().getDestination(), event.getCurr().getMove().getPromoteType(),
+                        event.getPrev().getTimerEnd()));
+
+            } catch (Exception e) {
+                stop(true, "Move error.", false);
+            }
 
         } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.RESULT_TERMINATED) {
 
@@ -335,19 +348,19 @@ public class Client implements GameListener {
         } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER && game.getLastPos().getDrawOfferer() != 0
                 && (game.getLastPos().getDrawOfferer() == 1) != oppColor) {
 
-            send(new Message("draw"));
+            send(Message.DRAW_OFFER);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
                 && game.getResultReason() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW
                         : Game.REASON_BLACK_OFFERED_DRAW)) {
 
-            send(new Message("drawaccept"));
+            send(Message.DRAW_ACCEPT);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
                 && game.getResult() == (!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN)
                 && game.getResultReason() == Game.REASON_RESIGNATION) {
 
-            send(new Message("resign"));
+            send(Message.RESIGN);
 
         }
 
