@@ -401,7 +401,7 @@ public class Game {
 
         long timer = color ? whiteTimer : blackTimer;
 
-        if (p.isWhite() != color)
+        if (p.isWhite() != color || p.getTimerEnd() > 0)
             return timer >= 0 ? timer : 0;
         else {
 
@@ -464,7 +464,9 @@ public class Game {
                 || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS))
             return;
 
+        // TODO: shouldn't this be getCurrentCoundownPos()?
         Position active = getLastPos();
+        // TODO: IF YOU CHANGE ABOVE DON'T FORGET TO UPDATE THIS TOO
         Position previous = positions.size() - 2 >= 0 ? positions.get(positions.size() - 2) : null;
 
         long currentTime = System.currentTimeMillis();
