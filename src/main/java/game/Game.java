@@ -280,7 +280,7 @@ public class Game {
         if (flagfallChecker != null)
             flagfallChecker.shutdownNow();
 
-        flipTimer(true, 0);
+        // flipTimer(true, 0);
 
         fireEvent(GameEvent.OVER);
 
@@ -458,7 +458,7 @@ public class Game {
         else if (resultReason != REASON_FLAGFALL)
             active.setSystemTimeStart(currentTime);
 
-        if (result > RESULT_IN_PROGRESS) {
+/*         if (result > RESULT_IN_PROGRESS) {
 
             if (active.isWhite()) {
 
@@ -472,7 +472,7 @@ public class Game {
 
             }
 
-        }
+        } */
 
     }
 
