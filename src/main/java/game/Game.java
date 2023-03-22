@@ -335,7 +335,7 @@ public class Game {
         }
 
         if (movePosition.isInsufficientMaterial()) {
-            
+
             flipTimer(true, 0);
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
@@ -420,7 +420,7 @@ public class Game {
 
         if (paused
                 || settings.getTimePerSide() <= -1
-                || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS))
+                /* || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS) */)
             return;
 
         Position active = getLastPos();
