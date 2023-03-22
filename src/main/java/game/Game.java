@@ -325,8 +325,11 @@ public class Game {
 
         if (movePosition.isCheckMate()) {
 
-            flipTimer(true, 0);
-
+            if (!movePosition.isWhite())
+                whiteTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
+            else
+                blackTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
+                
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
             markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
@@ -336,7 +339,11 @@ public class Game {
 
         if (movePosition.isInsufficientMaterial()) {
 
-            flipTimer(true, 0);
+
+            if (!movePosition.isWhite())
+                whiteTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
+            else
+                blackTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
