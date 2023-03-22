@@ -385,8 +385,8 @@ public class Board extends VBox implements GameListener {
         stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
         stack.setId("stack");
 
-        topTimerBox.setViewOrder(1);
-        bottomTimerBox.setViewOrder(1);
+        topBox.setViewOrder(1);
+        bottomBox.setViewOrder(1);
         stack.setViewOrder(0);
 
         getChildren().addAll(topBox, stack, bottomBox);
