@@ -268,6 +268,9 @@ public class Game {
 
     public void markGameOver(int result, int resultReason) {
 
+        if (result > RESULT_IN_PROGRESS)
+            return;
+
         this.result = result;
         this.resultReason = resultReason;
 
