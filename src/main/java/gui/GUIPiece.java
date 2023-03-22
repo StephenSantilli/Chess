@@ -246,6 +246,7 @@ public class GUIPiece {
      * @param ev The event of the mouse being dragged.
      */
     public void onMouseDragged(MouseEvent ev) {
+
         if (promoteMove != null)
             return;
         setPieceX(ev.getSceneX());
@@ -253,7 +254,6 @@ public class GUIPiece {
 
         Square hoverSquare = b.getSquareByLoc(ev.getSceneX(), ev.getSceneY(), true);
 
-        b.clearBorder();
         b.drawBorder(b.getXBySquare(hoverSquare), b.getYBySquare(hoverSquare));
 
     }
