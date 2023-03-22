@@ -329,7 +329,9 @@ public class Game {
                 whiteTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
             else
                 blackTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
-                
+
+            movePosition.setTimerEnd(!movePosition.isWhite() ? whiteTimer : blackTimer);
+
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
             markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
@@ -344,6 +346,8 @@ public class Game {
                 whiteTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
             else
                 blackTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
+
+            movePosition.setTimerEnd(!movePosition.isWhite() ? whiteTimer : blackTimer);
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
@@ -427,7 +431,10 @@ public class Game {
 
         if (paused
                 || settings.getTimePerSide() <= -1
-                /* || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result == RESULT_IN_PROGRESS) */)
+        /*
+         * || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result ==
+         * RESULT_IN_PROGRESS)
+         */)
             return;
 
         Position active = getLastPos();
