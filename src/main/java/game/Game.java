@@ -341,13 +341,13 @@ public class Game {
 
         if (movePosition.isInsufficientMaterial()) {
 
-
-            if (!movePosition.isWhite())
-                whiteTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
+            Position prev = positions.get(posNumber - 1);
+            if (prev.isWhite())
+                whiteTimer -= (System.currentTimeMillis() - prev.getSystemTimeStart());
             else
-                blackTimer -= (System.currentTimeMillis() - movePosition.getSystemTimeStart());
+                blackTimer -= (System.currentTimeMillis() - prev.getSystemTimeStart());
 
-            movePosition.setTimerEnd(!movePosition.isWhite() ? whiteTimer : blackTimer);
+            prev.setTimerEnd(prev.isWhite() ? whiteTimer : blackTimer);
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
