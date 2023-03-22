@@ -325,6 +325,8 @@ public class Game {
 
         if (movePosition.isCheckMate()) {
 
+            flipTimer(true, 0);
+
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
             markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
@@ -333,6 +335,8 @@ public class Game {
         }
 
         if (movePosition.isInsufficientMaterial()) {
+            
+            flipTimer(true, 0);
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
@@ -341,8 +345,7 @@ public class Game {
 
         }
 
-        if (movePosition.getMove().getPromoteType() != '?')
-            flipTimer(true, 0);
+        flipTimer(true, 0);
 
         fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
