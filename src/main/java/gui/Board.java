@@ -28,6 +28,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -200,6 +201,9 @@ public class Board extends VBox implements GameListener {
 
     private EventHandler<MouseEvent> mouseDragged = ev -> {
 
+        if (game == null)
+            return;
+
         if (ev.getButton() != MouseButton.PRIMARY)
             return;
 
@@ -233,6 +237,14 @@ public class Board extends VBox implements GameListener {
 
     public Game getGame() {
         return game;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public GUIPiece getActive() {
@@ -277,6 +289,10 @@ public class Board extends VBox implements GameListener {
 
     public EventHandler<KeyEvent> getKeyHandler() {
         return keyHandler;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
     }
 
     public boolean isTurn() {
@@ -368,7 +384,6 @@ public class Board extends VBox implements GameListener {
         initSquares();
         initPieceTranscoders();
 
-
         stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
         stack.setId("stack");
 
@@ -383,6 +398,12 @@ public class Board extends VBox implements GameListener {
         setOnMouseDragged(mouseDragged);
         setOnMouseReleased(mouseReleased);
 
+        boardUpdated();
+
+    }
+
+    public void setPos(int pos) {
+        this.currentPos = pos;
     }
 
     public void setCurrentPos(int pos) {
@@ -450,7 +471,8 @@ public class Board extends VBox implements GameListener {
 
     void startGame(WindowEvent we) {
 
-        GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), game);
+        final GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), this);
+        
         settings.setOnHidden(e -> {
 
             if (settings.isCreate() && settings.getTimePerSide() > -1) {
@@ -559,7 +581,7 @@ public class Board extends VBox implements GameListener {
         gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
                 movesPane.getLayoutBounds().getHeight());
 
-        if (!isTurn() || active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
+        if (game == null || !isTurn() || active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
             return;
 
         ArrayList<Move> pMoves = game.getLastPos().getMoves();
@@ -599,6 +621,9 @@ public class Board extends VBox implements GameListener {
 
         gc.clearRect(0.0, 0.0, squareHighlightPane.getLayoutBounds().getWidth(),
                 squareHighlightPane.getLayoutBounds().getHeight());
+
+        if (game == null)
+            return;
 
         gc.setFill(SQUARE_PREV_MOVE);
 
@@ -758,6 +783,9 @@ public class Board extends VBox implements GameListener {
 
         piecePane.getChildren().clear();
 
+        if (game == null)
+            return;
+
         if (pos2 == null)
             pos2 = game.getPositions().get(currentPos);
 
@@ -851,6 +879,26 @@ public class Board extends VBox implements GameListener {
 
     void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
 
+        if (game == null) {
+
+            clearBorder();
+            drawMovesPane();
+            drawHighlightSq();
+            viewMenu.update();
+            topTimer.update();
+            bottomTimer.update();
+            gameMenu.update();
+            movePane.initMovePane();
+            active = null;
+            dragging = null;
+            drawPieces(false, null, null, false);
+            topName.setText("");
+            bottomName.setText("");
+
+            return;
+
+        }
+
         updateActive();
         viewMenu.update();
 
@@ -903,10 +951,10 @@ public class Board extends VBox implements GameListener {
 
         });
 
-        Bounds bds = stack.localToScreen(stack.getBoundsInParent());
+        Bounds bds = piecePane.localToScreen(piecePane.getBoundsInLocal());
 
-        pD.setX(bds.getMinX() + getXBySquare(square, true));
-        pD.setY(bds.getMinY() + getYBySquare(square, true)
+        pD.setX(bds.getMinX() + getXBySquare(square));
+        pD.setY(bds.getMinY() + getYBySquare(square)
                 - ((!white && flipped) || (white && !flipped)
                         ? (-squareSize)
                         : (squareSize) * (4 + (1 / 3.0))));
@@ -995,7 +1043,7 @@ public class Board extends VBox implements GameListener {
 
         if (relative) {
 
-            Bounds bds = stack.localToScene(getBoundsInParent());
+            Bounds bds = piecePane.localToScene(getBoundsInParent());
 
             rel = (int) bds.getMinX();
 
@@ -1110,11 +1158,11 @@ public class Board extends VBox implements GameListener {
 
     @Override
     public void onPlayerEvent(GameEvent event) {
-
+        if (game == null)
+            return;
         Platform.runLater(() -> {
 
             if (event.getType() == GameEvent.TYPE_MOVE) {
-
 
                 currentPos = event.getCurrIndex();
 
@@ -1153,6 +1201,9 @@ public class Board extends VBox implements GameListener {
                 drawDialog.show();
 
             } else if (event.getType() == GameEvent.TYPE_OVER) {
+
+                if (game == null)
+                    return;
 
                 if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
                     return;

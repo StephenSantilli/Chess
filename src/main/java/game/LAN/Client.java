@@ -331,7 +331,7 @@ public class Client implements GameListener {
             send(Message.DRAW_ACCEPT);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResult() == (!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN)
+                && game.getResult() == (oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN)
                 && game.getResultReason() == Game.REASON_RESIGNATION) {
 
             send(Message.RESIGN);

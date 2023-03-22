@@ -11,9 +11,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -99,10 +102,10 @@ public class GameSettingsDialog extends Stage {
 
     };
 
-    public GameSettingsDialog(Window window, Game game) {
+    public GameSettingsDialog(Window window, Board board) {
 
         initOwner(window);
-        initModality(Modality.WINDOW_MODAL);
+        initModality(Modality.APPLICATION_MODAL);
 
         setResizable(false);
 
@@ -258,7 +261,7 @@ public class GameSettingsDialog extends Stage {
 
             try {
 
-                search = new ChallengeSearchDialog(getScene().getWindow(), game, gameCreatedCallbackSearcher);
+                search = new ChallengeSearchDialog(getScene().getWindow(), gameCreatedCallbackSearcher);
                 search.setOnHidden(we -> {
 
                     client = search.getClient();
@@ -277,13 +280,50 @@ public class GameSettingsDialog extends Stage {
 
         items.getChildren().addAll(checkHBox, perSide, perMove, errorLabel, btns);
 
+        setX(window.getX() + (window.getWidth() / 3.0));
+        setY(window.getY() + (window.getHeight() / 3.0));
+        setScene(s);
+        setTitle("Configure Game Settings");
+
         setOnShown(e -> {
+
             sizeToScene();
+
+            if (board.getGame() != null) {
+
+                Dialog<ButtonType> confirm = new Dialog<>();
+                confirm.initOwner(getScene().getWindow());
+                confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
+                confirm.setTitle("Confirm New Game");
+
+                ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
+                ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
+
+                confirm.getDialogPane().getButtonTypes().addAll(yes, no);
+
+                confirm.setOnHidden(ev -> {
+                    if (confirm.getResult().getText().equals("Yes")) {
+
+                        if (board.getGame().getResult() == Game.RESULT_IN_PROGRESS)
+                            board.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+
+                        if (board.getClient() != null)
+                            board.getClient().stop();
+
+                        board.setGame(null);
+                        board.setPos(0);
+                        board.setClient(null);
+
+                        board.boardUpdated();
+
+                    }
+                });
+
+                confirm.showAndWait();
+
+            }
+
         });
 
-        setTitle("Configure Game Settings");
-        setScene(s);
-
     }
-
 }

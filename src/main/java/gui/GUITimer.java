@@ -42,12 +42,10 @@ public class GUITimer extends Label {
                     }
                 }));
 
-        setFont(new Font(getFont().getName(), 24));
+        //setFont(new Font(getFont().getName(), 24));
 
         this.board = board;
         this.white = white;
-
-        
 
         if (board.getGame() != null && board.getGame().getLastPos().isWhite() == white)
             setId("guitimeractive");
@@ -57,6 +55,11 @@ public class GUITimer extends Label {
     }
 
     public void update() {
+
+        if (board.getGame() == null) {
+            setText("");
+            return;
+        }
 
         if (board.getGame().getLastPos().isWhite() == white) {
 
@@ -100,6 +103,12 @@ public class GUITimer extends Label {
     }
 
     private void frame() {
+
+        if (board.getGame() == null || board.getGame().getTimerTime(white) == -1) {
+            setText("");
+            return;
+        }
+
         setText(formatTime(board.getGame().getTimerTime(white)));
     }
 

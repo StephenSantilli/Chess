@@ -95,7 +95,7 @@ public class ChallengeSearchDialog extends Stage {
 
     };
 
-    public ChallengeSearchDialog(Window window, Game game, Runnable gameCreatedCallback) throws Exception {
+    public ChallengeSearchDialog(Window window, Runnable gameCreatedCallback) throws Exception {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);

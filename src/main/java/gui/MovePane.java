@@ -117,6 +117,9 @@ public class MovePane extends GridPane {
 
         getChildren().clear();
 
+        if (board.getGame() == null)
+            return;
+
         for (int i = 1; i < board.getGame().getPositions().size(); i++) {
 
             execMove(i);
