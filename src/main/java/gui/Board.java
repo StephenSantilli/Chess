@@ -475,7 +475,7 @@ public class Board extends VBox implements GameListener {
         
         settings.setOnHidden(e -> {
 
-            if (settings.isCreate() && settings.getTimePerSide() > -1) {
+            if (settings.isCreate()) {
 
                 if (game != null)
                     game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
@@ -714,7 +714,7 @@ public class Board extends VBox implements GameListener {
 
         ImageView img = guiPiece.getImage();
 
-        TranslateTransition t = new TranslateTransition(Duration.millis(100), img);
+        TranslateTransition t = new TranslateTransition(Duration.millis(150), img);
 
         double fromX = getXBySquare(origin) + ((squareSize - pieceSize) / 2.0);
         double fromY = getYBySquare(origin) + ((squareSize - pieceSize) / 2.0);

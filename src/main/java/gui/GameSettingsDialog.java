@@ -204,8 +204,10 @@ public class GameSettingsDialog extends Stage {
         startButton = new Button("Start 2-Player Game");
         startButton.setOnAction(e -> {
 
-            timePerSide = timeBox.isSelected() ? -1 : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
-            timePerMove = timeBox.isSelected() ? -1 : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
+            timePerSide = !timeBox.isSelected() ? -1
+                    : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
+            timePerMove = !timeBox.isSelected() ? -1
+                    : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
             create = true;
             hide();
 
@@ -221,9 +223,9 @@ public class GameSettingsDialog extends Stage {
                 if (!cDialog.isCreate())
                     return;
 
-                timePerSide = timeBox.isSelected() ? -1
+                timePerSide = !timeBox.isSelected() ? -1
                         : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
-                timePerMove = timeBox.isSelected() ? -1
+                timePerMove = !timeBox.isSelected() ? -1
                         : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
 
                 try {

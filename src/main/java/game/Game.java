@@ -124,18 +124,11 @@ public class Game {
      */
     Runnable flagfall = () -> {
 
-        Position a = getLastPos();
-        long start = a.getSystemTimeStart();
+        if (getTimerTime(true) <= 0)
+            markGameOver(RESULT_BLACK_WIN, REASON_FLAGFALL);
 
-        if (start <= 0)
-            return;
-
-        long current = System.currentTimeMillis();
-        if ((current - start) > (a.isWhite() ? whiteTimer : blackTimer)) {
-
-            markGameOver(getLastPos().isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_FLAGFALL);
-
-        }
+        if (getTimerTime(false) <= 0)
+            markGameOver(RESULT_WHITE_WIN, REASON_FLAGFALL);
 
     };
 
@@ -239,7 +232,7 @@ public class Game {
 
     public boolean canDrawOffer() {
 
-        return result == RESULT_IN_PROGRESS && getLastPos().getDrawOfferer() == 0;
+        return result == RESULT_IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
 
     }
 
@@ -248,39 +241,41 @@ public class Game {
         if (result != RESULT_IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
-        if (getLastPos().getDrawOfferer() == 0)
+        if (getLastPos().getDrawOfferer() == Position.NO_OFFER)
             throw new Exception("No draw offer.");
 
-        markGameOver(RESULT_DRAW, (getLastPos().getDrawOfferer() == 1) ? REASON_WHITE_OFFERED_DRAW
-                : REASON_BLACK_OFFERED_DRAW);
+        if (!canDrawOffer())
+            throw new Exception("Cannot accept draw.");
+
+        markGameOver(RESULT_DRAW,
+                (getLastPos().getDrawOfferer() == Position.WHITE)
+                        ? REASON_WHITE_OFFERED_DRAW
+                        : REASON_BLACK_OFFERED_DRAW);
 
     }
 
-    public void sendDrawOffer(boolean offerer) throws Exception {
+    public void sendDrawOffer(boolean offererWhite) throws Exception {
 
         if (!canDrawOffer())
             throw new Exception("Cannot offer a draw.");
 
-        getLastPos().setDrawOfferer(offerer ? 1 : 2);
+        getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
         fireEvent(GameEvent.DRAW_OFFER);
 
     }
 
     public void markGameOver(int result, int resultReason) {
 
-        if (result > RESULT_IN_PROGRESS)
-            return;
-
         this.result = result;
         this.resultReason = resultReason;
 
-        if (result <= 0)
+        if (result <= RESULT_IN_PROGRESS)
             return;
 
         if (flagfallChecker != null)
             flagfallChecker.shutdownNow();
 
-        // flipTimer(true, 0);
+        flipTimer(true, 0);
 
         fireEvent(GameEvent.OVER);
 
@@ -288,7 +283,7 @@ public class Game {
 
     public void makeMove(Square origin, Square destination, char promoteType) throws Exception {
 
-        if (paused || result != RESULT_IN_PROGRESS)
+        if (paused)
             throw new Exception("Game is paused.");
 
         if (result != RESULT_IN_PROGRESS)
@@ -325,13 +320,10 @@ public class Game {
 
         if (movePosition.isCheckMate()) {
 
-            Position prev = positions.get(posNumber - 1);
-            if (prev.isWhite())
-                whiteTimer -= (System.currentTimeMillis() - prev.getSystemTimeStart());
-            else
-                blackTimer -= (System.currentTimeMillis() - prev.getSystemTimeStart());
+            result = movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN;
+            resultReason = REASON_CHECKMATE;
 
-            prev.setTimerEnd(prev.isWhite() ? whiteTimer : blackTimer);
+            flipTimer(true, 0);
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
@@ -342,17 +334,28 @@ public class Game {
 
         if (movePosition.isInsufficientMaterial()) {
 
-            Position prev = positions.get(posNumber - 1);
-            if (prev.isWhite())
-                whiteTimer -= (System.currentTimeMillis() - prev.getSystemTimeStart());
-            else
-                blackTimer -= (System.currentTimeMillis() - prev.getSystemTimeStart());
+            result = RESULT_DRAW;
+            resultReason = REASON_DEAD_INSUFFICIENT_MATERIAL;
 
-            prev.setTimerEnd(prev.isWhite() ? whiteTimer : blackTimer);
+            flipTimer(true, 0);
 
             fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
 
             markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
+            return;
+
+        }
+
+        if (movePosition.getMoves().size() == 0) {
+
+            result = RESULT_DRAW;
+            resultReason = REASON_STALEMATE;
+
+            flipTimer(true, 0);
+
+            fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
+
+            markGameOver(RESULT_DRAW, REASON_STALEMATE);
             return;
 
         }
@@ -431,18 +434,15 @@ public class Game {
             setTimer = false;
 
         if (paused
-                || settings.getTimePerSide() <= -1
-        /*
-         * || (pauseTime <= 0 && getLastPos().getSystemTimeStart() > -1 && result ==
-         * RESULT_IN_PROGRESS)
-         */)
+                || settings.getTimePerSide() <= 0)
             return;
 
         Position active = getLastPos();
         Position previous = getPreviousPos();
 
         long currentTime = System.currentTimeMillis();
-        if (previous != null && setTimer && pauseTime <= 0) {
+
+        if (previous != null && setTimer && pauseTime <= 0 && previous.getTimerEnd() <= 0) {
 
             if (previous.isWhite())
                 whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove());
@@ -455,10 +455,10 @@ public class Game {
 
         if (pauseTime > 0)
             active.setSystemTimeStart(currentTime - (pauseTime - active.getSystemTimeStart()));
-        else if (resultReason != REASON_FLAGFALL)
+        else if (result == RESULT_IN_PROGRESS && active.getSystemTimeStart() <= 0)
             active.setSystemTimeStart(currentTime);
 
-/*         if (result > RESULT_IN_PROGRESS) {
+        if (result > RESULT_IN_PROGRESS) {
 
             if (active.isWhite()) {
 
@@ -472,7 +472,7 @@ public class Game {
 
             }
 
-        } */
+        }
 
     }
 
