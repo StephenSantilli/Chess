@@ -213,8 +213,6 @@ public class Board extends VBox implements GameListener {
 
         }
 
-        setMouseType(ev.getSceneX(), ev.getSceneY());
-
     };
 
     // Getters/Setters
