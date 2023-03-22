@@ -57,7 +57,7 @@ runtime {
 
         imageOptions += ['--icon', "src/main/resources/img/icon_256x256.$imgType"]
 
-        installerOptions += ['--resource-dir', "src/main/resources"]
+        installerOptions += ['--resource-dir', "src/main/resources", '--vendor', 'Stephen Santilli']
 
         if(currentOs.windows) {
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
