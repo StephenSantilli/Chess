@@ -37,7 +37,7 @@ public class ChallengeSearcher {
 
         try {
 
-            String send = "c";
+            String send = Game.VERSION;
             DatagramPacket packet = new DatagramPacket(send.getBytes(), send.length(),
                     InetAddress.getByName("255.255.255.255"), Client.PORT);
 

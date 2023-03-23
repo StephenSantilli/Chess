@@ -82,19 +82,19 @@ public class Client implements GameListener {
 
     }
 
-    public void sendInitMessage() {
+    public void start() {
 
         send(new InitMessage(Game.VERSION, name));
 
     }
 
-    public void send(Message message) {
+    private void send(Message message) {
 
         output.println(message.toString());
 
     }
 
-    public void receive(String message) {
+    private void receive(String message) {
 
         System.out.println(message);
 

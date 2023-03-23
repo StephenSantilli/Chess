@@ -35,7 +35,7 @@ public class Message {
         }
 
         return same;
-
+      
     }
 
     public Message(String text) {

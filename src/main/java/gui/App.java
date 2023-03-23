@@ -26,8 +26,11 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
 
-        if (prefs.get("username", null) == null)
-            prefs.put("username", "User");
+        // if (prefs.get("username", null) == null)
+        //     prefs.put("username", "User");
+
+        // if (prefs.get("timePerMove", null) == null)
+        //     prefs.put("username", "User");
 
         // stage.setResizable(false);
         stage.setTitle("Chess " + Game.VERSION);

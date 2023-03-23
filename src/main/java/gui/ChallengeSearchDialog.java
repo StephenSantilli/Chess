@@ -185,7 +185,7 @@ public class ChallengeSearchDialog extends Stage {
 
                             client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreatedCallback);
 
-                            client.sendInitMessage();
+                            client.start();
 
                             hide();
 

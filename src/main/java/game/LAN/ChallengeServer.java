@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import game.GameSettings;
 
 /**
- * The server to be started when a challenge is created and you are waiting for others to search for it.
+ * The server to be started when a challenge is created and you are waiting for
+ * others to search for it.
  */
 public class ChallengeServer {
 
@@ -34,7 +35,7 @@ public class ChallengeServer {
 
         this.challenge = challenge;
         this.gameCreatedCallback = gameCreatedCallback;
-        
+
         udpSocket = new DatagramSocket(Client.PORT);
         udpSocket.setBroadcast(true);
 
@@ -70,7 +71,10 @@ public class ChallengeServer {
 
                 Socket connection = tcpSocket.accept();
 
-                client = new Client(connection, challenge.getName(), challenge.getColor(), new GameSettings(challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true, true), gameCreatedCallback);
+                client = new Client(connection, challenge.getName(), challenge.getColor(),
+                        new GameSettings(challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true,
+                                true),
+                        gameCreatedCallback);
 
             }
 
@@ -85,13 +89,14 @@ public class ChallengeServer {
 
             while (true) {
 
-                byte[] buf = new byte[1];
+                byte[] buf = new byte[10];
 
-                DatagramPacket packet = new DatagramPacket(buf, 1);
+                DatagramPacket packet = new DatagramPacket(buf, 10);
                 udpSocket.receive(packet);
 
                 new Thread(new ChallengeSender(new Challenge(challenge.getName(), challenge.getColor(),
-                        challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), udpSocket), "Challenge Sender").start();
+                        challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), udpSocket),
+                        "Challenge Sender").start();
 
             }
 
