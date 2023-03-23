@@ -4,9 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 public class GUITimer extends Label {

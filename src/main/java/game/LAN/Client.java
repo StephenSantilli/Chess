@@ -4,14 +4,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-
 import game.Game;
 import game.GameSettings;
-import game.Player;
 import game.GameEvent;
 import game.GameListener;
-import game.Square;
 
 public class Client implements GameListener {
 

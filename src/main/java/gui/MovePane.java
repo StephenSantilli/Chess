@@ -5,8 +5,6 @@ import game.Position;
 import java.util.ArrayList;
 
 import game.Move;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;

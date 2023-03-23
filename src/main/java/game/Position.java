@@ -16,6 +16,12 @@ public class Position {
     public static final int WHITE = 1;
     public static final int BLACK = 2;
 
+    /**
+     * The number of turns completed in this game including the move that led to
+     * this position. Starts at {@code 0}.
+     */
+    private int moveNumber;
+
     private Piece[][] pieces;
 
     private ArrayList<Piece> capturedPieces;
@@ -93,6 +99,10 @@ public class Position {
      * the current position.
      */
     private int fiftyMoveCounter;
+
+    public int getMoveNumber() {
+        return moveNumber;
+    }
 
     /** All of the pieces in the position. Does not include captured pieces. */
     public Piece[][] getPieces() {
@@ -281,6 +291,7 @@ public class Position {
         initDefaultPosition();
         initMoves(true, game);
 
+        this.moveNumber = 0;
         this.systemTimeStart = -1;
         this.timerEnd = -1;
         this.capturedPieces = new ArrayList<Piece>();
@@ -288,6 +299,8 @@ public class Position {
         this.fiftyMoveCounter = 0;
 
     }
+
+    //TODO: Create position from FEN notation
 
     /**
      * Creates a new {@link Position} object from the previous position with the new
@@ -316,6 +329,8 @@ public class Position {
 
         this.capturedPieces = new ArrayList<Piece>();
         capturedPieces.addAll(prev.getCapturedPieces());
+
+        this.moveNumber = prev.getMoveNumber() + 1;
 
         for (int r = 0; r < prevPieces.length; r++) {
 
@@ -430,7 +445,7 @@ public class Position {
 
         initMoves(checkForMate, game);
 
-        if(move.isCapture() || move.getPiece().getCode() == 'P') {
+        if (move.isCapture() || move.getPiece().getCode() == 'P') {
             this.fiftyMoveCounter = 0;
         } else {
             this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
@@ -831,6 +846,105 @@ public class Position {
         }
 
         return pieceMoves;
+
+    }
+
+    /**
+     * Outputs the Forsyth–Edwards Notation (FEN) for this position.
+     */
+    @Override
+    public String toString() {
+
+        String fen = "";
+
+        // Pieces
+        for (int r = 7; r >= 0; r--) {
+
+            int noPieceCount = 0;
+
+            for (int f = 0; f < 8; f++) {
+
+                Piece p = pieces[r][f];
+
+                if (p == null)
+                    ++noPieceCount;
+                else {
+
+                    if (noPieceCount > 0) {
+                        fen += noPieceCount;
+                        noPieceCount = 0;
+                    }
+
+                    fen += p.isWhite() ? (p.getCode() + "") : (p.getCode() + "").toLowerCase();
+
+                }
+
+            }
+
+            if (noPieceCount > 0) {
+                fen += noPieceCount;
+                noPieceCount = 0;
+            }
+
+            if (r > 0)
+                fen += "/";
+
+        }
+
+        // Active Color
+        fen += " " + (isWhite() ? "w" : "b");
+
+        // Castle availability
+        boolean wKing = false, wQueen = false, bKing = false, bQueen = false;
+
+        boolean w = true;
+        for (int i = 0; i < 2; i++, w = false) {
+
+            final Piece king = getPieceAtSquare(w ? whiteKing : blackKing);
+
+            if (king.hasMoved())
+                continue;
+
+            final Piece kRook = getPieceAtSquare(new Square(8, w ? 1 : 8));
+            final Piece qRook = getPieceAtSquare(new Square(1, w ? 1 : 8));
+
+            if (kRook != null && !kRook.hasMoved()) {
+                if (w)
+                    wKing = true;
+                else
+                    bKing = true;
+            }
+
+            if (qRook != null && !qRook.hasMoved()) {
+                if (w)
+                    wQueen = true;
+                else
+                    bQueen = true;
+            }
+
+        }
+
+        fen += " " + (wKing ? "K" : "") + (wQueen ? "Q" : "") + (bKing ? "k" : "") + (bQueen ? "q" : "");
+
+        if (fen.charAt(fen.length() - 1) == ' ')
+            fen += '-';
+
+        // En Passant Square
+        if (move != null && move.getPiece().getCode() == 'P' && !move.isCapture() && move.getMoveDistance() == 2
+                && ((move.isWhite() && move.getDestination().getRank() == 4)
+                        || (!move.isWhite() && move.getDestination().getRank() == 5)))
+            fen += " " + (new Square(move.getDestination().getFile(),
+                    move.getDestination().getRank() + (move.isWhite() ? -1 : 1)).toString());
+        else
+            fen += " " + "-";
+
+        // Fifty-move rule clock
+        fen += " " + fiftyMoveCounter;
+
+        // Fullmove number
+        fen += " " + ((int) Math.ceil((moveNumber + 1) / 2.0));
+
+        return fen;
 
     }
 

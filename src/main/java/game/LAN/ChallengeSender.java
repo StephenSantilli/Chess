@@ -2,9 +2,6 @@ package game.LAN;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-
-import game.Game;
 
 /**
  * Sends the challenge to the {@link ChallengeSearcher} that requested it.

@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.application.*;
-import javafx.geometry.Insets;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.control.ScrollPane;
@@ -12,7 +11,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import java.awt.FontMetrics;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.util.prefs.Preferences;

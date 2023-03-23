@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import game.Game;
 import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
@@ -51,6 +50,10 @@ public class ChallengeSearchDialog extends Stage {
     }
 
     private Player player;
+
+    public ChallengeSearcher getSearcher() {
+        return searcher;
+    }
 
     public int getTimePerMove() {
         return timePerMove;
@@ -247,12 +250,7 @@ public class ChallengeSearchDialog extends Stage {
 
         });
 
-        setOnHidden(we -> {
 
-            System.out.println("Searcher stopping...");
-            searcher.stop();
-
-        });
 
         setTitle("Search for Challenges");
         setScene(s);

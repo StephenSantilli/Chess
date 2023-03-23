@@ -1,7 +1,6 @@
 package gui;
 
 import game.Game;
-import javafx.application.Platform;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;

@@ -1,9 +1,7 @@
 package gui;
 
 import game.Game;
-import game.Player;
 import game.LAN.Challenge;
-import game.LAN.ChallengeSearcher;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
 import javafx.application.Platform;
@@ -23,7 +21,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 public class GameSettingsDialog extends Stage {
@@ -91,7 +88,6 @@ public class GameSettingsDialog extends Stage {
         Platform.runLater(() -> {
             client = search.getClient();
             create = true;
-            System.out.println("fddfdddf");
 
             timePerSide = client.getGame().getSettings().getTimePerSide();
             timePerMove = client.getGame().getSettings().getTimePerMove();
@@ -267,6 +263,7 @@ public class GameSettingsDialog extends Stage {
                 search.setOnHidden(we -> {
 
                     client = search.getClient();
+                    search.getSearcher().stop();
 
                 });
 
