@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 
 import java.awt.Taskbar;
 import java.awt.Toolkit;
+import java.net.URL;
 import java.util.prefs.Preferences;
 
 import game.Game;
@@ -21,17 +22,25 @@ public class App extends Application {
 
     static Preferences prefs = Preferences.userNodeForPackage(App.class);
 
+    private Stage stage;
+    private Scene scene;
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
     @Override
     public void start(Stage stage) {
 
-        // if (prefs.get("username", null) == null)
-        //     prefs.put("username", "User");
-
-        // if (prefs.get("timePerMove", null) == null)
-        //     prefs.put("username", "User");
+        this.stage = stage;
 
         // stage.setResizable(false);
         stage.setTitle("Chess " + Game.VERSION);
+
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_32x32.png").toString()));
@@ -50,60 +59,61 @@ public class App extends Application {
         }
 
         VBox vb = new VBox();
-        HBox hb = new HBox();
 
-        Scene s = new Scene(vb);
-        s.setFill(Color.TRANSPARENT);
-        s.getStylesheets().add(getClass().getResource("/css/style.css").toString());
+        scene = new Scene(vb);
 
-        stage.setScene(s);
+        scene.setFill(Color.TRANSPARENT);
+        scene.getStylesheets().add(getClass().getResource("/css/style.css").toString());
+        scene.getStylesheets().add(getClass().getResource("/css/theme.css").toString());
+
+        stage.setScene(scene);
 
         try {
-            BarMenu menu = new BarMenu(s.getWindow());
 
-            Board b = new Board(100, menu);
-            hb.getChildren().add(b);
+            BarMenu menu = new BarMenu(scene.getWindow());
 
-            vb.getChildren().addAll(menu, hb);
+            Board b = new Board(this, menu);
 
-            ScrollPane sp = b.getScrollMovePane();
+            VBox.setVgrow(b, Priority.ALWAYS);
 
-            sp.setHbarPolicy(ScrollBarPolicy.NEVER);
-            sp.setVbarPolicy(ScrollBarPolicy.NEVER);
+            vb.getChildren().addAll(menu, b);
 
-            HBox.setHgrow(b, Priority.NEVER);
-            // HBox.setHgrow(sp, Priority.ALWAYS);
+            scene.setOnKeyReleased(b::keyHandler);
 
-            // hb.setPadding(new Insets(5,5,5,5));
-
-            hb.getChildren().add(sp);
-            b.setViewOrder(0);
-            sp.setViewOrder(1);
-
-            s.setOnKeyReleased(b.getKeyHandler());
+            stage.setOnShown(b::startGame);
 
             stage.setOnCloseRequest(e -> {
 
-                //TODO: save board position for resuming
-                if (b.getGame() != null)
+                // TODO: save board position for resuming
+                if (b.getGame() != null && b.getGame().getResult() == Game.RESULT_IN_PROGRESS)
                     b.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
                 Platform.exit();
 
             });
 
-            stage.setOnShown(b::startGame);
-
             stage.show();
             stage.sizeToScene();
 
-            stage.setMinHeight(stage.getHeight());
-            stage.setMinWidth(stage.getWidth());
+/*             stage.setMinHeight(stage.getHeight());
+            stage.setMinWidth(stage.getWidth()); */
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    public void setTheme(String name) throws Exception {
+
+        URL sheet = null;
+        try {
+            sheet = getClass().getResource("/css/" + name + ".css");
+        } catch (Exception e) {
+            throw new Exception("Theme not found.");
+        }
+
+        scene.getStylesheets().add(sheet.toString());
     }
 
     public static void main(String[] args) {

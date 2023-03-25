@@ -11,11 +11,18 @@ import game.LAN.Client;
 import game.pieces.Piece;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -25,6 +32,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -37,27 +45,19 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-public class Board extends VBox implements GameListener {
-
-    // private static final Color SQUARE_DARK = Color.rgb(155, 182, 124, 1);
-    private static final Color SQUARE_DARK = Color.web("#698269");
-    // private static final Color SQUARE_LIGHT = Color.rgb(245, 241, 218, 1);
-    private static final Color SQUARE_LIGHT = Color.web("#F0EBCE");
-    private static final Color SQUARE_ACTIVE = Color.rgb(238, 187, 77, .70);
-    private static final Color SQUARE_PREV_MOVE = Color.rgb(238, 187, 85, .70);
-    private static final Color SQUARE_BORDER = Color.rgb(200, 200, 200, .5);
-    private static final Color ATTACK_INDICATOR_COLOR = Color.rgb(100, 100, 100, .4);
+public class Board extends HBox implements GameListener {
 
     public static final int TWO_PLAYER = 0;
     public static final int WHITE = 1;
     public static final int BLACK = 2;
 
-    private int squareSize = 100;
-    private int pieceSize = 90;
+    private double squareSize = 90;
+    private double pieceSize = 80;
 
     private Game game;
     private Client client;
@@ -73,19 +73,22 @@ public class Board extends VBox implements GameListener {
 
     private int currentPos;
 
+    private App app;
+
     private StackPane stack;
+    private Pane infoPane;
+
     private GUITimer topTimer;
     private GUITimer bottomTimer;
 
     private Label topName;
     private Label bottomName;
 
-    private VBox squarePane;
-    private Canvas squareHighlightPane;
-    private Canvas borderPane;
+    private Pane squarePane;
+    private Pane highlightPane;
+    private Pane borderCanvas;
+    private Pane movesCanvas;
     private Pane piecePane;
-
-    private Canvas movesPane;
 
     private MovePane movePane;
     private ScrollPane scrollMovePane;
@@ -102,7 +105,11 @@ public class Board extends VBox implements GameListener {
         return transitions;
     }
 
-    private EventHandler<KeyEvent> keyHandler = ev -> {
+    public Pane getSquarePane() {
+        return squarePane;
+    }
+
+    public void keyHandler(KeyEvent ev) {
 
         if (game == null)
             return;
@@ -129,7 +136,7 @@ public class Board extends VBox implements GameListener {
 
         }
 
-    };
+    }
 
     private EventHandler<MouseEvent> mouseMoved = ev -> {
 
@@ -211,6 +218,52 @@ public class Board extends VBox implements GameListener {
 
     };
 
+    private Timer resizer = new Timer("Resizer", true);
+    private TimerTask resizeTask = null;
+    private ChangeListener<Number> resizeEvent = (obs, o, n) -> {
+
+        if (resizeTask != null) {
+            resizeTask.cancel();
+        }
+
+        resizeTask = new TimerTask() {
+            public void run() {
+                Platform.runLater(() -> {
+                    Bounds ip = infoPane.getBoundsInParent();
+                    Bounds mp = scrollMovePane.getBoundsInParent();
+
+                    double width = mp.getMinX() - ip.getMaxX();
+                    double height = stack.getBoundsInParent().getHeight();
+                    System.out.println(width + " " + height);
+                    if (width < height) {
+                        squareSize = width / 8;
+                        pieceSize = squareSize * 0.9;
+                    } else {
+                        squareSize = height / 8;
+                        pieceSize = squareSize * 0.9;
+                    }
+
+                    squarePane.setMinSize(squareSize * 8, squareSize * 8);
+                    highlightPane.setMinSize(squareSize * 8, squareSize * 8);
+                    borderCanvas.setMinSize(squareSize * 8, squareSize * 8);
+                    movesCanvas.setMinSize(squareSize * 8, squareSize * 8);
+                    piecePane.setMinSize(squareSize * 8, squareSize * 8);
+
+                    try {
+                        initSquares();
+                        initPieceTranscoders();
+                        boardUpdated();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        };
+
+        resizer.schedule(resizeTask, 200);
+
+    };
+
     // Getters/Setters
 
     public int getCurrentPos() {
@@ -221,11 +274,11 @@ public class Board extends VBox implements GameListener {
         return piecePane;
     }
 
-    public int getSquareSize() {
+    public double getSquareSize() {
         return squareSize;
     }
 
-    public int getPieceSize() {
+    public double getPieceSize() {
         return pieceSize;
     }
 
@@ -281,10 +334,6 @@ public class Board extends VBox implements GameListener {
         return menuBar;
     }
 
-    public EventHandler<KeyEvent> getKeyHandler() {
-        return keyHandler;
-    }
-
     public void setGame(Game game) {
         this.game = game;
     }
@@ -303,94 +352,106 @@ public class Board extends VBox implements GameListener {
 
     }
 
-    public Board(int squareSize, BarMenu menuBar) throws Exception {
-
-        // this.game = new Game();
-        // game.addMoveListener(this);
+    public Board(App app, BarMenu menuBar) throws Exception {
 
         setId("board");
 
-        this.squareSize = squareSize;
+        this.app = app;
 
         this.menuBar = menuBar;
-        initMenus();
-
-        this.color = 0;
-        this.flipped = false;
-
         this.transitions = new ArrayList<TranslateTransition>();
 
-        this.topTimer = new GUITimer(this, !flipped);
-        this.bottomTimer = new GUITimer(this, flipped);
+        this.color = TWO_PLAYER;
+        this.flipped = false;
+
+        // Info Pane (timer & player names)
+
+        // - Top timer
+        topTimer = new GUITimer(this, flipped);
+        topTimer.setAlignment(Pos.CENTER);
 
         topName = new Label();
         topName.setId("nameLabel");
+        topName.setAlignment(Pos.CENTER);
+
+        VBox topInfoBox = new VBox(topName, topTimer);
+        topInfoBox.setId("infoBox");
+        topInfoBox.setAlignment(Pos.TOP_CENTER);
+
+        // - Spacer
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        // - Bottom timer
+        this.bottomTimer = new GUITimer(this, !flipped);
+
+        bottomTimer.setAlignment(Pos.CENTER);
 
         bottomName = new Label();
         bottomName.setId("nameLabel");
 
-        HBox topNameBox = new HBox(topName);
-        topNameBox.setAlignment(Pos.CENTER_LEFT);
+        bottomName.setAlignment(Pos.CENTER);
 
-        HBox bottomNameBox = new HBox(bottomName);
-        bottomNameBox.setAlignment(Pos.CENTER_LEFT);
+        VBox bottomInfoBox = new VBox(bottomTimer, bottomName);
+        bottomInfoBox.setId("infoBox");
+        topInfoBox.setAlignment(Pos.BOTTOM_CENTER);
 
-        HBox bottomTimerBox = new HBox(topTimer);
-        bottomTimerBox.setAlignment(Pos.CENTER_RIGHT);
+        infoPane = new VBox(topInfoBox, spacer, bottomInfoBox);
+        infoPane.setId("infoPane");
 
-        HBox topTimerBox = new HBox(bottomTimer);
-        topTimerBox.setAlignment(Pos.CENTER_RIGHT);
-
-        Region topSpace = new Region();
-        HBox.setHgrow(topSpace, Priority.ALWAYS);
-
-        Region bottomSpace = new Region();
-        HBox.setHgrow(bottomSpace, Priority.ALWAYS);
-
-        HBox topBox = new HBox(topNameBox, topSpace, topTimerBox);
-        topBox.setId("infoBox");
-
-        HBox bottomBox = new HBox(bottomNameBox, bottomSpace, bottomTimerBox);
-        bottomBox.setId("infoBox");
-
-        stack = new StackPane();
-        stack.setMaxWidth(squareSize * 8);
-        stack.setMaxHeight(squareSize * 8);
-
-        this.scrollMovePane = new ScrollPane();
+        // Board view
+        scrollMovePane = new ScrollPane();
         scrollMovePane.setFitToWidth(true);
         scrollMovePane.setFitToHeight(true);
-
+        scrollMovePane.setHbarPolicy(ScrollBarPolicy.NEVER);
+        scrollMovePane.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollMovePane.setMinWidth(220);
 
-        this.movePane = new MovePane(this, scrollMovePane);
+        movePane = new MovePane(this, scrollMovePane);
         scrollMovePane.setContent(movePane);
 
-        this.squarePane = new VBox();
-        squarePane.setId("squarePane");
+        squarePane = new Pane();
         squarePane.setId("squarePane");
 
-        squareHighlightPane = new Canvas(squareSize * 8, squareSize * 8);
-        borderPane = new Canvas(squareSize * 8, squareSize * 8);
-        movesPane = new Canvas(squareSize * 8, squareSize * 8);
+        highlightPane = new Pane();
+        borderCanvas = new Pane();
+        movesCanvas = new Pane();
         piecePane = new Pane();
 
+        squarePane.setManaged(false);
+        highlightPane.setManaged(false);
+        movesCanvas.setManaged(false);
+        piecePane.setManaged(false);
+
+        stack = new StackPane(squarePane, highlightPane, borderCanvas, movesCanvas, piecePane);
+        stack.setId("stack");
+
+        app.getStage().widthProperty().addListener(resizeEvent);
+        app.getStage().heightProperty().addListener(resizeEvent);
+
+        // Initializers
+        initMenus();
         initSquares();
         initPieceTranscoders();
 
-        stack.getChildren().addAll(squarePane, squareHighlightPane, borderPane, movesPane, piecePane);
-        stack.setId("stack");
+        getChildren().addAll(infoPane, stack, scrollMovePane);
 
-        topBox.setViewOrder(1);
-        bottomBox.setViewOrder(1);
+        scrollMovePane.setViewOrder(1);
+        infoPane.setViewOrder(1);
         stack.setViewOrder(0);
-
-        getChildren().addAll(topBox, stack, bottomBox);
 
         setOnMouseMoved(mouseMoved);
         setOnMousePressed(mousePressed);
         setOnMouseDragged(mouseDragged);
         setOnMouseReleased(mouseReleased);
+
+        HBox.setHgrow(infoPane, Priority.NEVER);
+        HBox.setHgrow(stack, Priority.ALWAYS);
+        HBox.setHgrow(scrollMovePane, Priority.NEVER);
+
+        HBox.setMargin(infoPane, new Insets(5, 5, 5, 5));
+        HBox.setMargin(stack, new Insets(5, 5, 5, 5));
+        HBox.setMargin(scrollMovePane, new Insets(5, 5, 5, 5));
 
         boardUpdated();
 
@@ -466,7 +527,7 @@ public class Board extends VBox implements GameListener {
     void startGame(WindowEvent we) {
 
         final GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), this);
-        
+
         settings.setOnHidden(e -> {
 
             if (settings.isCreate()) {
@@ -545,10 +606,7 @@ public class Board extends VBox implements GameListener {
     // Drawing
     void clearBorder() {
 
-        GraphicsContext gc = borderPane.getGraphicsContext2D();
-
-        gc.clearRect(0.0, 0.0, borderPane.getLayoutBounds().getWidth(),
-                borderPane.getLayoutBounds().getHeight());
+        borderCanvas.getChildren().clear();
 
     }
 
@@ -556,98 +614,120 @@ public class Board extends VBox implements GameListener {
 
         clearBorder();
 
-        GraphicsContext gc = borderPane.getGraphicsContext2D();
-
         double strokeWidth = squareSize / 20.0;
 
-        gc.setLineWidth(strokeWidth);
-        gc.setStroke(SQUARE_BORDER);
+        Rectangle border = new Rectangle(squareSize - strokeWidth, squareSize - strokeWidth);
+        border.setId("squareBorder");
 
-        gc.strokeRect(x + (strokeWidth / 2.0), y + (strokeWidth / 2.0), squareSize - strokeWidth,
-                squareSize - strokeWidth);
+        border.setLayoutX(x + (strokeWidth / 2.0));
+        border.setLayoutY(y + (strokeWidth / 2.0));
+
+        border.setStrokeWidth(strokeWidth);
+
+        borderCanvas.getChildren().add(border);
 
     }
 
     private void drawMovesPane() {
 
-        GraphicsContext gc = movesPane.getGraphicsContext2D();
-
-        gc.clearRect(0.0, 0.0, movesPane.getLayoutBounds().getWidth(),
-                movesPane.getLayoutBounds().getHeight());
+        movesCanvas.getChildren().clear();
 
         if (game == null || !isTurn() || active == null || game.getResult() != Game.RESULT_IN_PROGRESS)
             return;
 
         ArrayList<Move> pMoves = game.getLastPos().getMoves();
 
-        gc.setFill(ATTACK_INDICATOR_COLOR);
-        gc.setStroke(ATTACK_INDICATOR_COLOR);
-        gc.setLineWidth(squareSize * 0.04);
+        // gc.setFill(ATTACK_INDICATOR_COLOR);
+        // gc.setStroke(ATTACK_INDICATOR_COLOR);
+        // gc.setLineWidth(squareSize * 0.04);
 
         for (Move m : pMoves) {
 
             if (!m.getPiece().equals(active.getPiece()))
                 continue;
 
-            int x = getXBySquare(m.getDestination(), false);
-            int y = getYBySquare(m.getDestination(), false);
+            double x = getXBySquare(m.getDestination(), false);
+            double y = getYBySquare(m.getDestination(), false);
 
             if (m.isCapture() && m.getCaptureSquare().equals(m.getDestination())) {
 
-                gc.strokeOval(x + (squareSize * 0.05),
-                        y + (squareSize * 0.05),
-                        squareSize - (squareSize * .1),
-                        squareSize - (squareSize * .1));
+                Ellipse captureCircle = new Ellipse((squareSize - (squareSize * .1)) / 2.0,
+                        (squareSize - (squareSize * .1)) / 2.0);
+                captureCircle.setId("captureCircle");
+                captureCircle.setLayoutX(x + (squareSize / 2.0));
+                captureCircle.setLayoutY(y + (squareSize / 2.0));
+                captureCircle.setStrokeWidth(squareSize * 0.04);
 
-            } else
-                gc.fillOval(x + (squareSize / 3.0),
-                        y + (squareSize / 3.0),
-                        squareSize / 3.0,
-                        squareSize / 3.0);
+                movesCanvas.getChildren().add(captureCircle);
 
+            } else {
+
+                Ellipse nonCaptureCircle = new Ellipse(squareSize / 6.0, squareSize / 6.0);
+                nonCaptureCircle.setId("nonCaptureCircle");
+                nonCaptureCircle.setLayoutX(x + (squareSize / 2.0));
+                nonCaptureCircle.setLayoutY(y + (squareSize / 2.0));
+
+                movesCanvas.getChildren().add(nonCaptureCircle);
+
+            }
         }
 
     }
 
     private void drawHighlightSq() {
 
-        GraphicsContext gc = squareHighlightPane.getGraphicsContext2D();
+        // GraphicsContext gc = highlightPane.getGraphicsContext2D();
 
-        gc.clearRect(0.0, 0.0, squareHighlightPane.getLayoutBounds().getWidth(),
-                squareHighlightPane.getLayoutBounds().getHeight());
+        // gc.clearRect(0.0, 0.0, highlightPane.getLayoutBounds().getWidth(),
+        // highlightPane.getLayoutBounds().getHeight());
+
+        highlightPane.getChildren().clear();
 
         if (game == null)
             return;
 
-        gc.setFill(SQUARE_PREV_MOVE);
+        // gc.setFill(SQUARE_PREV_MOVE);
 
         if (currentPos > 0) {
 
             Position pos = game.getPositions().get(currentPos);
 
             Square origin = pos.getMove().getOrigin();
-            gc.fillRect(getXBySquare(origin), getYBySquare(origin), squareSize, squareSize);
+            Rectangle oRect = new Rectangle(0, 0, squareSize, squareSize);
+            oRect.setLayoutX(getXBySquare(origin));
+            oRect.setLayoutY(getYBySquare(origin));
+            oRect.setId("moveSquare");
 
             Square destination = pos.getMove().getDestination();
-            gc.fillRect(getXBySquare(destination), getYBySquare(destination), squareSize, squareSize);
+            Rectangle dRect = new Rectangle(getXBySquare(destination), getYBySquare(destination), squareSize,
+                    squareSize);
+            dRect.setId("moveSquare");
+
+            highlightPane.getChildren().addAll(oRect, dRect);
 
         }
 
-        gc.setFill(SQUARE_ACTIVE);
+        // gc.setFill(SQUARE_ACTIVE);
 
         if (active != null) {
 
-            gc.fillRect(getXBySquare(active.getPiece().getSquare()),
+            Rectangle aRect = new Rectangle(getXBySquare(active.getPiece().getSquare()),
                     getYBySquare(active.getPiece().getSquare()),
                     squareSize,
                     squareSize);
+            aRect.setId("activeSquare");
+
+            highlightPane.getChildren().addAll(aRect);
 
         } else if (dragging != null) {
 
-            gc.fillRect(getXBySquare(dragging.getPiece().getSquare()),
+            Rectangle aRect = new Rectangle(getXBySquare(dragging.getPiece().getSquare()),
                     getYBySquare(dragging.getPiece().getSquare()),
                     squareSize,
                     squareSize);
+            aRect.setId("activeSquare");
+
+            highlightPane.getChildren().addAll(aRect);
 
         }
 
@@ -1001,10 +1081,14 @@ public class Board extends VBox implements GameListener {
             return new Square(-1, -1);
 
         if (!flipped)
-            return new Square(((((int) x) / squareSize) + 1),
-                    8 - ((int) y / squareSize));
+            return new Square((int) (x / squareSize) + 1, 8 - (int) (y / squareSize));
         else
-            return new Square(8 - (((int) x) / squareSize), (int) y / squareSize + 1);
+            return new Square(8 - (int) (x / squareSize), (int) (y / squareSize) + 1);
+        // if (!flipped)
+        // return new Square(((((int) x) / squareSize) + 1),
+        // 8 - ((int) y / squareSize));
+        // else
+        // return new Square(8 - (((int) x) / squareSize), (int) y / squareSize + 1);
 
     }
 
@@ -1014,7 +1098,7 @@ public class Board extends VBox implements GameListener {
      * @param square The {@link Square} to get the x value for
      * @return The x location of the top left of the {@link Square}
      */
-    public int getXBySquare(Square square) {
+    public double getXBySquare(Square square) {
 
         return getXBySquare(square, false);
 
@@ -1031,22 +1115,22 @@ public class Board extends VBox implements GameListener {
      * @param relative Whether or not to treat the x value as relative
      * @return The x location of the top left of the {@link Square}
      */
-    public int getXBySquare(Square square, boolean relative) {
+    public double getXBySquare(Square square, boolean relative) {
 
-        int rel = 0;
+        double rel = 0;
 
         if (relative) {
 
             Bounds bds = piecePane.localToScene(getBoundsInParent());
 
-            rel = (int) bds.getMinX();
+            rel = bds.getMinX();
 
         }
 
         if (!flipped)
-            return (int) ((square.getFile() - 1) * squareSize) - rel;
+            return ((square.getFile() - 1) * squareSize) - rel;
         else
-            return (int) ((squareSize * 7) - ((square.getFile() - 1) * squareSize)) - rel;
+            return ((squareSize * 7) - ((square.getFile() - 1) * squareSize)) - rel;
 
     }
 
@@ -1056,7 +1140,7 @@ public class Board extends VBox implements GameListener {
      * @param square The {@link Square} to get the y value for
      * @return The y location of the top left of the {@link Square}
      */
-    public int getYBySquare(Square square) {
+    public double getYBySquare(Square square) {
 
         return getYBySquare(square, false);
 
@@ -1073,22 +1157,22 @@ public class Board extends VBox implements GameListener {
      * @param relative Whether or not to treat the y value as relative
      * @return The y location of the top left of the {@link Square}
      */
-    public int getYBySquare(Square square, boolean relative) {
+    public double getYBySquare(Square square, boolean relative) {
 
-        int rel = 0;
+        double rel = 0;
 
         if (relative) {
 
             Bounds bds = stack.localToScene(getBoundsInParent());
 
-            rel = (int) bds.getMinY();
+            rel = bds.getMinY();
 
         }
 
         if (!flipped)
-            return (int) ((squareSize * 7) - ((square.getRank() - 1) * squareSize)) - rel;
+            return ((squareSize * 7) - ((square.getRank() - 1) * squareSize)) - rel;
         else
-            return (int) ((square.getRank() - 1) * squareSize) - rel;
+            return ((square.getRank() - 1) * squareSize) - rel;
 
     }
 
@@ -1125,25 +1209,39 @@ public class Board extends VBox implements GameListener {
 
     private void initSquares() {
 
-        boolean dark = false;
+        squarePane.getChildren().clear();
 
-        for (int r = 0; r < 8; r++) {
+        for (int r = 8; r > 0; r--) {
 
-            HBox hbox = new HBox();
+            for (int f = 8; f > 0; f--) {
 
-            for (int c = 0; c < 8; c++, dark = !dark) {
+                Region sq = new Region();
+                sq.setPrefSize(squareSize, squareSize);
+                sq.setMinSize(squareSize, squareSize);
 
-                Rectangle sq = new Rectangle(squareSize, squareSize, dark ? SQUARE_DARK : SQUARE_LIGHT);
+                Square square = new Square(f, r);
 
-                StackPane pane = new StackPane(sq);
+                sq.setLayoutX(getXBySquare(square));
+                sq.setLayoutY(getYBySquare(square));
 
-                hbox.getChildren().add(pane);
+                if (square.isLightSquare())
+                    sq.setId("lightSquare");
+                else
+                    sq.setId("darkSquare");
+
+                if (square.getFile() == 1 && square.getRank() == 1)
+                    sq.setStyle("-fx-background-radius: 0 0 0 10; -fx-border-radius: 0 0 0 10;");
+                else if (square.getFile() == 8 && square.getRank() == 1)
+                    sq.setStyle("-fx-background-radius: 0 0 10 0; -fx-border-radius: 0 0 10 0;");
+                else if (square.getFile() == 8 && square.getRank() == 8)
+                    sq.setStyle("-fx-background-radius: 0 10 0 0; -fx-border-radius: 0 10 0 0;");
+                else if (square.getFile() == 1 && square.getRank() == 8)
+                    sq.setStyle("-fx-background-radius: 10 0 0 0; -fx-border-radius: 10 0 0 0;");
+
+                squarePane.getChildren().add(sq);
 
             }
 
-            dark = !dark;
-
-            squarePane.getChildren().add(hbox);
         }
 
     }

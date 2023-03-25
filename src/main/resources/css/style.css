@@ -1,17 +1,37 @@
 .root {
     -fx-font-family: 'Verdana', 'sans-serif';
-    -fx-background-color: #FFFBF5;
+    -fx-fill: transparent;
 }
 
+#infoPane {
+    -fx-padding: 25, 5, 25, 10;
+    -fx-alignment: center-left;
+}
 
+#captureCircle {
+    -fx-fill: transparent;
+}
+
+#stack {
+    -fx-border-radius: 5 5 5 5;
+    -fx-background-radius: 5 5 5 5;
+    -fx-alignment: center;
+}
+
+#board {
+    -fx-padding: 5 5 5 5;
+}
+
+#squarePane {
+    -fx-border-radius: 5 5 5 5;
+    -fx-background-radius: 5 5 5 5;
+}
 
 #guitimer {
 
     -fx-border-radius: 5 5 5 5;
     -fx-background-radius: 5 5 5 5;
-    -fx-background-color: #4E6C50;
     -fx-alignment: center;
-    -fx-text-fill: #fff;
     -fx-font-size: 24;
 
 }
@@ -20,22 +40,18 @@
 
     -fx-border-radius: 5 5 5 5;
     -fx-background-radius: 5 5 5 5;
-    -fx-background-color: #395144;
     -fx-alignment: center;
-    -fx-text-fill: #fff;
     -fx-font-size: 24;
+
 }
+
+
 
 #nameLabel {
 
     -fx-font-size: 14;
-    -fx-text-fill: #000;
     -fx-alignment: center;
 
-}
-
-#board {
-    -fx-padding: 5 5 5 5;
 }
 
 #infoBox {
@@ -45,51 +61,21 @@
 
 .scroll-pane>.viewport {
     -fx-background-color: transparent;
-    -fx-alignment: center;
+    -fx-alignment: center-right;
 }
 
 .scroll-pane {
     -fx-background-color: transparent;
     -fx-padding: 25 10 25 5;
-    -fx-alignment: center;
+    -fx-alignment: center-right;
 }
 
 #movePane {
-    -fx-background-color: #698269;
     -fx-border-width: 0 0 0 0;
     -fx-alignment: top-center;
     -fx-border-radius: 5 5 5 5;
     -fx-background-radius: 5 5 5 5;
-    -fx-text-fill: #fff;
     -fx-padding: 10 10 10 10;
     -fx-hgap: 5;
     -fx-vgap: 5;
-}
-
-#movePaneButton {
-    -fx-text-fill: #fff;
-    -fx-background-color: #CFB997;
-}
-
-#movePaneButtonActive {
-    -fx-text-fill: #fff;
-    -fx-background-color: #AA8B56;
-}
-
-#movePaneLabel {
-    -fx-text-fill: #fff;
-}
-
-#stack {
-    -fx-border-width: 0;
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
-    -fx-padding: 0 5 0 10;
-
-}
-
-#squarePane {
-    -fx-border-width: 0;
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
 }

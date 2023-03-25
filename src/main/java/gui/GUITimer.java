@@ -27,28 +27,21 @@ public class GUITimer extends Label {
 
         super(formatTime(board.getGame() == null ? 0 : board.getGame().getTimerTime(white)));
 
+        this.board = board;
+        this.white = white;
+
         setId("guitimer");
 
         setMinWidth(100);
 
         this.tl = new Timeline();
         tl.setCycleCount(Timeline.INDEFINITE);
-        tl.getKeyFrames().add(
-                new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>() {
-                    public void handle(ActionEvent ev) {
-                        frame();
-                    }
+        tl.getKeyFrames().add(new KeyFrame(Duration.millis(50),
+                ae -> {
+                    frame();
                 }));
 
-        //setFont(new Font(getFont().getName(), 24));
-
-        this.board = board;
-        this.white = white;
-
-        if (board.getGame() != null && board.getGame().getLastPos().isWhite() == white)
-            setId("guitimeractive");
-        else
-            setId("guitimer");
+        update();
 
     }
 
@@ -59,7 +52,7 @@ public class GUITimer extends Label {
             return;
         }
 
-        if (board.getGame().getLastPos().isWhite() == white) {
+        if (board.getGame().getLastPos().isWhite() == white && board.getGame().getSettings().getTimePerSide() > -1) {
 
             setId("guitimeractive");
 
@@ -85,15 +78,29 @@ public class GUITimer extends Label {
 
         String str = "";
 
-        long minutes = time / 1000 / 60;
-        long seconds = time / 1000 % 60;
-        long tenths = (time - (minutes * 60 * 1000) - (seconds * 1000)) / 100;
+        long counted = time;
+
+        long hours = counted / 1000 / 60 / 60;
+        counted -= (hours * 1000 * 60 * 60);
+
+        long minutes = counted / 1000 / 60;
+        counted -= (minutes * 1000 * 60);
+
+        long seconds = counted / 1000;
+        counted -= (seconds * 1000);
+
+        long tenths = counted / 100;
+        counted -= (tenths * 100);
 
         str += (seconds < 10 && minutes > 0 ? "0" : "") + seconds;
         if (minutes > 0) {
-            str = minutes + ":" + str;
-        } else {
+            str = (minutes < 10 && hours > 0 ? "0" : "") + minutes + ":" + str;
+        } else if (hours == 0) {
             str += "." + tenths;
+        }
+
+        if (hours > 0) {
+            str = hours + ":" + str;
         }
 
         return str;

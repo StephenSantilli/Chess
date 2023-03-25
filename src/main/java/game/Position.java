@@ -151,7 +151,7 @@ public class Position {
      */
     public String getMoveString() {
 
-        String str = move.getMoveText();
+        String str = move.getMoveNotation();
         if (isCheckMate())
             str += "#";
         else if (isInCheck())
@@ -440,7 +440,7 @@ public class Position {
 
         }
 
-        move.setText(prev);
+        move.updateMoveNotation(prev);
         this.move = move;
 
         initMoves(checkForMate, game);
@@ -484,7 +484,7 @@ public class Position {
         if (!move.getPiece().equals(getPieceAtSquare(mps))) {
 
             initMoves(true, game);
-            move.setText(game.getLastPos());
+            move.updateMoveNotation(game.getLastPos());
 
         }
 

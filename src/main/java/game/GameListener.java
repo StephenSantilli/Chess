@@ -1,5 +1,6 @@
 package game;
 
+@FunctionalInterface
 public interface GameListener {
 
     /**

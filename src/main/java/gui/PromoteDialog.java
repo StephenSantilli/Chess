@@ -24,7 +24,7 @@ public class PromoteDialog extends Stage {
         return result;
     }
 
-    public PromoteDialog(int pieceSize, int squareSize, boolean white, boolean flipped, Window owner) throws Exception {
+    public PromoteDialog(double pieceSize, double squareSize, boolean white, boolean flipped, Window owner) throws Exception {
 
         this.result = 'X';
 

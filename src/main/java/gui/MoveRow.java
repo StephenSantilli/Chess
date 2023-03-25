@@ -50,7 +50,7 @@ public class MoveRow extends HBox {
         
         HBox.setHgrow(moves, Priority.ALWAYS);
 
-        Button btn1 = new Button(m1.getMoveText());
+        Button btn1 = new Button(m1.getMoveNotation());
         btn1.setBackground(new Background(new BackgroundFill(Color.GREEN, null, getInsets())));
         btn1.setAlignment(Pos.CENTER_LEFT);
 
@@ -61,7 +61,7 @@ public class MoveRow extends HBox {
 
         if (m2 != null) {
 
-            Button btn2 = new Button(m2.getMoveText());
+            Button btn2 = new Button(m2.getMoveNotation());
             btn2.setAlignment(Pos.CENTER_RIGHT);
 
             HBox.setMargin(btn2, new Insets(5, 5, 5, 5));

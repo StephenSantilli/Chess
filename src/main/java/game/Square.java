@@ -66,6 +66,7 @@ public class Square {
      * <br>
      * Ex: "h4"
      */
+    @Override
     public String toString() {
 
         return "" + (char) (96 + file) + rank;

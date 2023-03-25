@@ -76,8 +76,8 @@ public class GUIPiece {
 
         Pane stack = board.getPiecePane();
 
-        this.boardBounds = stack.localToScene(stack.getBoundsInLocal());
-        this.vBoxBounds = stack.localToScene(board.getBoundsInParent());
+        this.boardBounds = stack.getParent().localToScene(stack.localToParent(stack.getBoundsInParent()));
+        this.vBoxBounds = boardBounds/* b.sceneToLocal(board.getBoundsInParent()) */;
 
         this.promoteResponse = '0';
 
@@ -85,8 +85,8 @@ public class GUIPiece {
 
     private void setPieceX(double x) {
 
-        int relative = (int) vBoxBounds.getMinX();
-        int offset = (int) boardBounds.getMinX();
+        double relative = vBoxBounds.getMinX();
+        double offset = boardBounds.getMinX();
 
         double ax = x - (b.getPieceSize() / 2.0) - relative;
 
@@ -100,8 +100,8 @@ public class GUIPiece {
 
     private void setPieceY(double y) {
 
-        int relative = (int) vBoxBounds.getMinY();
-        int offset = (int) boardBounds.getMinY();
+        double relative = vBoxBounds.getMinY();
+        double offset = boardBounds.getMinY();
 
         double ay = y - (b.getPieceSize() / 2.0) - relative;
 
@@ -311,8 +311,11 @@ public class GUIPiece {
                     if (m.getPromoteType() == '?') {
 
                         promoteMove = m;
-                        // b.pieceMoveAnimation(b.getDragging(), m.getOrigin(), m.getDestination(),
-                        // m.getCapturePiece());
+                        GUIPiece capPiece = b.getGUIPieceAtSquare(m.getDestination());
+
+                        if (capPiece != null)
+                            b.getPiecePane().getChildren().remove(capPiece.getImage());
+
                         setPieceSquare(m.getDestination());
                         b.showPromoteDialog(m.getDestination(), m.isWhite(), this);
 
