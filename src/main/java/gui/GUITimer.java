@@ -9,7 +9,7 @@ import javafx.util.Duration;
 
 public class GUITimer extends Label {
 
-    private Board board;
+    private GameView board;
 
     private boolean white;
 
@@ -23,7 +23,7 @@ public class GUITimer extends Label {
         this.white = white;
     }
 
-    public GUITimer(Board board, boolean white) {
+    public GUITimer(GameView board, boolean white) {
 
         super(formatTime(board.getGame() == null ? 0 : board.getGame().getTimerTime(white)));
 

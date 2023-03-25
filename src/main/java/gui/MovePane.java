@@ -14,7 +14,7 @@ import javafx.scene.layout.GridPane;
 
 public class MovePane extends GridPane {
 
-    private Board board;
+    private GameView board;
 
     private ArrayList<MoveRow> rows;
 
@@ -27,7 +27,7 @@ public class MovePane extends GridPane {
     private static final String BUTTON_INACTIVE_CLICKED = "#cacaca";
     private static final String BUTTON_ACTIVE_CLICKED = "#888888";
 
-    public MovePane(Board board, ScrollPane sp) {
+    public MovePane(GameView board, ScrollPane sp) {
 
         setId("movePane");
 
@@ -58,7 +58,7 @@ public class MovePane extends GridPane {
 
     public void boardUpdated() {
 
-        initMovePane();
+        initMoveList();
 
     }
 
@@ -104,14 +104,14 @@ public class MovePane extends GridPane {
 
         if (rows == null || rows.size() == 0) {
 
-            initMovePane();
+            initMoveList();
             return;
 
         }
 
     }
 
-    public void initMovePane() {
+    public void initMoveList() {
 
         getChildren().clear();
 

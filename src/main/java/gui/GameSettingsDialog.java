@@ -98,7 +98,7 @@ public class GameSettingsDialog extends Stage {
 
     };
 
-    public GameSettingsDialog(Window window, Board board) {
+    public GameSettingsDialog(Window window, GameView board) {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
@@ -313,7 +313,7 @@ public class GameSettingsDialog extends Stage {
                         board.setPos(0);
                         board.setClient(null);
 
-                        board.boardUpdated();
+                        board.getBoard().boardUpdated();
 
                     }
                 });

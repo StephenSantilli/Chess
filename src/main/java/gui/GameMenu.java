@@ -10,9 +10,9 @@ public class GameMenu extends Menu {
 
     private MenuItem newGame, undo, redo, resign, drawOffer, pause, resume, showPgn;
 
-    private Board board;
+    private GameView board;
 
-    public GameMenu(Board board) {
+    public GameMenu(GameView board) {
 
         super("Game");
         this.board = board;
@@ -72,7 +72,7 @@ public class GameMenu extends Menu {
         resign = new MenuItem("Resign");
         resign.setOnAction(e -> {
 
-            if (board.getColor() == Board.TWO_PLAYER) {
+            if (board.getColor() == GameView.TWO_PLAYER) {
 
                 board.getGame().markGameOver(
                         board.getGame().getLastPos().isWhite() ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
@@ -82,7 +82,7 @@ public class GameMenu extends Menu {
             }
 
             board.getGame().markGameOver(
-                    board.getColor() == Board.WHITE ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
+                    board.getColor() == GameView.WHITE ? Game.RESULT_BLACK_WIN : Game.RESULT_WHITE_WIN,
                     Game.REASON_RESIGNATION);
 
         });
@@ -90,7 +90,7 @@ public class GameMenu extends Menu {
         drawOffer = new MenuItem("Offer Draw");
         drawOffer.setOnAction(e -> {
 
-            if (board.getColor() == Board.TWO_PLAYER) {
+            if (board.getColor() == GameView.TWO_PLAYER) {
 
                 board.getGame().markGameOver(
                         Game.RESULT_DRAW,
@@ -102,7 +102,7 @@ public class GameMenu extends Menu {
 
             try {
 
-                board.getGame().sendDrawOffer(board.getColor() == Board.WHITE);
+                board.getGame().sendDrawOffer(board.getColor() == GameView.WHITE);
             } catch (Exception ex) {
 
             }

@@ -1,81 +1,68 @@
 .root {
-    -fx-font-family: 'Verdana', 'sans-serif';
-    -fx-fill: transparent;
+  -fx-font-family: "Verdana", "sans-serif";
+  -fx-fill: transparent;
 }
 
 #infoPane {
-    -fx-padding: 25, 5, 25, 10;
-    -fx-alignment: center-left;
+  -fx-padding: 25 0 25 0;
+  -fx-alignment: center-right;
 }
 
 #captureCircle {
-    -fx-fill: transparent;
+  -fx-fill: transparent;
 }
 
-#stack {
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
-    -fx-alignment: center;
+#Board {
+  -fx-alignment: center;
 }
 
-#board {
-    -fx-padding: 5 5 5 5;
-}
-
-#squarePane {
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
+#squareBorder {
+    /* -fx-border-width: 5; */
+    -fx-background-color: transparent;
 }
 
 #guitimer {
-
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
-    -fx-alignment: center;
-    -fx-font-size: 24;
-
+  -fx-border-radius: 5 5 5 5;
+  -fx-background-radius: 5 5 5 5;
+  -fx-alignment: center;
+  -fx-font-size: 24;
 }
 
 #guitimeractive {
-
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
-    -fx-alignment: center;
-    -fx-font-size: 24;
-
+  -fx-border-radius: 5 5 5 5;
+  -fx-background-radius: 5 5 5 5;
+  -fx-alignment: center;
+  -fx-font-size: 24;
 }
 
-
-
 #nameLabel {
-
-    -fx-font-size: 14;
-    -fx-alignment: center;
-
+  -fx-font-size: 14;
+  -fx-alignment: center;
+  -fx-min-width: 100;
 }
 
 #infoBox {
-    -fx-padding: 7.5 10 7.5 25;
-    -fx-alignment: center;
+  -fx-padding: 7.5 10 7.5 25;
+  -fx-alignment: center-right;
 }
 
-.scroll-pane>.viewport {
-    -fx-background-color: transparent;
-    -fx-alignment: center-right;
+.scroll-pane > .viewport {
+  -fx-background-color: transparent;
+  -fx-alignment: center-left;
 }
 
 .scroll-pane {
-    -fx-background-color: transparent;
-    -fx-padding: 25 10 25 5;
-    -fx-alignment: center-right;
+  -fx-background-color: transparent;
+  -fx-padding: 25 0 25 0;
+  -fx-alignment: center-left;
 }
 
 #movePane {
-    -fx-border-width: 0 0 0 0;
-    -fx-alignment: top-center;
-    -fx-border-radius: 5 5 5 5;
-    -fx-background-radius: 5 5 5 5;
-    -fx-padding: 10 10 10 10;
-    -fx-hgap: 5;
-    -fx-vgap: 5;
+  -fx-border-width: 0 0 0 0;
+  -fx-alignment: top-center;
+  -fx-border-radius: 5 5 5 5;
+  -fx-background-radius: 5 5 5 5;
+  -fx-padding: 10 10 10 10;
+  -fx-hgap: 5;
+  -fx-vgap: 5;
 }

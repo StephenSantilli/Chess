@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import game.PGNParser.PGNParser;
+
+import game.PGN.PGNParser;
 
 public class Game {
 
-    public static final String VERSION = Game.class.getPackage().getImplementationVersion() == null ? "DEV"
-            : Game.class
-                    .getPackage().getImplementationVersion();
+    public static final String VERSION = Game.class.getPackage().getImplementationVersion() != null
+            ? Game.class.getPackage().getImplementationVersion()
+            : "DEV";
 
     public static final int RESULT_NOT_STARTED = -1;
     public static final int RESULT_IN_PROGRESS = 0;

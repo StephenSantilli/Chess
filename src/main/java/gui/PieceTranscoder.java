@@ -14,8 +14,6 @@ public class PieceTranscoder extends ImageTranscoder {
 
     private BufferedImage img = null;
 
-    private double pieceSize;
-
     private boolean color;
     private char pieceCode;
 
@@ -24,9 +22,8 @@ public class PieceTranscoder extends ImageTranscoder {
         super();
         this.color = color;
         this.pieceCode = pieceCode;
-        this.pieceSize = pieceSize;
 
-        //addTranscodingHint(KEY_PIXEL_UNIT_TO_MILLIMETER, (25.4f / 1200));
+        // addTranscodingHint(KEY_PIXEL_UNIT_TO_MILLIMETER, (25.4f / 1200));
         addTranscodingHint(PieceTranscoder.KEY_WIDTH, (float) pieceSize);
         addTranscodingHint(PieceTranscoder.KEY_HEIGHT, (float) pieceSize);
 
@@ -46,12 +43,6 @@ public class PieceTranscoder extends ImageTranscoder {
 
         ImageView i = new ImageView(SwingFXUtils.toFXImage(img, null));
         i.setManaged(false);
-/*         i.setFitWidth(pieceSize);
-        i.setFitHeight(pieceSize);
-        i.setTranslateX(0);
-        i.setTranslateY(0);
-        i.setX(0);
-        i.setY(0); */
         i.setSmooth(true);
 
         return i;

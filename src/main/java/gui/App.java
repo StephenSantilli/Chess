@@ -3,10 +3,7 @@ package gui;
 import javafx.application.*;
 import javafx.stage.*;
 import javafx.scene.*;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -72,7 +69,7 @@ public class App extends Application {
 
             BarMenu menu = new BarMenu(scene.getWindow());
 
-            Board b = new Board(this, menu);
+            GameView b = new GameView(this, menu);
 
             VBox.setVgrow(b, Priority.ALWAYS);
 
@@ -95,8 +92,8 @@ public class App extends Application {
             stage.show();
             stage.sizeToScene();
 
-/*             stage.setMinHeight(stage.getHeight());
-            stage.setMinWidth(stage.getWidth()); */
+            stage.setMinHeight(stage.getHeight());
+            stage.setMinWidth(stage.getWidth());
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,96 +1,95 @@
 .root {
-    -background: #FFFBF5;
-    -accent: #698269;
-    -accent-active: #395144;
-    -lightSquare: #F0EBCE;
-    -darkSquare: #698269;
-    -moveButton: #cfb896;
-    -moveButtonActive: #aa8b56;
-    -moveSquare: rgba(238, 187, 77, .70);
-    -activeSquare: rgba(238, 187, 85, .70);
-    -moveIndicator: rgba(100, 100, 100, .4);
-    -squareBorder: rgba(200, 200, 200, .5);
+  -background: #fffbf5;
+  -accent: #698269;
+  -accent-active: #395144;
+  -lightsquare: #f0ebce;
+  -darksquare: #698269;
+  -movebutton: #cfb896;
+  -movebuttonactive: #aa8b56;
+  -movesquare: rgba(238, 187, 77, 0.7);
+  -activesquare: rgba(238, 187, 85, 0.7);
+  -moveindicator: rgba(100, 100, 100, 0.4);
+  -squareborder: rgba(200, 200, 200, 0.5);
 
-    -fx-background-color: -background;
+  -fx-background-color: -background;
 }
 
 #captureCircle {
-    -fx-stroke: -moveIndicator;
+  -fx-stroke: -moveIndicator;
 }
 
 #nonCaptureCircle {
-    -fx-fill: -moveIndicator;
+  -fx-fill: -moveIndicator;
 }
 
 #squareBorder {
-    -fx-fill: transparent;
-    -fx-stroke: -squareBorder;
+  -fx-border-color: -squareBorder;
 }
 
 #moveSquare {
-    -fx-fill: -moveSquare;
+  -fx-background-color: -moveSquare;
 }
 
 #activeSquare {
-    -fx-fill: -activeSquare;
+  -fx-background-color: -activeSquare;
 }
 
 #lightSquare {
-    -fx-background-color: -lightSquare;
+  -fx-background-color: -lightSquare;
 }
 
 #darkSquare {
-    -fx-background-color: -darkSquare;
+  -fx-background-color: -darkSquare;
 }
 
 #guitimer {
-    -fx-background-color: -accent;
-    -fx-text-fill: ladder(-accent, white 60%, black 40%);
+  -fx-background-color: -accent;
+  -fx-text-fill: ladder(-accent, white 60%, black 40%);
 }
 
 #guitimeractive {
-    -fx-background-color: -accent-active;
-    -fx-text-fill: ladder(-accent-active, white 60%, black 40%);
+  -fx-background-color: -accent-active;
+  -fx-text-fill: ladder(-accent-active, white 60%, black 40%);
 }
 
 #nameLabel {
-    -fx-text-fill: ladder(-background, white 60%, black 40%);
+  -fx-text-fill: ladder(-background, white 60%, black 40%);
 }
 
 #movePane {
-    -fx-background-color: -accent;
+  -fx-background-color: -accent;
 }
 
 #movePaneLabel {
-    -fx-text-fill: ladder(-accent, white 60%, black 40%);
+  -fx-text-fill: ladder(-accent, white 60%, black 40%);
 }
 
 #movePaneButton {
-    -fx-text-fill: ladder(-moveButton, white 60%, black 40%);
-    -fx-background-color: -moveButton;
+  -fx-text-fill: ladder(-moveButton, white 60%, black 40%);
+  -fx-background-color: -moveButton;
 }
 
 #movePaneButton:hover {
-    -fx-text-fill: ladder(-moveButton, white 60%, black 40%);
-    -fx-background-color: derive(-moveButton, -.1);
+  -fx-text-fill: ladder(-moveButton, white 60%, black 40%);
+  -fx-background-color: derive(-moveButton, -0.1);
 }
 
 #movePaneButton:armed {
-    -fx-text-fill: ladder(-moveButton, white 60%, black 40%);
-    -fx-background-color: derive(-moveButton, -.2);
+  -fx-text-fill: ladder(-moveButton, white 60%, black 40%);
+  -fx-background-color: derive(-moveButton, -0.2);
 }
 
 #movePaneButtonActive {
-    -fx-text-fill: ladder(-moveButtonActive, white 60%, black 40%);
-    -fx-background-color: -moveButtonActive;
+  -fx-text-fill: ladder(-moveButtonActive, white 60%, black 40%);
+  -fx-background-color: -moveButtonActive;
 }
 
 #movePaneButtonActive:hover {
-    -fx-text-fill: ladder(-moveButtonActive, white 60%, black 40%);
-    -fx-background-color: derive(-moveButtonActive, -.1);
+  -fx-text-fill: ladder(-moveButtonActive, white 60%, black 40%);
+  -fx-background-color: derive(-moveButtonActive, -0.1);
 }
 
 #movePaneButtonActive:armed {
-    -fx-text-fill: ladder(-moveButtonActive, white 60%, black 40%);
-    -fx-background-color: derive(-moveButtonActive, -.2);
+  -fx-text-fill: ladder(-moveButtonActive, white 60%, black 40%);
+  -fx-background-color: derive(-moveButtonActive, -0.2);
 }

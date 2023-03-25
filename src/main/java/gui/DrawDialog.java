@@ -19,7 +19,7 @@ public class DrawDialog extends Stage {
         return accept;
     }
 
-    public DrawDialog(Board board, String offererName) {
+    public DrawDialog(GameView board, String offererName) {
 
         initOwner(board.getScene().getWindow());
         // initModality(Modality.WINDOW_MODAL);

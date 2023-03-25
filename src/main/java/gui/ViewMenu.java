@@ -7,9 +7,10 @@ import javafx.scene.input.KeyCombination;
 public class ViewMenu extends Menu {
 
     private CheckMenuItem flip;
-    private Board board;
+    private CheckMenuItem autoFlip;
+    private GameView board;
 
-    public ViewMenu(Board board) {
+    public ViewMenu(GameView board) {
 
         super("View");
         this.board = board;
@@ -22,9 +23,17 @@ public class ViewMenu extends Menu {
 
         });
 
+        autoFlip = new CheckMenuItem("Auto Flip");
+        autoFlip.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+F"));
+        autoFlip.setOnAction(e -> {
+
+            board.setAutoFlip(autoFlip.isSelected());
+
+        });
+
         update();
 
-        getItems().addAll(flip);
+        getItems().addAll(flip, autoFlip);
 
     }
 
@@ -35,15 +44,22 @@ public class ViewMenu extends Menu {
             flip.setDisable(true);
             flip.setSelected(false);
 
+            autoFlip.setSelected(false);
+            autoFlip.setDisable(true);
+
         } else {
 
             flip.setDisable(false);
-            if (board.getColor() == Board.WHITE) {
+
+            if (board.getColor() == GameView.WHITE) {
                 flip.setSelected(board.isFlipped());
-            } else if (board.getColor() == Board.BLACK) {
+                autoFlip.setDisable(true);
+            } else if (board.getColor() == GameView.BLACK) {
                 flip.setSelected(!board.isFlipped());
-            } else if (board.getColor() == Board.TWO_PLAYER) {
-                flip.setSelected(!board.isFlipped() == board.getGame().getLastPos().isWhite());
+                autoFlip.setDisable(true);
+            } else if (board.getColor() == GameView.TWO_PLAYER) {
+                flip.setSelected(board.isFlipped() == board.getGame().getLastPos().isWhite());
+                autoFlip.setDisable(false);
             }
 
         }

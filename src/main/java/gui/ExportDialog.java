@@ -18,7 +18,7 @@ public class ExportDialog extends Stage {
 
     private TextArea ta;
 
-    public ExportDialog(Board board) {
+    public ExportDialog(GameView board) {
 
         initOwner(board.getScene().getWindow());
         initModality(Modality.WINDOW_MODAL);
