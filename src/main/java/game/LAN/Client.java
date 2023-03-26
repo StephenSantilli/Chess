@@ -205,12 +205,20 @@ public class Client implements GameListener {
             } else if (msg.getArgs().get(0).equals("moved")) {
 
                 if (msg.getArgs().size() != 2)
-                    send(new ErrorMessage(ErrorMessage.NORMAL, "Invalid moved message."));
+                    send(new ErrorMessage(ErrorMessage.FATAL, "Invalid moved message."));
 
                 String fen = msg.getArgs().get(1);
 
                 if (!fen.trim().equals(game.getLastPos().toString().trim()))
                     stop(new ErrorMessage(ErrorMessage.FATAL, "Position desynchronized."));
+
+            } else if (msg.equals(Message.DRAW_DECLINE)) {
+
+                try {
+                    game.declineDrawOffer();
+                } catch (Exception e) {
+                    send(new ErrorMessage(ErrorMessage.NORMAL, "Unable to decline draw."));
+                }
 
             }
 
@@ -360,8 +368,11 @@ public class Client implements GameListener {
         } else if (event.getType() == GameEvent.TYPE_MESSAGE && event.getMessage() != null
                 && event.getMessage().getPlayer().isWhite() != oppColor) {
 
-            send(new ChatMessage(new Date(event.getMessage().getTimestamp()), event.getMessage().getMessage()));
+            if (!event.getMessage().isSystemMessage())
+                send(new ChatMessage(new Date(event.getMessage().getTimestamp()), event.getMessage().getMessage()));
 
+        } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() != oppColor) {
+            send(Message.DRAW_DECLINE);
         }
 
     }

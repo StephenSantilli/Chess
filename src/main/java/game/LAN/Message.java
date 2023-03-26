@@ -6,6 +6,7 @@ public class Message {
 
     public static final Message DRAW_OFFER = new Message("draw");
     public static final Message DRAW_ACCEPT = new Message("drawaccept");
+    public static final Message DRAW_DECLINE = new Message("drawdecline");
     public static final Message RESIGN = new Message("resign");
     public static final Message TERMINATE = new Message("terminate");
     public static final Message START = new Message("start");

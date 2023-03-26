@@ -10,6 +10,7 @@ public class GameEvent {
     public static final int TYPE_IMPORTED = 7;
     public static final int TYPE_PAUSED = 8;
     public static final int TYPE_RESUMED = 9;
+    public static final int TYPE_DRAW_DECLINED = 10;
 
     public static final GameEvent STARTED = new GameEvent(TYPE_STARTED);
     public static final GameEvent OVER = new GameEvent(TYPE_OVER);
@@ -25,6 +26,8 @@ public class GameEvent {
 
     private Position prev;
     private Position curr;
+
+    private boolean white;
 
     private Chat message;
 
@@ -46,6 +49,10 @@ public class GameEvent {
 
     public Position getCurr() {
         return curr;
+    }
+
+    public boolean isWhite() {
+        return white;
     }
 
     public Chat getMessage() {
@@ -72,6 +79,13 @@ public class GameEvent {
         this.currIndex = currIndex;
         this.prev = prev;
         this.curr = curr;
+
+    }
+
+    public GameEvent(int type, boolean white) {
+
+        this.type = type;
+        this.white = white;
 
     }
 
