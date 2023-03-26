@@ -14,7 +14,6 @@ public class GameEvent {
     public static final GameEvent STARTED = new GameEvent(TYPE_STARTED);
     public static final GameEvent OVER = new GameEvent(TYPE_OVER);
     public static final GameEvent DRAW_OFFER = new GameEvent(TYPE_DRAW_OFFER);
-    public static final GameEvent MESSAGE = new GameEvent(TYPE_MESSAGE);
     public static final GameEvent IMPORTED = new GameEvent(TYPE_IMPORTED);
     public static final GameEvent PAUSED = new GameEvent(TYPE_PAUSED);
     public static final GameEvent RESUMED = new GameEvent(TYPE_RESUMED);
@@ -26,6 +25,8 @@ public class GameEvent {
 
     private Position prev;
     private Position curr;
+
+    private Chat message;
 
     public int getType() {
         return type;
@@ -47,9 +48,20 @@ public class GameEvent {
         return curr;
     }
 
-    public GameEvent(int type) {
+    public Chat getMessage() {
+		return message;
+	}
+
+	public GameEvent(int type) {
 
         this.type = type;
+
+    }
+
+    public GameEvent(Chat message) {
+
+        this.type = TYPE_MESSAGE;
+        this.message = message;
 
     }
 

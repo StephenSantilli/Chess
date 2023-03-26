@@ -26,6 +26,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.WindowEvent;
 
 public class GameView extends HBox implements GameListener {
@@ -169,14 +170,19 @@ public class GameView extends HBox implements GameListener {
         scrollMoveList.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollMoveList.setMinWidth(220);
 
+        ChatBox cb = new ChatBox(this);
+
+        VBox listAndChat = new VBox(scrollMoveList, cb);
+        listAndChat.setSpacing(5);
+
         board = new Board(this);
         boardPane = new Pane(board);
 
         initMenus();
 
-        getChildren().addAll(infoPane, boardPane, scrollMoveList);
+        getChildren().addAll(infoPane, boardPane, listAndChat);
 
-        scrollMoveList.setViewOrder(1);
+        listAndChat.setViewOrder(1);
         infoPane.setViewOrder(1);
         board.setViewOrder(0);
 
@@ -187,11 +193,11 @@ public class GameView extends HBox implements GameListener {
 
         HBox.setHgrow(infoPane, Priority.SOMETIMES);
         HBox.setHgrow(boardPane, Priority.SOMETIMES);
-        HBox.setHgrow(scrollMoveList, Priority.SOMETIMES);
+        HBox.setHgrow(listAndChat, Priority.SOMETIMES);
 
         HBox.setMargin(infoPane, new Insets(5, 5, 5, 5));
         HBox.setMargin(boardPane, new Insets(5, 5, 5, 5));
-        HBox.setMargin(scrollMoveList, new Insets(5, 5, 5, 5));
+        HBox.setMargin(listAndChat, new Insets(5, 5, 5, 5));
 
         boardPane.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
 

@@ -8,6 +8,7 @@ public class Player {
             + "}";
 
     private String name;
+    private boolean white;
 
     public String getName() {
         return name;
@@ -17,7 +18,15 @@ public class Player {
         this.name = name;
     }
 
-    @Override
+    public boolean isWhite() {
+		return white;
+	}
+
+	public void setWhite(boolean white) {
+		this.white = white;
+	}
+
+	@Override
     public String toString() {
         return name; 
     }
@@ -25,6 +34,13 @@ public class Player {
     public Player(String name) {
 
         this.name = name;
+
+    }
+
+    public Player(String name, boolean white) {
+
+        this.name = name;
+        this.white = white;
 
     }
 

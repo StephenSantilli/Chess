@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.Date;
+
+import game.Chat;
 import game.Game;
 import game.GameSettings;
 import game.GameEvent;
@@ -27,14 +30,6 @@ public class Client implements GameListener {
     private Game game;
     private boolean oppColor;
 
-    public boolean isOppColor() {
-        return oppColor;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
     private Runnable listener = () -> {
 
         try {
@@ -55,6 +50,14 @@ public class Client implements GameListener {
         }
 
     };
+
+    public boolean isOppColor() {
+        return oppColor;
+    }
+
+    public Game getGame() {
+        return game;
+    }
 
     public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
             throws Exception {
@@ -186,6 +189,16 @@ public class Client implements GameListener {
 
                 game.markGameOver(!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN,
                         Game.REASON_RESIGNATION);
+
+            } else if (msg.getArgs().get(0).equals("chat")) {
+
+                try {
+                    ChatMessage cMsg = new ChatMessage(msg.toString());
+                    game.sendMessage(
+                            new Chat(game.getPlayer(oppColor), cMsg.getTimestamp().getTime(), cMsg.getMessage()));
+                } catch (Exception e) {
+                    send(new ErrorMessage(ErrorMessage.NORMAL, "Invalid chat message."));
+                }
 
             }
 
@@ -331,6 +344,11 @@ public class Client implements GameListener {
                 && game.getResultReason() == Game.REASON_RESIGNATION) {
 
             send(Message.RESIGN);
+
+        } else if (event.getType() == GameEvent.TYPE_MESSAGE && event.getMessage() != null
+                && event.getMessage().getPlayer().isWhite() != oppColor) {
+
+            send(new ChatMessage(new Date(event.getMessage().getTimestamp()), event.getMessage().getMessage()));
 
         }
 

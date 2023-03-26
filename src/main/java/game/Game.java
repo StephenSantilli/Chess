@@ -42,6 +42,8 @@ public class Game {
 
     private Player black;
 
+    private ArrayList<Chat> messages;
+
     /**
      * A list of the positions in this game, in order.
      */
@@ -134,6 +136,10 @@ public class Game {
         return settings;
     }
 
+    public ArrayList<Chat> getMessages() {
+        return messages;
+    }
+
     public ArrayList<Position> getPositions() {
         return positions;
     }
@@ -186,8 +192,8 @@ public class Game {
      */
     public Game(String whiteName, String blackName, GameSettings settings) {
 
-        this.white = new Player(whiteName);
-        this.black = new Player(blackName);
+        this.white = new Player(whiteName, true);
+        this.black = new Player(blackName, false);
 
         this.settings = settings;
 
@@ -276,6 +282,13 @@ public class Game {
         flipTimer(true, 0);
 
         fireEvent(GameEvent.OVER);
+
+    }
+
+    public void sendMessage(Chat message) {
+
+        messages.add(message);
+        fireEvent(new GameEvent(message));
 
     }
 
