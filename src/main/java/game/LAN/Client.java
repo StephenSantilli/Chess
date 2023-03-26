@@ -46,7 +46,7 @@ public class Client implements GameListener {
             input.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
 
     };
@@ -145,9 +145,16 @@ public class Client implements GameListener {
                     stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move message: " + e.getMessage()));
                 }
 
-            } else if (msg.equals(Message.TERMINATE)) {
+            } else if (msg.equals(ErrorMessage.TERMINATE)) {
 
-                stop(new ErrorMessage(ErrorMessage.NORMAL, "Opponent disconnected."));
+                ErrorMessage eMsg = ErrorMessage.TERMINATE;
+
+                game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
+                        (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
+                                + game.getPlayer(oppColor).getName() + ": " + eMsg.getReason(),
+                        true));
+
+                stop();
 
             } else if (msg.getArgs().get(0).equals("error")) {
 
@@ -381,7 +388,7 @@ public class Client implements GameListener {
             if (!event.getMessage().isSystemMessage())
                 send(new ChatMessage(new Date(event.getMessage().getTimestamp()), event.getMessage().getMessage()));
 
-        } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() == oppColor) {
+        } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() != oppColor) {
             send(Message.DRAW_DECLINE);
         }
 

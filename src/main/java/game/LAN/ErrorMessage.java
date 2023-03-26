@@ -5,6 +5,8 @@ public class ErrorMessage extends Message {
     public static final int NORMAL = 0;
     public static final int FATAL = 1;
 
+    public static final ErrorMessage TERMINATE = new ErrorMessage(FATAL, "Disconnected.");
+
     private final int severity;
     private final String reason;
 

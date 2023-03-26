@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 import game.Chat;
 import game.Game;
+import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -45,33 +46,38 @@ public class ChatBox extends VBox {
 
     public void update() {
 
-        if (gameView.getColor() == GameView.TWO_PLAYER) {
-            chat.setDisable(true);
-            enter.setDisable(true);
-            return;
-        } else {
-            chat.setDisable(false);
-            enter.setDisable(false);
-        }
+        Platform.runLater(() -> {
 
-        chat.setText("");
-
-        final Game game = gameView.getGame();
-
-        for (Chat c : game.getMessages()) {
-
-            if (!c.isSystemMessage())
-                chat.setText(chat.getText() + c.getPlayer().getName() + " ("
-                        + SimpleDateFormat.getTimeInstance().format(new Date(c.getTimestamp())) + "): " + c.getMessage()
-                        + "\n");
-            else {
-
-                chat.setText(chat.getText() + c.getMessage() + "\n");
+            if (gameView.getColor() == GameView.TWO_PLAYER) {
+                chat.setDisable(true);
+                enter.setDisable(true);
+                return;
+            } else {
+                chat.setDisable(false);
+                enter.setDisable(false);
             }
 
-        }
+            chat.setText("");
 
-        chat.positionCaret(chat.getLength());
+            final Game game = gameView.getGame();
+
+            for (Chat c : game.getMessages()) {
+
+                if (!c.isSystemMessage())
+                    chat.setText(chat.getText() + c.getPlayer().getName() + " ("
+                            + SimpleDateFormat.getTimeInstance().format(new Date(c.getTimestamp())) + "): "
+                            + c.getMessage()
+                            + "\n");
+                else {
+
+                    chat.setText(chat.getText() + c.getMessage() + "\n");
+                }
+
+            }
+
+            chat.positionCaret(chat.getLength());
+            
+        });
 
     }
 
