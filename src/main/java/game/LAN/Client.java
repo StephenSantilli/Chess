@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.sql.Date;
+import java.util.Date;
 
 import game.Chat;
 import game.Game;
@@ -154,6 +154,11 @@ public class Client implements GameListener {
                 try {
 
                     ErrorMessage eMsg = new ErrorMessage(msg.toString());
+
+                    game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
+                            (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
+                                    + game.getPlayer(oppColor).getName() + ": " + eMsg.getReason(),
+                            true));
 
                     if (eMsg.getSeverity() == ErrorMessage.FATAL)
                         stop();
@@ -308,14 +313,19 @@ public class Client implements GameListener {
         stop(null);
     }
 
-    public void stop(Message reason) {
+    public void stop(ErrorMessage reason) {
 
         try {
 
-            System.out.println("Stopping because: " + reason);
+            // System.out.println("Stopping because: " + reason);
 
-            if (reason != null)
+            if (reason != null) {
+                game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
+                        (reason.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
+                                + game.getPlayer(oppColor).getName() + ": " + reason.getReason(),
+                        true));
                 send(reason);
+            }
 
             input.close();
             output.close();

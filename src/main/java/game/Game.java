@@ -275,7 +275,7 @@ public class Game {
         fireEvent(new GameEvent(GameEvent.TYPE_DRAW_DECLINED, white));
 
         sendMessage(new Chat(getPlayer(white), new Date().getTime(),
-                getPlayer(white).getName() + " declined the draw offer."));
+                getPlayer(white).getName() + " declined the draw offer.", true));
 
 
 

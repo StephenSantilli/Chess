@@ -1,7 +1,6 @@
 package gui.component;
 
 import java.util.Date;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import game.Chat;
@@ -65,8 +64,10 @@ public class ChatBox extends VBox {
                 chat.setText(chat.getText() + c.getPlayer().getName() + " ("
                         + SimpleDateFormat.getTimeInstance().format(new Date(c.getTimestamp())) + "): " + c.getMessage()
                         + "\n");
-            else
+            else {
+
                 chat.setText(chat.getText() + c.getMessage() + "\n");
+            }
 
         }
 
