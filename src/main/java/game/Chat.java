@@ -8,6 +8,8 @@ public class Chat {
     private long timestamp;
     private String message;
 
+    private boolean systemMessage;
+
     public Player getPlayer() {
         return player;
     }
@@ -20,10 +22,21 @@ public class Chat {
         return message;
     }
 
+    public boolean isSystemMessage() {
+        return systemMessage;
+    }
+
     public Chat(Player player, long timestamp, String message) {
         this.player = player;
         this.timestamp = timestamp;
         this.message = message;
+    }
+
+    public Chat(Player player, long timestamp, String message, boolean systemMessage) {
+        this.player = player;
+        this.timestamp = timestamp;
+        this.message = message;
+        this.systemMessage = systemMessage;
     }
 
 }

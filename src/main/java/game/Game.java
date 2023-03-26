@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -257,6 +258,23 @@ public class Game {
                         ? REASON_WHITE_OFFERED_DRAW
                         : REASON_BLACK_OFFERED_DRAW);
 
+        sendMessage(new Chat(getPlayer(getLastPos().getDrawOfferer() == Position.WHITE), new Date().getTime(),
+                getPlayer(getLastPos().getDrawOfferer() == Position.WHITE).getName() + " accepted the draw offer."));
+
+    }
+
+    public void declineDrawOffer() throws Exception {
+
+        if (canDrawOffer())
+            throw new Exception("No draw to decline.");
+
+        final boolean white = getLastPos().getDrawOfferer() == Position.WHITE;
+
+        getLastPos().setDrawOfferer(Position.NO_OFFER);
+
+        sendMessage(new Chat(getPlayer(white), new Date().getTime(),
+                getPlayer(white).getName() + " declined the draw offer."));
+
     }
 
     public void sendDrawOffer(boolean offererWhite) throws Exception {
@@ -266,6 +284,9 @@ public class Game {
 
         getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
         fireEvent(GameEvent.DRAW_OFFER);
+
+        sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
+                getPlayer(offererWhite).getName() + " sent a draw offer."));
 
     }
 

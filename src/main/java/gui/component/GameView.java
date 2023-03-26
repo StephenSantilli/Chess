@@ -456,6 +456,14 @@ public class GameView extends HBox implements GameListener {
                         } catch (Exception e) {
                         }
 
+                    } else {
+
+                        try {
+                            game.declineDrawOffer();
+                        } catch (Exception e) {
+
+                        }
+
                     }
 
                 });
@@ -494,9 +502,10 @@ public class GameView extends HBox implements GameListener {
 
                 chatBox.update();
 
-                if (color != TWO_PLAYER && event.getMessage() != null && event.getMessage().getPlayer().isWhite() != (color == WHITE)) {
+                if (color != TWO_PLAYER && event.getMessage() != null
+                        && event.getMessage().getPlayer().isWhite() != (color == WHITE)) {
                     if (!app.getStage().isFocused())
-                        //app.getStage().toFront();
+                        // app.getStage().toFront();
                         java.awt.Toolkit.getDefaultToolkit().beep();
                 }
 

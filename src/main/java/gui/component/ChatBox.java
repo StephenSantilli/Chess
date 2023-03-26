@@ -37,7 +37,7 @@ public class ChatBox extends VBox {
         });
 
         setSpacing(5);
-        
+
         getChildren().addAll(chat, enter);
 
         update();
@@ -61,9 +61,12 @@ public class ChatBox extends VBox {
 
         for (Chat c : game.getMessages()) {
 
-            chat.setText(chat.getText() + c.getPlayer().getName() + " ("
-                    + SimpleDateFormat.getTimeInstance().format(new Date(c.getTimestamp())) + "): " + c.getMessage()
-                    + "\n");
+            if (!c.isSystemMessage())
+                chat.setText(chat.getText() + c.getPlayer().getName() + " ("
+                        + SimpleDateFormat.getTimeInstance().format(new Date(c.getTimestamp())) + "): " + c.getMessage()
+                        + "\n");
+            else
+                chat.setText(chat.getText() + c.getMessage() + "\n");
 
         }
 
