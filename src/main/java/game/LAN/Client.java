@@ -381,7 +381,7 @@ public class Client implements GameListener {
             if (!event.getMessage().isSystemMessage())
                 send(new ChatMessage(new Date(event.getMessage().getTimestamp()), event.getMessage().getMessage()));
 
-        } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() != oppColor) {
+        } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() == oppColor) {
             send(Message.DRAW_DECLINE);
         }
 
