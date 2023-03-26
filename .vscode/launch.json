@@ -5,7 +5,8 @@
             "type": "java",
             "name": "Launch App",
             "request": "launch",
-            "mainClass": "gui.Chess"
+            "mainClass": "gui.Chess",
+            "preLaunchTask": "gradle: compileJava"
         }
     ]
 }

@@ -46,7 +46,7 @@ public class GameInfo extends VBox {
     public GameInfo(GameView board) {
 
         // - Top timer
-        topTimer = new GUITimer(board, board.isFlipped());
+        topTimer = new GUITimer(board, !board.isFlipped());
         topTimer.setAlignment(Pos.CENTER);
 
         topName = new Label();
@@ -62,7 +62,7 @@ public class GameInfo extends VBox {
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         // - Bottom timer
-        this.bottomTimer = new GUITimer(board, !board.isFlipped());
+        this.bottomTimer = new GUITimer(board, board.isFlipped());
 
         bottomTimer.setAlignment(Pos.CENTER);
 

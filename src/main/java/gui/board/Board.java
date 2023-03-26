@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 import game.Position;
 import game.Square;
 import gui.component.GameView;
@@ -271,7 +270,6 @@ public class Board extends StackPane {
         moveIndicatorsPane = new MoveIndicators(gameView);
         piecePane = new Pieces(gameView);
 
-
         getChildren().addAll(squarePane, highlightPane, moveIndicatorsPane, borderPane, piecePane);
 
         gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
@@ -370,9 +368,8 @@ public class Board extends StackPane {
 
         piecePane.draw(backward, ani ? p1 : null, p2);
 
-        gameView.getInfoPane().getTopTimer().setWhite(!gameView.isFlipped());
-
-        gameView.getInfoPane().getBottomTimer().setWhite(gameView.isFlipped());
+        gameView.getInfoPane().getTopTimer().setWhite(gameView.isFlipped());
+        gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
 
         gameView.getInfoPane().updateTimers();
 

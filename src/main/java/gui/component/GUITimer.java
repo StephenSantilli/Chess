@@ -1,5 +1,6 @@
 package gui.component;
 
+import game.Game;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Label;
@@ -23,7 +24,8 @@ public class GUITimer extends Label {
 
     public GUITimer(GameView board, boolean white) {
 
-        super(formatTime(board.getGame() == null ? 0 : board.getGame().getTimerTime(white)));
+        super(formatTime(board.getGame() == null ? 0
+                : (board.getGame().getTimerTime(white))));
 
         this.board = board;
         this.white = white;
@@ -49,12 +51,12 @@ public class GUITimer extends Label {
             setText("");
             return;
         }
-
-        if (board.getGame().getLastPos().isWhite() == white && board.getGame().getSettings().getTimePerSide() > -1) {
+        if ((white == board.getGame().getLastPos().isWhite())
+                && board.getGame().getSettings().getTimePerSide() > -1) {
 
             setId("guitimeractive");
 
-            if (!board.getGame().isPaused() && board.getGame().getResult() == 0)
+            if (!board.getGame().isPaused() && board.getGame().getResult() == Game.RESULT_IN_PROGRESS)
                 tl.play();
             else {
                 tl.pause();
@@ -113,6 +115,7 @@ public class GUITimer extends Label {
         }
 
         setText(formatTime(board.getGame().getTimerTime(white)));
+
     }
 
 }
