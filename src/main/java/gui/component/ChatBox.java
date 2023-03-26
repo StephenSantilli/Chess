@@ -36,6 +36,8 @@ public class ChatBox extends VBox {
 
         });
 
+        setSpacing(5);
+        
         getChildren().addAll(chat, enter);
 
         update();
@@ -65,7 +67,7 @@ public class ChatBox extends VBox {
 
         }
 
-        chat.selectEnd();
+        chat.positionCaret(chat.getLength());
 
     }
 

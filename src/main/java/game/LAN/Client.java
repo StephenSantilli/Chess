@@ -135,6 +135,8 @@ public class Client implements GameListener {
 
                         game.setTimer(oppColor, moveMsg.getTimerEnd());
 
+                        send(new Message("moved", game.getLastPos().toString()));
+
                     } catch (Exception e) {
                         stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move: " + e.getMessage()));
                     }
@@ -199,6 +201,16 @@ public class Client implements GameListener {
                 } catch (Exception e) {
                     send(new ErrorMessage(ErrorMessage.NORMAL, "Invalid chat message."));
                 }
+
+            } else if (msg.getArgs().get(0).equals("moved")) {
+
+                if (msg.getArgs().size() != 2)
+                    send(new ErrorMessage(ErrorMessage.NORMAL, "Invalid moved message."));
+
+                String fen = msg.getArgs().get(1);
+
+                if (!fen.trim().equals(game.getLastPos().toString().trim()))
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Position desynchronized."));
 
             }
 

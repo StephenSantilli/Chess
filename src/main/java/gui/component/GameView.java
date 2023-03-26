@@ -339,7 +339,6 @@ public class GameView extends HBox implements GameListener {
 
                         game.startGame();
                         board.boardUpdated();
-                        chatBox.update();
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -357,11 +356,14 @@ public class GameView extends HBox implements GameListener {
                         flip();
 
                     board.boardUpdated();
-                    chatBox.update();
 
                 }
 
                 moveList.initMoveList();
+                chatBox.update();
+
+                if (!app.getStage().isFocused())
+                    app.getStage().toFront();
 
             }
 
@@ -433,6 +435,11 @@ public class GameView extends HBox implements GameListener {
                 gameMenu.update();
                 viewMenu.update();
 
+                if (color != TWO_PLAYER && event.getCurr().isWhite() != (color == WHITE)) {
+                    if (!app.getStage().isFocused())
+                        app.getStage().toFront();
+                }
+
             } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER) {
 
                 if ((color == WHITE || color == BLACK) && game.getLastPos().getDrawOfferer() == color)
@@ -483,9 +490,15 @@ public class GameView extends HBox implements GameListener {
 
                 over.showAndWait();
 
-            } else if(event.getType() == GameEvent.TYPE_MESSAGE) {
+            } else if (event.getType() == GameEvent.TYPE_MESSAGE) {
 
                 chatBox.update();
+
+                if (color != TWO_PLAYER && event.getMessage() != null && event.getMessage().getPlayer().isWhite() != (color == WHITE)) {
+                    if (!app.getStage().isFocused())
+                        //app.getStage().toFront();
+                        java.awt.Toolkit.getDefaultToolkit().beep();
+                }
 
             }
 
