@@ -22,14 +22,17 @@ public class ChatBox extends VBox {
         this.gameView = gameView;
 
         chat = new TextArea();
-
-        final Game game = gameView.getGame();
+        chat.setEditable(false);
 
         enter = new TextField();
         enter.setOnAction(ev -> {
+
+            final Game game = gameView.getGame();
+
             gameView.getGame().sendMessage(new Chat(game.getPlayer(gameView.getColor() == GameView.WHITE),
                     new Date().getTime(), enter.getText()));
             enter.setText("");
+
         });
 
         getChildren().addAll(chat, enter);
