@@ -46,7 +46,7 @@ public class ChatArea extends VBox {
         });
 
         setSpacing(5);
-        VBox.setVgrow(scroller, Priority.ALWAYS);
+        VBox.setVgrow(scroller, Priority.NEVER);
         VBox.setVgrow(enter, Priority.NEVER);
         setFillWidth(true);
 
@@ -70,7 +70,8 @@ public class ChatArea extends VBox {
             }
 
             historyBox.draw(() -> {
-                scroller.setVvalue(1);
+                scroller.setMaxHeight(historyBox.getHeight());
+                scroller.setVvalue(scroller.getVmax());
             });
 
         });

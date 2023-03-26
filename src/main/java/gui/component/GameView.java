@@ -176,8 +176,8 @@ public class GameView extends HBox implements GameListener {
         VBox listAndChat = new VBox(scrollMoveList, chatBox);
         listAndChat.setSpacing(5);
 
-        VBox.setVgrow(scrollMoveList, Priority.SOMETIMES);
-        VBox.setVgrow(chatBox, Priority.SOMETIMES);
+        VBox.setVgrow(scrollMoveList, Priority.ALWAYS);
+        VBox.setVgrow(chatBox, Priority.NEVER);
 
         board = new Board(this);
         boardPane = new Pane(board);
