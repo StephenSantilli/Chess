@@ -66,7 +66,7 @@ public class Message {
         String text = "";
 
         for (int i = 0; i < args.size(); i++) {
-            text += args.get(i).replaceAll(";", "\\;") + ";";
+            text += args.get(i).replaceAll(";", "\\\\;") + ";";
         }
 
         return text;

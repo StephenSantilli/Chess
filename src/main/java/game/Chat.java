@@ -9,6 +9,7 @@ public class Chat {
     private String message;
 
     private boolean systemMessage;
+    private boolean error;
 
     public Player getPlayer() {
         return player;
@@ -26,6 +27,10 @@ public class Chat {
         return systemMessage;
     }
 
+    public boolean isError() {
+        return error;
+    }
+
     public Chat(Player player, long timestamp, String message) {
         this.player = player;
         this.timestamp = timestamp;
@@ -37,6 +42,14 @@ public class Chat {
         this.timestamp = timestamp;
         this.message = message;
         this.systemMessage = systemMessage;
+    }
+
+    public Chat(Player player, long timestamp, String message, boolean systemMessage, boolean error) {
+        this.player = player;
+        this.timestamp = timestamp;
+        this.message = message;
+        this.systemMessage = systemMessage;
+        this.error = error;
     }
 
 }

@@ -152,7 +152,7 @@ public class Client implements GameListener {
                 game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
                         (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
                                 + game.getPlayer(oppColor).getName() + ": " + eMsg.getReason(),
-                        true));
+                        true, true));
 
                 stop();
 
@@ -165,7 +165,7 @@ public class Client implements GameListener {
                     game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
                             (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
                                     + game.getPlayer(oppColor).getName() + ": " + eMsg.getReason(),
-                            true));
+                            true, true));
 
                     if (eMsg.getSeverity() == ErrorMessage.FATAL)
                         stop();

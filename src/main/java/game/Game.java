@@ -290,7 +290,7 @@ public class Game {
         fireEvent(GameEvent.DRAW_OFFER);
 
         sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
-                getPlayer(offererWhite).getName() + " sent a draw offer."));
+                getPlayer(offererWhite).getName() + " sent a draw offer.", true));
 
     }
 

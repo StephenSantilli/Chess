@@ -43,7 +43,7 @@ public class GameView extends HBox implements GameListener {
 
     private MoveList moveList;
     private ScrollPane scrollMoveList;
-    private ChatBox chatBox;
+    private ChatArea chatBox;
 
     private BarMenu menuBar;
     private GameMenu gameMenu;
@@ -171,7 +171,7 @@ public class GameView extends HBox implements GameListener {
         scrollMoveList.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollMoveList.setMinWidth(220);
 
-        chatBox = new ChatBox(this);
+        chatBox = new ChatArea(this);
 
         VBox listAndChat = new VBox(scrollMoveList, chatBox);
         listAndChat.setSpacing(5);

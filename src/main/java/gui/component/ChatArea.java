@@ -10,22 +10,21 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-public class ChatBox extends VBox {
+public class ChatArea extends VBox {
 
     private GameView gameView;
 
-    private TextArea chat;
+    private ChatHistoryBox historyBox;
     private TextField enter;
 
-    public ChatBox(GameView gameView) {
+    public ChatArea(GameView gameView) {
 
         this.gameView = gameView;
 
-        chat = new TextArea();
-        chat.setEditable(false);
-        chat.setWrapText(true);
+        historyBox = new ChatHistoryBox(gameView);
 
         enter = new TextField();
+        enter.setPromptText("Enter chat message...");
         enter.setOnAction(ev -> {
 
             final Game game = gameView.getGame();
@@ -38,7 +37,7 @@ public class ChatBox extends VBox {
 
         setSpacing(5);
 
-        getChildren().addAll(chat, enter);
+        getChildren().addAll(historyBox, enter);
 
         update();
 
@@ -49,33 +48,15 @@ public class ChatBox extends VBox {
         Platform.runLater(() -> {
 
             if (gameView.getColor() == GameView.TWO_PLAYER) {
-                chat.setDisable(true);
+                historyBox.setDisable(true);
                 enter.setDisable(true);
                 return;
             } else {
-                chat.setDisable(false);
+                historyBox.setDisable(false);
                 enter.setDisable(false);
             }
 
-            chat.setText("");
-
-            final Game game = gameView.getGame();
-
-            for (Chat c : game.getMessages()) {
-
-                if (!c.isSystemMessage())
-                    chat.setText(chat.getText() + c.getPlayer().getName() + " ("
-                            + SimpleDateFormat.getTimeInstance().format(new Date(c.getTimestamp())) + "): "
-                            + c.getMessage()
-                            + "\n");
-                else {
-
-                    chat.setText(chat.getText() + c.getMessage() + "\n");
-                }
-
-            }
-
-            chat.positionCaret(chat.getLength());
+            historyBox.draw();
             
         });
 
