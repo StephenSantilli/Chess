@@ -43,6 +43,7 @@ public class GameView extends HBox implements GameListener {
 
     private MoveList moveList;
     private ScrollPane scrollMoveList;
+    private ChatBox chatBox;
 
     private BarMenu menuBar;
     private GameMenu gameMenu;
@@ -170,10 +171,13 @@ public class GameView extends HBox implements GameListener {
         scrollMoveList.setVbarPolicy(ScrollBarPolicy.NEVER);
         scrollMoveList.setMinWidth(220);
 
-        ChatBox cb = new ChatBox(this);
+        chatBox = new ChatBox(this);
 
-        VBox listAndChat = new VBox(scrollMoveList, cb);
+        VBox listAndChat = new VBox(scrollMoveList, chatBox);
         listAndChat.setSpacing(5);
+
+        VBox.setVgrow(scrollMoveList, Priority.SOMETIMES);
+        VBox.setVgrow(chatBox, Priority.SOMETIMES);
 
         board = new Board(this);
         boardPane = new Pane(board);
@@ -335,6 +339,7 @@ public class GameView extends HBox implements GameListener {
 
                         game.startGame();
                         board.boardUpdated();
+                        chatBox.update();
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -352,6 +357,7 @@ public class GameView extends HBox implements GameListener {
                         flip();
 
                     board.boardUpdated();
+                    chatBox.update();
 
                 }
 
@@ -476,6 +482,10 @@ public class GameView extends HBox implements GameListener {
                 over.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
 
                 over.showAndWait();
+
+            } else if(event.getType() == GameEvent.TYPE_MESSAGE) {
+
+                chatBox.update();
 
             }
 
