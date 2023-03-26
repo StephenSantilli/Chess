@@ -42,7 +42,7 @@ public class ChatHistoryBox extends VBox {
 
             if (!c.isSystemMessage()) {
 
-                for (int j = 0; j < game.getMessages().size(); j++) {
+                for (int j = 0; i + j < game.getMessages().size(); j++) {
 
                     Chat cj = game.getMessages().get(i + j);
 
@@ -56,8 +56,8 @@ public class ChatHistoryBox extends VBox {
                     Label message = new Label(cj.getMessage());
 
                     content.add(name, 0, j);
-                    content.add(timestamp, 0, j);
-                    content.add(message, 0, j);
+                    content.add(timestamp, 1, j);
+                    content.add(message, 2, j);
 
                 }
 
