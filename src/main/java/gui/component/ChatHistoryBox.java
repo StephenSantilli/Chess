@@ -25,6 +25,9 @@ public class ChatHistoryBox extends GridPane {
 
         final Game game = gameView.getGame();
 
+        if (game == null)
+            return;
+
         final SimpleDateFormat dFormat = new SimpleDateFormat("h:mm a");
 
         int i = 0;
@@ -46,7 +49,7 @@ public class ChatHistoryBox extends GridPane {
                 Label message = new Label(c.getMessage());
                 if (c.isError())
                     message.setTextFill(Color.RED);
-                    
+
                 add(message, 0, i);
 
             }
