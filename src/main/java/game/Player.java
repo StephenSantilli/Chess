@@ -19,16 +19,28 @@ public class Player {
     }
 
     public boolean isWhite() {
-		return white;
-	}
+        return white;
+    }
 
-	public void setWhite(boolean white) {
-		this.white = white;
-	}
+    public void setWhite(boolean white) {
+        this.white = white;
+    }
 
-	@Override
+    @Override
     public String toString() {
-        return name; 
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (!(o instanceof Player))
+            return false;
+
+        Player casted = (Player) o;
+
+        return name.equals(casted.getName()) && white == casted.isWhite();
+
     }
 
     public Player(String name) {

@@ -147,13 +147,6 @@ public class Client implements GameListener {
 
             } else if (msg.equals(ErrorMessage.TERMINATE)) {
 
-                ErrorMessage eMsg = ErrorMessage.TERMINATE;
-
-                game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
-                        (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
-                                + game.getPlayer(oppColor).getName() + ": " + eMsg.getReason(),
-                        true, true));
-
                 stop();
 
             } else if (msg.getArgs().get(0).equals("error")) {
@@ -330,7 +323,7 @@ public class Client implements GameListener {
                 game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
                         (reason.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
                                 + game.getPlayer(oppColor).getName() + ": " + reason.getReason(),
-                        true));
+                        true, true));
                 send(reason);
             }
 

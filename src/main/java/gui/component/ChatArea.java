@@ -6,8 +6,10 @@ import java.text.SimpleDateFormat;
 import game.Chat;
 import game.Game;
 import javafx.application.Platform;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class ChatArea extends VBox {
@@ -15,6 +17,8 @@ public class ChatArea extends VBox {
     private GameView gameView;
 
     private ChatHistoryBox historyBox;
+    private ScrollPane scroller;
+
     private TextField enter;
 
     public ChatArea(GameView gameView) {
@@ -22,6 +26,9 @@ public class ChatArea extends VBox {
         this.gameView = gameView;
 
         historyBox = new ChatHistoryBox(gameView);
+        scroller = new ScrollPane(historyBox);
+        scroller.setFitToHeight(true);
+        scroller.setFitToWidth(true);
 
         enter = new TextField();
         enter.setPromptText("Enter chat message...");
@@ -36,8 +43,11 @@ public class ChatArea extends VBox {
         });
 
         setSpacing(5);
+        VBox.setVgrow(scroller, Priority.ALWAYS);
+        VBox.setVgrow(enter, Priority.NEVER);
+        setFillWidth(true);
 
-        getChildren().addAll(historyBox, enter);
+        getChildren().addAll(scroller, enter);
 
         update();
 
@@ -57,7 +67,7 @@ public class ChatArea extends VBox {
             }
 
             historyBox.draw();
-            
+
         });
 
     }

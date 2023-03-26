@@ -7,9 +7,11 @@ import game.Chat;
 import game.Game;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-public class ChatHistoryBox extends GridPane {
+public class ChatHistoryBox extends VBox {
 
     private GameView gameView;
 
@@ -23,6 +25,8 @@ public class ChatHistoryBox extends GridPane {
 
     public void draw() {
 
+        getChildren().clear();
+
         final Game game = gameView.getGame();
 
         if (game == null)
@@ -30,19 +34,32 @@ public class ChatHistoryBox extends GridPane {
 
         final SimpleDateFormat dFormat = new SimpleDateFormat("h:mm a");
 
-        int i = 0;
+        for (int i = 0; i < game.getMessages().size(); i++) {
 
-        for (Chat c : game.getMessages()) {
+            Chat c = game.getMessages().get(i);
+            GridPane content = new GridPane();
+            content.setHgap(2);
 
             if (!c.isSystemMessage()) {
 
-                Label name = new Label(c.getPlayer().getName());
-                Label timestamp = new Label(dFormat.format(new Date(c.getTimestamp())));
-                Label message = new Label(c.getMessage());
+                for (int j = 0; j < game.getMessages().size(); j++) {
 
-                add(name, 0, i);
-                add(timestamp, 1, i);
-                add(message, 2, i);
+                    Chat cj = game.getMessages().get(i + j);
+
+                    if (!cj.getPlayer().equals(c.getPlayer()) || cj.isSystemMessage()) {
+                        i += j - 1;
+                        break;
+                    }
+
+                    Label name = new Label(cj.getPlayer().getName());
+                    Label timestamp = new Label(dFormat.format(new Date(cj.getTimestamp())));
+                    Label message = new Label(cj.getMessage());
+
+                    content.add(name, 0, j);
+                    content.add(timestamp, 0, j);
+                    content.add(message, 0, j);
+
+                }
 
             } else {
 
@@ -50,11 +67,11 @@ public class ChatHistoryBox extends GridPane {
                 if (c.isError())
                     message.setTextFill(Color.RED);
 
-                add(message, 0, i);
+                content.add(message, 0, i);
 
             }
 
-            i++;
+            getChildren().add(content);
 
         }
 
