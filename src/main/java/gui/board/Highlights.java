@@ -1,14 +1,15 @@
-package gui;
+package gui.board;
 
 import game.Position;
 import game.Square;
+import gui.component.GameView;
 import javafx.scene.layout.Pane;
 
-public class HighlightPane extends Pane {
+public class Highlights extends Pane {
     
     private GameView gameView;
 
-    public HighlightPane(GameView gameView) {
+    public Highlights(GameView gameView) {
         this.gameView = gameView;
     }
 

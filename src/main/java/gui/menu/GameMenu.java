@@ -1,6 +1,8 @@
-package gui;
+package gui.menu;
 
 import game.Game;
+import gui.component.GameView;
+import gui.dialog.Export;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -113,7 +115,7 @@ public class GameMenu extends Menu {
         showPgn.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
         showPgn.setOnAction(e -> {
 
-            ExportDialog eD = new ExportDialog(board);
+            Export eD = new Export(board);
 
             eD.show();
 

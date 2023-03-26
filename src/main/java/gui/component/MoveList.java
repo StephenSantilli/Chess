@@ -1,4 +1,4 @@
-package gui;
+package gui.component;
 
 import game.Position;
 
@@ -12,7 +12,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
-public class MovePane extends GridPane {
+public class MoveList extends GridPane {
 
     private GameView board;
 
@@ -27,7 +27,7 @@ public class MovePane extends GridPane {
     private static final String BUTTON_INACTIVE_CLICKED = "#cacaca";
     private static final String BUTTON_ACTIVE_CLICKED = "#888888";
 
-    public MovePane(GameView board, ScrollPane sp) {
+    public MoveList(GameView board, ScrollPane sp) {
 
         setId("movePane");
 

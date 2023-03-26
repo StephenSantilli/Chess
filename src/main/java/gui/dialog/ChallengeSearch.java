@@ -1,4 +1,4 @@
-package gui;
+package gui.dialog;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -8,6 +8,7 @@ import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
 import game.LAN.Client;
+import gui.App;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
@@ -30,7 +31,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
-public class ChallengeSearchDialog extends Stage {
+public class ChallengeSearch extends Stage {
 
     private int timePerSide, timePerMove;
 
@@ -98,7 +99,7 @@ public class ChallengeSearchDialog extends Stage {
 
     };
 
-    public ChallengeSearchDialog(Window window, Runnable gameCreatedCallback) throws Exception {
+    public ChallengeSearch(Window window, Runnable gameCreatedCallback) throws Exception {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);

@@ -1,5 +1,6 @@
-package gui;
+package gui.dialog;
 
+import gui.component.GameView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -9,7 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class DrawDialog extends Stage {
+public class Draw extends Stage {
 
     private Button yes, no;
 
@@ -19,7 +20,7 @@ public class DrawDialog extends Stage {
         return accept;
     }
 
-    public DrawDialog(GameView board, String offererName) {
+    public Draw(GameView board, String offererName) {
 
         initOwner(board.getScene().getWindow());
         // initModality(Modality.WINDOW_MODAL);

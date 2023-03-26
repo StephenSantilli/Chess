@@ -1,16 +1,18 @@
-package gui;
+package gui.board;
 
 import java.util.ArrayList;
 
 import game.Position;
 import game.Square;
 import game.pieces.Piece;
+import gui.PieceTranscoder;
+import gui.component.GameView;
 import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
-public class PiecePane extends Pane {
+public class Pieces extends Pane {
 
     private GameView gameView;
 
@@ -18,12 +20,25 @@ public class PiecePane extends Pane {
     private ArrayList<PieceTranscoder> transcoderPieces;
     private ArrayList<TranslateTransition> transitions;
 
-    public PiecePane(GameView gameView) {
-        this.gameView = gameView;
+    public ArrayList<GUIPiece> getPieces() {
+        return pieces;
     }
 
-    public void drawPieces() {
-        drawPieces(false, null, null);
+    public ArrayList<PieceTranscoder> getTranscoderPieces() {
+        return transcoderPieces;
+    }
+
+    public ArrayList<TranslateTransition> getTransitions() {
+        return transitions;
+    }
+
+    public Pieces(GameView gameView) {
+        this.gameView = gameView;
+        this.transitions = new ArrayList<TranslateTransition>();
+    }
+
+    public void draw() {
+        draw(false, null, null);
     }
 
     /**
@@ -36,8 +51,8 @@ public class PiecePane extends Pane {
      * @param curr     The position after the board was updated. If {@code null},
      *                 the active position of the game will be used instead.
      */
-    public void drawPieces(boolean backward, Position prev, Position curr) {
-        
+    public void draw(boolean backward, Position prev, Position curr) {
+
         final Board board = gameView.getBoard();
         final double squareSize = board.getSquareSize();
         final double pieceSize = board.getPieceSize();
@@ -146,7 +161,8 @@ public class PiecePane extends Pane {
      *                    {@code null} if
      *                    there is no piece being captured.
      */
-    public void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture, Runnable callback) {
+    public void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture,
+            Runnable callback) {
 
         final Board board = gameView.getBoard();
         final double squareSize = board.getSquareSize();
@@ -212,7 +228,7 @@ public class PiecePane extends Pane {
      * @param piece The piece to get the {@link PieceTranscoder} for
      * @return The {@link PieceTranscoder}
      */
-    private PieceTranscoder getPieceTranscoder(Piece piece) {
+    public PieceTranscoder getPieceTranscoder(Piece piece) {
 
         PieceTranscoder found = null;
 
@@ -228,12 +244,11 @@ public class PiecePane extends Pane {
 
     }
 
-    void initPieceTranscoders() throws Exception {
+    public void initPieceTranscoders() throws Exception {
 
         final Board board = gameView.getBoard();
-        final double squareSize = board.getSquareSize();
         final double pieceSize = board.getPieceSize();
-        
+
         transcoderPieces = new ArrayList<PieceTranscoder>();
 
         boolean color = true;

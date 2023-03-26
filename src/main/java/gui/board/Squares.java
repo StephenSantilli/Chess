@@ -1,14 +1,15 @@
-package gui;
+package gui.board;
 
 import game.Square;
+import gui.component.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
-public class SquarePane extends Pane {
+public class Squares extends Pane {
 
     private GameView gameView;
 
-    public SquarePane(GameView gameView) {
+    public Squares(GameView gameView) {
         this.gameView = gameView;
     }
 

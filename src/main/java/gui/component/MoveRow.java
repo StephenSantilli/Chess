@@ -1,4 +1,4 @@
-package gui;
+package gui.component;
 
 import game.Move;
 import javafx.geometry.Insets;

@@ -1,5 +1,6 @@
-package gui;
+package gui.dialog;
 
+import gui.component.GameView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,11 +15,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ExportDialog extends Stage {
+public class Export extends Stage {
 
     private TextArea ta;
 
-    public ExportDialog(GameView board) {
+    public Export(GameView board) {
 
         initOwner(board.getScene().getWindow());
         initModality(Modality.WINDOW_MODAL);

@@ -1,4 +1,4 @@
-package gui;
+package gui.component;
 
 import javafx.scene.layout.HBox;
 

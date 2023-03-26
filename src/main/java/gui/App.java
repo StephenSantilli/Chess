@@ -14,10 +14,12 @@ import java.net.URL;
 import java.util.prefs.Preferences;
 
 import game.Game;
+import gui.component.GameView;
+import gui.menu.BarMenu;
 
 public class App extends Application {
 
-    static Preferences prefs = Preferences.userNodeForPackage(App.class);
+    public static Preferences prefs = Preferences.userNodeForPackage(App.class);
 
     private Stage stage;
     private Scene scene;

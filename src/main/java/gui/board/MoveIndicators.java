@@ -1,4 +1,4 @@
-package gui;
+package gui.board;
 
 import java.util.ArrayList;
 
@@ -6,14 +6,15 @@ import game.Game;
 import game.Move;
 import game.Position;
 import game.Square;
+import gui.component.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Ellipse;
 
-public class MoveIndicatorsPane extends Pane {
+public class MoveIndicators extends Pane {
 
     private GameView gameView;
 
-    public MoveIndicatorsPane(GameView gameView) {
+    public MoveIndicators(GameView gameView) {
         this.gameView = gameView;
     }
 

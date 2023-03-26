@@ -1,5 +1,6 @@
-package gui;
+package gui.dialog;
 
+import gui.PieceTranscoder;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,7 +17,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
-public class PromoteDialog extends Stage {
+public class Promote extends Stage {
 
     private char result;
 
@@ -24,7 +25,7 @@ public class PromoteDialog extends Stage {
         return result;
     }
 
-    public PromoteDialog(double pieceSize, double squareSize, boolean white, boolean flipped, Window owner) throws Exception {
+    public Promote(double pieceSize, double squareSize, boolean white, boolean flipped, Window owner) throws Exception {
 
         this.result = 'X';
 

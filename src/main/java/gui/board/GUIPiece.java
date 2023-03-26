@@ -1,10 +1,11 @@
-package gui;
+package gui.board;
 
 import java.util.ArrayList;
 
 import game.Move;
 import game.Square;
 import game.pieces.Piece;
+import gui.component.GameView;
 import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -164,7 +165,7 @@ public class GUIPiece {
 
                         };
 
-                        ArrayList<TranslateTransition> ts = b.getBoard().getTransitions();
+                        ArrayList<TranslateTransition> ts = b.getBoard().getPiecePane().getTransitions();
                         ts.clear();
                         // b.getChildren().remove(active.getImage());
 
@@ -173,7 +174,8 @@ public class GUIPiece {
                                     .remove(b.getBoard().getGUIPieceAtSquare(m.getCaptureSquare()).getImage());
 
                         active.setPieceSquare(clickSquare);
-                        b.getBoard().pieceMoveAnimation(active, m.getOrigin(), m.getDestination(), m.getCapturePiece(),
+                        b.getBoard().getPiecePane().pieceMoveAnimation(active, m.getOrigin(), m.getDestination(),
+                                m.getCapturePiece(),
                                 callback);
                         for (TranslateTransition t : ts) {
 

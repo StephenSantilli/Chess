@@ -1,4 +1,4 @@
-package gui;
+package gui.board;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -9,6 +9,8 @@ import game.Move;
 import game.Position;
 import game.Square;
 import game.pieces.Piece;
+import gui.component.GameView;
+import gui.dialog.Promote;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -22,19 +24,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Ellipse;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 public class Board extends StackPane {
 
     private GameView gameView;
 
-    private SquarePane squarePane;
-    private HighlightPane highlightPane;
-    private BorderPane borderPane;
-    private MoveIndicatorsPane moveIndicatorsPane;
-    private PiecePane piecePane;
-
-
+    private Squares squarePane;
+    private Highlights highlightPane;
+    private SquareBorders borderPane;
+    private MoveIndicators moveIndicatorsPane;
+    private Pieces piecePane;
 
     private double squareSize = 90;
     private double pieceSize = 90 * .9;
@@ -165,43 +166,43 @@ public class Board extends StackPane {
         return gameView;
     }
 
-    public SquarePane getSquarePane() {
+    public Squares getSquarePane() {
         return squarePane;
     }
 
-    public void setSquarePane(SquarePane squarePane) {
+    public void setSquarePane(Squares squarePane) {
         this.squarePane = squarePane;
     }
 
-    public HighlightPane getHighlightPane() {
+    public Highlights getHighlightPane() {
         return highlightPane;
     }
 
-    public void setHighlightPane(HighlightPane highlightPane) {
+    public void setHighlightPane(Highlights highlightPane) {
         this.highlightPane = highlightPane;
     }
 
-    public BorderPane getBorderPane() {
+    public SquareBorders getBorderPane() {
         return borderPane;
     }
 
-    public void setBorderPane(BorderPane borderPane) {
+    public void setBorderPane(SquareBorders borderPane) {
         this.borderPane = borderPane;
     }
 
-    public MoveIndicatorsPane getMoveIndicatorsPane() {
+    public MoveIndicators getMoveIndicatorsPane() {
         return moveIndicatorsPane;
     }
 
-    public void setMovesCanvas(MoveIndicatorsPane moveIndicatorsPane) {
+    public void setMovesCanvas(MoveIndicators moveIndicatorsPane) {
         this.moveIndicatorsPane = moveIndicatorsPane;
     }
 
-    public PiecePane getPiecePane() {
+    public Pieces getPiecePane() {
         return piecePane;
     }
 
-    public void setPiecePane(PiecePane piecePane) {
+    public void setPiecePane(Pieces piecePane) {
         this.piecePane = piecePane;
     }
 
@@ -245,10 +246,6 @@ public class Board extends StackPane {
         this.boardBounds = boardBounds;
     }
 
-    public ArrayList<TranslateTransition> getTransitions() {
-        return transitions;
-    }
-
     public ChangeListener<Number> getResizeEvent() {
         return resizeEvent;
     }
@@ -271,27 +268,29 @@ public class Board extends StackPane {
 
     public Board(GameView gameView) {
 
-        squarePane = new SquarePane(gameView);
-        highlightPane = new HighlightPane(gameView);
-        borderPane = new BorderPane(gameView);
-        moveIndicatorsPane = new MoveIndicatorsPane(gameView);
-        piecePane = new PiecePane(gameView);
-
-        this.transitions = new ArrayList<TranslateTransition>();
-
         this.gameView = gameView;
+
+        squarePane = new Squares(gameView);
+        highlightPane = new Highlights(gameView);
+        borderPane = new SquareBorders(gameView);
+        moveIndicatorsPane = new MoveIndicators(gameView);
+        piecePane = new Pieces(gameView);
 
         getChildren().addAll(squarePane, highlightPane, moveIndicatorsPane, borderPane, piecePane);
 
-        squarePane.draw();
-        try {
-            initPieceTranscoders();
-        } catch (Exception e) {
-        }
+        gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
+
+            try {
+                squarePane.draw();
+                piecePane.initPieceTranscoders();
+            } catch (Exception e) {
+            }
+
+        }));
 
     }
 
-    void clearSelection() {
+    public void clearSelection() {
 
         setActive(null);
         setDragging(null);
@@ -301,9 +300,9 @@ public class Board extends StackPane {
 
     }
 
-    void showPromoteDialog(Square square, boolean white, GUIPiece callback) throws Exception {
+    public void showPromoteDialog(Square square, boolean white, GUIPiece callback) throws Exception {
 
-        PromoteDialog pD = new PromoteDialog(pieceSize, squareSize, white, gameView.isFlipped(),
+        Promote pD = new Promote(pieceSize, squareSize, white, gameView.isFlipped(),
                 getScene().getWindow());
 
         pD.setOnHidden(ev -> {
@@ -326,8 +325,6 @@ public class Board extends StackPane {
 
     }
 
-
-
     /**
      * Updates the square highlights and moves panes.
      */
@@ -338,11 +335,11 @@ public class Board extends StackPane {
 
     }
 
-    void boardUpdated() {
+    public void boardUpdated() {
         boardUpdated(false, null, null, false);
     }
 
-    void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
+    public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
 
         if (gameView.getGame() == null) {
 
@@ -361,7 +358,7 @@ public class Board extends StackPane {
 
             active = null;
             dragging = null;
-            drawPieces();
+            piecePane.draw();
 
             return;
 
@@ -376,7 +373,7 @@ public class Board extends StackPane {
                         || gameView.getGame().getLastPos().isWhite() != (gameView.getColor() == GameView.WHITE)))
             ani = false;
 
-        drawPieces(backward, ani ? p1 : null, p2);
+        piecePane.draw(backward, ani ? p1 : null, p2);
 
         gameView.getInfoPane().getTopTimer().setWhite(!gameView.isFlipped());
 
@@ -397,6 +394,8 @@ public class Board extends StackPane {
     public GUIPiece getGUIPieceAtSquare(Square square) {
 
         GUIPiece found = null;
+
+        final ArrayList<GUIPiece> pieces = piecePane.getPieces();
 
         for (int i = 0; i < pieces.size() && found == null; i++) {
 
@@ -556,7 +555,5 @@ public class Board extends StackPane {
         return "0 0 0 0";
 
     }
-
-
 
 }

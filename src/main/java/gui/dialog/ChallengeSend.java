@@ -1,9 +1,10 @@
-package gui;
+package gui.dialog;
 
 import java.util.function.UnaryOperator;
 
 import game.Player;
 import game.LAN.Challenge;
+import gui.App;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -18,7 +19,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class ChallengeSendDialog extends Stage {
+public class ChallengeSend extends Stage {
 
     private String name;
     private int color;
@@ -40,7 +41,7 @@ public class ChallengeSendDialog extends Stage {
         return create;
     }
 
-    public ChallengeSendDialog(Window owner) {
+    public ChallengeSend(Window owner) {
 
         this.create = false;
 

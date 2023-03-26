@@ -1,21 +1,22 @@
-package gui;
+package gui.board;
 
 import game.Position;
 import game.Square;
+import gui.component.GameView;
 import javafx.scene.layout.Pane;
 
-public class BorderPane extends Pane {
+public class SquareBorders extends Pane {
 
     private GameView gameView;
 
-    public BorderPane(GameView gameView) {
+    public SquareBorders(GameView gameView) {
         this.gameView = gameView;
     }
 
     public void drawBorder(Square square) {
 
         final Board board = gameView.getBoard();
-        
+
         getChildren().clear();
 
         final double squareSize = board.getSquareSize();

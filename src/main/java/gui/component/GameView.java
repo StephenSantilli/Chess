@@ -1,10 +1,17 @@
-package gui;
+package gui.component;
 
 import game.GameSettings;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
 import game.LAN.Client;
+import gui.App;
+import gui.board.Board;
+import gui.dialog.Draw;
+import gui.dialog.GameSetup;
+import gui.menu.BarMenu;
+import gui.menu.GameMenu;
+import gui.menu.ViewMenu;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.BoundingBox;
@@ -37,21 +44,26 @@ public class GameView extends HBox implements GameListener {
     private int currentPos;
 
     private App app;
+
+
     private Board board;
 
     private Pane boardPane;
-    private InfoPane infoPane;
+    private GameInfo infoPane;
 
-    private MovePane moveList;
+    private MoveList moveList;
     private ScrollPane scrollMoveList;
 
     private BarMenu menuBar;
     private GameMenu gameMenu;
     private ViewMenu viewMenu;
 
-    private DrawDialog drawDialog;
+    private Draw drawDialog;
 
     // Getters/Setters
+    public App getApp() {
+        return app;
+    }
 
     public int getCurrentPos() {
         return currentPos;
@@ -65,7 +77,7 @@ public class GameView extends HBox implements GameListener {
         return boardPane;
     }
 
-    public InfoPane getInfoPane() {
+    public GameInfo getInfoPane() {
         return infoPane;
     }
 
@@ -101,7 +113,7 @@ public class GameView extends HBox implements GameListener {
         return board;
     }
 
-    public MovePane getMoveList() {
+    public MoveList getMoveList() {
         return moveList;
     }
 
@@ -133,18 +145,16 @@ public class GameView extends HBox implements GameListener {
 
     public GameView(App app, BarMenu menuBar) throws Exception {
 
-        setId("gameView");
-
         this.app = app;
         this.menuBar = menuBar;
 
         color = TWO_PLAYER;
         flipped = false;
 
-        infoPane = new InfoPane(this);
+        infoPane = new GameInfo(this);
 
         scrollMoveList = new ScrollPane();
-        moveList = new MovePane(this, scrollMoveList);
+        moveList = new MoveList(this, scrollMoveList);
 
         scrollMoveList.setContent(moveList);
         scrollMoveList.setFitToWidth(true);
@@ -246,7 +256,7 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    void setAutoFlip(boolean autoFlip) {
+    public void setAutoFlip(boolean autoFlip) {
 
         this.autoFlip = autoFlip;
 
@@ -286,16 +296,16 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    void flipBoard() {
+    public void flipBoard() {
 
         flipped = !flipped;
         board.boardUpdated();
 
     }
 
-    void startGame(WindowEvent we) {
+    public void startGame(WindowEvent we) {
 
-        final GameSettingsDialog settings = new GameSettingsDialog(getScene().getWindow(), this);
+        final GameSetup settings = new GameSetup(getScene().getWindow(), this);
 
         settings.setOnHidden(e -> {
 
@@ -413,7 +423,7 @@ public class GameView extends HBox implements GameListener {
                 if ((color == WHITE || color == BLACK) && game.getLastPos().getDrawOfferer() == color)
                     return;
 
-                drawDialog = new DrawDialog(this, game.getPlayer(client.isOppColor()).getName());
+                drawDialog = new Draw(this, game.getPlayer(client.isOppColor()).getName());
 
                 drawDialog.setOnHidden(ev -> {
 

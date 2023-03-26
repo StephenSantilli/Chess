@@ -1,4 +1,4 @@
-package gui;
+package gui.component;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -6,7 +6,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-public class InfoPane extends VBox {
+public class GameInfo extends VBox {
 
     private GUITimer topTimer, bottomTimer;
     private Label topName, bottomName;
@@ -45,7 +45,7 @@ public class InfoPane extends VBox {
         this.bottomName = bottomName;
     }
 
-    public InfoPane(GameView board) {
+    public GameInfo(GameView board) {
 
         this.board = board;
 
@@ -84,7 +84,7 @@ public class InfoPane extends VBox {
 
     }
 
-    void updateTimers() {
+    public void updateTimers() {
     
         topTimer.update();
         bottomTimer.update();

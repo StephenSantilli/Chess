@@ -1,9 +1,11 @@
-package gui;
+package gui.dialog;
 
 import game.Game;
 import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
+import gui.App;
+import gui.component.GameView;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,7 +25,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class GameSettingsDialog extends Stage {
+public class GameSetup extends Stage {
 
     private long timePerSide, timePerMove;
 
@@ -37,7 +39,7 @@ public class GameSettingsDialog extends Stage {
 
     private Label perSideLabel, perSideDivider, perMoveLabel, perMoveDivider, eLabel;
 
-    private ChallengeSearchDialog search;
+    private ChallengeSearch search;
 
     private boolean create;
     private Client client;
@@ -98,7 +100,7 @@ public class GameSettingsDialog extends Stage {
 
     };
 
-    public GameSettingsDialog(Window window, GameView board) {
+    public GameSetup(Window window, GameView board) {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
@@ -212,7 +214,7 @@ public class GameSettingsDialog extends Stage {
         createChallenge = new Button("Create LAN Challenge");
         createChallenge.setOnAction(e -> {
 
-            ChallengeSendDialog cDialog = new ChallengeSendDialog(getScene().getWindow());
+            ChallengeSend cDialog = new ChallengeSend(getScene().getWindow());
 
             cDialog.setOnHidden(we -> {
 
@@ -259,7 +261,7 @@ public class GameSettingsDialog extends Stage {
 
             try {
 
-                search = new ChallengeSearchDialog(getScene().getWindow(), gameCreatedCallbackSearcher);
+                search = new ChallengeSearch(getScene().getWindow(), gameCreatedCallbackSearcher);
                 search.setOnHidden(we -> {
 
                     client = search.getClient();
