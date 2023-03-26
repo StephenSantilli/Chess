@@ -34,18 +34,7 @@ public class GameView extends HBox implements GameListener {
     public static final int WHITE = 1;
     public static final int BLACK = 2;
 
-    private Game game;
-    private Client client;
-
-    private boolean flipped;
-    private boolean autoFlip;
-
-    private int color;
-    private int currentPos;
-
     private App app;
-
-
     private Board board;
 
     private Pane boardPane;
@@ -60,17 +49,36 @@ public class GameView extends HBox implements GameListener {
 
     private Draw drawDialog;
 
+    private Game game;
+    private Client client;
+
+    private int color;
+    private int currentPos;
+
+    private boolean flipped;
+    private boolean autoFlip;
+
     // Getters/Setters
+    public boolean isTurn() {
+
+        if (color == TWO_PLAYER)
+            return true;
+
+        if (color == BLACK && !game.getLastPos().isWhite())
+            return true;
+        if (color == WHITE && game.getLastPos().isWhite())
+            return true;
+
+        return false;
+
+    }
+
     public App getApp() {
         return app;
     }
 
-    public int getCurrentPos() {
-        return currentPos;
-    }
-
-    public boolean isAutoFlip() {
-        return autoFlip;
+    public Board getBoard() {
+        return board;
     }
 
     public Pane getBoardPane() {
@@ -79,38 +87,6 @@ public class GameView extends HBox implements GameListener {
 
     public GameInfo getInfoPane() {
         return infoPane;
-    }
-
-    public GameMenu getGameMenu() {
-        return gameMenu;
-    }
-
-    public ViewMenu getViewMenu() {
-        return viewMenu;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    public boolean isFlipped() {
-        return flipped;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public Board getBoard() {
-        return board;
     }
 
     public MoveList getMoveList() {
@@ -125,22 +101,52 @@ public class GameView extends HBox implements GameListener {
         return menuBar;
     }
 
+    public GameMenu getGameMenu() {
+        return gameMenu;
+    }
+
+    public ViewMenu getViewMenu() {
+        return viewMenu;
+    }
+
+    public Draw getDrawDialog() {
+        return drawDialog;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
     public void setGame(Game game) {
         this.game = game;
     }
 
-    public boolean isTurn() {
+    public Client getClient() {
+        return client;
+    }
 
-        if (color == TWO_PLAYER)
-            return true;
+    public void setClient(Client client) {
+        this.client = client;
+    }
 
-        if (color == BLACK && !game.getLastPos().isWhite())
-            return true;
-        if (color == WHITE && game.getLastPos().isWhite())
-            return true;
+    public int getColor() {
+        return color;
+    }
 
-        return false;
+    public int getCurrentPos() {
+        return currentPos;
+    }
 
+    public void setCurrentPos(int pos) {
+        this.currentPos = pos;
+    }
+
+    public boolean isFlipped() {
+        return flipped;
+    }
+
+    public boolean isAutoFlip() {
+        return autoFlip;
     }
 
     public GameView(App app, BarMenu menuBar) throws Exception {
@@ -207,24 +213,6 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    public void setPos(int pos) {
-        this.currentPos = pos;
-    }
-
-    public void setCurrentPos(int pos) {
-
-        int old = currentPos;
-
-        currentPos = pos;
-
-        board.boardUpdated(Math.abs(pos - old) == 1, game.getPositions().get(old), game.getPositions().get(currentPos),
-                old > currentPos);
-
-        moveList.posChanged(currentPos);
-        gameMenu.update();
-
-    }
-
     // Actions
 
     public void keyHandler(KeyEvent ev) {
@@ -256,12 +244,26 @@ public class GameView extends HBox implements GameListener {
 
     }
 
+    public void setPos(int pos) {
+
+        int old = currentPos;
+
+        currentPos = pos;
+
+        board.boardUpdated(Math.abs(pos - old) == 1, game.getPositions().get(old), game.getPositions().get(currentPos),
+                old > currentPos);
+
+        moveList.posChanged(currentPos);
+        gameMenu.update();
+
+    }
+
     public void setAutoFlip(boolean autoFlip) {
 
         this.autoFlip = autoFlip;
 
         if (game != null && game.getLastPos().isWhite() == flipped)
-            flipBoard();
+            flip();
 
     }
 
@@ -269,7 +271,7 @@ public class GameView extends HBox implements GameListener {
 
         if (currentPos + 1 < game.getPositions().size()) {
 
-            setCurrentPos(currentPos + 1);
+            setPos(currentPos + 1);
 
         }
 
@@ -279,24 +281,24 @@ public class GameView extends HBox implements GameListener {
 
         if (currentPos - 1 >= 0) {
 
-            setCurrentPos(currentPos - 1);
+            setPos(currentPos - 1);
         }
 
     }
 
     void goToFirstPos() {
 
-        setCurrentPos(0);
+        setPos(0);
 
     }
 
     void goToLastPos() {
 
-        setCurrentPos(game.getPositions().size() - 1);
+        setPos(game.getPositions().size() - 1);
 
     }
 
-    public void flipBoard() {
+    public void flip() {
 
         flipped = !flipped;
         board.boardUpdated();
@@ -305,22 +307,22 @@ public class GameView extends HBox implements GameListener {
 
     public void startGame(WindowEvent we) {
 
-        final GameSetup settings = new GameSetup(getScene().getWindow(), this);
+        final GameSetup setup = new GameSetup(getScene().getWindow(), this);
 
-        settings.setOnHidden(e -> {
+        setup.setOnHidden(e -> {
 
-            if (settings.isCreate()) {
+            if (setup.isCreate()) {
 
                 if (game != null)
                     game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
-                if (settings.getClient() == null) {
+                if (setup.getClient() == null) {
                     try {
 
                         color = TWO_PLAYER;
 
                         game = new Game("White", "Black",
-                                new GameSettings(settings.getTimePerSide(), settings.getTimePerMove(), true, true, true,
+                                new GameSettings(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
                                         true));
 
                         game.addListener(this);
@@ -334,14 +336,14 @@ public class GameView extends HBox implements GameListener {
 
                 } else {
 
-                    client = settings.getClient();
+                    client = setup.getClient();
                     game = client.getGame();
                     color = client.isOppColor() ? BLACK : WHITE;
 
                     game.addListener(this);
 
                     if (color == BLACK)
-                        flipBoard();
+                        flip();
 
                     board.boardUpdated();
 
@@ -353,7 +355,7 @@ public class GameView extends HBox implements GameListener {
 
         });
 
-        settings.showAndWait();
+        setup.showAndWait();
 
     }
 
@@ -383,6 +385,7 @@ public class GameView extends HBox implements GameListener {
                 return ".";
 
         }
+
     }
 
     // Initializers
@@ -408,7 +411,7 @@ public class GameView extends HBox implements GameListener {
                 currentPos = event.getCurrIndex();
 
                 if (color == TWO_PLAYER && autoFlip && game.getLastPos().isWhite() == flipped)
-                    flipBoard();
+                    flip();
 
                 board.boardUpdated(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 

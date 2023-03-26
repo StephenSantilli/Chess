@@ -24,6 +24,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 
 public class GameSetup extends Stage {
 
@@ -290,10 +291,13 @@ public class GameSetup extends Stage {
 
             sizeToScene();
 
+        });
+
+        addEventHandler(WindowEvent.WINDOW_HIDDEN, we -> {
             if (board.getGame() != null) {
 
                 Dialog<ButtonType> confirm = new Dialog<>();
-                confirm.initOwner(getScene().getWindow());
+                confirm.initOwner(window);
                 confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
                 confirm.setTitle("Confirm New Game");
 
@@ -312,18 +316,17 @@ public class GameSetup extends Stage {
                             board.getClient().stop();
 
                         board.setGame(null);
-                        board.setPos(0);
+                        board.setCurrentPos(0);
                         board.setClient(null);
 
                         board.getBoard().boardUpdated();
 
-                    }
+                    } else create = false;
                 });
 
                 confirm.showAndWait();
 
             }
-
         });
 
     }

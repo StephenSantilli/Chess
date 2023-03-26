@@ -20,7 +20,7 @@ public class ViewMenu extends Menu {
         flip.setAccelerator(KeyCombination.keyCombination("Shortcut+F"));
         flip.setOnAction(e -> {
 
-            board.flipBoard();
+            board.flip();
 
         });
 

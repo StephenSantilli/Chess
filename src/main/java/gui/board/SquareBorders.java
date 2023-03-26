@@ -1,6 +1,5 @@
 package gui.board;
 
-import game.Position;
 import game.Square;
 import gui.component.GameView;
 import javafx.scene.layout.Pane;

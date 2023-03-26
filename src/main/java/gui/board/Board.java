@@ -4,30 +4,25 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import game.Game;
-import game.Move;
+
 import game.Position;
 import game.Square;
-import game.pieces.Piece;
 import gui.component.GameView;
 import gui.dialog.Promote;
-import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Ellipse;
 import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 
 public class Board extends StackPane {
+
+    private static final double pieceSizeMultiplier = .85;
 
     private GameView gameView;
 
@@ -37,8 +32,8 @@ public class Board extends StackPane {
     private MoveIndicators moveIndicatorsPane;
     private Pieces piecePane;
 
-    private double squareSize = 90;
-    private double pieceSize = 90 * .9;
+    private double squareSize = 100;
+    private double pieceSize = Math.round(squareSize * pieceSizeMultiplier);
 
     private GUIPiece active;
     private GUIPiece dragging;
@@ -48,7 +43,7 @@ public class Board extends StackPane {
     private Timer resizer = new Timer("Resizer", true);
     private TimerTask resizeTask = null;
 
-    private ChangeListener<Number> resizeEvent = (obs, o, n) -> {
+    private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
 
         if (resizeTask != null) {
             resizeTask.cancel();
@@ -60,7 +55,7 @@ public class Board extends StackPane {
 
                     squareSize = Math.min(gameView.getBoardPane().getWidth(), gameView.getBoardPane().getHeight())
                             / 8.0;
-                    pieceSize = squareSize * 0.9;
+                    pieceSize = Math.round(squareSize * pieceSizeMultiplier);
 
                     setMaxSize(squareSize * 8, squareSize * 8);
 
@@ -79,7 +74,7 @@ public class Board extends StackPane {
             }
         };
 
-        resizer.schedule(resizeTask, 25);
+        resizer.schedule(resizeTask, 50);
 
     };
     private EventHandler<MouseEvent> mouseMoved = ev -> {
@@ -276,6 +271,7 @@ public class Board extends StackPane {
         moveIndicatorsPane = new MoveIndicators(gameView);
         piecePane = new Pieces(gameView);
 
+
         getChildren().addAll(squarePane, highlightPane, moveIndicatorsPane, borderPane, piecePane);
 
         gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
@@ -294,7 +290,6 @@ public class Board extends StackPane {
 
         setActive(null);
         setDragging(null);
-        activeUpdated();
         borderPane.drawBorder(null);
         boardUpdated();
 
@@ -328,7 +323,7 @@ public class Board extends StackPane {
     /**
      * Updates the square highlights and moves panes.
      */
-    void activeUpdated() {
+    public void activeUpdated() {
 
         highlightPane.draw();
         moveIndicatorsPane.draw();
@@ -391,24 +386,7 @@ public class Board extends StackPane {
 
     }
 
-    public GUIPiece getGUIPieceAtSquare(Square square) {
-
-        GUIPiece found = null;
-
-        final ArrayList<GUIPiece> pieces = piecePane.getPieces();
-
-        for (int i = 0; i < pieces.size() && found == null; i++) {
-
-            if (pieces.get(i).getPiece().getSquare().equals(square))
-                found = pieces.get(i);
-
-        }
-
-        return found;
-
-    }
-
-    void setMouseType(double mouseX, double mouseY) {
+    public void setMouseType(double mouseX, double mouseY) {
 
         if (gameView.getGame() == null) {
             setCursor(Cursor.DEFAULT);
@@ -432,6 +410,23 @@ public class Board extends StackPane {
     }
 
     // Calculations
+
+    public GUIPiece getGUIPieceAtSquare(Square square) {
+
+        GUIPiece found = null;
+
+        final ArrayList<GUIPiece> pieces = piecePane.getPieces();
+
+        for (int i = 0; i < pieces.size() && found == null; i++) {
+
+            if (pieces.get(i).getPiece().getSquare().equals(square))
+                found = pieces.get(i);
+
+        }
+
+        return found;
+
+    }
 
     /**
      * Gets the {@link Square} that {@code x} and {@code y} fall within.

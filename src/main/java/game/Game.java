@@ -580,7 +580,8 @@ public class Game {
 
         positions.add(redo);
 
-        redo.setPromote(redo.getRedoPromote(), this);
+        if (redo.getRedoPromote() != '0')
+            redo.setPromote(redo.getRedoPromote(), this);
 
         boolean redoTime = getPreviousPos().getTimerEnd() > 0;
 

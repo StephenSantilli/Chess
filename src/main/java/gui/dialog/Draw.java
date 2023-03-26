@@ -23,7 +23,6 @@ public class Draw extends Stage {
     public Draw(GameView board, String offererName) {
 
         initOwner(board.getScene().getWindow());
-        // initModality(Modality.WINDOW_MODAL);
         getIcons().setAll(((Stage) (board.getScene().getWindow())).getIcons());
 
         setResizable(false);
@@ -41,7 +40,7 @@ public class Draw extends Stage {
 
         HBox buttons = new HBox();
 
-        Button yes = new Button("Yes");
+        yes = new Button("Yes");
         yes.setOnAction(ev -> {
 
             accept = true;
@@ -49,7 +48,7 @@ public class Draw extends Stage {
 
         });
 
-        Button no = new Button("No");
+        no = new Button("No");
         no.setOnAction(ev -> {
 
             accept = false;
@@ -64,7 +63,6 @@ public class Draw extends Stage {
 
         vb.setSpacing(5);
         buttons.setSpacing(5);
-
 
     }
 

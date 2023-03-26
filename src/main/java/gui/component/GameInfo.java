@@ -11,8 +11,6 @@ public class GameInfo extends VBox {
     private GUITimer topTimer, bottomTimer;
     private Label topName, bottomName;
     private Region spacer;
-    private GameView board;
-
     public GUITimer getTopTimer() {
         return topTimer;
     }
@@ -46,8 +44,6 @@ public class GameInfo extends VBox {
     }
 
     public GameInfo(GameView board) {
-
-        this.board = board;
 
         // - Top timer
         topTimer = new GUITimer(board, board.isFlipped());

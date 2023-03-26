@@ -20,13 +20,6 @@ public class MoveList extends GridPane {
 
     private ScrollPane sp;
 
-    private static final String BUTTON_INACTIVE = "#ffffff";
-    private static final String BUTTON_ACTIVE = "#bbbbbb";
-    private static final String BUTTON_INACTIVE_HOVER = "#dddddd";
-    private static final String BUTTON_ACTIVE_HOVER = "#999999";
-    private static final String BUTTON_INACTIVE_CLICKED = "#cacaca";
-    private static final String BUTTON_ACTIVE_CLICKED = "#888888";
-
     public MoveList(GameView board, ScrollPane sp) {
 
         setId("movePane");
@@ -161,7 +154,7 @@ public class MoveList extends GridPane {
         btn.setOnAction(e -> {
 
             try {
-                board.setCurrentPos(pos);
+                board.setPos(pos);
             } catch (Exception e1) {
             }
 

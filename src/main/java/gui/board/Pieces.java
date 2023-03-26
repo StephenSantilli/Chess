@@ -253,6 +253,8 @@ public class Pieces extends Pane {
 
         boolean color = true;
 
+        System.out.println(pieceSize);
+
         for (int i = 0; i < 2; i++) {
 
             transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
