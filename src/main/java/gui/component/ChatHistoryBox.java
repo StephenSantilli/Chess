@@ -47,7 +47,7 @@ public class ChatHistoryBox extends VBox {
                     Chat cj = game.getMessages().get(i + j);
 
                     if (!cj.getPlayer().equals(c.getPlayer()) || cj.isSystemMessage()) {
-                        i += j - 1;
+                        i += j;
                         break;
                     }
 
@@ -55,8 +55,10 @@ public class ChatHistoryBox extends VBox {
                     Label timestamp = new Label(dFormat.format(new Date(cj.getTimestamp())));
                     Label message = new Label(cj.getMessage());
 
-                    content.add(name, 0, j);
-                    content.add(timestamp, 1, j);
+                    if (j == 0) {
+                        content.add(name, 0, j);
+                        content.add(timestamp, 1, j);
+                    }
                     content.add(message, 2, j);
 
                 }
