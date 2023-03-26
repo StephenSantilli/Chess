@@ -19,11 +19,11 @@ public class ChatHistoryBox extends VBox {
 
         this.gameView = gameView;
 
-        draw();
+        draw(null);
 
     }
 
-    public void draw() {
+    public void draw(Runnable callback) {
 
         getChildren().clear();
 
@@ -42,24 +42,31 @@ public class ChatHistoryBox extends VBox {
 
             if (!c.isSystemMessage()) {
 
-                for (int j = 0; i + j < game.getMessages().size(); j++) {
+                Label name = new Label(c.getPlayer().getName());
+                Label timestamp = new Label(dFormat.format(new Date(c.getTimestamp())));
+                Label message = new Label(c.getMessage());
+
+                content.add(name, 0, 0);
+                content.add(timestamp, 1, 0);
+                content.add(message, 2, 0);
+
+                for (int j = 1; i + j <= game.getMessages().size(); j++) {
+
+                    if (i + j == game.getMessages().size()) {
+                        i += j - 1;
+                        break;
+                    }
 
                     Chat cj = game.getMessages().get(i + j);
 
                     if (!cj.getPlayer().equals(c.getPlayer()) || cj.isSystemMessage()) {
-                        i += j;
+                        i += j - 1;
                         break;
                     }
 
-                    Label name = new Label(cj.getPlayer().getName());
-                    Label timestamp = new Label(dFormat.format(new Date(cj.getTimestamp())));
-                    Label message = new Label(cj.getMessage());
+                    Label cmessage = new Label(cj.getMessage());
 
-                    if (j == 0) {
-                        content.add(name, 0, j);
-                        content.add(timestamp, 1, j);
-                    }
-                    content.add(message, 2, j);
+                    content.add(cmessage, 2, j);
 
                 }
 
@@ -76,6 +83,9 @@ public class ChatHistoryBox extends VBox {
             getChildren().add(content);
 
         }
+
+        if (callback != null)
+            callback.run();
 
     }
 

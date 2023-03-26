@@ -34,6 +34,9 @@ public class ChatArea extends VBox {
         enter.setPromptText("Enter chat message...");
         enter.setOnAction(ev -> {
 
+            if (enter.getText().equals(""))
+                return;
+
             final Game game = gameView.getGame();
 
             gameView.getGame().sendMessage(new Chat(game.getPlayer(gameView.getColor() == GameView.WHITE),
@@ -66,7 +69,9 @@ public class ChatArea extends VBox {
                 enter.setDisable(false);
             }
 
-            historyBox.draw();
+            historyBox.draw(() -> {
+                scroller.setVvalue(1);
+            });
 
         });
 
