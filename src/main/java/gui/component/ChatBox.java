@@ -23,6 +23,7 @@ public class ChatBox extends VBox {
 
         chat = new TextArea();
         chat.setEditable(false);
+        chat.setWrapText(true);
 
         enter = new TextField();
         enter.setOnAction(ev -> {
@@ -63,6 +64,8 @@ public class ChatBox extends VBox {
                     + "\n");
 
         }
+
+        chat.selectEnd();
 
     }
 
