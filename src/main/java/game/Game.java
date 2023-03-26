@@ -197,6 +197,7 @@ public class Game {
 
         this.settings = settings;
 
+        messages = new ArrayList<Chat>();
         positions = new ArrayList<Position>();
 
         positions.add(new Position(this));
