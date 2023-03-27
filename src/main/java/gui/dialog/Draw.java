@@ -1,6 +1,6 @@
 package gui.dialog;
 
-import gui.component.GameView;
+import gui.GameView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;

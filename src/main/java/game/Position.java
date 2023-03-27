@@ -375,22 +375,26 @@ public class Position {
                     boolean white = Character.isUpperCase(c);
                     switch (Character.toUpperCase(c)) {
                         case 'K':
-                            pieces[7 - r][f] = new King(f + 1, r + 1, white);
+                            pieces[7 - r][f] = new King(f + 1, 8 - r, white);
                             break;
                         case 'Q':
-                            pieces[7 - r][f] = new Queen(f + 1, r + 1, white);
+                            pieces[7 - r][f] = new Queen(f + 1, 8 - r, white);
                             break;
                         case 'R':
-                            pieces[7 - r][f] = new Rook(f + 1, r + 1, white);
+                            pieces[7 - r][f] = new Rook(f + 1, 8 - r, white);
                             break;
                         case 'B':
-                            pieces[7 - r][f] = new Bishop(f + 1, r + 1, white);
+                            pieces[7 - r][f] = new Bishop(f + 1, 8 - r, white);
                             break;
                         case 'N':
-                            pieces[7 - r][f] = new Knight(f + 1, r + 1, white);
+                            pieces[7 - r][f] = new Knight(f + 1, 8 - r, white);
                             break;
                         case 'P':
-                            pieces[7 - r][f] = new Pawn(f + 1, r + 1, white);
+                            pieces[7 - r][f] = new Pawn(f + 1, 8 - r, white);
+
+                            if ((white && r != 6) || (!white && r != 1))
+                                pieces[7 - r][f].setHasMoved(true);
+
                             break;
                         default:
                             throw new Exception("Unexpected piece.");
@@ -414,34 +418,49 @@ public class Position {
 
         this.capturedPieces = new ArrayList<Piece>();
 
-        for (int i = 0; i < a[2].length(); i++) {
+        Piece wkr = getPieceAtSquare(new Square(8, 1));
+        Piece wqr = getPieceAtSquare(new Square(1, 1));
+        Piece bkr = getPieceAtSquare(new Square(8, 8));
+        Piece bqr = getPieceAtSquare(new Square(1, 8));
 
-            char c = a[2].charAt(i);
-            switch (c) {
-                case 'K':
-                    Piece wkr = getPieceAtSquare(new Square(8, 1));
-                    if (wkr != null && wkr.getCode() == 'R')
-                        wkr.setHasMoved(true);
-                    break;
-                case 'Q':
-                    Piece wqr = getPieceAtSquare(new Square(1, 1));
-                    if (wqr != null && wqr.getCode() == 'R')
-                        wqr.setHasMoved(true);
-                    break;
-                case 'k':
-                    Piece bkr = getPieceAtSquare(new Square(8, 8));
-                    if (bkr != null && bkr.getCode() == 'R')
-                        bkr.setHasMoved(true);
-                    break;
-                case 'q':
-                    Piece bqr = getPieceAtSquare(new Square(1, 8));
-                    if (bqr != null && bqr.getCode() == 'R')
-                        bqr.setHasMoved(true);
-                    break;
-                default:
-                    throw new Exception("Invalid castle status.");
+        if (wkr != null && wkr.getCode() == 'R')
+            wkr.setHasMoved(true);
+
+        if (wqr != null && wqr.getCode() == 'R')
+            wqr.setHasMoved(true);
+
+        if (bkr != null && bkr.getCode() == 'R')
+            bkr.setHasMoved(true);
+
+        if (bqr != null && bqr.getCode() == 'R')
+            bqr.setHasMoved(true);
+
+        if (!a[2].equals("-")) {
+            for (int i = 0; i < a[2].length(); i++) {
+
+                char c = a[2].charAt(i);
+                switch (c) {
+                    case 'K':
+                        if (wkr != null && wkr.getCode() == 'R')
+                            wkr.setHasMoved(false);
+                        break;
+                    case 'Q':
+                        if (wqr != null && wqr.getCode() == 'R')
+                            wqr.setHasMoved(false);
+                        break;
+                    case 'k':
+                        if (bkr != null && bkr.getCode() == 'R')
+                            bkr.setHasMoved(false);
+                        break;
+                    case 'q':
+                        if (bqr != null && bqr.getCode() == 'R')
+                            bqr.setHasMoved(false);
+                        break;
+                    default:
+                        throw new Exception("Invalid castle status.");
+                }
+
             }
-
         }
 
         initMoves(true, game);
@@ -1057,13 +1076,16 @@ public class Position {
             fen += '-';
 
         // En Passant Square
-        if (move != null && move.getPiece().getCode() == 'P' && !move.isCapture() && move.getMoveDistance() == 2
-                && ((move.isWhite() && move.getDestination().getRank() == 4)
-                        || (!move.isWhite() && move.getDestination().getRank() == 5)))
-            fen += " " + (new Square(move.getDestination().getFile(),
-                    move.getDestination().getRank() + (move.isWhite() ? -1 : 1)).toString());
-        else
-            fen += " " + "-";
+        // if (move != null && move.getPiece().getCode() == 'P' && !move.isCapture() &&
+        // move.getMoveDistance() == 2
+        // && ((move.isWhite() && move.getDestination().getRank() == 4)
+        // || (!move.isWhite() && move.getDestination().getRank() == 5)))
+        // fen += " " + (new Square(move.getDestination().getFile(),
+        // move.getDestination().getRank() + (move.isWhite() ? -1 : 1)).toString());
+        // else
+        // fen += " " + "-";
+
+        fen += " " + (enPassantDestination == null ? "-" : enPassantDestination.toString());
 
         // Fifty-move rule clock
         fen += " " + fiftyMoveCounter;
@@ -1205,7 +1227,8 @@ public class Position {
 
     public static void main(String[] args) throws Exception {
 
-        Position p = new Position(new Game("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "w", "b", new GameSettings(-1, -1, false, false, false, false)));
+        Position p = new Position(new Game("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "w", "b",
+                new GameSettings(-1, -1, false, false, false, false)));
 
         System.out.println(p.getMoves());
 

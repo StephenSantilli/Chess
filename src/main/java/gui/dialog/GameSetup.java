@@ -5,7 +5,7 @@ import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
 import gui.App;
-import gui.component.GameView;
+import gui.GameView;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,7 +32,7 @@ public class GameSetup extends Stage {
 
     private ChallengeServer server;
 
-    private Button createChallenge, searchForChallenge, startButton, cancelButton;
+    private Button setFEN, createChallenge, searchForChallenge, startButton, cancelButton;
 
     private CheckBox timeBox;
 
@@ -43,6 +43,12 @@ public class GameSetup extends Stage {
     private ChallengeSearch search;
 
     private boolean create;
+    private String fen;
+
+    public String getFen() {
+        return fen;
+    }
+
     private Client client;
 
     public boolean isCreate() {
@@ -278,7 +284,20 @@ public class GameSetup extends Stage {
 
         });
 
-        btns.getChildren().addAll(createChallenge, searchForChallenge, startButton, cancelButton);
+        setFEN = new Button("Set FEN");
+        setFEN.setOnAction(e -> {
+
+            FEN fDialog = new FEN(getScene().getWindow());
+
+            fDialog.setOnHidden(we -> {
+                this.fen = fDialog.getFen();
+            });
+
+            fDialog.show();
+
+        });
+
+        btns.getChildren().addAll(createChallenge, searchForChallenge, setFEN, startButton, cancelButton);
 
         items.getChildren().addAll(checkHBox, perSide, perMove, errorLabel, btns);
 
@@ -321,7 +340,8 @@ public class GameSetup extends Stage {
 
                         board.getBoard().boardUpdated();
 
-                    } else create = false;
+                    } else
+                        create = false;
                 });
 
                 confirm.showAndWait();

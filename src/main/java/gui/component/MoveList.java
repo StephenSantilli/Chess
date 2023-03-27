@@ -1,6 +1,7 @@
 package gui.component;
 
 import game.Position;
+import gui.GameView;
 
 import java.util.ArrayList;
 
@@ -67,21 +68,12 @@ public class MoveList extends GridPane {
                             c) == (board.getGame().getPositions().get(active).isWhite() ? 2
                                     : 1)) {
 
-                // if (c.isHover())
-                // c.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
-                // else
-                // c.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
                 c.setId("movePaneButtonActive");
 
                 c.requestFocus();
 
             } else if (getColumnIndex(c) != 0) {
                 c.setId("movePaneButton");
-
-                // if (c.isHover())
-                // c.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-                // else
-                // c.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
 
             }
 
@@ -122,33 +114,11 @@ public class MoveList extends GridPane {
     private void execMove(int pos) {
 
         Position p = board.getGame().getPositions().get(pos);
-        int row = ((pos - 1) / 2);
+        int row = (int) Math.ceil((p.getMoveNumber()) / 2.0) - 1;
         Move m = p.getMove();
         Button btn = new Button(p.getMoveString());
         btn.setMaxWidth(Double.MAX_VALUE);
-        // btn.setStyle("-fx-background-color: " + (board.getCurrentPos() == pos ?
-        // BUTTON_ACTIVE : BUTTON_INACTIVE));
         btn.setId("movePaneButton");
-
-        /*
-         * btn.setOnMouseEntered(e -> {
-         * 
-         * if (btn.getStyle().endsWith(BUTTON_INACTIVE))
-         * btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE_HOVER);
-         * else if (btn.getStyle().endsWith(BUTTON_ACTIVE))
-         * btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE_HOVER);
-         * 
-         * });
-         * 
-         * btn.setOnMouseExited(e -> {
-         * if (btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
-         * btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
-         * } else if (btn.getStyle().endsWith(BUTTON_ACTIVE_HOVER)) {
-         * btn.setStyle("-fx-background-color: " + BUTTON_ACTIVE);
-         * }
-         * });
-         */
-
         btn.setFocusTraversable(true);
 
         btn.setOnAction(e -> {
@@ -160,32 +130,17 @@ public class MoveList extends GridPane {
 
         });
 
-        // btn.setOnMousePressed(e -> {
-        // if (btn.getStyle().endsWith(BUTTON_INACTIVE) ||
-        // btn.getStyle().endsWith(BUTTON_INACTIVE_HOVER)) {
-        // btn.setId("movePaneButtonClicked");
-        // }
-        // });
-
-        // btn.setOnMouseReleased(e -> {
-        // if (btn.getStyle().endsWith(BUTTON_INACTIVE_CLICKED)) {
-        // btn.setStyle("-fx-background-color: " + BUTTON_INACTIVE);
-        // }
-        // });
-
         add(btn, m.isWhite() ? 1 : 2, row);
         requestFocus();
         sp.setVvalue(1);
 
-        // GridPane.setMargin(btn, new Insets(5, 5, 5, 5));
 
-        if (m.isWhite()) {
+        if (m.isWhite() || pos == 1) {
 
             Label l = new Label((row + 1) + ".");
             l.setId("movePaneLabel");
 
             add(l, 0, row);
-            // GridPane.setMargin(l, new Insets(5, 5, 5, 5));
 
         }
 

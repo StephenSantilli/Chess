@@ -14,7 +14,6 @@ import java.net.URL;
 import java.util.prefs.Preferences;
 
 import game.Game;
-import gui.component.GameView;
 import gui.menu.BarMenu;
 
 public class App extends Application {

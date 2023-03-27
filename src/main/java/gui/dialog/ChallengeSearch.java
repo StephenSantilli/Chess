@@ -35,7 +35,6 @@ public class ChallengeSearch extends Stage {
 
     private int timePerSide, timePerMove;
 
-
     private Button refresh;
 
     private TableView<Challenge> challengeTable;
@@ -182,7 +181,7 @@ public class ChallengeSearch extends Stage {
                     if (ev.getClickCount() >= 2) {
 
                         try {
-                            
+
                             Socket s = new Socket();
 
                             s.connect(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
@@ -250,8 +249,6 @@ public class ChallengeSearch extends Stage {
             sizeToScene();
 
         });
-
-
 
         setTitle("Search for Challenges");
         setScene(s);

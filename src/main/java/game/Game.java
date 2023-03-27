@@ -43,6 +43,16 @@ public class Game {
 
     private Player black;
 
+    private String event;
+
+    private String site;
+    
+    private Date date;
+
+    private String round;
+
+    
+
     private ArrayList<Chat> messages;
 
     /**

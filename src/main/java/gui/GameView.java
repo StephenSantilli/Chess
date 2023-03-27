@@ -1,12 +1,17 @@
-package gui.component;
+package gui;
 
 import game.GameSettings;
+
+import org.apache.xmlgraphics.util.dijkstra.Edge;
+
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
 import game.LAN.Client;
-import gui.App;
 import gui.board.Board;
+import gui.component.ChatArea;
+import gui.component.GameInfo;
+import gui.component.MoveList;
 import gui.dialog.Draw;
 import gui.dialog.GameSetup;
 import gui.menu.BarMenu;
@@ -331,9 +336,14 @@ public class GameView extends HBox implements GameListener {
 
                         color = TWO_PLAYER;
 
-                        game = new Game("White", "Black",
-                                new GameSettings(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
-                                        true));
+                        if (!setup.getFen().equals(""))
+                            game = new Game(setup.getFen(), "White", "Black",
+                                    new GameSettings(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+                                            true));
+                        else
+                            game = new Game("White", "Black",
+                                    new GameSettings(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+                                            true));
 
                         game.addListener(this);
 
@@ -341,7 +351,15 @@ public class GameView extends HBox implements GameListener {
                         board.boardUpdated();
 
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                    
+                        Dialog<Void> eDg = new Dialog<>();
+                        eDg.setTitle("Error Creating Game");
+                        eDg.setContentText(ex.getMessage());
+                        
+                        eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+                        eDg.showAndWait();
+
                     }
 
                 } else {

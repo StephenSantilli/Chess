@@ -2,7 +2,7 @@ package gui.board;
 
 import game.Position;
 import game.Square;
-import gui.component.GameView;
+import gui.GameView;
 import javafx.scene.layout.Pane;
 
 public class Highlights extends Pane {

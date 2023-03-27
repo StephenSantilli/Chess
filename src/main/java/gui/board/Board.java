@@ -6,7 +6,7 @@ import java.util.TimerTask;
 
 import game.Position;
 import game.Square;
-import gui.component.GameView;
+import gui.GameView;
 import gui.dialog.Promote;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;

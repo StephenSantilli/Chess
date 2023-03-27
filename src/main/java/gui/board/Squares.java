@@ -1,7 +1,7 @@
 package gui.board;
 
 import game.Square;
-import gui.component.GameView;
+import gui.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import game.Move;
 import game.Square;
 import game.pieces.Piece;
-import gui.component.GameView;
+import gui.GameView;
 import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;

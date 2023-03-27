@@ -1,7 +1,7 @@
 package gui.menu;
 
 import game.Game;
-import gui.component.GameView;
+import gui.GameView;
 import gui.dialog.Export;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;

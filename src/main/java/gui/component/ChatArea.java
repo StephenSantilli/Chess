@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 import game.Chat;
 import game.Game;
+import gui.GameView;
 import javafx.application.Platform;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;

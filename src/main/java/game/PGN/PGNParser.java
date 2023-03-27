@@ -205,7 +205,7 @@ public class PGNParser {
         }
         PGNParser p = new PGNParser(str);
 
-        System.out.println(p.outputPGN());
+        // System.out.println(p.outputPGN());
 
     }
 
@@ -261,7 +261,8 @@ public class PGNParser {
 
             String comment = null;
 
-            if (includeClock && game.getSettings().getTimePerSide() > 0 && game.getPositions().get(i - 1).getTimerEnd() > 0) {
+            if (includeClock && game.getSettings().getTimePerSide() > 0
+                    && game.getPositions().get(i - 1).getTimerEnd() > 0) {
                 comment = "{[%clk " + millisToOutputFormat(game.getPositions().get(i - 1).getTimerEnd()) + "]}";
             }
 
@@ -269,10 +270,6 @@ public class PGNParser {
 
         }
 
-    }
-
-    public String outputPGN() {
-        return outputPGN(true);
     }
 
     public String outputPGN(boolean includeTags) {
@@ -391,6 +388,11 @@ public class PGNParser {
                     extraTags.add(value);
                     break;
             }
+
+            if (key.equals("TimeControl") && !value.equals("?") && !value.equals("-")) {
+
+            }
+
         }
 
         /*

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import game.Game;
 import game.Move;
-import gui.component.GameView;
+import gui.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Ellipse;
 
