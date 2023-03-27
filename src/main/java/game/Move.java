@@ -128,6 +128,18 @@ public class Move {
 
     }
 
+    private void initMove(Position pos) throws Exception {
+
+        this.white = piece.isWhite();
+        this.enPassant = checkIfEnPassant(pos);
+        this.capture = checkIfCapture(pos);
+        this.promoteType = checkIfPromote() ? '?' : '0';
+        this.castle = checkIfCastle(pos);
+
+        this.capturePiece = pos.getPieceAtSquare(getCaptureSquare());
+
+    }
+
     public Move(Square origin, Square destination, Position pos) throws Exception {
 
         this.origin = origin;
@@ -144,19 +156,7 @@ public class Move {
         if (piece == null)
             throw new Exception("There is no piece at that square.");
 
-        this.white = piece.isWhite();
-        this.enPassant = checkIfEnPassant(pos);
-        this.capture = checkIfCapture(pos);
-        this.promoteType = checkIfPromote() ? '?' : '0';
-        this.castle = checkIfCastle(pos);
-
-        this.capturePiece = pos.getPieceAtSquare(getCaptureSquare());
-
-    }
-
-    public Move(String move, Position pos) {
-
-        // TODO: add parsing PGN input to replace old constructor
+        initMove(pos);
 
     }
 
@@ -261,13 +261,16 @@ public class Move {
         if (destP != null)
             return false;
 
+        if (pos.getEnPassantDestination() != null && pos.getEnPassantDestination().equals(destination))
+            return true;
+
         Piece p = pos.getPieceAtSquare(new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1)));
         if (p == null || p.getCode() != 'P')
             return false;
 
         Move prevMove = pos.getMove();
 
-        if (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile())
+        if (prevMove != null && (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile()))
             return false;
 
         return true;

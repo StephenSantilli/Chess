@@ -1,6 +1,8 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import game.pieces.Bishop;
 import game.pieces.King;
@@ -96,9 +98,17 @@ public class Position {
      * Counter that counts the number of moves made since the last time a pawn was
      * moved or a capture was made. Once 50 moves have been completed (100 turns),
      * the game will be declared a draw. This number includes the move that led to
-     * the current position.
+     * the current position. It will count up to 100.
      */
     private int fiftyMoveCounter;
+
+    private Square enPassantDestination;
+
+    public Square getEnPassantDestination() {
+        return enPassantDestination;
+    }
+
+    private boolean mateChecked;
 
     public int getMoveNumber() {
         return moveNumber;
@@ -287,6 +297,7 @@ public class Position {
     public Position(Game game) {
 
         white = true;
+        this.mateChecked = false;
 
         initDefaultPosition();
         initMoves(true, game);
@@ -300,7 +311,142 @@ public class Position {
 
     }
 
-    //TODO: Create position from FEN notation
+    // TODO: Create position from FEN notation
+
+    public Position(String fen, Game game) throws Exception {
+
+        String[] a = fen.split(" ");
+
+        if (a.length != 6)
+            throw new Exception("Invalid FEN.");
+
+        this.pieces = new Piece[8][8];
+        this.mateChecked = false;
+
+        this.systemTimeStart = -1;
+        this.timerEnd = -1;
+
+        this.drawOfferer = NO_OFFER;
+
+        String[] ranks = a[0].split("/");
+
+        if (ranks.length != 8)
+            throw new Exception("Invalid ranks.");
+
+        if (a[1].equals("w"))
+            white = true;
+        else if (a[1].equals("b"))
+            white = false;
+        else
+            throw new Exception("Invalid color to move.");
+
+        try {
+            fiftyMoveCounter = Integer.parseInt(a[4]);
+        } catch (Exception e) {
+            throw new Exception("Invalid 50 move counter.");
+        }
+
+        try {
+            moveNumber = Integer.parseInt(a[5]) - 1;
+        } catch (Exception e) {
+            throw new Exception("Invalid move number.");
+        }
+
+        if (fiftyMoveCounter < 0)
+            throw new Exception("Fifty move counter cannot be less than 0.");
+
+        if (moveNumber + 1 < 1)
+            throw new Exception("Move number cannot be less than 1.");
+
+        for (int r = 0; r < 8; r++) {
+
+            for (int i = 0, f = 0; i < ranks[r].length(); i++) {
+
+                char c = ranks[r].charAt(i);
+
+                if (Character.isDigit(c)) {
+                    int amt = Integer.parseInt(c + "");
+                    f += amt;
+                    continue;
+                } else {
+
+                    if (!(c + "").matches("[KQBRNPkqbrnp]"))
+                        throw new Exception("Unexpected piece type.");
+                    boolean white = Character.isUpperCase(c);
+                    switch (Character.toUpperCase(c)) {
+                        case 'K':
+                            pieces[7 - r][f] = new King(f + 1, r + 1, white);
+                            break;
+                        case 'Q':
+                            pieces[7 - r][f] = new Queen(f + 1, r + 1, white);
+                            break;
+                        case 'R':
+                            pieces[7 - r][f] = new Rook(f + 1, r + 1, white);
+                            break;
+                        case 'B':
+                            pieces[7 - r][f] = new Bishop(f + 1, r + 1, white);
+                            break;
+                        case 'N':
+                            pieces[7 - r][f] = new Knight(f + 1, r + 1, white);
+                            break;
+                        case 'P':
+                            pieces[7 - r][f] = new Pawn(f + 1, r + 1, white);
+                            break;
+                        default:
+                            throw new Exception("Unexpected piece.");
+                    }
+
+                    ++f;
+
+                }
+
+            }
+
+        }
+
+        if (!a[3].equals("-")) {
+            try {
+                enPassantDestination = new Square(a[3]);
+            } catch (Exception e) {
+                throw new Exception("Invalid en passant target square.");
+            }
+        }
+
+        this.capturedPieces = new ArrayList<Piece>();
+
+        for (int i = 0; i < a[2].length(); i++) {
+
+            char c = a[2].charAt(i);
+            switch (c) {
+                case 'K':
+                    Piece wkr = getPieceAtSquare(new Square(8, 1));
+                    if (wkr != null && wkr.getCode() == 'R')
+                        wkr.setHasMoved(true);
+                    break;
+                case 'Q':
+                    Piece wqr = getPieceAtSquare(new Square(1, 1));
+                    if (wqr != null && wqr.getCode() == 'R')
+                        wqr.setHasMoved(true);
+                    break;
+                case 'k':
+                    Piece bkr = getPieceAtSquare(new Square(8, 8));
+                    if (bkr != null && bkr.getCode() == 'R')
+                        bkr.setHasMoved(true);
+                    break;
+                case 'q':
+                    Piece bqr = getPieceAtSquare(new Square(1, 8));
+                    if (bqr != null && bqr.getCode() == 'R')
+                        bqr.setHasMoved(true);
+                    break;
+                default:
+                    throw new Exception("Invalid castle status.");
+            }
+
+        }
+
+        initMoves(true, game);
+
+    }
 
     /**
      * Creates a new {@link Position} object from the previous position with the new
@@ -318,12 +464,14 @@ public class Position {
             throws Exception {
 
         this.pieces = new Piece[8][8];
-        this.white = white;
+        this.mateChecked = false;
 
         this.systemTimeStart = -1;
         this.timerEnd = -1;
 
         this.drawOfferer = NO_OFFER;
+
+        this.white = white;
 
         Piece[][] prevPieces = prev.getPieces();
 
@@ -401,6 +549,11 @@ public class Position {
 
         }
 
+        if (!movePiece.hasMoved() && movePiece.getCode() == 'P' && move.getMoveDistance() == 2) {
+            enPassantDestination = new Square(move.getDestination().getFile(),
+                    move.getDestination().getRank() + (move.isWhite() ? -1 : 1));
+        }
+
         movePiece.setSquare(move.getDestination());
         movePiece.setHasMoved(true);
 
@@ -453,7 +606,7 @@ public class Position {
 
     }
 
-    void setPromote(char promo, Game game) throws Exception {
+    public void setPromote(char promo, Game game) throws Exception {
 
         if (promo != '?' && promo != 'Q' && promo != 'R' && promo != 'B' && promo != 'N')
             throw new Exception("Invalid promote type.");
@@ -581,6 +734,7 @@ public class Position {
      */
     private void setCheckMate(Game g) {
 
+        this.mateChecked = true;
         this.checkMate = true;
 
         for (int i = 0; i < moves.size(); i++) {
@@ -895,36 +1049,9 @@ public class Position {
         fen += " " + (isWhite() ? "w" : "b");
 
         // Castle availability
-        boolean wKing = false, wQueen = false, bKing = false, bQueen = false;
 
-        boolean w = true;
-        for (int i = 0; i < 2; i++, w = false) {
-
-            final Piece king = getPieceAtSquare(w ? whiteKing : blackKing);
-
-            if (king.hasMoved())
-                continue;
-
-            final Piece kRook = getPieceAtSquare(new Square(8, w ? 1 : 8));
-            final Piece qRook = getPieceAtSquare(new Square(1, w ? 1 : 8));
-
-            if (kRook != null && !kRook.hasMoved()) {
-                if (w)
-                    wKing = true;
-                else
-                    bKing = true;
-            }
-
-            if (qRook != null && !qRook.hasMoved()) {
-                if (w)
-                    wQueen = true;
-                else
-                    bQueen = true;
-            }
-
-        }
-
-        fen += " " + (wKing ? "K" : "") + (wQueen ? "Q" : "") + (bKing ? "k" : "") + (bQueen ? "q" : "");
+        fen += " " + (canCastle(true, true) ? "K" : "") + (canCastle(true, false) ? "Q" : "")
+                + (canCastle(false, true) ? "k" : "") + (canCastle(false, false) ? "q" : "");
 
         if (fen.charAt(fen.length() - 1) == ' ')
             fen += '-';
@@ -945,6 +1072,142 @@ public class Position {
         fen += " " + ((int) Math.ceil((moveNumber + 1) / 2.0));
 
         return fen;
+
+    }
+
+    /**
+     * Checks the castling availability in the current position. Based on whether or
+     * not the king and rook can move, and whether or not there is a king or rook on
+     * the given side. Does not mean that castling can occur during the current
+     * turn, as temporary blocks like check may still be present.
+     * 
+     * @param white
+     * @param kingSide
+     * @return Whether or not a castle is possible.
+     */
+    public boolean canCastle(boolean white, boolean kingSide) {
+
+        final Piece king = getPieceAtSquare(white ? whiteKing : blackKing);
+
+        if (king.hasMoved())
+            return false;
+
+        final Piece rook = getPieceAtSquare(new Square(white ? 1 : 8, kingSide ? 8 : 1));
+
+        if (rook != null && !rook.hasMoved()) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public Move getMoveByPGN(String move) throws Exception {
+
+        if (!mateChecked)
+            throw new Exception(
+                    "Cannot find move by PGN if position has not been initialized with {@code checkForMate} as {@code true}.");
+
+        move = move.trim();
+
+        Square o = null;
+        Square d = null;
+        char piece = '0';
+        int oFile = -1;
+        int oRank = -1;
+
+        if (move.matches("0-0-0") || move.matches("O-O-O")) {
+
+            o = new Square(5, white ? 1 : 8);
+            d = new Square(1, white ? 1 : 8);
+
+        } else if (move.matches("0-0") || move.matches("O-O")) {
+
+            o = new Square(5, white ? 1 : 8);
+            d = new Square(8, white ? 1 : 8);
+
+        } else {
+
+            Pattern pat = Pattern.compile("[a-h][1-8]");
+            Matcher m = pat.matcher(move);
+
+            int lastSquare = -1;
+            while (m.find()) {
+                lastSquare = m.start();
+            }
+
+            if (lastSquare <= -1)
+                throw new Exception("No destination square.");
+
+            try {
+                d = new Square(move.substring(lastSquare, lastSquare + 2));
+            } catch (Exception e) {
+                throw new Exception("Invalid destination square.");
+            }
+
+            String first = move.substring(0, 1);
+            int start = 0;
+
+            if (first.matches("[KQRBNP]")) {
+                piece = first.charAt(0);
+                start = 1;
+            } else if (first.matches("[a-h]"))
+                piece = 'P';
+            else
+                throw new Exception("Invalid piece type.");
+
+            if (move.length() > 3) {
+                String modifier = move.substring(start, lastSquare - 1);
+
+                if (modifier.matches("[a-h][1-8]")) {
+                    o = new Square(modifier);
+                } else if (modifier.matches("[a-h]")) {
+                    oFile = (int) (modifier.charAt(0)) - 96;
+                } else if (modifier.matches("[1-8]")) {
+                    oRank = (int) (modifier.charAt(0)) - 48;
+                }
+            }
+
+        }
+
+        ArrayList<Move> possibleMoves = new ArrayList<Move>();
+
+        for (Move mo : moves) {
+
+            if (mo.getPiece().getCode() != piece || mo.isWhite() != isWhite())
+                continue;
+
+            if (mo.getDestination().equals(d)) {
+
+                if (o != null && mo.getOrigin().equals(o))
+                    possibleMoves.add(mo);
+                else if (oFile > -1 && mo.getOrigin().getFile() == oFile) {
+                    possibleMoves.add(mo);
+                } else if (oRank > -1 && mo.getOrigin().getRank() == oRank) {
+                    possibleMoves.add(mo);
+                } else {
+                    possibleMoves.add(mo);
+                }
+
+            }
+
+        }
+
+        if (possibleMoves.size() == 0)
+            throw new Exception("Move not found.");
+
+        if (possibleMoves.size() > 1)
+            throw new Exception("Multiple possible moves.");
+
+        return possibleMoves.get(0);
+
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        Position p = new Position(new Game("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "w", "b", new GameSettings(-1, -1, false, false, false, false)));
+
+        System.out.println(p.getMoves());
 
     }
 

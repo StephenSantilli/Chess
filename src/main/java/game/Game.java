@@ -213,6 +213,28 @@ public class Game {
 
     }
 
+    public Game(String fen, String whiteName, String blackName, GameSettings settings) throws Exception {
+
+        this.white = new Player(whiteName, true);
+        this.black = new Player(blackName, false);
+
+        this.settings = settings;
+
+        messages = new ArrayList<Chat>();
+        positions = new ArrayList<Position>();
+
+        positions.add(new Position(fen, this));
+
+        result = RESULT_NOT_STARTED;
+        resultReason = REASON_IN_PROGRESS;
+
+        this.whiteTimer = settings.getTimePerSide();
+        this.blackTimer = settings.getTimePerSide();
+
+        this.listeners = new ArrayList<GameListener>();
+
+    }
+
     public void startGame() throws Exception {
 
         if (paused)

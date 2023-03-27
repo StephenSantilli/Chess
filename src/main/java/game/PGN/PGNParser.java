@@ -343,7 +343,7 @@ public class PGNParser {
 
     }
 
-    private static final String TAG_REGEX = "\\[([A-z0-9_]+) ?\"([^\"\n]*)\"\\]";
+    private static final String TAG_REGEX = "\\[([A-Za-z0-9_]+) ?\"([^\"\n]*)\"\\]";
 
     private void parseTags() throws Exception {
 
