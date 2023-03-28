@@ -100,8 +100,8 @@ public class GameProperties {
             throws Exception {
 
         this.fen = FEN;
-        this.timePerSide = timePerSide;
-        this.timePerMove = timePerMove;
+        this.timePerSide = timePerSide <= 0 ? -1 : timePerSide;
+        this.timePerMove = timePerMove <= 0 ? -1 : timePerMove;
         this.canPause = canPause;
         this.canUndo = canUndo;
         this.whiteTimerManaged = whiteTimerManaged;
