@@ -22,6 +22,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
@@ -162,6 +163,8 @@ public class GameView extends HBox implements GameListener {
 
     public GameView(App app, BarMenu menuBar) throws Exception {
 
+        System.out.println(getTypeSelector());
+
         this.app = app;
         this.menuBar = menuBar;
 
@@ -174,20 +177,23 @@ public class GameView extends HBox implements GameListener {
         moveList = new MoveList(this, scrollMoveList);
 
         scrollMoveList.setContent(moveList);
+        scrollMoveList.setMaxWidth(Double.MAX_VALUE);
+
         scrollMoveList.setFitToWidth(true);
         scrollMoveList.setFitToHeight(true);
         scrollMoveList.setHbarPolicy(ScrollBarPolicy.NEVER);
         scrollMoveList.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollMoveList.setMinWidth(275);
 
         chatBox = new ChatArea(this);
+        chatBox.setMaxWidth(Double.MAX_VALUE);
 
         GridPane listAndChat = new GridPane();
         listAndChat.setVgap(5);
+        listAndChat.setAlignment(Pos.CENTER_LEFT);
 
         listAndChat.add(scrollMoveList, 0, 0);
         listAndChat.add(chatBox, 0, 1);
-        
+
         RowConstraints rm = new RowConstraints();
         rm.setFillHeight(true);
         rm.setPercentHeight(70);
@@ -198,16 +204,24 @@ public class GameView extends HBox implements GameListener {
 
         ColumnConstraints col = new ColumnConstraints();
         col.setFillWidth(true);
+        GridPane.setHgrow(listAndChat, Priority.ALWAYS);
+        GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
+        GridPane.setHgrow(chatBox, Priority.ALWAYS);
+        // listAndChat.setMinWidth(220);
+        // listAndChat.setMaxWidth(Double.MAX_VALUE);
+        col.setMinWidth(250);
+        col.setMaxWidth(350);
 
-        listAndChat.getRowConstraints().addAll(rm, cm);
-        listAndChat.getColumnConstraints().add(col);
+        listAndChat.getRowConstraints().setAll(rm, cm);
+        listAndChat.getColumnConstraints().setAll(col);
+        listAndChat.setId("listAndChat");
 
         board = new Board(this);
-        boardPane = new Pane(board);
+        // boardPane = new Pane(board);
 
         initMenus();
 
-        getChildren().addAll(infoPane, boardPane, listAndChat);
+        getChildren().addAll(infoPane, board, listAndChat);
 
         listAndChat.setViewOrder(1);
         infoPane.setViewOrder(1);
@@ -219,26 +233,31 @@ public class GameView extends HBox implements GameListener {
         setOnMouseReleased(board.getMouseReleased());
 
         HBox.setHgrow(infoPane, Priority.ALWAYS);
-        HBox.setHgrow(boardPane, Priority.NEVER);
+        HBox.setHgrow(board, Priority.SOMETIMES);
         HBox.setHgrow(listAndChat, Priority.ALWAYS);
 
-        HBox.setMargin(infoPane, new Insets(5, 5, 5, 5));
-        HBox.setMargin(boardPane, new Insets(5, 5, 5, 5));
-        HBox.setMargin(listAndChat, new Insets(5, 5, 5, 5));
+        HBox.setMargin(infoPane, new Insets(10, 5, 10, 5));
+        HBox.setMargin(board, new Insets(10, 5, 10, 5));
+        HBox.setMargin(listAndChat, new Insets(10, 5, 10, 5));
 
-        boardPane.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
+        setAlignment(Pos.CENTER);
+
+        board.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
+        board.setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
 
         app.getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
 
-            board.setMaxSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
+            // board.setMaxSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
             board.setBoardBounds(
                     board.localToScene(new BoundingBox(0, 0, board.getSquareSize() * 8, board.getSquareSize() * 8)));
 
-            boardPane.prefWidthProperty().bind(Bindings.min(boardPane.widthProperty(), boardPane.heightProperty()));
-            boardPane.prefHeightProperty().bind(Bindings.min(boardPane.widthProperty(), boardPane.heightProperty()));
+            // boardPane.prefWidthProperty().bind(Bindings.min(boardPane.widthProperty(),
+            // boardPane.heightProperty()));
+            // boardPane.prefHeightProperty().bind(Bindings.min(boardPane.widthProperty(),
+            // boardPane.heightProperty()));
 
-            boardPane.widthProperty().addListener(board.getResizeEvent());
-            boardPane.heightProperty().addListener(board.getResizeEvent());
+            getScene().getWindow().widthProperty().addListener(board.getResizeEvent());
+            getScene().getWindow().heightProperty().addListener(board.getResizeEvent());
 
         }));
 

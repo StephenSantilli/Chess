@@ -72,6 +72,8 @@ public class App extends Application {
 
             GameView b = new GameView(this, menu);
 
+            b.setManaged(true);
+
             VBox.setVgrow(b, Priority.ALWAYS);
 
             vb.getChildren().addAll(menu, b);

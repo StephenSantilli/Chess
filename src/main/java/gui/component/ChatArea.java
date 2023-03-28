@@ -30,6 +30,7 @@ public class ChatArea extends VBox {
         scroller = new ScrollPane(historyBox);
         scroller.setFitToHeight(true);
         scroller.setFitToWidth(true);
+        setMaxWidth(Double.MAX_VALUE);
 
         enter = new TextField();
         enter.setPromptText("Enter chat message...");

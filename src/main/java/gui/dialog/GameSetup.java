@@ -118,6 +118,7 @@ public class GameSetup extends Stage {
         initModality(Modality.APPLICATION_MODAL);
 
         setResizable(false);
+        centerOnScreen();
 
         getIcons().setAll(((Stage) (window)).getIcons());
 
@@ -332,8 +333,6 @@ public class GameSetup extends Stage {
 
         items.getChildren().addAll(checkHBox, perSide, perMove, errorLabel, btns);
 
-        setX(window.getX() + (window.getWidth() / 3.0));
-        setY(window.getY() + (window.getHeight() / 3.0));
         setScene(s);
         setTitle("Configure Game Settings");
 

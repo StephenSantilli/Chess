@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
@@ -19,7 +20,14 @@ public class Export extends Stage {
 
     private TextArea ta;
 
+    private boolean includeClock;
+
+    private GameView board;
+
     public Export(GameView board) {
+
+        this.board = board;
+        includeClock = true;
 
         initOwner(board.getScene().getWindow());
         initModality(Modality.WINDOW_MODAL);
@@ -35,21 +43,16 @@ public class Export extends Stage {
         setScene(s);
         setTitle("Export Game");
 
-        String output = "";
-        try {
+        CheckBox cb = new CheckBox("Include clock");
+        cb.setSelected(true);
+        cb.setOnAction(e -> {
+            includeClock = cb.isSelected();
+            ta.setText(getPGN());
+        });
 
-            output = board.getGame().exportPosition(true, true);
+        HBox hb = new HBox(cb);
 
-        } catch (Exception e) {
-
-            Dialog<Void> eDialog = new Dialog<Void>();
-
-            eDialog.setTitle("Error Exporting Position");
-            eDialog.setContentText("An error occurred while exporting the position.");
-            eDialog.showAndWait();
-            hide();
-
-        }
+        String output = getPGN();
 
         ta = new TextArea(output);
         ta.setEditable(false);
@@ -77,7 +80,7 @@ public class Export extends Stage {
         buttons.setAlignment(Pos.CENTER_RIGHT);
         buttons.getChildren().addAll(copyButton, okButton);
 
-        vb.getChildren().addAll(ta, buttons);
+        vb.getChildren().addAll(hb, ta, buttons);
 
         vb.setSpacing(5);
         buttons.setSpacing(5);
@@ -85,6 +88,25 @@ public class Export extends Stage {
         ta.setPrefColumnCount(85);
         ta.setPrefRowCount(15);
 
+    }
+
+    public String getPGN() {
+        try {
+
+            return board.getGame().exportPosition(true, includeClock);
+
+        } catch (Exception e) {
+
+            Dialog<Void> eDialog = new Dialog<Void>();
+
+            eDialog.setTitle("Error Exporting Position");
+            eDialog.setContentText("An error occurred while exporting the position.");
+            eDialog.showAndWait();
+            hide();
+
+        }
+
+        return "";
     }
 
 }

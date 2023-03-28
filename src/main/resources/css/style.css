@@ -3,6 +3,13 @@
   -fx-fill: transparent;
 }
 
+/* #listAndChat {
+    -fx-border-width: 5;
+  -fx-border-color: red;
+} */
+
+
+
 #infoPane {
   -fx-padding: 25 0 25 0;
   -fx-alignment: center-right;
@@ -12,13 +19,30 @@
   -fx-fill: transparent;
 }
 
-#Board {
+GameView {
+  -fx-border-width: 2;
+  -fx-border-color: red;
+}
+
+Board {
   -fx-alignment: center;
+  -fx-border-width: 2;
+  -fx-border-color: red;
+}
+
+GameInfo {
+    -fx-border-width: 2;
+  -fx-border-color: red;
+}
+
+#listAndChat {
+  -fx-border-width: 2;
+  -fx-border-color: red;
 }
 
 #squareBorder {
-    /* -fx-border-width: 5; */
-    -fx-background-color: transparent;
+  /* -fx-border-width: 5; */
+  -fx-background-color: transparent;
 }
 
 #guitimer {

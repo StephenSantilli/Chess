@@ -46,38 +46,10 @@ public class Board extends StackPane {
 
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
 
-        if (resizeTask != null) {
-            resizeTask.cancel();
-        }
-
-        resizeTask = new TimerTask() {
-            public void run() {
-                Platform.runLater(() -> {
-
-                    squareSize = Math.min(gameView.getBoardPane().getWidth(), gameView.getBoardPane().getHeight())
-                            / 8.0;
-                    pieceSize = Math.round(squareSize * pieceSizeMultiplier);
-
-                    setMaxSize(squareSize * 8, squareSize * 8);
-
-                    boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
-
-                    try {
-
-                        squarePane.draw();
-                        piecePane.initPieceTranscoders();
-                        boardUpdated();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-        };
-
-        resizer.schedule(resizeTask, 50);
+        boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
 
     };
+
     private EventHandler<MouseEvent> mouseMoved = ev -> {
 
         setMouseType(ev.getSceneX(), ev.getSceneY());
@@ -85,6 +57,26 @@ public class Board extends StackPane {
     };
 
     private EventHandler<MouseEvent> mouseReleased = e -> {
+
+        if (resizing != null) {
+
+            resizing = null;
+
+            try {
+
+                highlightPane.setVisible(true);
+                borderPane.setVisible(true);
+                moveIndicatorsPane.setVisible(true);
+                piecePane.setVisible(true);
+                piecePane.initPieceTranscoders();
+                boardUpdated();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            return;
+        }
 
         if (gameView.getGame() == null)
             return;
@@ -96,7 +88,8 @@ public class Board extends StackPane {
             dragging.onMouseReleased(e);
         } else {
 
-            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(), true));
+            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(),
+                    true));
             if (found != null)
                 found.onMouseReleased(e);
             else if (active != null)
@@ -118,8 +111,11 @@ public class Board extends StackPane {
 
     private EventHandler<MouseEvent> mousePressed = ev -> {
 
-        if(ev.getX() >= boardBounds.getMaxX() - 25 && ev.getX() <= boardBounds.getMaxX() + 25 && ev.getY() >= boardBounds.getMaxY() - 25 && ev.getY() <= boardBounds.getMaxY() + 25) {
+        if (ev.getX() >= boardBounds.getMaxX() - 10 && ev.getX() <= boardBounds.getMaxX() + 10
+                && ev.getY() >= boardBounds.getMaxY() - 10 && ev.getY() <= boardBounds.getMaxY() + 10) {
             resizing = ev;
+            setMouseType(ev.getX(), ev.getY());
+            return;
         }
 
         if (gameView.getGame() == null)
@@ -148,9 +144,36 @@ public class Board extends StackPane {
 
     private EventHandler<MouseEvent> mouseDragged = ev -> {
 
-        if(resizing != null) {
+        if (resizing != null) {
+            // System.out.println(ev.getX());
+            squareSize = Math.min(Math.min(ev.getX(), getScene().getWidth() - 280),
+                    Math.min(ev.getY(), getScene().getHeight() - 20))
+                    / 8.0;
+            pieceSize = Math.round(squareSize * pieceSizeMultiplier);
 
-            
+            // setMaxSize(squareSize * 8, squareSize * 8);
+            setPrefSize(squareSize * 8, squareSize * 8);
+            setMinSize(squareSize * 8, squareSize * 8);
+            setWidth(squareSize * 8);
+            setHeight(squareSize * 8);
+
+            gameView.getApp().getStage().setMinHeight(gameView.getApp().getStage().getHeight());
+            gameView.getApp().getStage().setMinWidth(gameView.getApp().getStage().getWidth());
+
+            // gameView.getApp().getStage().sizeToScene();
+
+            // gameView.getApp().getStage().setMinHeight(gameView.getApp().getStage().getHeight());
+            // gameView.getApp().getStage().setMinWidth(gameView.getApp().getStage().getWidth());
+
+            boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
+            squarePane.draw();
+
+            highlightPane.setVisible(false);
+            borderPane.setVisible(false);
+            moveIndicatorsPane.setVisible(false);
+            piecePane.setVisible(false);
+
+            return;
 
         }
 
@@ -252,10 +275,6 @@ public class Board extends StackPane {
         this.boardBounds = boardBounds;
     }
 
-    public ChangeListener<Number> getResizeEvent() {
-        return resizeEvent;
-    }
-
     public EventHandler<MouseEvent> getMouseMoved() {
         return mouseMoved;
     }
@@ -273,6 +292,8 @@ public class Board extends StackPane {
     }
 
     public Board(GameView gameView) {
+
+        setId("Board");
 
         this.gameView = gameView;
 
@@ -388,6 +409,7 @@ public class Board extends StackPane {
         gameView.getInfoPane().getTopName().setText(gameView.getGame().getPlayer(gameView.isFlipped()).getName());
         gameView.getInfoPane().getBottomName().setText(gameView.getGame().getPlayer(!gameView.isFlipped()).getName());
 
+        borderPane.drawBorder(null);
         activeUpdated();
 
         gameView.getGameMenu().update();
@@ -397,7 +419,8 @@ public class Board extends StackPane {
 
     public void setMouseType(double mouseX, double mouseY) {
 
-        if(resizing != null) {
+        if (resizing != null || (mouseX >= boardBounds.getMaxX() - 10 && mouseX <= boardBounds.getMaxX() + 10
+                && mouseY >= boardBounds.getMaxY() - 10 && mouseY <= boardBounds.getMaxY() + 10)) {
             setCursor(Cursor.SE_RESIZE);
             return;
         }
@@ -563,6 +586,10 @@ public class Board extends StackPane {
 
         return "0 0 0 0";
 
+    }
+
+    public ChangeListener<Number> getResizeEvent() {
+        return resizeEvent;
     }
 
 }

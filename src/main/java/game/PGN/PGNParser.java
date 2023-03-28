@@ -279,23 +279,21 @@ public class PGNParser {
         String str = "";
 
         if (includeTags) {
-            /*
-             * str += "[Event \"" + event + "\"]\n";
-             * str += "[Site \"" + site + "\"]\n";
-             * str += "[Date \"" + date + "\"]\n";
-             * str += "[Round \"" + round + "\"]\n";
-             * str += "[White \"" + white + "\"]\n";
-             * str += "[Black \"" + black + "\"]\n";
-             * str += "[Result \"" + result + "\"]\n";
-             */
 
-            // for (int i = 0; i < tags.size(); i++) {
-
-            // str += "[" + tags.get(tags.) + " \"" + tags.get(++i) + "\"]\n";
-
-            // }
+            str += "[Event \"" + tags.getOrDefault("Event", "?") + "\"]\n";
+            str += "[Site \"" + tags.getOrDefault("Site", "?") + "\"]\n";
+            str += "[Date \"" + tags.getOrDefault("Date", "????.??.??") + "\"]\n";
+            str += "[Round \"" + tags.getOrDefault("Round", "-") + "\"]\n";
+            str += "[White \"" + tags.getOrDefault("White", "?") + "\"]\n";
+            str += "[Black \"" + tags.getOrDefault("Black", "?") + "\"]\n";
+            str += "[Result \"" + tags.getOrDefault("Result", "*") + "\"]\n";
 
             for (Map.Entry<String, String> tag : tags.entrySet()) {
+
+                if (tag.getKey().equals("Event") || tag.getKey().equals("Site") || tag.getKey().equals("Date")
+                        || tag.getKey().equals("Round") || tag.getKey().equals("White") || tag.getKey().equals("Black")
+                        || tag.getKey().equals("Result"))
+                    continue;
 
                 str += "[" + tag.getKey() + " \"" + tag.getValue() + "\"]\n";
 

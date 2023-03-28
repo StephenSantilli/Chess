@@ -25,7 +25,6 @@ public class MoveList extends GridPane {
 
         setId("movePane");
 
-        // setMinWidth(220);
         setMaxWidth(Double.MAX_VALUE);
         this.board = board;
 
