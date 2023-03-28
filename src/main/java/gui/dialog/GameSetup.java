@@ -305,7 +305,7 @@ public class GameSetup extends Stage {
 
         });
 
-        setPGN = new Button("Set PGN");
+        setPGN = new Button("Import from PGN");
         setPGN.setOnAction(e -> {
 
             PGN fDialog = new PGN(getScene().getWindow());

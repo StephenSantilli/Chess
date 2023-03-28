@@ -32,7 +32,7 @@ public class PGN extends Stage {
 
         VBox vb = new VBox();
 
-        set = new Button("Set");
+        set = new Button("Start Game");
         set.setOnAction(ev -> {
             pgn = field.getText();
             hide();
@@ -68,7 +68,7 @@ public class PGN extends Stage {
 
         });
 
-        setTitle("Enter PGN Game");
+        setTitle("Start Game from PGN");
         setScene(s);
 
     }
