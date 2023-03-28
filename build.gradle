@@ -53,7 +53,7 @@ runtime {
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
         def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
 
-        imageOptions += ['--icon', "src/main/resources/img/icon_256x256.$imgType"]
+        imageOptions += ['--icon', "src/main/resources/img/icon.$imgType"]
 
         installerOptions += ['--resource-dir', "src/main/resources", '--vendor', 'Stephen Santilli']
 

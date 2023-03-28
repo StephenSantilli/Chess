@@ -35,23 +35,23 @@ public class MoveRow extends HBox {
         this.move1 = m1;
         this.move2 = m2;
 
-        setBackground(new Background(new BackgroundFill(Color.BLACK, null, getInsets())));
+
 
         Label l = new Label(moveNumber + ".");
-        l.setBackground(new Background(new BackgroundFill(Color.BLUE, null, getInsets())));
+
         l.setAlignment(Pos.TOP_LEFT);
 
         HBox.setMargin(l, new Insets(5, 5, 5, 5));
         HBox.setHgrow(l, Priority.ALWAYS);
 
         HBox moves = new HBox();
-        moves.setBackground(new Background(new BackgroundFill(Color.YELLOW, null, getInsets())));
+
         moves.setAlignment(Pos.CENTER);
         
         HBox.setHgrow(moves, Priority.ALWAYS);
 
         Button btn1 = new Button(m1.getMoveNotation());
-        btn1.setBackground(new Background(new BackgroundFill(Color.GREEN, null, getInsets())));
+
         btn1.setAlignment(Pos.CENTER_LEFT);
 
         HBox.setMargin(btn1, new Insets(5, 5, 5, 5));

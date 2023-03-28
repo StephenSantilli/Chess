@@ -42,6 +42,8 @@ public class Board extends StackPane {
     private Timer resizer = new Timer("Resizer", true);
     private TimerTask resizeTask = null;
 
+    private MouseEvent resizing;
+
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
 
         if (resizeTask != null) {
@@ -116,6 +118,10 @@ public class Board extends StackPane {
 
     private EventHandler<MouseEvent> mousePressed = ev -> {
 
+        if(ev.getX() >= boardBounds.getMaxX() - 25 && ev.getX() <= boardBounds.getMaxX() + 25 && ev.getY() >= boardBounds.getMaxY() - 25 && ev.getY() <= boardBounds.getMaxY() + 25) {
+            resizing = ev;
+        }
+
         if (gameView.getGame() == null)
             return;
 
@@ -141,6 +147,12 @@ public class Board extends StackPane {
     };
 
     private EventHandler<MouseEvent> mouseDragged = ev -> {
+
+        if(resizing != null) {
+
+            
+
+        }
 
         if (gameView.getGame() == null)
             return;
@@ -384,6 +396,11 @@ public class Board extends StackPane {
     }
 
     public void setMouseType(double mouseX, double mouseY) {
+
+        if(resizing != null) {
+            setCursor(Cursor.SE_RESIZE);
+            return;
+        }
 
         if (gameView.getGame() == null) {
             setCursor(Cursor.DEFAULT);

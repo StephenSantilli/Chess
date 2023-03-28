@@ -29,9 +29,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.stage.WindowEvent;
 
@@ -175,15 +178,29 @@ public class GameView extends HBox implements GameListener {
         scrollMoveList.setFitToHeight(true);
         scrollMoveList.setHbarPolicy(ScrollBarPolicy.NEVER);
         scrollMoveList.setVbarPolicy(ScrollBarPolicy.NEVER);
-        scrollMoveList.setMinWidth(220);
+        scrollMoveList.setMinWidth(275);
 
         chatBox = new ChatArea(this);
 
-        VBox listAndChat = new VBox(scrollMoveList, chatBox);
-        listAndChat.setSpacing(5);
+        GridPane listAndChat = new GridPane();
+        listAndChat.setVgap(5);
 
-        VBox.setVgrow(scrollMoveList, Priority.ALWAYS);
-        VBox.setVgrow(chatBox, Priority.NEVER);
+        listAndChat.add(scrollMoveList, 0, 0);
+        listAndChat.add(chatBox, 0, 1);
+        
+        RowConstraints rm = new RowConstraints();
+        rm.setFillHeight(true);
+        rm.setPercentHeight(70);
+
+        RowConstraints cm = new RowConstraints();
+        cm.setFillHeight(false);
+        cm.setPercentHeight(30);
+
+        ColumnConstraints col = new ColumnConstraints();
+        col.setFillWidth(true);
+
+        listAndChat.getRowConstraints().addAll(rm, cm);
+        listAndChat.getColumnConstraints().add(col);
 
         board = new Board(this);
         boardPane = new Pane(board);
@@ -201,9 +218,9 @@ public class GameView extends HBox implements GameListener {
         setOnMouseDragged(board.getMouseDragged());
         setOnMouseReleased(board.getMouseReleased());
 
-        HBox.setHgrow(infoPane, Priority.SOMETIMES);
-        HBox.setHgrow(boardPane, Priority.SOMETIMES);
-        HBox.setHgrow(listAndChat, Priority.SOMETIMES);
+        HBox.setHgrow(infoPane, Priority.ALWAYS);
+        HBox.setHgrow(boardPane, Priority.NEVER);
+        HBox.setHgrow(listAndChat, Priority.ALWAYS);
 
         HBox.setMargin(infoPane, new Insets(5, 5, 5, 5));
         HBox.setMargin(boardPane, new Insets(5, 5, 5, 5));
@@ -218,7 +235,7 @@ public class GameView extends HBox implements GameListener {
                     board.localToScene(new BoundingBox(0, 0, board.getSquareSize() * 8, board.getSquareSize() * 8)));
 
             boardPane.prefWidthProperty().bind(Bindings.min(boardPane.widthProperty(), boardPane.heightProperty()));
-            boardPane.prefWidthProperty().bind(Bindings.min(boardPane.widthProperty(), boardPane.heightProperty()));
+            boardPane.prefHeightProperty().bind(Bindings.min(boardPane.widthProperty(), boardPane.heightProperty()));
 
             boardPane.widthProperty().addListener(board.getResizeEvent());
             boardPane.heightProperty().addListener(board.getResizeEvent());

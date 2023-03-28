@@ -64,10 +64,14 @@ public class ChatArea extends VBox {
             if (gameView.getColor() == GameView.TWO_PLAYER) {
                 historyBox.setDisable(true);
                 enter.setDisable(true);
+                historyBox.setVisible(false);
+                enter.setVisible(false);
                 return;
             } else {
                 historyBox.setDisable(false);
                 enter.setDisable(false);
+                historyBox.setVisible(true);
+                enter.setVisible(true);
             }
 
             historyBox.draw(() -> {
