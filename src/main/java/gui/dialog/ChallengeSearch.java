@@ -1,5 +1,6 @@
 package gui.dialog;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -212,7 +215,38 @@ public class ChallengeSearch extends Stage {
 
         Button directConnect = new Button("Direct Connect");
         directConnect.setOnAction(ev -> {
-            // TODO: ADD DIRECT CONNECT DIALOG
+
+            DirectConnect dDialog = new DirectConnect(getScene().getWindow());
+
+            dDialog.setOnHidden(we -> {
+                try {
+
+                    Socket s = new Socket();
+
+                    s.connect(new InetSocketAddress(InetAddress.getByName(dDialog.getIp()), Client.PORT));
+
+                    client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreatedCallback);
+
+                    client.start();
+
+                    hide();
+
+                } catch (Exception e) {
+
+                    Dialog<Void> eDg = new Dialog<>();
+                    eDg.initOwner(getScene().getWindow());
+                    eDg.setTitle("Error Creating Game");
+                    eDg.setContentText(e.getMessage());
+
+                    eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+                    eDg.showAndWait();
+
+                }
+            });
+
+            dDialog.show();
+
         });
 
         refresh = new Button("Searching...");
