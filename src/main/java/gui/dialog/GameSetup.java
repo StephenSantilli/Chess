@@ -32,7 +32,7 @@ public class GameSetup extends Stage {
 
     private ChallengeServer server;
 
-    private Button setFEN, createChallenge, searchForChallenge, startButton, cancelButton;
+    private Button setPGN, setFEN, createChallenge, searchForChallenge, startButton, cancelButton;
 
     private CheckBox timeBox;
 
@@ -44,9 +44,14 @@ public class GameSetup extends Stage {
 
     private boolean create;
     private String fen;
+    private String pgn;
 
     public String getFen() {
         return fen;
+    }
+
+    public String getPgn() {
+        return pgn;
     }
 
     private Client client;
@@ -210,9 +215,9 @@ public class GameSetup extends Stage {
         startButton.setOnAction(e -> {
 
             timePerSide = !timeBox.isSelected() ? -1
-                    : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
+                    : ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
             timePerMove = !timeBox.isSelected() ? -1
-                    : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
+                    : ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
             create = true;
             hide();
 
@@ -229,9 +234,9 @@ public class GameSetup extends Stage {
                     return;
 
                 timePerSide = !timeBox.isSelected() ? -1
-                        : ((minPerSide.getValue() * 60) + (secPerSide.getValue())) * 1000;
+                        : ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
                 timePerMove = !timeBox.isSelected() ? -1
-                        : ((minPerMove.getValue() * 60) + (secPerMove.getValue())) * 1000;
+                        : ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
 
                 try {
 
@@ -284,6 +289,9 @@ public class GameSetup extends Stage {
 
         });
 
+        fen = "";
+        pgn = "";
+
         setFEN = new Button("Set FEN");
         setFEN.setOnAction(e -> {
 
@@ -297,7 +305,26 @@ public class GameSetup extends Stage {
 
         });
 
-        btns.getChildren().addAll(createChallenge, searchForChallenge, setFEN, startButton, cancelButton);
+        setPGN = new Button("Set PGN");
+        setPGN.setOnAction(e -> {
+
+            PGN fDialog = new PGN(getScene().getWindow());
+
+            fDialog.setOnHidden(we -> {
+                this.pgn = fDialog.getPgn();
+                timePerSide = !timeBox.isSelected() ? -1
+                        : ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
+                timePerMove = !timeBox.isSelected() ? -1
+                        : ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
+                create = true;
+                hide();
+            });
+
+            fDialog.show();
+
+        });
+
+        btns.getChildren().addAll(createChallenge, searchForChallenge, setPGN, setFEN, startButton, cancelButton);
 
         items.getChildren().addAll(checkHBox, perSide, perMove, errorLabel, btns);
 

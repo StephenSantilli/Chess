@@ -1,6 +1,6 @@
 package gui;
 
-import game.GameSettings;
+import game.GameProperties;
 
 import org.apache.xmlgraphics.util.dijkstra.Edge;
 
@@ -8,6 +8,7 @@ import game.Game;
 import game.GameEvent;
 import game.GameListener;
 import game.LAN.Client;
+import game.PGN.PGNParser;
 import gui.board.Board;
 import gui.component.ChatArea;
 import gui.component.GameInfo;
@@ -335,14 +336,19 @@ public class GameView extends HBox implements GameListener {
                     try {
 
                         color = TWO_PLAYER;
-
-                        if (!setup.getFen().equals(""))
-                            game = new Game(setup.getFen(), "White", "Black",
-                                    new GameSettings(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+                        if (!setup.getPgn().equals("")) {
+                            game = new Game("White", "Black",
+                                    new GameProperties(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+                                            true));
+                            game.importPosition(new PGNParser(setup.getPgn()));
+                        } else if (!setup.getFen().equals(""))
+                            game = new Game("White", "Black",
+                                    new GameProperties(setup.getFen(), setup.getTimePerSide(), setup.getTimePerMove(),
+                                            true, true, true,
                                             true));
                         else
                             game = new Game("White", "Black",
-                                    new GameSettings(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+                                    new GameProperties(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
                                             true));
 
                         game.addListener(this);
@@ -351,14 +357,17 @@ public class GameView extends HBox implements GameListener {
                         board.boardUpdated();
 
                     } catch (Exception ex) {
-                    
+
                         Dialog<Void> eDg = new Dialog<>();
+                        eDg.initOwner(getScene().getWindow());
                         eDg.setTitle("Error Creating Game");
                         eDg.setContentText(ex.getMessage());
-                        
+
                         eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
 
                         eDg.showAndWait();
+
+                        ex.printStackTrace();
 
                     }
 

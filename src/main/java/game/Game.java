@@ -1,11 +1,16 @@
 package game;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import game.PGN.PGNMove;
 import game.PGN.PGNParser;
 
 public class Game {
@@ -37,21 +42,12 @@ public class Game {
     /**
      * The settings of the game.
      */
-    private GameSettings settings;
+    private GameProperties settings;
 
     private Player white;
-
     private Player black;
 
-    private String event;
-
-    private String site;
-    
-    private Date date;
-
-    private String round;
-
-    
+    private Date start;
 
     private ArrayList<Chat> messages;
 
@@ -143,7 +139,7 @@ public class Game {
 
     };
 
-    public GameSettings getSettings() {
+    public GameProperties getSettings() {
         return settings;
     }
 
@@ -201,7 +197,7 @@ public class Game {
      *                    each move they make.
      * @param isTwoPlayer Whether or not there will be an opponent.
      */
-    public Game(String whiteName, String blackName, GameSettings settings) {
+    public Game(String whiteName, String blackName, GameProperties settings) throws Exception {
 
         this.white = new Player(whiteName, true);
         this.black = new Player(blackName, false);
@@ -211,35 +207,16 @@ public class Game {
         messages = new ArrayList<Chat>();
         positions = new ArrayList<Position>();
 
-        positions.add(new Position(this));
+        if (settings.getFen().equals(GameProperties.DEFAULT_FEN))
+            positions.add(new Position(this));
+        else
+            positions.add(new Position(settings.getFen(), this));
 
         result = RESULT_NOT_STARTED;
         resultReason = REASON_IN_PROGRESS;
 
-        this.whiteTimer = settings.getTimePerSide();
-        this.blackTimer = settings.getTimePerSide();
-
-        this.listeners = new ArrayList<GameListener>();
-
-    }
-
-    public Game(String fen, String whiteName, String blackName, GameSettings settings) throws Exception {
-
-        this.white = new Player(whiteName, true);
-        this.black = new Player(blackName, false);
-
-        this.settings = settings;
-
-        messages = new ArrayList<Chat>();
-        positions = new ArrayList<Position>();
-
-        positions.add(new Position(fen, this));
-
-        result = RESULT_NOT_STARTED;
-        resultReason = REASON_IN_PROGRESS;
-
-        this.whiteTimer = settings.getTimePerSide();
-        this.blackTimer = settings.getTimePerSide();
+        this.whiteTimer = settings.getTimePerSide() * 1000;
+        this.blackTimer = settings.getTimePerSide() * 1000;
 
         this.listeners = new ArrayList<GameListener>();
 
@@ -250,10 +227,11 @@ public class Game {
         if (paused)
             return;
 
+        start = new Date();
         result = RESULT_IN_PROGRESS;
 
-        whiteTimer = settings.getTimePerSide();
-        blackTimer = settings.getTimePerSide();
+        whiteTimer = settings.getTimePerSide() * 1000;
+        blackTimer = settings.getTimePerSide() * 1000;
 
         flipTimer(true, 0);
 
@@ -265,6 +243,43 @@ public class Game {
         }
 
         fireEvent(GameEvent.STARTED);
+
+        if (getLastPos().isCheckMate()) {
+
+            result = getLastPos().isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN;
+            resultReason = REASON_CHECKMATE;
+
+            flipTimer(true, 0);
+
+            markGameOver(getLastPos().isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
+            return;
+
+        }
+
+        if (getLastPos().isInsufficientMaterial()) {
+
+            result = RESULT_DRAW;
+            resultReason = REASON_DEAD_INSUFFICIENT_MATERIAL;
+
+            flipTimer(true, 0);
+
+            markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
+            return;
+
+        }
+
+        // Stalemate
+        if (getLastPos().getMoves().size() == 0) {
+
+            result = RESULT_DRAW;
+            resultReason = REASON_STALEMATE;
+
+            flipTimer(true, 0);
+
+            markGameOver(RESULT_DRAW, REASON_STALEMATE);
+            return;
+
+        }
 
     }
 
@@ -308,8 +323,6 @@ public class Game {
 
         sendMessage(new Chat(getPlayer(!offererWhite), new Date().getTime(),
                 getPlayer(!offererWhite).getName() + " declined the draw offer.", true));
-
-
 
     }
 
@@ -415,6 +428,7 @@ public class Game {
 
         }
 
+        // Stalemate
         if (movePosition.getMoves().size() == 0) {
 
             result = RESULT_DRAW;
@@ -514,9 +528,9 @@ public class Game {
         if (previous != null && setTimer && pauseTime <= 0 && previous.getTimerEnd() <= 0) {
 
             if (previous.isWhite())
-                whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove());
+                whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove() * 1000);
             else
-                blackTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove());
+                blackTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove() * 1000);
 
             previous.setTimerEnd(previous.isWhite() ? whiteTimer : blackTimer);
 
@@ -618,11 +632,11 @@ public class Game {
 
         Position prev = getPreviousPos();
         if (getLastPos().isWhite()) {
-            blackTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
-            whiteTimer -= settings.getTimePerMove();
+            blackTimer = prev == null ? settings.getTimePerSide() * 1000 : prev.getTimerEnd();
+            whiteTimer -= settings.getTimePerMove() * 1000;
         } else {
-            whiteTimer = prev == null ? settings.getTimePerSide() : prev.getTimerEnd();
-            blackTimer -= settings.getTimePerMove();
+            whiteTimer = prev == null ? settings.getTimePerSide() * 1000 : prev.getTimerEnd();
+            blackTimer -= settings.getTimePerMove() * 1000;
         }
 
         getLastPos().setSystemTimeStart(-1);
@@ -690,33 +704,74 @@ public class Game {
 
     public void importPosition(PGNParser PGN) throws Exception {
 
-        /*
-         * positions = new ArrayList<Position>();
-         * positions.add(new Position(this));
-         * 
-         * ArrayList<PGNMove> moves = PGN.getParsedMoves();
-         * 
-         * for (int i = 0; i < moves.size(); i++) {
-         * 
-         * Move m = new Move(moves.get(i).getMoveText(), getLastPos(),
-         * getLastPos().isWhite());
-         * 
-         * positions.add(new Position(getLastPos(), m, this, !getLastPos().isWhite(),
-         * true));
-         * 
-         * }
-         * 
-         * if (positions.size() == 1)
-         * throw new Exception("Position import failed.");
-         * 
-         * fireEvent(GameEvent.IMPORTED);
-         */
+        if (result != RESULT_NOT_STARTED)
+            throw new Exception("Cannot import a game after it has already started!");
+
+        positions = new ArrayList<Position>();
+        positions.add(new Position(this));
+
+        ArrayList<PGNMove> pMoves = PGN.getParsedMoves();
+
+        for (int i = 0; i < pMoves.size(); i++) {
+            String m = pMoves.get(i).getMoveText();
+            try {
+                char promote = m.charAt(m.length() - 1);
+                if (!((promote + "").matches("[QRBN]")))
+                    promote = '0';
+
+                positions.add(new Position(getLastPos(), getLastPos().getMoveByPGN(m), this, !getLastPos().isWhite(),
+                        true, promote));
+            } catch (Exception e) {
+                throw new Exception("Error at move " + i + ", \"" + m + "\". " + e.getMessage());
+            }
+
+        }
+
+        if (positions.size() == 1)
+            throw new Exception("Position import failed.");
+
+        fireEvent(GameEvent.IMPORTED);
 
     }
 
-    public String exportPosition() throws Exception {
+    public String exportPosition(boolean includeTags, boolean includeClock) throws Exception {
 
-        return new PGNParser(this, null, true).outputPGN(false);
+        Map<String, String> tags = new HashMap<>();
+
+        tags.put("Event", "?");
+        tags.put("Site", "?");
+
+        DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
+        if (start == null)
+            tags.put("Date", "????.??.??");
+        else
+            tags.put("Date", df.format(start));
+
+        tags.put("Round", "-");
+        tags.put("White", getPlayer(true).getName());
+        tags.put("Black", getPlayer(false).getName());
+
+        switch (result) {
+            case RESULT_DRAW:
+                tags.put("Result", "1/2-1/2");
+                break;
+            case RESULT_WHITE_WIN:
+                tags.put("Result", "1-0");
+                break;
+            case RESULT_BLACK_WIN:
+                tags.put("Result", "0-1");
+                break;
+            default:
+                tags.put("Result", "*");
+        }
+
+        if (settings.getTimePerSide() <= -1)
+            tags.put("TimeControl", "-");
+        else
+            tags.put("TimeControl",
+                    settings.getTimePerSide() + (settings.getTimePerMove() > 0 ? "+" + settings.getTimePerMove() : ""));
+
+        return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 
     }
 

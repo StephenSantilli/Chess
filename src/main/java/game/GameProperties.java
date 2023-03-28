@@ -1,15 +1,19 @@
 package game;
 
-public class GameSettings {
+public class GameProperties {
+
+    public static final String DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    private final String fen;
 
     /**
-     * The time, in milliseconds, each side has in total. Should be {@code -1} if no
+     * The time, in seconds, each side has in total. Should be {@code -1} if no
      * time control used.
      */
     private final long timePerSide;
 
     /**
-     * The time, in milliseconds, each side gains per move made. Should be
+     * The time, in seconds, each side gains per move made. Should be
      * {@code -1} if no time control used, but {@code 0} if no timer added per move.
      */
     private final long timePerMove;
@@ -33,6 +37,13 @@ public class GameSettings {
      * Whether or not black's timer should be automatically flipped/managed.
      */
     private final boolean blackTimerManaged;
+
+    /**
+     * @see #timePerSide
+     */
+    public String getFen() {
+        return fen;
+    }
 
     /**
      * @see #timePerSide
@@ -76,10 +87,19 @@ public class GameSettings {
         return blackTimerManaged;
     }
 
-    public GameSettings(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
+    public GameProperties(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
+            boolean whiteTimerManaged, boolean blackTimerManaged) throws Exception {
+
+        this(DEFAULT_FEN, timePerSide, timePerMove, canPause, canUndo,
+                whiteTimerManaged, blackTimerManaged);
+
+    }
+
+    public GameProperties(String FEN, long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
             boolean whiteTimerManaged, boolean blackTimerManaged)
             throws Exception {
 
+        this.fen = FEN;
         this.timePerSide = timePerSide;
         this.timePerMove = timePerMove;
         this.canPause = canPause;

@@ -2,8 +2,10 @@ package game.PGN;
 
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,45 +27,45 @@ public class PGNParser {
     /** The parsed moves. */
     private ArrayList<PGNMove> parsedMoves;
 
-    /** The name of the tournament or match event. */
-    private String event;
+    // /** The name of the tournament or match event. */
+    // private String event;
 
-    /**
-     * The location of the event. {@code [City], [Region] [IOC country code]}.
-     * <br>
-     * <br>
-     * Ex: {@code New York City, NY USA}.
-     */
-    private String site;
+    // /**
+    // * The location of the event. {@code [City], [Region] [IOC country code]}.
+    // * <br>
+    // * <br>
+    // * Ex: {@code New York City, NY USA}.
+    // */
+    // private String site;
 
-    /**
-     * The starting date of the event. {@code YYYY.MM.DD} format. {@code ??} used
-     * when unknown.
-     */
-    private String date;
+    // /**
+    // * The starting date of the event. {@code YYYY.MM.DD} format. {@code ??} used
+    // * when unknown.
+    // */
+    // private String date;
 
-    /** The round of the game in the event. */
-    private String round;
+    // /** The round of the game in the event. */
+    // private String round;
 
-    /** The player of the white pieces. {@code Lastname, Firstname}. */
-    private String white;
+    // /** The player of the white pieces. {@code Lastname, Firstname}. */
+    // private String white;
 
-    /** The player of the white pieces. {@code Lastname, Firstname}. */
-    private String black;
+    // /** The player of the white pieces. {@code Lastname, Firstname}. */
+    // private String black;
 
-    /**
-     * The result of the game. {@code [White score]-[Black score]} or {@code *}
-     * (when game has not concluded.)
-     * <br>
-     * <br>
-     * <b>Potential values:</b>
-     * <ul>
-     * <li>{@code 1-0}
-     * <li>{@code 0-1}
-     * <li>{@code 1/2-1/2}
-     * <li>{@code *}
-     */
-    private String result;
+    // /**
+    // * The result of the game. {@code [White score]-[Black score]} or {@code *}
+    // * (when game has not concluded.)
+    // * <br>
+    // * <br>
+    // * <b>Potential values:</b>
+    // * <ul>
+    // * <li>{@code 1-0}
+    // * <li>{@code 0-1}
+    // * <li>{@code 1/2-1/2}
+    // * <li>{@code *}
+    // */
+    // private String result;
 
     // /** The person annotating the game. */
     // private String annotator;
@@ -194,7 +196,7 @@ public class PGNParser {
     // private String board;
 
     /** Used for any extra, non-standard tags. */
-    private ArrayList<String> extraTags;
+    private Map<String, String> tags;
 
     public static void main(String[] args) throws Exception {
 
@@ -213,7 +215,7 @@ public class PGNParser {
 
         // this.text = String.join(" ", text.trim().split("\n"));
         this.text = text.trim();
-        extraTags = new ArrayList<String>();
+        tags = new HashMap<String, String>();
         moves = new ArrayList<String>();
         parsedMoves = new ArrayList<PGNMove>();
 
@@ -249,7 +251,7 @@ public class PGNParser {
     public PGNParser(Game game, Map<String, String> tags, boolean includeClock) throws Exception {
 
         text = "";
-        extraTags = new ArrayList<String>();
+        this.tags = tags;
         moves = new ArrayList<String>();
         parsedMoves = new ArrayList<PGNMove>();
 
@@ -277,21 +279,30 @@ public class PGNParser {
         String str = "";
 
         if (includeTags) {
-            str += "[Event \"" + event + "\"]\n";
-            str += "[Site \"" + site + "\"]\n";
-            str += "[Date \"" + date + "\"]\n";
-            str += "[Round \"" + round + "\"]\n";
-            str += "[White \"" + white + "\"]\n";
-            str += "[Black \"" + black + "\"]\n";
-            str += "[Result \"" + result + "\"]\n";
+            /*
+             * str += "[Event \"" + event + "\"]\n";
+             * str += "[Site \"" + site + "\"]\n";
+             * str += "[Date \"" + date + "\"]\n";
+             * str += "[Round \"" + round + "\"]\n";
+             * str += "[White \"" + white + "\"]\n";
+             * str += "[Black \"" + black + "\"]\n";
+             * str += "[Result \"" + result + "\"]\n";
+             */
 
-            for (int i = 0; i + 1 < extraTags.size(); i++) {
+            // for (int i = 0; i < tags.size(); i++) {
 
-                str += "[" + extraTags.get(i) + " \"" + extraTags.get(++i) + "\"]\n";
+            // str += "[" + tags.get(tags.) + " \"" + tags.get(++i) + "\"]\n";
+
+            // }
+
+            for (Map.Entry<String, String> tag : tags.entrySet()) {
+
+                str += "[" + tag.getKey() + " \"" + tag.getValue() + "\"]\n";
 
             }
 
             str += "\n";
+
         }
 
         String moveList = "";
@@ -301,9 +312,8 @@ public class PGNParser {
 
             if (i + 1 < parsedMoves.size()) {
 
-                if (!parsedMoves.get(i).getCommentary().equals("") || parsedMoves.get(i).getNAG() != 0) {
+                if (!parsedMoves.get(i).getCommentary().equals("") || parsedMoves.get(i).getNAG() != 0)
                     moveList += ((i / 2) + 1) + "... ";
-                }
 
                 moveList += parsedMoves.get(++i) + " ";
             }
@@ -311,12 +321,15 @@ public class PGNParser {
         }
 
         while (moveList.length() > 80) {
+
             int find = moveList.lastIndexOf(" ", 80);
-            if (find <= -1) {
+
+            if (find <= -1)
                 find = 79;
-            }
+
             str += moveList.substring(0, find + 1).trim() + "\n";
             moveList = moveList.substring(find + 1);
+
         }
         str += moveList;
         str += "\n";
@@ -324,7 +337,7 @@ public class PGNParser {
         return str;
     }
 
-    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)?\\s*(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O)|(O-O-O)))(?<suffix>[?!]{0,2})(((?<comm>\\s*\\{[^\\}]+\\}))|((?<NAG>\\s*\\$\\d{1,3}))|((?<res>\\s*((1\\-0)|(0\\-1)|(\\*)|(1\\/2\\-1\\/2))))){0,3}\\s*(?<eol>\\;[^\n]*)?";
+    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)?\\s*(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O-O)|(O-O)))(?<suffix>[?!]{0,2})(((?<comm>\\s*\\{[^\\}]+\\}))|((?<NAG>\\s*\\$\\d{1,3}))|((?<res>\\s*((1\\-0)|(0\\-1)|(\\*)|(1\\/2\\-1\\/2))))){0,3}\\s*(?<eol>\\;[^\n]*)?";
 
     private void parseMoves() throws Exception {
 
@@ -346,51 +359,39 @@ public class PGNParser {
 
         Matcher m = Pattern.compile(TAG_REGEX).matcher(text);
 
-        ArrayList<String> tags = new ArrayList<String>();
+        ArrayList<String> t = new ArrayList<String>();
 
         while (m.find()) {
 
-            tags.add(m.group(1));
-            tags.add(m.group(2));
+            t.add(m.group(1));
+            t.add(m.group(2));
 
         }
 
-        for (int i = 0; i + 1 < tags.size(); i++) {
+        for (int i = 0; i + 1 < t.size(); i++) {
 
-            String key = tags.get(i);
-            String value = tags.get(++i);
+            String key = t.get(i);
+            String value = t.get(++i);
 
             switch (key) {
 
-                case "Event":
-                    event = value;
-                    break;
-                case "Site":
-                    site = value;
-                    break;
-                case "Date":
-                    date = value;
-                    break;
-                case "Round":
-                    round = value;
-                    break;
-                case "White":
-                    white = value;
-                    break;
-                case "Black":
-                    black = value;
-                    break;
+                // case "Date":
+                // break;
                 case "Result":
-                    result = value;
+                    if (value.matches("1-0|0-1|1\\/2-1\\/2|\\*"))
+                        tags.put(key, value);
+                    else
+                        throw new Exception("Invalid result.");
+                    break;
+                case "TimeControl":
+                    if (value.matches("\\?|-|([\\d]+\\/[\\d]+)|([\\d]+(\\+[\\d]+)?)|(\\*[\\d]+)"))
+                        tags.put(key, value);
+                    else
+                        throw new Exception("Invalid time control.");
                     break;
                 default:
-                    extraTags.add(key);
-                    extraTags.add(value);
+                    tags.put(key, value);
                     break;
-            }
-
-            if (key.equals("TimeControl") && !value.equals("?") && !value.equals("-")) {
-
             }
 
         }
@@ -414,34 +415,6 @@ public class PGNParser {
 
     public ArrayList<String> getMoves() {
         return moves;
-    }
-
-    public String getEvent() {
-        return event;
-    }
-
-    public String getSite() {
-        return site;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public String getRound() {
-        return round;
-    }
-
-    public String getWhite() {
-        return white;
-    }
-
-    public String getBlack() {
-        return black;
-    }
-
-    public String getResult() {
-        return result;
     }
 
     public ArrayList<PGNMove> getParsedMoves() {

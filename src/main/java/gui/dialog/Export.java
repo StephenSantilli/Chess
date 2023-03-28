@@ -38,7 +38,7 @@ public class Export extends Stage {
         String output = "";
         try {
 
-            output = board.getGame().exportPosition();
+            output = board.getGame().exportPosition(true, true);
 
         } catch (Exception e) {
 

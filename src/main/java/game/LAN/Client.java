@@ -8,7 +8,7 @@ import java.util.Date;
 
 import game.Chat;
 import game.Game;
-import game.GameSettings;
+import game.GameProperties;
 import game.GameEvent;
 import game.GameListener;
 
@@ -23,7 +23,7 @@ public class Client implements GameListener {
 
     private String name;
     private int color;
-    private GameSettings settings;
+    private GameProperties settings;
 
     private Runnable gameCreatedCallback;
 
@@ -59,7 +59,7 @@ public class Client implements GameListener {
         return game;
     }
 
-    public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
+    public Client(Socket socket, String name, int color, GameProperties settings, Runnable gameCreatedCallback)
             throws Exception {
 
         this.socket = socket;
@@ -256,9 +256,13 @@ public class Client implements GameListener {
                 color = Math.round(Math.random()) == 0 ? Challenge.CHALLENGE_WHITE
                         : Challenge.CHALLENGE_BLACK;
 
-            game = new Game(color == Challenge.CHALLENGE_WHITE ? name : iMsg.getName(),
-                    color == Challenge.CHALLENGE_BLACK ? name : iMsg.getName(),
-                    settings);
+            try {
+                game = new Game(color == Challenge.CHALLENGE_WHITE ? name : iMsg.getName(),
+                        color == Challenge.CHALLENGE_BLACK ? name : iMsg.getName(),
+                        settings);
+            } catch (Exception e) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to create game."));
+            }
 
             game.addListener(this);
 
@@ -288,7 +292,7 @@ public class Client implements GameListener {
 
                 game = new Game(white ? name : rMsg.getName(),
                         !white ? name : rMsg.getName(),
-                        new GameSettings(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
+                        new GameProperties(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
                 oppColor = !white;
                 game.addListener(this);
 

@@ -298,20 +298,18 @@ public class Position {
 
         white = true;
         this.mateChecked = false;
-
-        initDefaultPosition();
-        initMoves(true, game);
+        this.capturedPieces = new ArrayList<Piece>();
 
         this.moveNumber = 0;
         this.systemTimeStart = -1;
         this.timerEnd = -1;
-        this.capturedPieces = new ArrayList<Piece>();
         this.drawOfferer = NO_OFFER;
         this.fiftyMoveCounter = 0;
 
-    }
+        initDefaultPosition();
+        initMoves(true, game);
 
-    // TODO: Create position from FEN notation
+    }
 
     public Position(String fen, Game game) throws Exception {
 
@@ -327,6 +325,8 @@ public class Position {
         this.timerEnd = -1;
 
         this.drawOfferer = NO_OFFER;
+
+        this.capturedPieces = new ArrayList<Piece>();
 
         String[] ranks = a[0].split("/");
 
@@ -494,8 +494,7 @@ public class Position {
 
         Piece[][] prevPieces = prev.getPieces();
 
-        this.capturedPieces = new ArrayList<Piece>();
-        capturedPieces.addAll(prev.getCapturedPieces());
+        this.capturedPieces = prev.getCapturedPieces();
 
         this.moveNumber = prev.getMoveNumber() + 1;
 
@@ -775,7 +774,7 @@ public class Position {
                     --i;
                 }
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
 
         }
@@ -1128,7 +1127,7 @@ public class Position {
 
         if (!mateChecked)
             throw new Exception(
-                    "Cannot find move by PGN if position has not been initialized with {@code checkForMate} as {@code true}.");
+                    "Cannot find move by PGN if position has not been initialized with checkForMate as true.");
 
         move = move.trim();
 
@@ -1141,12 +1140,14 @@ public class Position {
         if (move.matches("0-0-0") || move.matches("O-O-O")) {
 
             o = new Square(5, white ? 1 : 8);
-            d = new Square(1, white ? 1 : 8);
+            d = new Square(3, white ? 1 : 8);
+            piece = 'K';
 
         } else if (move.matches("0-0") || move.matches("O-O")) {
 
             o = new Square(5, white ? 1 : 8);
-            d = new Square(8, white ? 1 : 8);
+            d = new Square(7, white ? 1 : 8);
+            piece = 'K';
 
         } else {
 
@@ -1179,7 +1180,7 @@ public class Position {
                 throw new Exception("Invalid piece type.");
 
             if (move.length() > 3) {
-                String modifier = move.substring(start, lastSquare - 1);
+                String modifier = move.substring(start, lastSquare);
 
                 if (modifier.matches("[a-h][1-8]")) {
                     o = new Square(modifier);
@@ -1203,10 +1204,12 @@ public class Position {
 
                 if (o != null && mo.getOrigin().equals(o))
                     possibleMoves.add(mo);
-                else if (oFile > -1 && mo.getOrigin().getFile() == oFile) {
-                    possibleMoves.add(mo);
-                } else if (oRank > -1 && mo.getOrigin().getRank() == oRank) {
-                    possibleMoves.add(mo);
+                else if (oFile > -1 && oRank > -1) {
+                    if(mo.getOrigin().getFile() == oFile && mo.getOrigin().getRank() == oRank) possibleMoves.add(mo);
+                } else if (oFile > -1) {
+                    if(mo.getOrigin().getFile() == oFile) possibleMoves.add(mo);
+                } else if (oRank > -1) {
+                    if(mo.getOrigin().getRank() == oRank) possibleMoves.add(mo);
                 } else {
                     possibleMoves.add(mo);
                 }
@@ -1227,8 +1230,8 @@ public class Position {
 
     public static void main(String[] args) throws Exception {
 
-        Position p = new Position(new Game("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "w", "b",
-                new GameSettings(-1, -1, false, false, false, false)));
+        Position p = new Position(new Game("w", "b", new GameProperties(
+                "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", -1, -1, false, false, false, false)));
 
         System.out.println(p.getMoves());
 
