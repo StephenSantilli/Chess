@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -16,15 +17,21 @@ public class PGN extends Stage {
     private TextArea field;
     private Button set, cancel;
 
+    private boolean create;
+
     private String pgn;
 
     public String getPgn() {
         return pgn;
     }
 
+    public boolean isCreate() {
+        return create;
+    }
+
     public PGN(Window window) {
 
-        //initOwner(window);
+        // initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
 
@@ -49,20 +56,21 @@ public class PGN extends Stage {
 
         field = new TextArea();
         field.setPromptText("Enter PGN...");
+        VBox.setVgrow(field, Priority.ALWAYS);
 
         vb.getChildren().addAll(field, btns);
         vb.setPadding(new Insets(10));
         vb.setSpacing(10);
 
         Scene s = new Scene(vb);
-
+        setWidth(500);
+        setMinWidth(500);
+        setMinHeight(400);
+        setHeight(400);
         setOnShown(we -> {
 
-            sizeToScene();
-            setWidth(500);
-            setMinWidth(500);
-            setMinHeight(400);
-            setHeight(400);
+            // sizeToScene();
+
             setMaxHeight(getHeight());
             setMaxWidth(getWidth());
 

@@ -311,6 +311,10 @@ public class GameSetup extends Stage {
             PGN fDialog = new PGN(getScene().getWindow());
 
             fDialog.setOnHidden(we -> {
+                
+                if (!fDialog.isCreate())
+                    return;
+
                 this.pgn = fDialog.getPgn();
                 timePerSide = !timeBox.isSelected() ? -1
                         : ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
