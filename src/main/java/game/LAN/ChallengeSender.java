@@ -2,8 +2,10 @@ package game.LAN;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 
+/**
+ * Sends the challenge to the {@link ChallengeSearcher} that requested it.
+ */
 public class ChallengeSender implements Runnable {
 
     private Challenge challenge;
@@ -19,7 +21,7 @@ public class ChallengeSender implements Runnable {
     public void run() {
         try {
 
-            DatagramPacket packet = new DatagramPacket(challenge.toString().getBytes(), challenge.toString().length(),
+            DatagramPacket packet = new DatagramPacket((challenge.toString()).getBytes(), challenge.toString().length(),
                     challenge.getAddress(), Client.PORT);
 
             sock.send(packet);

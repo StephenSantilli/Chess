@@ -97,10 +97,15 @@ abstract public class Piece {
      * @param p The {@link Piece} object to compare
      * @return Whether or not the pieces are the same
      */
-    public boolean equals(Piece p) {
+    @Override
+    public boolean equals(Object compare) {
 
-        return (p.getCode() == getCode()) && isWhite() == p.isWhite() && square == p.getSquare()
-                && p.hasMoved() == hasMoved;
+        if(!(compare instanceof Piece)) return false;
+
+        Piece casted = (Piece)(compare);
+
+        return (casted.getCode() == getCode()) && isWhite() == casted.isWhite() && square == casted.getSquare()
+                && casted.hasMoved() == hasMoved;
 
     }
 

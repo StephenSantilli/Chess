@@ -1,59 +1,75 @@
 package game.LAN;
 
+import java.util.ArrayList;
+
 public class Message {
 
-    private String name, moveText;
+    public static final Message DRAW_OFFER = new Message("draw");
+    public static final Message DRAW_ACCEPT = new Message("drawaccept");
+    public static final Message DRAW_DECLINE = new Message("drawdecline");
+    public static final Message RESIGN = new Message("resign");
+    public static final Message START = new Message("start");
+    public static final Message STARTED = new Message("started");
 
-    public String getName() {
-        return name;
+    protected ArrayList<String> args;
+
+    public ArrayList<String> getArgs() {
+        return args;
     }
 
-    public String getMoveText() {
-        return moveText;
-    }
+    @Override
+    public boolean equals(Object compare) {
 
-    public Message(String name, String moveText) {
+        if (!(compare instanceof Message))
+            return false;
 
-        this.name = name;
-        this.moveText = moveText;
+        Message casted = (Message) (compare);
 
-    }
+        boolean same = args.size() == casted.getArgs().size();
 
-    public Message(String message) throws Exception {
+        for (int i = 0; same && i < args.size(); i++) {
 
-        if (!message.startsWith("Chess;"))
-            throw new Exception("Invalid message.");
+            if (!args.get(i).equals(casted.getArgs().get(i)))
+                same = false;
 
-        String[] el = message.split(";");
-
-        if (el.length <= 1)
-            throw new Exception("No message body.");
-
-        if(el.length >= 2) {
-            name = el[1];
         }
 
-        if(el.length >= 3) {
-            moveText = el[2];
+        return same;
+      
+    }
+
+    public Message(String text) {
+
+        this.args = new ArrayList<String>();
+
+        String[] split = text.split("(?<!\\\\);");
+
+        for (int i = 0; i < split.length; i++) {
+            args.add(split[i].replaceAll("\\\\;", ";"));
         }
 
     }
 
+    public Message(String... split) {
+
+        this.args = new ArrayList<String>();
+
+        for (int i = 0; i < split.length; i++) {
+            args.add(split[i].replaceAll("\\\\;", ";"));
+        }
+
+    }
+
+    @Override
     public String toString() {
 
-        String str = "Chess;";
+        String text = "";
 
-        if (name != null) {
-            str += name;
+        for (int i = 0; i < args.size(); i++) {
+            text += args.get(i).replaceAll(";", "\\\\;") + ";";
         }
-        str += ";";
 
-        if (moveText != null) {
-            str += moveText;
-        }
-        str += ";";
-
-        return str;
+        return text;
 
     }
 

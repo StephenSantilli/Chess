@@ -2,6 +2,10 @@ package game.LAN;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+
+import game.Game;
+import game.Player;
 
 public class Challenge {
 
@@ -9,13 +13,14 @@ public class Challenge {
     public static final int CHALLENGE_WHITE = 1;
     public static final int CHALLENGE_BLACK = 2;
 
-    public static final int MAX_NAME_LENGTH = 15;
-
-    private String name;
-
-    private int color, timePerSide, timePerMove;
-
+    private String version, name;
+    private int color;
+    private long timePerSide, timePerMove;
     private InetAddress address;
+
+    public String getVersion() {
+        return version;
+    }
 
     public String getName() {
         return name;
@@ -25,11 +30,11 @@ public class Challenge {
         return color;
     }
 
-    public int getTimePerSide() {
+    public long getTimePerSide() {
         return timePerSide;
     }
 
-    public int getTimePerMove() {
+    public long getTimePerMove() {
         return timePerMove;
     }
 
@@ -37,19 +42,16 @@ public class Challenge {
         return address;
     }
 
-    public Challenge(String name, int color, int timePerSide, int timePerMove, InetAddress address) throws Exception {
+    public Challenge(String name, int color, long timePerSide, long timePerMove, InetAddress address) throws Exception {
 
-        if (name.length() > MAX_NAME_LENGTH) {
-
-            throw new Exception("Name is too long.");
-
-        }
-
+        this.version = Game.VERSION;
         this.name = name;
-        this.address = address;
         this.color = color;
         this.timePerSide = timePerSide;
         this.timePerMove = timePerMove;
+        this.address = address;
+
+        checkIfValid();
 
     }
 
@@ -57,41 +59,58 @@ public class Challenge {
 
         String str = new String(packet.getData()).trim();
 
-        String[] a = str.split(";");
+        Message msg = new Message(str);
 
-        if(a.length < 4) {
+        ArrayList<String> a = msg.getArgs();
+
+        if (a.size() != 5) {
             throw new Exception("Invalid challenge.");
         }
-        
-        name = a[0];
-        
-        if(name.length() > MAX_NAME_LENGTH) throw new Exception("Invalid name length.");
+
+        version = a.get(0);
+
+        name = a.get(1);
 
         try {
-            color = Integer.parseInt(a[1]);
-        } catch(Exception e) {
+            color = Integer.parseInt(a.get(2));
+        } catch (Exception e) {
             throw new Exception("Invalid color.");
         }
 
         try {
-            timePerSide = Integer.parseInt(a[2]);
-        } catch(Exception e) {
-            throw new Exception("Invalid timePerSide.");
+            timePerSide = Integer.parseInt(a.get(3));
+        } catch (Exception e) {
+            throw new Exception("Invalid time per side.");
         }
 
         try {
-            timePerMove = Integer.parseInt(a[3]);
-        } catch(Exception e) {
-            throw new Exception("Invalid timePerMove.");
+            timePerMove = Integer.parseInt(a.get(4));
+        } catch (Exception e) {
+            throw new Exception("Invalid time per move.");
         }
 
         address = packet.getAddress();
+
+        checkIfValid();
+
+    }
+
+    private void checkIfValid() throws Exception {
+
+        if (name.length() > Player.MAX_NAME_LENGTH)
+            throw new Exception("Your name is too long.");
+
+        if (!name.matches(Player.NAME_REGEX))
+            throw new Exception("Invalid name.");
+
+        if (color < Challenge.CHALLENGE_RANDOM || color > CHALLENGE_BLACK)
+            throw new Exception("Invalid color.");
 
     }
 
     public String toString() {
 
-        String str = name + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
+        String str = version + ";" + name + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
         return str;
 
     }

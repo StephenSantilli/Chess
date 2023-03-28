@@ -1,29 +1,13 @@
 package game;
 
-import java.util.EventListener;
-
-public interface GameListener extends EventListener {
-    
-    public void moveMade();
-
-    public void undoMove();
-
-    public void redoMove();
-
-    public void resetMoves();
-
-    public void posChanged(int old, int curr);
-
-    public void gameOver();
+@FunctionalInterface
+public interface GameListener {
 
     /**
-     * Event to signal the timer has switched sides.
-     * @param white The side the clock is ticking down on.
+     * Event to be fired when the board is updated. Does not fire when
+     * {@code currentPos} is
+     * changed.
      */
-    public void timerChange();
-
-    public void pauseGame();
-
-    public void resumeGame();
+    public void onPlayerEvent(GameEvent event);
 
 }

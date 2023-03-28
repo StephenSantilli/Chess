@@ -21,6 +21,21 @@ public class Square {
 
     }
 
+    public Square(String square) throws Exception {
+
+        square = square.toLowerCase().trim();
+
+        if (!square.matches("[a-h][1-8]"))
+            throw new Exception("Square format invalid.");
+
+        this.file = (int) (square.toLowerCase().charAt(0)) - 96;
+        this.rank = (int) (square.toLowerCase().charAt(1)) - 48;
+
+        if (!isValid())
+            throw new Exception("Invalid square.");
+
+    }
+
     /**
      * Checks if square is a valid board position (within bounds).
      * 
@@ -51,6 +66,7 @@ public class Square {
      * <br>
      * Ex: "h4"
      */
+    @Override
     public String toString() {
 
         return "" + (char) (96 + file) + rank;
@@ -63,9 +79,15 @@ public class Square {
      * @param compare The square to compare to.
      * @return Whether or not the file and rank match.
      */
-    public boolean equals(Square compare) {
+    @Override
+    public boolean equals(Object compare) {
 
-        return (file == compare.getFile()) && (rank == compare.getRank());
+        if (!(compare instanceof Square))
+            return false;
+
+        Square casted = (Square) (compare);
+
+        return (file == casted.getFile()) && (rank == casted.getRank());
 
     }
 

@@ -1,0 +1,11 @@
+.root {
+    -background: #b48845;
+    -accent: #77db77;
+    -accent-active: #41a871;
+    -lightSquare: #444130;
+    -darkSquare: #31a731;
+    -moveButton: #cfb896;
+    -moveButtonActive: #aa8b56;
+    -moveSquare: rgba(238, 187, 77, .70);
+    -activeSquare: rgba(238, 187, 85, .70);
+}

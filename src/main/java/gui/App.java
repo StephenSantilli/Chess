@@ -3,29 +3,42 @@ package gui;
 import javafx.application.*;
 import javafx.stage.*;
 import javafx.scene.*;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.image.Image;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.awt.Taskbar;
 import java.awt.Toolkit;
+import java.net.URL;
+import java.util.prefs.Preferences;
+
+import game.Game;
+import gui.menu.BarMenu;
 
 public class App extends Application {
+
+    public static Preferences prefs = Preferences.userNodeForPackage(App.class);
+
+    private Stage stage;
+    private Scene scene;
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
 
     @Override
     public void start(Stage stage) {
 
-        VBox vb = new VBox();
-        HBox hb = new HBox();
+        this.stage = stage;
 
-        Scene s = new Scene(vb);
-        s.setFill(Color.TRANSPARENT);
+        // stage.setResizable(false);
+        stage.setTitle("Chess " + Game.VERSION);
 
-        stage.setTitle("Chess");
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_24x24.png").toString()));
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_32x32.png").toString()));
@@ -43,39 +56,39 @@ public class App extends Application {
             }
         }
 
-        stage.setScene(s);
+        VBox vb = new VBox();
+
+        scene = new Scene(vb);
+
+        scene.setFill(Color.TRANSPARENT);
+        scene.getStylesheets().add(getClass().getResource("/css/style.css").toString());
+        scene.getStylesheets().add(getClass().getResource("/css/theme.css").toString());
+
+        stage.setScene(scene);
 
         try {
-            BarMenu menu = new BarMenu(s.getWindow());
-            
-            Board b = new Board(100, menu);
-            hb.getChildren().add(b);
-            
-            vb.getChildren().addAll(menu, hb);
 
-            ScrollPane sp = b.getScrollMovePane();
+            BarMenu menu = new BarMenu(scene.getWindow());
 
-            sp.setHbarPolicy(ScrollBarPolicy.NEVER);
-            sp.setVbarPolicy(ScrollBarPolicy.NEVER);
+            GameView b = new GameView(this, menu);
 
-            HBox.setHgrow(b, Priority.NEVER);
-            HBox.setHgrow(sp, Priority.ALWAYS);
+            VBox.setVgrow(b, Priority.ALWAYS);
 
-            hb.getChildren().add(sp);
-            b.setViewOrder(0);
-            sp.setViewOrder(1);
+            vb.getChildren().addAll(menu, b);
 
-            s.setOnKeyReleased(b.getKeyHandler());
+            scene.setOnKeyReleased(b::keyHandler);
+
+            stage.setOnShown(b::startGame);
 
             stage.setOnCloseRequest(e -> {
 
-                b.getGame().stopGame();
+                // TODO: save board position for resuming
+                if (b.getGame() != null && b.getGame().getResult() == Game.RESULT_IN_PROGRESS)
+                    b.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
                 Platform.exit();
 
             });
-
-            // stage.setOnShown(b::startGame);
 
             stage.show();
             stage.sizeToScene();
@@ -87,6 +100,18 @@ public class App extends Application {
             e.printStackTrace();
         }
 
+    }
+
+    public void setTheme(String name) throws Exception {
+
+        URL sheet = null;
+        try {
+            sheet = getClass().getResource("/css/" + name + ".css");
+        } catch (Exception e) {
+            throw new Exception("Theme not found.");
+        }
+
+        scene.getStylesheets().add(sheet.toString());
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,8 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import game.pieces.Bishop;
 import game.pieces.King;
@@ -12,12 +14,19 @@ import game.pieces.Rook;
 
 public class Position {
 
+    public static final int NO_OFFER = 0;
+    public static final int WHITE = 1;
+    public static final int BLACK = 2;
+
+    /**
+     * The number of turns completed in this game including the move that led to
+     * this position. Starts at {@code 0}.
+     */
+    private int moveNumber;
+
     private Piece[][] pieces;
 
-    /** All of the pieces in the position. Does not include captured pieces. */
-    public Piece[][] getPieces() {
-        return pieces;
-    }
+    private ArrayList<Piece> capturedPieces;
 
     /**
      * All of the moves that can be made. If {@code checkForMate} is {@code true}
@@ -74,6 +83,46 @@ public class Position {
      */
     private long timerEnd;
 
+    /**
+     * The color of who offered the draw. If multiple draw offers, will only include
+     * last.
+     * 
+     * <ul>
+     * <li>0 - No draw offer
+     * <li>1 - White offered
+     * <li>2 - Black offered
+     */
+    private int drawOfferer;
+
+    /**
+     * Counter that counts the number of moves made since the last time a pawn was
+     * moved or a capture was made. Once 50 moves have been completed (100 turns),
+     * the game will be declared a draw. This number includes the move that led to
+     * the current position. It will count up to 100.
+     */
+    private int fiftyMoveCounter;
+
+    private Square enPassantDestination;
+
+    public Square getEnPassantDestination() {
+        return enPassantDestination;
+    }
+
+    private boolean mateChecked;
+
+    public int getMoveNumber() {
+        return moveNumber;
+    }
+
+    /** All of the pieces in the position. Does not include captured pieces. */
+    public Piece[][] getPieces() {
+        return pieces;
+    }
+
+    public ArrayList<Piece> getCapturedPieces() {
+        return capturedPieces;
+    }
+
     public long getSystemTimeStart() {
         return systemTimeStart;
     }
@@ -112,7 +161,7 @@ public class Position {
      */
     public String getMoveString() {
 
-        String str = move.getMoveText();
+        String str = move.getMoveNotation();
         if (isCheckMate())
             str += "#";
         else if (isInCheck())
@@ -190,18 +239,45 @@ public class Position {
         return checkMate;
     }
 
-    public boolean equals(Position compare) {
+    public int getDrawOfferer() {
+        return drawOfferer;
+    }
+
+    public void setDrawOfferer(int drawOfferer) {
+        this.drawOfferer = drawOfferer;
+    }
+
+    public int getFiftyMoveCounter() {
+        return fiftyMoveCounter;
+    }
+
+    /**
+     * Checks if the board positions are exactly equal. Will return {@code false}
+     * even if pieces
+     * are in the same spots but their {@link Piece#hasMoved()} property is
+     * different. It will also return {@code false} if the pieces are in the same
+     * positions, but it is the opposite color's turn.
+     */
+    @Override
+    public boolean equals(Object compare) {
+
+        if (!(compare instanceof Position))
+            return false;
+
+        Position casted = (Position) (compare);
 
         boolean same = true;
 
-        for(int r = 0; r < 8; r++) {
+        if (isWhite() != casted.isWhite())
+            same = false;
 
-            for(int f = 0; f < 8; f++) {
+        for (int r = 0; same && r < 8; r++) {
 
-                if(!pieces[r][f].equals(compare.getPieces()[r][f])) {
+            for (int f = 0; same && f < 8; f++) {
+
+                if (!pieces[r][f].equals(casted.getPieces()[r][f])) {
 
                     same = false;
-                    break;
 
                 }
 
@@ -221,10 +297,173 @@ public class Position {
     public Position(Game game) {
 
         white = true;
-        initDefaultPosition();
-        initMoves(true, game);
+        this.mateChecked = false;
+        this.capturedPieces = new ArrayList<Piece>();
+
+        this.moveNumber = 0;
         this.systemTimeStart = -1;
         this.timerEnd = -1;
+        this.drawOfferer = NO_OFFER;
+        this.fiftyMoveCounter = 0;
+
+        initDefaultPosition();
+        initMoves(true, game);
+
+    }
+
+    public Position(String fen, Game game) throws Exception {
+
+        String[] a = fen.split(" ");
+
+        if (a.length != 6)
+            throw new Exception("Invalid FEN.");
+
+        this.pieces = new Piece[8][8];
+        this.mateChecked = false;
+
+        this.systemTimeStart = -1;
+        this.timerEnd = -1;
+
+        this.drawOfferer = NO_OFFER;
+
+        this.capturedPieces = new ArrayList<Piece>();
+
+        String[] ranks = a[0].split("/");
+
+        if (ranks.length != 8)
+            throw new Exception("Invalid ranks.");
+
+        if (a[1].equals("w"))
+            white = true;
+        else if (a[1].equals("b"))
+            white = false;
+        else
+            throw new Exception("Invalid color to move.");
+
+        try {
+            fiftyMoveCounter = Integer.parseInt(a[4]);
+        } catch (Exception e) {
+            throw new Exception("Invalid 50 move counter.");
+        }
+
+        try {
+            moveNumber = Integer.parseInt(a[5]) - 1;
+        } catch (Exception e) {
+            throw new Exception("Invalid move number.");
+        }
+
+        if (fiftyMoveCounter < 0)
+            throw new Exception("Fifty move counter cannot be less than 0.");
+
+        if (moveNumber + 1 < 1)
+            throw new Exception("Move number cannot be less than 1.");
+
+        for (int r = 0; r < 8; r++) {
+
+            for (int i = 0, f = 0; i < ranks[r].length(); i++) {
+
+                char c = ranks[r].charAt(i);
+
+                if (Character.isDigit(c)) {
+                    int amt = Integer.parseInt(c + "");
+                    f += amt;
+                    continue;
+                } else {
+
+                    if (!(c + "").matches("[KQBRNPkqbrnp]"))
+                        throw new Exception("Unexpected piece type.");
+                    boolean white = Character.isUpperCase(c);
+                    switch (Character.toUpperCase(c)) {
+                        case 'K':
+                            pieces[7 - r][f] = new King(f + 1, 8 - r, white);
+                            break;
+                        case 'Q':
+                            pieces[7 - r][f] = new Queen(f + 1, 8 - r, white);
+                            break;
+                        case 'R':
+                            pieces[7 - r][f] = new Rook(f + 1, 8 - r, white);
+                            break;
+                        case 'B':
+                            pieces[7 - r][f] = new Bishop(f + 1, 8 - r, white);
+                            break;
+                        case 'N':
+                            pieces[7 - r][f] = new Knight(f + 1, 8 - r, white);
+                            break;
+                        case 'P':
+                            pieces[7 - r][f] = new Pawn(f + 1, 8 - r, white);
+
+                            if ((white && r != 6) || (!white && r != 1))
+                                pieces[7 - r][f].setHasMoved(true);
+
+                            break;
+                        default:
+                            throw new Exception("Unexpected piece.");
+                    }
+
+                    ++f;
+
+                }
+
+            }
+
+        }
+
+        if (!a[3].equals("-")) {
+            try {
+                enPassantDestination = new Square(a[3]);
+            } catch (Exception e) {
+                throw new Exception("Invalid en passant target square.");
+            }
+        }
+
+        this.capturedPieces = new ArrayList<Piece>();
+
+        Piece wkr = getPieceAtSquare(new Square(8, 1));
+        Piece wqr = getPieceAtSquare(new Square(1, 1));
+        Piece bkr = getPieceAtSquare(new Square(8, 8));
+        Piece bqr = getPieceAtSquare(new Square(1, 8));
+
+        if (wkr != null && wkr.getCode() == 'R')
+            wkr.setHasMoved(true);
+
+        if (wqr != null && wqr.getCode() == 'R')
+            wqr.setHasMoved(true);
+
+        if (bkr != null && bkr.getCode() == 'R')
+            bkr.setHasMoved(true);
+
+        if (bqr != null && bqr.getCode() == 'R')
+            bqr.setHasMoved(true);
+
+        if (!a[2].equals("-")) {
+            for (int i = 0; i < a[2].length(); i++) {
+
+                char c = a[2].charAt(i);
+                switch (c) {
+                    case 'K':
+                        if (wkr != null && wkr.getCode() == 'R')
+                            wkr.setHasMoved(false);
+                        break;
+                    case 'Q':
+                        if (wqr != null && wqr.getCode() == 'R')
+                            wqr.setHasMoved(false);
+                        break;
+                    case 'k':
+                        if (bkr != null && bkr.getCode() == 'R')
+                            bkr.setHasMoved(false);
+                        break;
+                    case 'q':
+                        if (bqr != null && bqr.getCode() == 'R')
+                            bqr.setHasMoved(false);
+                        break;
+                    default:
+                        throw new Exception("Invalid castle status.");
+                }
+
+            }
+        }
+
+        initMoves(true, game);
 
     }
 
@@ -236,25 +475,35 @@ public class Position {
      *                     position.
      * @param move         The move to be made.
      * @param game         The game this position is associated with.
-     * @param isWhite      Whether or not it is white's turn after this move is
+     * @param white        Whether or not it is white's turn after this move is
      *                     made.
      * @param checkForMate Whether or not checkmate should be checked for.
      */
-    public Position(Position prev, Move move, Game game, boolean isWhite, boolean checkForMate) {
+    public Position(Position prev, Move move, Game game, boolean white, boolean checkForMate, char promoteType)
+            throws Exception {
 
-        // this.pieces = new ArrayList<Piece>();
         this.pieces = new Piece[8][8];
-        this.white = isWhite;
+        this.mateChecked = false;
 
         this.systemTimeStart = -1;
         this.timerEnd = -1;
 
+        this.drawOfferer = NO_OFFER;
+
+        this.white = white;
+
         Piece[][] prevPieces = prev.getPieces();
+
+        this.capturedPieces = prev.getCapturedPieces();
+
+        this.moveNumber = prev.getMoveNumber() + 1;
 
         for (int r = 0; r < prevPieces.length; r++) {
 
-            for (int c = 0; c < prevPieces[r].length; c++) {
-                Piece old = prevPieces[r][c];
+            for (int f = 0; f < prevPieces[r].length; f++) {
+
+                final Piece old = prevPieces[r][f];
+
                 if (old == null)
                     continue;
 
@@ -267,6 +516,7 @@ public class Position {
                     case 'K':
                         piece = new King(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
                                 old.hasMoved());
+
                         if (piece.isWhite())
                             whiteKing = piece.getSquare();
                         else
@@ -291,21 +541,22 @@ public class Position {
                         break;
                 }
 
-                if (piece != null) {
+                if (piece != null)
                     pieces[old.getSquare().getRank() - 1][old.getSquare().getFile() - 1] = piece;
-                }
+
             }
         }
 
         if (move.isCapture()) {
 
-            Square capSquare = move.getCaptureSquare();
+            final Square capSquare = move.getCaptureSquare();
+
+            capturedPieces.add(pieces[capSquare.getRank() - 1][capSquare.getFile() - 1]);
             pieces[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
 
         }
 
-        Square movePieceSq = move.getOrigin();
-        Piece movePiece = pieces[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1];
+        final Piece movePiece = pieces[move.getOrigin().getRank() - 1][move.getOrigin().getFile() - 1];
 
         if (movePiece.getCode() == 'K') {
 
@@ -316,34 +567,72 @@ public class Position {
 
         }
 
-        Square destSq = move.getDestination();
-        movePiece.setSquare(destSq);
+        if (!movePiece.hasMoved() && movePiece.getCode() == 'P' && move.getMoveDistance() == 2) {
+            enPassantDestination = new Square(move.getDestination().getFile(),
+                    move.getDestination().getRank() + (move.isWhite() ? -1 : 1));
+        }
+
+        movePiece.setSquare(move.getDestination());
         movePiece.setHasMoved(true);
-        pieces[destSq.getRank() - 1][destSq.getFile() - 1] = movePiece;
-        pieces[movePieceSq.getRank() - 1][movePieceSq.getFile() - 1] = null;
+
+        pieces[move.getDestination().getRank() - 1][move.getDestination().getFile() - 1] = movePiece;
+        pieces[move.getOrigin().getRank() - 1][move.getOrigin().getFile() - 1] = null;
 
         if (move.isCastle()) {
 
-            Piece rook = getPieceAtSquare(move.getRookOrigin());
+            final Piece rook = getPieceAtSquare(move.getRookOrigin());
             rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
+            rook.setHasMoved(true);
 
         }
 
-        move.setText(prev);
+        if (move.getPromoteType() == '?' && checkForMate) {
+
+            if (promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N')
+                throw new Exception("Invalid promote type.");
+
+            move.setPromoteType(promoteType);
+            final Square mps = move.getDestination();
+
+            switch (promoteType) {
+                case 'Q':
+                    setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'R':
+                    setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'B':
+                    setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'N':
+                    setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+            }
+
+        }
+
+        move.updateMoveNotation(prev);
         this.move = move;
 
         initMoves(checkForMate, game);
 
+        if (move.isCapture() || move.getPiece().getCode() == 'P') {
+            this.fiftyMoveCounter = 0;
+        } else {
+            this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
+        }
+
     }
 
-    public void setPromoType(char promo, Game game) {
+    public void setPromote(char promo, Game game) throws Exception {
 
-        if (promo == '0')
-            return;
+        if (promo != '?' && promo != 'Q' && promo != 'R' && promo != 'B' && promo != 'N')
+            throw new Exception("Invalid promote type.");
 
-        Piece movePiece = move.getPiece();
         move.setPromoteType(promo);
-        Square mps = move.getDestination();
+
+        final Piece movePiece = move.getPiece();
+        final Square mps = move.getDestination();
 
         switch (promo) {
             case 'Q':
@@ -366,7 +655,8 @@ public class Position {
         if (!move.getPiece().equals(getPieceAtSquare(mps))) {
 
             initMoves(true, game);
-            move.setText(game.getPositions().get(game.getCurrentPos() - 1));
+            move.updateMoveNotation(game.getLastPos());
+
         }
 
     }
@@ -386,7 +676,8 @@ public class Position {
         for (int r = 0; r < pieces.length; r++) {
 
             for (int c = 0; c < pieces[r].length; c++) {
-                Piece p = pieces[r][c];
+
+                final Piece p = pieces[r][c];
                 if (p == null)
                     continue;
 
@@ -422,65 +713,35 @@ public class Position {
             givingCheck = true;
 
         if (checkForMate) {
+
             setCheckMate(g);
 
             if (this.inCheck == false) {
+
                 for (Move c : castleMoves) {
 
                     if ((c.getRookOrigin().getFile() == 1
                             && canPieceMoveToSquare(c.getPiece(), new Square(4, c.getOrigin().getRank())))
-                            ||
-                            (c.getRookOrigin().getFile() == 8
+                            || (c.getRookOrigin().getFile() == 8
                                     && canPieceMoveToSquare(c.getPiece(), new Square(6, c.getOrigin().getRank())))) {
 
-                        Position test = new Position(this, c, g, !c.isWhite(), false);
-                        if (!test.isGivingCheck())
-                            moves.add(c);
+                        try {
+
+                            final Position test = new Position(this, c, g, !c.isWhite(), false, '0');
+
+                            if (!test.isGivingCheck())
+                                moves.add(c);
+
+                        } catch (Exception e) {
+
+                        }
 
                     }
 
                 }
             }
-        }
-    }
-
-    /**
-     * Calculates the amount of points the given color has.
-     * 
-     * @param white True if checking for white's points
-     * @return The point delta of the color chosen. Will be 0 if color has less
-     *         material.
-     */
-    public int getCapturedPoints(boolean white) {
-
-        int whitePoints = 0;
-        int blackPoints = 0;
-
-        for (int r = 0; r < pieces.length; r++) {
-
-            for (int c = 0; c < pieces[r].length; c++) {
-
-                Piece p = pieces[r][c];
-                if (p == null)
-                    continue;
-
-                if (p.isWhite())
-                    whitePoints += p.getPoints();
-                else
-                    blackPoints += p.getPoints();
-
-            }
 
         }
-
-        if (white && blackPoints > whitePoints || !white && whitePoints > blackPoints)
-            return 0;
-
-        if (white)
-            return whitePoints - blackPoints;
-        else
-            return blackPoints - whitePoints;
-
     }
 
     /**
@@ -491,6 +752,7 @@ public class Position {
      */
     private void setCheckMate(Game g) {
 
+        this.mateChecked = true;
         this.checkMate = true;
 
         for (int i = 0; i < moves.size(); i++) {
@@ -503,12 +765,16 @@ public class Position {
                 continue;
             }
 
-            Position test = new Position(this, m, g, !white, false);
-            if (!test.isGivingCheck())
-                checkMate = false;
-            else {
-                moves.remove(i);
-                --i;
+            try {
+                Position test = new Position(this, m, g, !white, false, '0');
+                if (!test.isGivingCheck())
+                    checkMate = false;
+                else {
+                    moves.remove(i);
+                    --i;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
         }
@@ -560,6 +826,30 @@ public class Position {
 
     }
 
+    /**
+     * Gets the point total of the pieces that {@code white} has captured.
+     * 
+     * @param white The color of the capturer, or the opposite of the pieces that
+     *              were captured.
+     * @return A point total of the pieces captured.
+     */
+    public int getCapturedPiecePoints(boolean white) {
+
+        int points = 0;
+
+        for (Piece cap : capturedPieces) {
+
+            if (cap.isWhite() == white)
+                continue;
+
+            points += cap.getPoints();
+
+        }
+
+        return points;
+
+    }
+
     public void setSquare(Square s, Piece p) {
 
         pieces[s.getRank() - 1][s.getFile() - 1] = p;
@@ -573,19 +863,6 @@ public class Position {
      * @return The {@link Piece} object. Will be {@code null}
      *         if no
      *         piece is at the square.
-     */
-    /*
-     * public Piece getPieceAtSquare(Square s) {
-     * 
-     * int index = findPiece(s);
-     * 
-     * Piece piece = null;
-     * if (index >= 0)
-     * piece = pieces.get(index);
-     * 
-     * return piece;
-     * 
-     * }
      */
     public Piece getPieceAtSquare(Square s) {
         return pieces[s.getRank() - 1][s.getFile() - 1];
@@ -648,27 +925,14 @@ public class Position {
 
     }
 
-    /**
-     * Tests to see if the current board position is check.
-     * 
-     * @param white
-     * @return
-     */
-    @Deprecated
-    public boolean isCheck(boolean white) {
-
-        return getPiecesByAttacking(getKingSquare(white)).size() > 0;
-
-    }
-
     public boolean isInsufficientMaterial() {
 
-        ArrayList<Piece> list = getPiecesAsArray();
+        ArrayList<Piece> list = getPiecesAsArrayList();
 
         if (list.size() > 4)
             return false;
 
-        //King and king
+        // King and king
         if (list.size() == 2)
             return true;
 
@@ -681,7 +945,7 @@ public class Position {
 
         }
 
-        //King against king and bishop / king against king and knight
+        // King against king and bishop / king against king and knight
         if (list.size() == 1 && (list.get(0).getCode() == 'B' || list.get(0).getCode() == 'N'))
             return true;
         else if (list.size() == 2) {
@@ -689,7 +953,8 @@ public class Position {
             Piece one = list.get(0);
             Piece two = list.get(1);
 
-            //King and bishop against king and bishop, with both being on squares of same color
+            // King and bishop against king and bishop, with both being on squares of same
+            // color
             if (one.isWhite() != two.isWhite()
                     && one.getSquare().isLightSquare() == two.getSquare().isLightSquare())
                 return true;
@@ -700,7 +965,7 @@ public class Position {
 
     }
 
-    public ArrayList<Piece> getPiecesAsArray() {
+    public ArrayList<Piece> getPiecesAsArrayList() {
 
         ArrayList<Piece> list = new ArrayList<Piece>();
 
@@ -753,6 +1018,222 @@ public class Position {
         }
 
         return pieceMoves;
+
+    }
+
+    /**
+     * Outputs the Forsyth–Edwards Notation (FEN) for this position.
+     */
+    @Override
+    public String toString() {
+
+        String fen = "";
+
+        // Pieces
+        for (int r = 7; r >= 0; r--) {
+
+            int noPieceCount = 0;
+
+            for (int f = 0; f < 8; f++) {
+
+                Piece p = pieces[r][f];
+
+                if (p == null)
+                    ++noPieceCount;
+                else {
+
+                    if (noPieceCount > 0) {
+                        fen += noPieceCount;
+                        noPieceCount = 0;
+                    }
+
+                    fen += p.isWhite() ? (p.getCode() + "") : (p.getCode() + "").toLowerCase();
+
+                }
+
+            }
+
+            if (noPieceCount > 0) {
+                fen += noPieceCount;
+                noPieceCount = 0;
+            }
+
+            if (r > 0)
+                fen += "/";
+
+        }
+
+        // Active Color
+        fen += " " + (isWhite() ? "w" : "b");
+
+        // Castle availability
+
+        fen += " " + (canCastle(true, true) ? "K" : "") + (canCastle(true, false) ? "Q" : "")
+                + (canCastle(false, true) ? "k" : "") + (canCastle(false, false) ? "q" : "");
+
+        if (fen.charAt(fen.length() - 1) == ' ')
+            fen += '-';
+
+        // En Passant Square
+        // if (move != null && move.getPiece().getCode() == 'P' && !move.isCapture() &&
+        // move.getMoveDistance() == 2
+        // && ((move.isWhite() && move.getDestination().getRank() == 4)
+        // || (!move.isWhite() && move.getDestination().getRank() == 5)))
+        // fen += " " + (new Square(move.getDestination().getFile(),
+        // move.getDestination().getRank() + (move.isWhite() ? -1 : 1)).toString());
+        // else
+        // fen += " " + "-";
+
+        fen += " " + (enPassantDestination == null ? "-" : enPassantDestination.toString());
+
+        // Fifty-move rule clock
+        fen += " " + fiftyMoveCounter;
+
+        // Fullmove number
+        fen += " " + ((int) Math.ceil((moveNumber + 1) / 2.0));
+
+        return fen;
+
+    }
+
+    /**
+     * Checks the castling availability in the current position. Based on whether or
+     * not the king and rook can move, and whether or not there is a king or rook on
+     * the given side. Does not mean that castling can occur during the current
+     * turn, as temporary blocks like check may still be present.
+     * 
+     * @param white
+     * @param kingSide
+     * @return Whether or not a castle is possible.
+     */
+    public boolean canCastle(boolean white, boolean kingSide) {
+
+        final Piece king = getPieceAtSquare(white ? whiteKing : blackKing);
+
+        if (king.hasMoved())
+            return false;
+
+        final Piece rook = getPieceAtSquare(new Square(white ? 1 : 8, kingSide ? 8 : 1));
+
+        if (rook != null && !rook.hasMoved()) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public Move getMoveByPGN(String move) throws Exception {
+
+        if (!mateChecked)
+            throw new Exception(
+                    "Cannot find move by PGN if position has not been initialized with checkForMate as true.");
+
+        move = move.trim();
+
+        Square o = null;
+        Square d = null;
+        char piece = '0';
+        int oFile = -1;
+        int oRank = -1;
+
+        if (move.matches("0-0-0") || move.matches("O-O-O")) {
+
+            o = new Square(5, white ? 1 : 8);
+            d = new Square(3, white ? 1 : 8);
+            piece = 'K';
+
+        } else if (move.matches("0-0") || move.matches("O-O")) {
+
+            o = new Square(5, white ? 1 : 8);
+            d = new Square(7, white ? 1 : 8);
+            piece = 'K';
+
+        } else {
+
+            Pattern pat = Pattern.compile("[a-h][1-8]");
+            Matcher m = pat.matcher(move);
+
+            int lastSquare = -1;
+            while (m.find()) {
+                lastSquare = m.start();
+            }
+
+            if (lastSquare <= -1)
+                throw new Exception("No destination square.");
+
+            try {
+                d = new Square(move.substring(lastSquare, lastSquare + 2));
+            } catch (Exception e) {
+                throw new Exception("Invalid destination square.");
+            }
+
+            String first = move.substring(0, 1);
+            int start = 0;
+
+            if (first.matches("[KQRBNP]")) {
+                piece = first.charAt(0);
+                start = 1;
+            } else if (first.matches("[a-h]"))
+                piece = 'P';
+            else
+                throw new Exception("Invalid piece type.");
+
+            if (move.length() > 3) {
+                String modifier = move.substring(start, lastSquare);
+
+                if (modifier.matches("[a-h][1-8]")) {
+                    o = new Square(modifier);
+                } else if (modifier.matches("[a-h]")) {
+                    oFile = (int) (modifier.charAt(0)) - 96;
+                } else if (modifier.matches("[1-8]")) {
+                    oRank = (int) (modifier.charAt(0)) - 48;
+                }
+            }
+
+        }
+
+        ArrayList<Move> possibleMoves = new ArrayList<Move>();
+
+        for (Move mo : moves) {
+
+            if (mo.getPiece().getCode() != piece || mo.isWhite() != isWhite())
+                continue;
+
+            if (mo.getDestination().equals(d)) {
+
+                if (o != null && mo.getOrigin().equals(o))
+                    possibleMoves.add(mo);
+                else if (oFile > -1 && oRank > -1) {
+                    if(mo.getOrigin().getFile() == oFile && mo.getOrigin().getRank() == oRank) possibleMoves.add(mo);
+                } else if (oFile > -1) {
+                    if(mo.getOrigin().getFile() == oFile) possibleMoves.add(mo);
+                } else if (oRank > -1) {
+                    if(mo.getOrigin().getRank() == oRank) possibleMoves.add(mo);
+                } else {
+                    possibleMoves.add(mo);
+                }
+
+            }
+
+        }
+
+        if (possibleMoves.size() == 0)
+            throw new Exception("Move not found.");
+
+        if (possibleMoves.size() > 1)
+            throw new Exception("Multiple possible moves.");
+
+        return possibleMoves.get(0);
+
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        Position p = new Position(new Game("w", "b", new GameProperties(
+                "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", -1, -1, false, false, false, false)));
+
+        System.out.println(p.getMoves());
 
     }
 
