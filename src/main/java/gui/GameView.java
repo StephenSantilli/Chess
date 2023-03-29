@@ -206,7 +206,7 @@ public class GameView extends HBox implements GameListener {
         rm.setPercentHeight(70);
 
         RowConstraints cm = new RowConstraints();
-        cm.setFillHeight(false);
+        cm.setFillHeight(true);
         cm.setPercentHeight(30);
 
         ColumnConstraints col = new ColumnConstraints();

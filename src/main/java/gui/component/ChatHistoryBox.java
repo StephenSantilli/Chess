@@ -80,7 +80,7 @@ public class ChatHistoryBox extends VBox {
                 content.add(message, 0, i);
 
             }
-
+            
             getChildren().add(content);
 
         }
