@@ -277,6 +277,7 @@ public class GUIPiece {
             b.getBoard().setDragging(null);
 
             b.getBoard().activeUpdated();
+            setPieceSquare(piece.getSquare());
 
             return;
 
@@ -324,6 +325,8 @@ public class GUIPiece {
                     } else
                         b.getGame().makeMove(m.getOrigin(), m.getDestination(), '0');
 
+                } else {
+                    b.getBoard().boardUpdated();
                 }
 
             } catch (Exception e) {

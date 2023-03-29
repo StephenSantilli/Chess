@@ -5,6 +5,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import game.Chat;
 import game.Game;
@@ -15,6 +18,9 @@ import game.GameListener;
 public class Client implements GameListener {
 
     public static final int PORT = 49265;
+
+    private long pingSent = -1;
+    private long ping = -1;
 
     private Socket socket;
 
@@ -29,6 +35,13 @@ public class Client implements GameListener {
 
     private Game game;
     private boolean oppColor;
+
+    private ScheduledExecutorService pingThread;
+    private Runnable pinger = () -> {
+
+        send(new Message("ping"));
+
+    };
 
     private Runnable listener = () -> {
 
@@ -75,6 +88,9 @@ public class Client implements GameListener {
 
             new Thread(listener, "Game Client Listener").start();
 
+            pingThread = Executors.newScheduledThreadPool(1);
+            pingThread.scheduleWithFixedDelay(pinger, 0, 1000, TimeUnit.MILLISECONDS);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,6 +114,18 @@ public class Client implements GameListener {
         System.out.println(message);
 
         Message msg = new Message(message);
+
+        if (msg.equals(new Message("ping"))) {
+
+            send(new Message("pong"));
+
+        } else if (msg.equals(new Message("pong"))) {
+
+            ping = System.currentTimeMillis() - pingSent;
+
+            System.out.println(ping + "ms");
+
+        }
 
         if (game == null) {
 
@@ -320,6 +348,8 @@ public class Client implements GameListener {
     public void stop(ErrorMessage reason) {
 
         try {
+
+            pingThread.shutdownNow();
 
             // System.out.println("Stopping because: " + reason);
 
