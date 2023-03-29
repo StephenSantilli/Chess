@@ -60,10 +60,10 @@ public class Client implements GameListener {
             }
 
             input.close();
-            stop(new ErrorMessage(ErrorMessage.FATAL, "Connection terminated."));
+            stop();
 
         } catch (Exception e) {
-            stop(new ErrorMessage(ErrorMessage.FATAL, "Connection terminated."));
+            stop();
 
         }
 
@@ -358,8 +358,6 @@ public class Client implements GameListener {
 
             closed = true;
             pingThread.shutdownNow();
-
-            // System.out.println("Stopping because: " + reason);
 
             if (reason != null) {
                 game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
