@@ -45,8 +45,10 @@ public class Board extends StackPane {
     private MouseEvent resizing;
 
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
+        Platform.runLater(() -> {
+            boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
 
-        boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
+        });
 
     };
 
@@ -111,10 +113,11 @@ public class Board extends StackPane {
 
     private EventHandler<MouseEvent> mousePressed = ev -> {
 
-        if (ev.getX() >= boardBounds.getMaxX() - 10 && ev.getX() <= boardBounds.getMaxX() + 10
-                && ev.getY() >= boardBounds.getMaxY() - 10 && ev.getY() <= boardBounds.getMaxY() + 10) {
+        if (ev.getSceneX() >= boardBounds.getMaxX() - 10 && ev.getSceneX() <= boardBounds.getMaxX() + 10
+                && ev.getSceneY() >= boardBounds.getMaxY() - 10 && ev.getSceneY() <= boardBounds.getMaxY() + 10) {
+            System.out.println("Resizing");
             resizing = ev;
-            setMouseType(ev.getX(), ev.getY());
+            setMouseType(ev.getSceneX(), ev.getSceneY());
             return;
         }
 
@@ -146,19 +149,19 @@ public class Board extends StackPane {
 
         if (resizing != null) {
             // System.out.println(ev.getX());
-            squareSize = Math.min(Math.min(ev.getX(), getScene().getWidth() - 280),
-                    Math.min(ev.getY(), getScene().getHeight() - 20))
+            squareSize = Math.min(Math.min(ev.getSceneX(), getScene().getWidth() - 280),
+                    Math.min(ev.getSceneY(), getScene().getHeight() - 20))
                     / 8.0;
             pieceSize = Math.round(squareSize * pieceSizeMultiplier);
 
-            // setMaxSize(squareSize * 8, squareSize * 8);
+            setMaxSize(squareSize * 8, squareSize * 8);
             setPrefSize(squareSize * 8, squareSize * 8);
             setMinSize(squareSize * 8, squareSize * 8);
             setWidth(squareSize * 8);
             setHeight(squareSize * 8);
 
-            gameView.getApp().getStage().setMinHeight(gameView.getApp().getStage().getHeight());
-            gameView.getApp().getStage().setMinWidth(gameView.getApp().getStage().getWidth());
+            // gameView.getApp().getStage().setMinHeight(gameView.getApp().getStage().getHeight());
+            // gameView.getApp().getStage().setMinWidth(gameView.getApp().getStage().getWidth());
 
             // gameView.getApp().getStage().sizeToScene();
 
@@ -421,6 +424,8 @@ public class Board extends StackPane {
 
         if (resizing != null || (mouseX >= boardBounds.getMaxX() - 10 && mouseX <= boardBounds.getMaxX() + 10
                 && mouseY >= boardBounds.getMaxY() - 10 && mouseY <= boardBounds.getMaxY() + 10)) {
+            System.out.println("hovring");
+
             setCursor(Cursor.SE_RESIZE);
             return;
         }

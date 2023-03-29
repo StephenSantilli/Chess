@@ -95,8 +95,10 @@ public class App extends Application {
             stage.show();
             stage.sizeToScene();
 
-            stage.setMinHeight(stage.getHeight());
-            stage.setMinWidth(stage.getWidth());
+   
+
+            // stage.setMinHeight(stage.getHeight());
+            // stage.setMinWidth(stage.getWidth());
 
         } catch (Exception e) {
             e.printStackTrace();

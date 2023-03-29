@@ -2,6 +2,9 @@ package gui;
 
 import game.GameProperties;
 
+import java.awt.Window;
+import java.util.stream.Collectors;
+
 import org.apache.xmlgraphics.util.dijkstra.Edge;
 
 import game.Game;
@@ -20,9 +23,12 @@ import gui.menu.GameMenu;
 import gui.menu.ViewMenu;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.event.Event;
 import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
@@ -37,6 +43,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class GameView extends HBox implements GameListener {
@@ -47,6 +54,8 @@ public class GameView extends HBox implements GameListener {
 
     private App app;
     private Board board;
+
+    private GridPane listAndChat;
 
     private Pane boardPane;
     private GameInfo infoPane;
@@ -161,6 +170,45 @@ public class GameView extends HBox implements GameListener {
         return autoFlip;
     }
 
+    @Override
+    protected void layoutChildren() {
+
+        super.layoutChildren();
+
+        Scene scene = getScene();
+        if (scene == null)
+            return;
+
+        Stage stage = (Stage) scene.getWindow();
+        if (stage == null)
+            return;
+
+        double widthDelta = stage.getWidth() - scene.getWidth();
+        double heightDelta = stage.getHeight() - scene.getHeight();
+
+        stage.setMinWidth(computeMinWidth(-1) + widthDelta * 2 + 20);
+        stage.setMinHeight(
+                board.minHeight(-1) + (localToScene(getBoundsInLocal()).getMinY() * 2) + heightDelta + 10);
+
+        System.out.println("layout");
+
+        board.getResizeEvent();
+    }
+
+    @Override
+    protected double computeMinWidth(double height) {
+        return getChildren().stream()
+                .collect(Collectors.summingDouble(node -> node.minWidth(height)));
+    }
+
+    /*
+     * @Override
+     * protected double computeMinHeight(double width) {
+     * return getChildren().stream()
+     * .collect(Collectors.summingDouble(node -> node.minHeight(width)));
+     * }
+     */
+
     public GameView(App app, BarMenu menuBar) throws Exception {
 
         System.out.println(getTypeSelector());
@@ -187,7 +235,7 @@ public class GameView extends HBox implements GameListener {
         chatBox = new ChatArea(this);
         chatBox.setMaxWidth(Double.MAX_VALUE);
 
-        GridPane listAndChat = new GridPane();
+        listAndChat = new GridPane();
         listAndChat.setVgap(5);
         listAndChat.setAlignment(Pos.CENTER_LEFT);
 
@@ -256,9 +304,11 @@ public class GameView extends HBox implements GameListener {
             // boardPane.prefHeightProperty().bind(Bindings.min(boardPane.widthProperty(),
             // boardPane.heightProperty()));
 
+            // app.getStage().minWidthProperty().bind(Bindings.min(getScene().widthProperty(),
+            // app.getStage().widthProperty()));
+
             getScene().getWindow().widthProperty().addListener(board.getResizeEvent());
             getScene().getWindow().heightProperty().addListener(board.getResizeEvent());
-
         }));
 
         board.boardUpdated();
