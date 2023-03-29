@@ -39,6 +39,7 @@ public class Client implements GameListener {
     private ScheduledExecutorService pingThread;
     private Runnable pinger = () -> {
 
+        pingSent = System.currentTimeMillis();
         send(new Message("ping"));
 
     };
