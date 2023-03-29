@@ -22,6 +22,8 @@ public class Client implements GameListener {
     private long pingSent = -1;
     private long ping = -1;
 
+    private boolean closed = false;
+
     private Socket socket;
 
     private BufferedReader input;
@@ -58,9 +60,11 @@ public class Client implements GameListener {
             }
 
             input.close();
+            stop(new ErrorMessage(ErrorMessage.FATAL, "Connection terminated."));
 
         } catch (Exception e) {
-            // e.printStackTrace();
+            stop(new ErrorMessage(ErrorMessage.FATAL, "Connection terminated."));
+
         }
 
     };
@@ -88,12 +92,12 @@ public class Client implements GameListener {
             this.output = new PrintWriter(socket.getOutputStream(), true);
 
             pingThread = Executors.newScheduledThreadPool(1);
-            pingThread.scheduleWithFixedDelay(pinger, 36000, 36000, TimeUnit.MILLISECONDS);
+            pingThread.scheduleWithFixedDelay(pinger, 18000, 18000, TimeUnit.MILLISECONDS);
 
             new Thread(listener, "Game Client Listener").start();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to establish connection."));
         }
 
     }
@@ -349,7 +353,10 @@ public class Client implements GameListener {
     public void stop(ErrorMessage reason) {
 
         try {
+            if (closed)
+                return;
 
+            closed = true;
             pingThread.shutdownNow();
 
             // System.out.println("Stopping because: " + reason);
