@@ -90,7 +90,7 @@ public class Client implements GameListener {
             new Thread(listener, "Game Client Listener").start();
 
             pingThread = Executors.newScheduledThreadPool(1);
-            pingThread.scheduleWithFixedDelay(pinger, 0, 1000, TimeUnit.MILLISECONDS);
+            pingThread.scheduleWithFixedDelay(pinger, 0, 1800, TimeUnit.MILLISECONDS);
 
         } catch (Exception e) {
             e.printStackTrace();
