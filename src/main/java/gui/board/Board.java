@@ -27,6 +27,7 @@ public class Board extends StackPane {
 
     private Squares squarePane;
     private Highlights highlightPane;
+    private Coordinates coordsPane;
     private SquareBorders borderPane;
     private MoveIndicators moveIndicatorsPane;
     private Pieces piecePane;
@@ -39,13 +40,11 @@ public class Board extends StackPane {
 
     private Bounds boardBounds;
 
-    private Timer resizer = new Timer("Resizer", true);
-    private TimerTask resizeTask = null;
-
     private MouseEvent resizing;
 
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
         Platform.runLater(() -> {
+
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
 
         });
@@ -113,12 +112,12 @@ public class Board extends StackPane {
 
     private EventHandler<MouseEvent> mousePressed = ev -> {
 
-        if (ev.getSceneX() >= boardBounds.getMaxX() - 10 && ev.getSceneX() <= boardBounds.getMaxX() + 10
-                && ev.getSceneY() >= boardBounds.getMaxY() - 10 && ev.getSceneY() <= boardBounds.getMaxY() + 10) {
-            System.out.println("Resizing");
+        if (isResizingBounds(ev.getSceneX(), ev.getSceneY())) {
+
             resizing = ev;
             setMouseType(ev.getSceneX(), ev.getSceneY());
             return;
+
         }
 
         if (gameView.getGame() == null)
@@ -160,16 +159,9 @@ public class Board extends StackPane {
             setWidth(squareSize * 8);
             setHeight(squareSize * 8);
 
-            // gameView.getApp().getStage().setMinHeight(gameView.getApp().getStage().getHeight());
-            // gameView.getApp().getStage().setMinWidth(gameView.getApp().getStage().getWidth());
-
-            // gameView.getApp().getStage().sizeToScene();
-
-            // gameView.getApp().getStage().setMinHeight(gameView.getApp().getStage().getHeight());
-            // gameView.getApp().getStage().setMinWidth(gameView.getApp().getStage().getWidth());
-
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
             squarePane.draw();
+            coordsPane.draw();
 
             highlightPane.setVisible(false);
             borderPane.setVisible(false);
@@ -193,6 +185,11 @@ public class Board extends StackPane {
         }
 
     };
+
+    public boolean isResizingBounds(double x, double y) {
+        return (x >= boardBounds.getMaxX() - 10 && x <= boardBounds.getMaxX() + 10
+                && y >= boardBounds.getMaxY() - 10 && y <= boardBounds.getMaxY() + 10);
+    }
 
     public GameView getGameView() {
         return gameView;
@@ -302,16 +299,18 @@ public class Board extends StackPane {
 
         squarePane = new Squares(gameView);
         highlightPane = new Highlights(gameView);
+        coordsPane = new Coordinates(gameView);
         borderPane = new SquareBorders(gameView);
         moveIndicatorsPane = new MoveIndicators(gameView);
         piecePane = new Pieces(gameView);
 
-        getChildren().addAll(squarePane, highlightPane, moveIndicatorsPane, borderPane, piecePane);
+        getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane);
 
         gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
 
             try {
                 squarePane.draw();
+                coordsPane.draw();
                 piecePane.initPieceTranscoders();
             } catch (Exception e) {
             }
@@ -422,9 +421,7 @@ public class Board extends StackPane {
 
     public void setMouseType(double mouseX, double mouseY) {
 
-        if (resizing != null || (mouseX >= boardBounds.getMaxX() - 10 && mouseX <= boardBounds.getMaxX() + 10
-                && mouseY >= boardBounds.getMaxY() - 10 && mouseY <= boardBounds.getMaxY() + 10)) {
-            System.out.println("hovring");
+        if (resizing != null || isResizingBounds(mouseX, mouseY)) {
 
             setCursor(Cursor.SE_RESIZE);
             return;

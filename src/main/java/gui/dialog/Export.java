@@ -1,10 +1,17 @@
 package gui.dialog;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
 import gui.GameView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
@@ -13,8 +20,10 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class Export extends Stage {
 
@@ -61,6 +70,40 @@ public class Export extends Stage {
 
         HBox buttons = new HBox();
 
+        Button exportButton = new Button("Export");
+        exportButton.setOnAction(e -> {
+
+            FileChooser chooser = new FileChooser();
+            chooser.getExtensionFilters().add(new ExtensionFilter("PGN File", "*.pgn"));
+
+            File f = chooser.showSaveDialog(new Stage());
+
+            if (f != null) {
+
+                try (PrintWriter scan = new PrintWriter(new FileWriter(f))) {
+
+                    String[] lines = ta.getText().split("\n");
+                    for (int i = 0; i < lines.length; i++) {
+
+                        scan.println(lines[i]);
+
+                    }
+
+                } catch (Exception er) {
+                    Dialog<Void> eDg = new Dialog<>();
+                    eDg.initOwner(getScene().getWindow());
+                    eDg.setTitle("Error Exporting PGN");
+                    eDg.setContentText(er.getMessage());
+
+                    eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+                    eDg.showAndWait();
+                }
+
+            }
+
+        });
+
         Button copyButton = new Button("Copy");
         copyButton.setOnAction(e -> {
 
@@ -78,7 +121,7 @@ public class Export extends Stage {
         });
 
         buttons.setAlignment(Pos.CENTER_RIGHT);
-        buttons.getChildren().addAll(copyButton, okButton);
+        buttons.getChildren().addAll(exportButton, copyButton, okButton);
 
         vb.getChildren().addAll(hb, ta, buttons);
 
@@ -91,6 +134,7 @@ public class Export extends Stage {
     }
 
     public String getPGN() {
+
         try {
 
             return board.getGame().exportPosition(true, includeClock);

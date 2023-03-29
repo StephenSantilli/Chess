@@ -1182,11 +1182,11 @@ public class Position {
             if (move.length() > 3) {
                 String modifier = move.substring(start, lastSquare);
 
-                if (modifier.matches("[a-h][1-8]")) {
+                if (modifier.matches("[a-h][1-8]x?")) {
                     o = new Square(modifier);
-                } else if (modifier.matches("[a-h]")) {
+                } else if (modifier.matches("[a-h]x?")) {
                     oFile = (int) (modifier.charAt(0)) - 96;
-                } else if (modifier.matches("[1-8]")) {
+                } else if (modifier.matches("[1-8]x?")) {
                     oRank = (int) (modifier.charAt(0)) - 48;
                 }
             }

@@ -20,24 +20,26 @@
 }
 
 GameView {
-  -fx-border-width: 2;
-  -fx-border-color: red;
+  /* -fx-border-width: 2;
+  -fx-border-color: red; */
 }
 
 Board {
   -fx-alignment: center;
-  -fx-border-width: 2;
-  -fx-border-color: red;
+  /* -fx-border-width: 2;
+  -fx-border-color: red; */
 }
 
 GameInfo {
-    -fx-border-width: 2;
-  -fx-border-color: red;
+    /* -fx-border-width: 2;
+  -fx-border-color: red; */
 }
 
+
+
 #listAndChat {
-  -fx-border-width: 2;
-  -fx-border-color: red;
+  /* -fx-border-width: 2;
+  -fx-border-color: red; */
 }
 
 #squareBorder {

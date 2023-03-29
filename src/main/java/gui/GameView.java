@@ -170,48 +170,7 @@ public class GameView extends HBox implements GameListener {
         return autoFlip;
     }
 
-    @Override
-    protected void layoutChildren() {
-
-        super.layoutChildren();
-
-        Scene scene = getScene();
-        if (scene == null)
-            return;
-
-        Stage stage = (Stage) scene.getWindow();
-        if (stage == null)
-            return;
-
-        double widthDelta = stage.getWidth() - scene.getWidth();
-        double heightDelta = stage.getHeight() - scene.getHeight();
-
-        stage.setMinWidth(computeMinWidth(-1) + widthDelta * 2 + 20);
-        stage.setMinHeight(
-                board.minHeight(-1) + (localToScene(getBoundsInLocal()).getMinY() * 2) + heightDelta + 10);
-
-        System.out.println("layout");
-
-        board.getResizeEvent();
-    }
-
-    @Override
-    protected double computeMinWidth(double height) {
-        return getChildren().stream()
-                .collect(Collectors.summingDouble(node -> node.minWidth(height)));
-    }
-
-    /*
-     * @Override
-     * protected double computeMinHeight(double width) {
-     * return getChildren().stream()
-     * .collect(Collectors.summingDouble(node -> node.minHeight(width)));
-     * }
-     */
-
     public GameView(App app, BarMenu menuBar) throws Exception {
-
-        System.out.println(getTypeSelector());
 
         this.app = app;
         this.menuBar = menuBar;
@@ -255,8 +214,6 @@ public class GameView extends HBox implements GameListener {
         GridPane.setHgrow(listAndChat, Priority.ALWAYS);
         GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
         GridPane.setHgrow(chatBox, Priority.ALWAYS);
-        // listAndChat.setMinWidth(220);
-        // listAndChat.setMaxWidth(Double.MAX_VALUE);
         col.setMinWidth(250);
         col.setMaxWidth(350);
 
@@ -265,7 +222,6 @@ public class GameView extends HBox implements GameListener {
         listAndChat.setId("listAndChat");
 
         board = new Board(this);
-        // boardPane = new Pane(board);
 
         initMenus();
 
@@ -295,20 +251,12 @@ public class GameView extends HBox implements GameListener {
 
         app.getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
 
-            // board.setMaxSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
             board.setBoardBounds(
                     board.localToScene(new BoundingBox(0, 0, board.getSquareSize() * 8, board.getSquareSize() * 8)));
 
-            // boardPane.prefWidthProperty().bind(Bindings.min(boardPane.widthProperty(),
-            // boardPane.heightProperty()));
-            // boardPane.prefHeightProperty().bind(Bindings.min(boardPane.widthProperty(),
-            // boardPane.heightProperty()));
-
-            // app.getStage().minWidthProperty().bind(Bindings.min(getScene().widthProperty(),
-            // app.getStage().widthProperty()));
-
             getScene().getWindow().widthProperty().addListener(board.getResizeEvent());
             getScene().getWindow().heightProperty().addListener(board.getResizeEvent());
+            
         }));
 
         board.boardUpdated();
