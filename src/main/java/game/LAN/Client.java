@@ -87,10 +87,10 @@ public class Client implements GameListener {
             this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.output = new PrintWriter(socket.getOutputStream(), true);
 
-            new Thread(listener, "Game Client Listener").start();
-
             pingThread = Executors.newScheduledThreadPool(1);
-            pingThread.scheduleWithFixedDelay(pinger, 0, 1800, TimeUnit.MILLISECONDS);
+            pingThread.scheduleWithFixedDelay(pinger, 1800, 1800, TimeUnit.MILLISECONDS);
+
+            new Thread(listener, "Game Client Listener").start();
 
         } catch (Exception e) {
             e.printStackTrace();
