@@ -2,9 +2,12 @@ package gui.board;
 
 import game.Square;
 import gui.GameView;
+import javafx.geometry.Bounds;
+import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 
 public class Coordinates extends Pane {
 
@@ -25,10 +28,12 @@ public class Coordinates extends Pane {
         for (int r = 8; r > 0; r--) {
 
             final Square square = new Square(1, r);
-            final double inset = board.getSquareSize() / 20;
-            Label l = new Label(r + "");
-            l.setLayoutX(board.getXBySquare(square) + inset);
-            l.setLayoutY(board.getYBySquare(square) + inset);
+            final double inset = squareSize / 40;
+            Text l = new Text(r + "");
+            Bounds lb = l.getBoundsInLocal();
+            l.setTextOrigin(VPos.CENTER);
+            l.setLayoutX(board.getXBySquare(square) + inset + (lb.getWidth() / 2.0));
+            l.setLayoutY(board.getYBySquare(square) + inset + (lb.getHeight() / 2.0));
 
             l.setId(square.isLightSquare() ? "lightCoord" : "darkCoord");
 
@@ -39,12 +44,13 @@ public class Coordinates extends Pane {
         for (int f = 1; f <= 8; f++) {
 
             final Square square = new Square(f, 1);
-            // final double inset = (board.getSquareSize() / 20) * 16;
-            final double inset = board.getSquareSize() / 20;
+            final double inset = squareSize / 40;
 
-            Label l = new Label((char)(f + 96) + "");
-            l.setLayoutX((board.getXBySquare(square) + (inset)));
-            l.setLayoutY((board.getYBySquare(square) + (inset)));
+            Text l = new Text((char) (f + 96) + "");
+            Bounds lb = l.getBoundsInLocal();
+            l.setTextOrigin(VPos.CENTER);
+            l.setLayoutX(board.getXBySquare(square) + squareSize - lb.getWidth() - inset - (lb.getWidth() / 2.0));
+            l.setLayoutY(board.getYBySquare(square) + squareSize - inset - (lb.getHeight() / 2.0));
 
             l.setId(square.isLightSquare() ? "lightCoord" : "darkCoord");
 

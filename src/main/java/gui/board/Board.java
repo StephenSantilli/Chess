@@ -148,8 +148,8 @@ public class Board extends StackPane {
 
         if (resizing != null) {
             // System.out.println(ev.getX());
-            squareSize = Math.min(Math.min(ev.getSceneX(), getScene().getWidth() - 280),
-                    Math.min(ev.getSceneY(), getScene().getHeight() - 20))
+            squareSize = Math.min(Math.min(Math.max(20, ev.getSceneX()), getScene().getWidth() - 280),
+                    Math.min(Math.max(20, ev.getSceneY()), getScene().getHeight() - 40))
                     / 8.0;
             pieceSize = Math.round(squareSize * pieceSizeMultiplier);
 

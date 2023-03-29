@@ -15,11 +15,11 @@
 }
 
 #lightCoord {
-  -fx-text-fill: -darkSquare;
+  -fx-fill: -darkSquare;
 }
 
 #darkCoord {
-  -fx-text-fill: -lightSquare;
+  -fx-fill: -lightSquare;
 }
 
 #captureCircle {
