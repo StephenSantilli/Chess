@@ -35,7 +35,9 @@ GameInfo {
   -fx-border-color: red; */
 }
 
-
+PauseView {
+  -fx-background-radius: 10;
+}
 
 #listAndChat {
   /* -fx-border-width: 2;

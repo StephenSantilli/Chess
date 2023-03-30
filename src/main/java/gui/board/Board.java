@@ -31,6 +31,7 @@ public class Board extends StackPane {
     private SquareBorders borderPane;
     private MoveIndicators moveIndicatorsPane;
     private Pieces piecePane;
+    private PauseView pausePane;
 
     private double squareSize = 100;
     private double pieceSize = Math.round(squareSize * pieceSizeMultiplier);
@@ -82,6 +83,9 @@ public class Board extends StackPane {
         if (gameView.getGame() == null)
             return;
 
+        if (gameView.getGame().isPaused())
+            return;
+
         if (e.getButton() != MouseButton.PRIMARY)
             return;
 
@@ -121,6 +125,9 @@ public class Board extends StackPane {
         }
 
         if (gameView.getGame() == null)
+            return;
+
+        if (gameView.getGame().isPaused())
             return;
 
         if (ev.getButton() != MouseButton.PRIMARY)
@@ -173,6 +180,9 @@ public class Board extends StackPane {
         }
 
         if (gameView.getGame() == null)
+            return;
+
+        if (gameView.getGame().isPaused())
             return;
 
         if (ev.getButton() != MouseButton.PRIMARY)
@@ -233,6 +243,10 @@ public class Board extends StackPane {
 
     public void setPiecePane(Pieces piecePane) {
         this.piecePane = piecePane;
+    }
+
+    public PauseView getPausePane() {
+        return pausePane;
     }
 
     public double getSquareSize() {
@@ -303,8 +317,11 @@ public class Board extends StackPane {
         borderPane = new SquareBorders(gameView);
         moveIndicatorsPane = new MoveIndicators(gameView);
         piecePane = new Pieces(gameView);
+        pausePane = new PauseView();
+        pausePane.setVisible(false);
 
-        getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane);
+        getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane,
+                pausePane);
 
         gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
 
@@ -425,9 +442,10 @@ public class Board extends StackPane {
 
             setCursor(Cursor.SE_RESIZE);
             return;
+
         }
 
-        if (gameView.getGame() == null) {
+        if (gameView.getGame() == null || gameView.getGame().isPaused()) {
             setCursor(Cursor.DEFAULT);
             return;
         }

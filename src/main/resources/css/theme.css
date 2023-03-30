@@ -14,6 +14,10 @@
   -fx-background-color: -background;
 }
 
+PauseView {
+  -fx-background-color: rgba(50, 50, 50, .6);
+}
+
 #lightCoord {
   -fx-fill: -darkSquare;
 }

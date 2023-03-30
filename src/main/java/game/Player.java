@@ -4,10 +4,14 @@ public class Player {
 
     public static final int MAX_NAME_LENGTH = 20;
 
+    public static final String HUMAN = "human";
+    public static final String PROGRAM = "program";
+
     public static final String NAME_REGEX = "[A-Za-z0-9!@#$%^&*()_\\-\\+=\"',. ?:\\/\\[\\]\\{\\}]{1," + MAX_NAME_LENGTH
             + "}";
 
     private String name;
+    private String type;
     private boolean white;
 
     public String getName() {
@@ -16,6 +20,14 @@ public class Player {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public boolean isWhite() {
@@ -49,9 +61,10 @@ public class Player {
 
     }
 
-    public Player(String name, boolean white) {
+    public Player(String name, String type, boolean white) {
 
         this.name = name;
+        this.type = type;
         this.white = white;
 
     }

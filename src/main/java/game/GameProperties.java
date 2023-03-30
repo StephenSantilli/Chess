@@ -74,14 +74,14 @@ public class GameProperties {
     }
 
     /**
-     * @see #manageWhiteTimer
+     * @see #whiteTimerManaged
      */
     public boolean isWhiteTimerManged() {
         return whiteTimerManaged;
     }
 
     /**
-     * @see #manageBlackTimer
+     * @see #blackTimerManaged
      */
     public boolean isBlackTimerManaged() {
         return blackTimerManaged;

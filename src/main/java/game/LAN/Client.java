@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import game.Chat;
 import game.Game;
 import game.GameProperties;
+import game.Player;
 import game.GameEvent;
 import game.GameListener;
 
@@ -106,7 +107,7 @@ public class Client implements GameListener {
 
         send(new InitMessage(Game.VERSION, name));
 
-    }
+    } 
 
     private void send(Message message) {
 
@@ -292,6 +293,8 @@ public class Client implements GameListener {
             try {
                 game = new Game(color == Challenge.CHALLENGE_WHITE ? name : iMsg.getName(),
                         color == Challenge.CHALLENGE_BLACK ? name : iMsg.getName(),
+                        Player.HUMAN,
+                        Player.HUMAN,
                         settings);
             } catch (Exception e) {
                 stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to create game."));
@@ -325,6 +328,8 @@ public class Client implements GameListener {
 
                 game = new Game(white ? name : rMsg.getName(),
                         !white ? name : rMsg.getName(),
+                        Player.HUMAN,
+                        Player.HUMAN,
                         new GameProperties(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
                 oppColor = !white;
                 game.addListener(this);

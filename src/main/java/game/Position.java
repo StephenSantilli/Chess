@@ -162,7 +162,7 @@ public class Position {
     public String getMoveString() {
 
         String str = move.getMoveNotation();
-        if (isCheckMate())
+        if (isCheckmate())
             str += "#";
         else if (isInCheck())
             str += "+";
@@ -235,7 +235,7 @@ public class Position {
      *         {@code null} if {@code checkForMate} was not true when constructor
      *         was called.
      */
-    public boolean isCheckMate() {
+    public boolean isCheckmate() {
         return checkMate;
     }
 
@@ -714,7 +714,7 @@ public class Position {
 
         if (checkForMate) {
 
-            setCheckMate(g);
+            setCheckmate(g);
 
             if (this.inCheck == false) {
 
@@ -746,11 +746,12 @@ public class Position {
 
     /**
      * Sets whether or not the position is check mate. (The color whose turn it is
-     * isn't able to make any moves and is in check.)
+     * isn't able to make any moves and is in check.) Also will filter out any moves
+     * that are not legal.
      * 
-     * @param g The game to check.
+     * @param game The game to check.
      */
-    private void setCheckMate(Game g) {
+    private void setCheckmate(Game game) {
 
         this.mateChecked = true;
         this.checkMate = true;
@@ -766,7 +767,7 @@ public class Position {
             }
 
             try {
-                Position test = new Position(this, m, g, !white, false, '0');
+                Position test = new Position(this, m, game, !white, false, '0');
                 if (!test.isGivingCheck())
                     checkMate = false;
                 else {
@@ -850,9 +851,9 @@ public class Position {
 
     }
 
-    public void setSquare(Square s, Piece p) {
+    public void setSquare(Square square, Piece piece) {
 
-        pieces[s.getRank() - 1][s.getFile() - 1] = p;
+        pieces[square.getRank() - 1][square.getFile() - 1] = piece;
 
     }
 
@@ -870,7 +871,8 @@ public class Position {
 
     /**
      * Gets a list of the pieces that are attacking the given square (able to
-     * capture the piece occupying it.)
+     * capture the piece occupying it.) 
+     * 
      * 
      * @param s The square to search for attacking pieces at.
      * @return An {@link ArrayList} of {@link Piece} objects
@@ -910,6 +912,43 @@ public class Position {
         }
 
         return pieces;
+
+    }
+
+    /**
+     * Checks if a piece can move to the given square.
+     * 
+     * @param piece  The piece to check
+     * @param square The square to check for
+     * @return Whether or not the location can be moved to
+     */
+    public boolean canPieceMoveToSquare(Piece piece, Square square) {
+
+        ArrayList<Piece> attackers = getPiecesByCanMoveTo(square);
+
+        for (int i = 0; i < attackers.size(); i++) {
+
+            if (attackers.get(i).equals(piece))
+                return true;
+
+        }
+
+        return false;
+
+    }
+
+    public ArrayList<Move> getPieceMoves(Piece piece) {
+
+        ArrayList<Move> pieceMoves = new ArrayList<Move>();
+
+        for (int i = 0; i < moves.size(); i++) {
+
+            if (moves.get(i).getPiece().equals(piece))
+                pieceMoves.add(moves.get(i));
+
+        }
+
+        return pieceMoves;
 
     }
 
@@ -965,6 +1004,12 @@ public class Position {
 
     }
 
+    public boolean isStalemate() {
+
+        return moves.size() == 0;
+
+    }
+
     public ArrayList<Piece> getPiecesAsArrayList() {
 
         ArrayList<Piece> list = new ArrayList<Piece>();
@@ -982,43 +1027,6 @@ public class Position {
         }
 
         return list;
-    }
-
-    /**
-     * Checks if a piece can move to the given square.
-     * 
-     * @param piece  The piece to check
-     * @param square The square to check for
-     * @return Whether or not the location can be moved to
-     */
-    public boolean canPieceMoveToSquare(Piece piece, Square square) {
-
-        ArrayList<Piece> attackers = getPiecesByCanMoveTo(square);
-
-        for (int i = 0; i < attackers.size(); i++) {
-
-            if (attackers.get(i).equals(piece))
-                return true;
-
-        }
-
-        return false;
-
-    }
-
-    public ArrayList<Move> getPieceMoves(Piece piece) {
-
-        ArrayList<Move> pieceMoves = new ArrayList<Move>();
-
-        for (int i = 0; i < moves.size(); i++) {
-
-            if (moves.get(i).getPiece().equals(piece))
-                pieceMoves.add(moves.get(i));
-
-        }
-
-        return pieceMoves;
-
     }
 
     /**
@@ -1073,16 +1081,6 @@ public class Position {
 
         if (fen.charAt(fen.length() - 1) == ' ')
             fen += '-';
-
-        // En Passant Square
-        // if (move != null && move.getPiece().getCode() == 'P' && !move.isCapture() &&
-        // move.getMoveDistance() == 2
-        // && ((move.isWhite() && move.getDestination().getRank() == 4)
-        // || (!move.isWhite() && move.getDestination().getRank() == 5)))
-        // fen += " " + (new Square(move.getDestination().getFile(),
-        // move.getDestination().getRank() + (move.isWhite() ? -1 : 1)).toString());
-        // else
-        // fen += " " + "-";
 
         fen += " " + (enPassantDestination == null ? "-" : enPassantDestination.toString());
 
@@ -1205,11 +1203,14 @@ public class Position {
                 if (o != null && mo.getOrigin().equals(o))
                     possibleMoves.add(mo);
                 else if (oFile > -1 && oRank > -1) {
-                    if(mo.getOrigin().getFile() == oFile && mo.getOrigin().getRank() == oRank) possibleMoves.add(mo);
+                    if (mo.getOrigin().getFile() == oFile && mo.getOrigin().getRank() == oRank)
+                        possibleMoves.add(mo);
                 } else if (oFile > -1) {
-                    if(mo.getOrigin().getFile() == oFile) possibleMoves.add(mo);
+                    if (mo.getOrigin().getFile() == oFile)
+                        possibleMoves.add(mo);
                 } else if (oRank > -1) {
-                    if(mo.getOrigin().getRank() == oRank) possibleMoves.add(mo);
+                    if (mo.getOrigin().getRank() == oRank)
+                        possibleMoves.add(mo);
                 } else {
                     possibleMoves.add(mo);
                 }
@@ -1225,15 +1226,6 @@ public class Position {
             throw new Exception("Multiple possible moves.");
 
         return possibleMoves.get(0);
-
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        Position p = new Position(new Game("w", "b", new GameProperties(
-                "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", -1, -1, false, false, false, false)));
-
-        System.out.println(p.getMoves());
 
     }
 

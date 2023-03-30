@@ -90,9 +90,19 @@ public class ChallengeServer {
                 DatagramPacket packet = new DatagramPacket(buf, 10);
                 udpSocket.receive(packet);
 
-                new Thread(new ChallengeSender(new Challenge(challenge.getName(), challenge.getColor(),
-                        challenge.getTimePerSide(), challenge.getTimePerMove(), packet.getAddress()), udpSocket),
-                        "Challenge Sender").start();
+                new Thread(() -> {
+                    try {
+
+                        DatagramPacket pack = new DatagramPacket((challenge.toString()).getBytes(),
+                                challenge.toString().length(),
+                                packet.getAddress(), Client.PORT);
+
+                        udpSocket.send(pack);
+
+                    } catch (Exception er) {
+                        er.printStackTrace();
+                    }
+                }, "Challenge Sender");
 
             }
 

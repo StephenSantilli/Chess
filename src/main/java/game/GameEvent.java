@@ -27,11 +27,13 @@ public class GameEvent {
     private Position prev;
     private Position curr;
 
+    private Move move;
+
     private boolean white;
 
     private Chat message;
 
-    public int getType() {
+	public int getType() {
         return type;
     }
 
@@ -51,15 +53,19 @@ public class GameEvent {
         return curr;
     }
 
+    public Move getMove() {
+        return move;
+    }
+
     public boolean isWhite() {
         return white;
     }
 
     public Chat getMessage() {
-		return message;
-	}
+        return message;
+    }
 
-	public GameEvent(int type) {
+    public GameEvent(int type) {
 
         this.type = type;
 
@@ -72,13 +78,15 @@ public class GameEvent {
 
     }
 
-    public GameEvent(int type, int prevIndex, int currIndex, Position prev, Position curr) {
+    public GameEvent(int type, int prevIndex, int currIndex, Position prev, Position curr, Move move, boolean white) {
 
         this.type = type;
         this.prevIndex = prevIndex;
         this.currIndex = currIndex;
         this.prev = prev;
         this.curr = curr;
+        this.move = move;
+        this.white = white;
 
     }
 

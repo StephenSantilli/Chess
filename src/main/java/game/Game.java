@@ -117,11 +117,6 @@ public class Game {
     private boolean paused;
 
     /**
-     * The system time the game was paused.
-     */
-    private long pauseStart;
-
-    /**
      * The service that checks for flagfall in the background.
      */
     private ScheduledExecutorService flagfallChecker;
@@ -197,15 +192,16 @@ public class Game {
      *                    each move they make.
      * @param isTwoPlayer Whether or not there will be an opponent.
      */
-    public Game(String whiteName, String blackName, GameProperties settings) throws Exception {
+    public Game(String whiteName, String blackName, String whiteType, String blackType, GameProperties settings)
+            throws Exception {
 
-        this.white = new Player(whiteName, true);
-        this.black = new Player(blackName, false);
+        this.white = new Player(whiteName, whiteType, true);
+        this.black = new Player(blackName, blackType, false);
 
         this.settings = settings;
 
-        messages = new ArrayList<Chat>();
         positions = new ArrayList<Position>();
+        messages = new ArrayList<Chat>();
 
         if (settings.getFen().equals(GameProperties.DEFAULT_FEN))
             positions.add(new Position(this));
@@ -233,7 +229,8 @@ public class Game {
         whiteTimer = settings.getTimePerSide() * 1000;
         blackTimer = settings.getTimePerSide() * 1000;
 
-        flipTimer(true, 0);
+        // flipTimer(true, 0);
+        startTimer();
 
         if (settings.getTimePerSide() > 0) {
 
@@ -244,12 +241,7 @@ public class Game {
 
         fireEvent(GameEvent.STARTED);
 
-        if (getLastPos().isCheckMate()) {
-
-            result = getLastPos().isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN;
-            resultReason = REASON_CHECKMATE;
-
-            flipTimer(true, 0);
+        if (getLastPos().isCheckmate()) {
 
             markGameOver(getLastPos().isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
             return;
@@ -258,84 +250,18 @@ public class Game {
 
         if (getLastPos().isInsufficientMaterial()) {
 
-            result = RESULT_DRAW;
-            resultReason = REASON_DEAD_INSUFFICIENT_MATERIAL;
-
-            flipTimer(true, 0);
-
             markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
             return;
 
         }
 
         // Stalemate
-        if (getLastPos().getMoves().size() == 0) {
-
-            result = RESULT_DRAW;
-            resultReason = REASON_STALEMATE;
-
-            flipTimer(true, 0);
+        if (getLastPos().isStalemate()) {
 
             markGameOver(RESULT_DRAW, REASON_STALEMATE);
             return;
 
         }
-
-    }
-
-    public boolean canDrawOffer() {
-
-        return result == RESULT_IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
-
-    }
-
-    public void acceptDrawOffer() throws Exception {
-
-        if (result != RESULT_IN_PROGRESS)
-            throw new Exception("Game is not in progress.");
-
-        if (getLastPos().getDrawOfferer() == Position.NO_OFFER)
-            throw new Exception("No draw offer.");
-
-        if (!canDrawOffer())
-            throw new Exception("Cannot accept draw.");
-
-        markGameOver(RESULT_DRAW,
-                (getLastPos().getDrawOfferer() == Position.WHITE)
-                        ? REASON_WHITE_OFFERED_DRAW
-                        : REASON_BLACK_OFFERED_DRAW);
-
-        sendMessage(new Chat(getPlayer(getLastPos().getDrawOfferer() == Position.WHITE), new Date().getTime(),
-                getPlayer(getLastPos().getDrawOfferer() == Position.WHITE).getName() + " accepted the draw offer."));
-
-    }
-
-    public void declineDrawOffer() throws Exception {
-
-        if (canDrawOffer())
-            throw new Exception("No draw to decline.");
-
-        final boolean offererWhite = getLastPos().getDrawOfferer() == Position.WHITE;
-
-        getLastPos().setDrawOfferer(Position.NO_OFFER);
-
-        fireEvent(new GameEvent(GameEvent.TYPE_DRAW_DECLINED, !offererWhite));
-
-        sendMessage(new Chat(getPlayer(!offererWhite), new Date().getTime(),
-                getPlayer(!offererWhite).getName() + " declined the draw offer.", true));
-
-    }
-
-    public void sendDrawOffer(boolean offererWhite) throws Exception {
-
-        if (!canDrawOffer())
-            throw new Exception("Cannot offer a draw.");
-
-        getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
-        fireEvent(GameEvent.DRAW_OFFER);
-
-        sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
-                getPlayer(offererWhite).getName() + " sent a draw offer.", true));
 
     }
 
@@ -350,16 +276,10 @@ public class Game {
         if (flagfallChecker != null)
             flagfallChecker.shutdownNow();
 
-        flipTimer(true, 0);
+        // flipTimer(true, 0);
+        // endTimer(false);
 
         fireEvent(GameEvent.OVER);
-
-    }
-
-    public void sendMessage(Chat message) {
-
-        messages.add(message);
-        fireEvent(new GameEvent(message));
 
     }
 
@@ -371,24 +291,24 @@ public class Game {
         if (result != RESULT_IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
-        Move valid = null;
-        for (int i = 0; valid == null && i < getLastPos().getMoves().size(); i++) {
+        Move move = null;
+        for (int i = 0; move == null && i < getLastPos().getMoves().size(); i++) {
 
             Move a = getLastPos().getMoves().get(i);
 
             if (a.getOrigin().equals(origin) && a.getDestination().equals(destination))
-                valid = a;
+                move = a;
 
         }
 
-        if (valid == null)
+        if (move == null)
             throw new Exception("Invalid move.");
 
-        if (valid.getPromoteType() == '?'
+        if (move.getPromoteType() == '?'
                 && (promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N'))
             throw new Exception("Invalid promotion type.");
 
-        Position movePosition = new Position(getLastPos(), valid, this, !getLastPos().isWhite(), true, promoteType);
+        Position movePosition = new Position(getLastPos(), move, this, !getLastPos().isWhite(), true, promoteType);
 
         if (movePosition.isGivingCheck())
             throw new Exception("Cannot move into check.");
@@ -396,56 +316,35 @@ public class Game {
         if (movePosition.getMove().isCapture() && movePosition.getMove().getCapturePiece().getCode() == 'K')
             throw new Exception("Cannot capture a king.");
 
+        endTimer(true);
+
         positions.add(movePosition);
 
         int posNumber = positions.size() - 1;
 
-        if (movePosition.isCheckMate()) {
+        fireEvent(new GameEvent(
+                GameEvent.TYPE_MOVE,
+                posNumber - 1,
+                posNumber,
+                getPreviousPos(),
+                getLastPos(),
+                move,
+                move.isWhite()));
 
-            result = movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN;
-            resultReason = REASON_CHECKMATE;
-
-            flipTimer(true, 0);
-
-            fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
+        if (movePosition.isCheckmate()) {
 
             markGameOver(movePosition.isWhite() ? RESULT_BLACK_WIN : RESULT_WHITE_WIN, REASON_CHECKMATE);
-            return;
 
-        }
-
-        if (movePosition.isInsufficientMaterial()) {
-
-            result = RESULT_DRAW;
-            resultReason = REASON_DEAD_INSUFFICIENT_MATERIAL;
-
-            flipTimer(true, 0);
-
-            fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
+        } else if (movePosition.isInsufficientMaterial()) {
 
             markGameOver(RESULT_DRAW, REASON_DEAD_INSUFFICIENT_MATERIAL);
-            return;
 
-        }
-
-        // Stalemate
-        if (movePosition.getMoves().size() == 0) {
-
-            result = RESULT_DRAW;
-            resultReason = REASON_STALEMATE;
-
-            flipTimer(true, 0);
-
-            fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
+        } else if (movePosition.isStalemate()) {
 
             markGameOver(RESULT_DRAW, REASON_STALEMATE);
-            return;
 
-        }
-
-        flipTimer(true, 0);
-
-        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, posNumber - 1, posNumber, getPreviousPos(), getLastPos()));
+        } else
+            startTimer();
 
     }
 
@@ -456,9 +355,9 @@ public class Game {
 
         Position p = getLastPos();
 
-        long timer = color ? whiteTimer : blackTimer;
+        final long timer = color ? whiteTimer : blackTimer;
 
-        if (p.isWhite() != color || p.getTimerEnd() > 0)
+        if (p.isWhite() != color || p.getTimerEnd() > 0 || p.getSystemTimeStart() <= 0)
             return timer >= 0 ? timer : 0;
         else {
 
@@ -479,6 +378,30 @@ public class Game {
 
     }
 
+    public long getTimer(boolean white) {
+
+        if (settings.getTimePerSide() <= -1)
+            return -1;
+
+        if (white)
+            return whiteTimer;
+        else
+            return blackTimer;
+
+    }
+
+    public void decTimer(boolean white, long dec) {
+
+        if (settings.getTimePerSide() <= -1)
+            return;
+
+        if (white)
+            whiteTimer -= dec;
+        else
+            blackTimer -= dec;
+
+    }
+
     public void setTimer(boolean white, long time) {
 
         if (settings.getTimePerSide() <= -1)
@@ -491,77 +414,54 @@ public class Game {
 
     }
 
-    /**
-     * Flips the timer to the color of {@link #getActivePos()}.
-     * 
-     * <p>
-     * If {@code setTimer}
-     * is {@code true}, the {@link Position#timerEnd} for the previous position will
-     * be set,
-     * and either {@link #whiteTimer} or {@link #blackTimer} will be set. Will also
-     * reset the timer task to schedule flagfall.
-     * 
-     * <p>
-     * If the game is over, ({@link #result} does not equal {@code 0},) and
-     * {@code setTimer} is true, then the flagfall timer will be stopped and a new
-     * one will not be started.
-     * 
-     * @param setTimer  Whether or not the timer should be set.
-     * @param pauseTime The time the game was paused at, if resuming. Should be
-     *                  {@code 0} otherwise.
-     */
-    private void flipTimer(boolean setTimer, long pauseTime) {
+    private void saveTimer() {
 
-        if ((getLastPos().isWhite() && !settings.isWhiteTimerManged())
-                || (!getLastPos().isWhite() && !settings.isBlackTimerManaged()))
-            setTimer = false;
-
-        if (paused
-                || settings.getTimePerSide() <= 0)
+        if (settings.getTimePerSide() <= 0)
             return;
 
-        Position active = getLastPos();
-        Position previous = getPreviousPos();
+        final Position lastPos = getLastPos();
 
-        long currentTime = System.currentTimeMillis();
+        decTimer(lastPos.isWhite(), System.currentTimeMillis() - lastPos.getSystemTimeStart());
 
-        if (previous != null && setTimer && pauseTime <= 0 && previous.getTimerEnd() <= 0) {
+    }
 
-            if (previous.isWhite())
-                whiteTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove() * 1000);
-            else
-                blackTimer -= (currentTime - previous.getSystemTimeStart()) - (settings.getTimePerMove() * 1000);
+    private void endTimer(boolean addTimePerMove) {
 
-            previous.setTimerEnd(previous.isWhite() ? whiteTimer : blackTimer);
+        if (settings.getTimePerSide() <= 0)
+            return;
 
-        }
+        final Position lastPos = getLastPos();
 
-        if (pauseTime > 0)
-            active.setSystemTimeStart(currentTime - (pauseTime - active.getSystemTimeStart()));
-        else if (result == RESULT_IN_PROGRESS && active.getSystemTimeStart() <= 0)
-            active.setSystemTimeStart(currentTime);
+        if ((lastPos.isWhite() && !settings.isWhiteTimerManged())
+                || (!lastPos.isWhite() && !settings.isBlackTimerManaged()))
+            return;
 
-        if (result > RESULT_IN_PROGRESS) {
+        if (lastPos.getSystemTimeStart() <= 0)
+            return;
 
-            if (active.isWhite()) {
+        decTimer(lastPos.isWhite(), System.currentTimeMillis() - lastPos.getSystemTimeStart()
+                + ((addTimePerMove && settings.getTimePerMove() > -1) ? -(settings.getTimePerMove() * 1000) : 0));
+        lastPos.setTimerEnd(lastPos.isWhite() ? whiteTimer : blackTimer);
 
-                whiteTimer -= (currentTime - active.getSystemTimeStart());
-                active.setTimerEnd(whiteTimer);
+    }
 
-            } else {
+    private void startTimer() {
 
-                blackTimer -= (currentTime - active.getSystemTimeStart());
-                active.setTimerEnd(blackTimer);
+        if (settings.getTimePerSide() <= 0)
+            return;
 
-            }
+        final Position lastPos = getLastPos();
 
-        }
+        if (lastPos.getSystemTimeStart() > 0)
+            return;
+
+        lastPos.setSystemTimeStart(System.currentTimeMillis());
 
     }
 
     public boolean canPause() {
 
-        return settings.canPause() && !isPaused();
+        return result == RESULT_IN_PROGRESS && settings.canPause() && !isPaused();
 
     }
 
@@ -571,7 +471,9 @@ public class Game {
             throw new Exception("Game is already paused.");
 
         paused = true;
-        pauseStart = System.currentTimeMillis();
+
+        saveTimer();
+        getLastPos().setSystemTimeStart(-1);
 
         fireEvent(GameEvent.PAUSED);
 
@@ -579,7 +481,7 @@ public class Game {
 
     public boolean canResume() {
 
-        return settings.canPause() && isPaused();
+        return result == RESULT_IN_PROGRESS && settings.canPause() && isPaused();
 
     }
 
@@ -590,9 +492,7 @@ public class Game {
 
         paused = false;
 
-        flipTimer(true, pauseStart);
-
-        pauseStart = 0;
+        startTimer();
 
         fireEvent(GameEvent.RESUMED);
 
@@ -633,17 +533,27 @@ public class Game {
         Position prev = getPreviousPos();
         if (getLastPos().isWhite()) {
             blackTimer = prev == null ? settings.getTimePerSide() * 1000 : prev.getTimerEnd();
-            whiteTimer -= settings.getTimePerMove() * 1000;
+            if (settings.getTimePerMove() > 0)
+                whiteTimer -= settings.getTimePerMove() * 1000;
         } else {
             whiteTimer = prev == null ? settings.getTimePerSide() * 1000 : prev.getTimerEnd();
-            blackTimer -= settings.getTimePerMove() * 1000;
+            if (settings.getTimePerMove() > 0)
+                blackTimer -= settings.getTimePerMove() * 1000;
         }
 
         getLastPos().setSystemTimeStart(-1);
+        getLastPos().setTimerEnd(-1);
 
-        flipTimer(false, 0);
+        fireEvent(new GameEvent(
+                GameEvent.TYPE_MOVE,
+                positions.size(),
+                positions.size() - 1,
+                redo,
+                getLastPos(),
+                getLastPos().getMove(),
+                !getLastPos().isWhite()));
 
-        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size(), positions.size() - 1, redo, getLastPos()));
+        startTimer();
 
     }
 
@@ -663,42 +573,86 @@ public class Game {
         if (redo == null)
             throw new Exception("No move to redo.");
 
+        endTimer(true);
+
         positions.add(redo);
 
         if (redo.getRedoPromote() != '0')
             redo.setPromote(redo.getRedoPromote(), this);
 
-        boolean redoTime = getPreviousPos().getTimerEnd() > 0;
+        fireEvent(new GameEvent(
+                GameEvent.TYPE_MOVE,
+                positions.size() - 2,
+                positions.size() - 1,
+                getPreviousPos(),
+                getLastPos(),
+                getLastPos().getMove(),
+                getLastPos().getMove().isWhite()));
 
-        if (redoTime) {
-
-            if (getPreviousPos().isWhite())
-                whiteTimer = getPreviousPos().getTimerEnd();
-            else
-                blackTimer = getPreviousPos().getTimerEnd();
-
-        }
-
-        flipTimer(!redoTime, 0);
-
-        fireEvent(new GameEvent(GameEvent.TYPE_MOVE, positions.size() - 2, positions.size() - 1, getPreviousPos(),
-                getLastPos()));
+        startTimer();
 
     }
 
-    public void addListener(GameListener listener) {
+    public boolean canDrawOffer() {
 
-        listeners.add(listener);
+        return result == RESULT_IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
 
     }
 
-    public void fireEvent(GameEvent event) {
+    public void sendDrawOffer(boolean offererWhite) throws Exception {
 
-        for (GameListener listener : listeners) {
+        if (!canDrawOffer())
+            throw new Exception("Cannot offer a draw.");
 
-            listener.onPlayerEvent(event);
+        getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
+        fireEvent(GameEvent.DRAW_OFFER);
 
-        }
+        sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
+                getPlayer(offererWhite).getName() + " sent a draw offer.", true));
+
+    }
+
+    public void acceptDrawOffer() throws Exception {
+
+        if (result != RESULT_IN_PROGRESS)
+            throw new Exception("Game is not in progress.");
+
+        if (getLastPos().getDrawOfferer() == Position.NO_OFFER)
+            throw new Exception("No draw offer.");
+
+        if (!canDrawOffer())
+            throw new Exception("Cannot accept draw.");
+
+        markGameOver(RESULT_DRAW,
+                (getLastPos().getDrawOfferer() == Position.WHITE)
+                        ? REASON_WHITE_OFFERED_DRAW
+                        : REASON_BLACK_OFFERED_DRAW);
+
+        sendMessage(new Chat(getPlayer(getLastPos().getDrawOfferer() == Position.WHITE), new Date().getTime(),
+                getPlayer(getLastPos().getDrawOfferer() == Position.WHITE).getName() + " accepted the draw offer."));
+
+    }
+
+    public void declineDrawOffer() throws Exception {
+
+        if (canDrawOffer())
+            throw new Exception("No draw to decline.");
+
+        final boolean offererWhite = getLastPos().getDrawOfferer() == Position.WHITE;
+
+        getLastPos().setDrawOfferer(Position.NO_OFFER);
+
+        fireEvent(new GameEvent(GameEvent.TYPE_DRAW_DECLINED, !offererWhite));
+
+        sendMessage(new Chat(getPlayer(!offererWhite), new Date().getTime(),
+                getPlayer(!offererWhite).getName() + " declined the draw offer.", true));
+
+    }
+
+    public void sendMessage(Chat message) {
+
+        messages.add(message);
+        fireEvent(new GameEvent(message));
 
     }
 
@@ -738,16 +692,11 @@ public class Game {
 
         Map<String, String> tags = new HashMap<>();
 
-        tags.put("Event", "?");
-        tags.put("Site", "?");
-
         DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
-        if (start == null)
-            tags.put("Date", "????.??.??");
-        else
+        if (start != null)
+
             tags.put("Date", df.format(start));
 
-        tags.put("Round", "-");
         tags.put("White", getPlayer(true).getName());
         tags.put("Black", getPlayer(false).getName());
 
@@ -771,8 +720,110 @@ public class Game {
             tags.put("TimeControl",
                     settings.getTimePerSide() + (settings.getTimePerMove() > 0 ? "+" + settings.getTimePerMove() : ""));
 
+        final Player white = getPlayer(true);
+        final Player black = getPlayer(false);
+
+        if (!white.getType().equals(""))
+            tags.put("WhiteType", white.getType());
+
+        if (!black.getType().equals(""))
+            tags.put("BlackType", black.getType());
+
         return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 
     }
+
+    public void addListener(GameListener listener) {
+
+        listeners.add(listener);
+
+    }
+
+    public void fireEvent(GameEvent event) {
+
+        for (GameListener listener : listeners) {
+
+            listener.onPlayerEvent(event);
+
+        }
+
+    }
+
+    // /**
+    // * @deprecated
+    // * Flips the timer to the color of {@link #getActivePos()}.
+    // *
+    // * <p>
+    // * If {@code setTimer}
+    // * is {@code true}, the {@link Position#timerEnd} for the previous
+    // * position will
+    // * be set, and either {@link #whiteTimer} or {@link #blackTimer}
+    // * will be set.
+    // * Will also reset the timer task to schedule flagfall.
+    // *
+    // * <p>
+    // * If the game is over, ({@link #result} does not equal {@code 0},)
+    // * and
+    // * {@code setTimer} is true, then the flagfall timer will be stopped
+    // * and a new
+    // * one will not be started.
+    // *
+    // * @param setTimer Whether or not the timer should be set.
+    // * @param pauseTime The time the game was paused at, if resuming. Should be
+    // * {@code 0} otherwise.
+    // */
+    // @Deprecated
+    // private void flipTimer(boolean setTimer, long pauseTime) {
+
+    // if ((getLastPos().isWhite() && !settings.isWhiteTimerManged())
+    // || (!getLastPos().isWhite() && !settings.isBlackTimerManaged()))
+    // setTimer = false;
+
+    // if (paused
+    // || settings.getTimePerSide() <= 0)
+    // return;
+
+    // final Position active = getLastPos();
+    // final Position previous = getPreviousPos();
+
+    // final long currentTime = System.currentTimeMillis();
+
+    // if (previous != null && setTimer && pauseTime <= 0 && previous.getTimerEnd()
+    // <= 0) {
+
+    // if (previous.isWhite())
+    // whiteTimer -= (currentTime - previous.getSystemTimeStart()) -
+    // (settings.getTimePerMove() * 1000);
+    // else
+    // blackTimer -= (currentTime - previous.getSystemTimeStart()) -
+    // (settings.getTimePerMove() * 1000);
+
+    // previous.setTimerEnd(previous.isWhite() ? whiteTimer : blackTimer);
+
+    // }
+
+    // if (pauseTime > 0)
+    // active.setSystemTimeStart(currentTime - (pauseTime -
+    // active.getSystemTimeStart()));
+    // else if (result == RESULT_IN_PROGRESS && active.getSystemTimeStart() <= 0)
+    // active.setSystemTimeStart(currentTime);
+
+    // if (result > RESULT_IN_PROGRESS && active.getSystemTimeStart() > 0) {
+
+    // if (active.isWhite()) {
+
+    // whiteTimer -= (currentTime - active.getSystemTimeStart());
+    // active.setTimerEnd(whiteTimer);
+
+    // } else {
+
+    // blackTimer -= (currentTime - active.getSystemTimeStart());
+    // active.setTimerEnd(blackTimer);
+
+    // }
+
+    // }
+
+    // }
 
 }

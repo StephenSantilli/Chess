@@ -1,6 +1,7 @@
 package gui;
 
 import game.GameProperties;
+import game.Player;
 
 import java.awt.Window;
 import java.util.stream.Collectors;
@@ -256,7 +257,7 @@ public class GameView extends HBox implements GameListener {
 
             getScene().getWindow().widthProperty().addListener(board.getResizeEvent());
             getScene().getWindow().heightProperty().addListener(board.getResizeEvent());
-            
+
         }));
 
         board.boardUpdated();
@@ -371,18 +372,40 @@ public class GameView extends HBox implements GameListener {
 
                         color = TWO_PLAYER;
                         if (!setup.getPgn().equals("")) {
-                            game = new Game("White", "Black",
-                                    new GameProperties(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+
+                            game = new Game("White",
+                                    "Black",
+                                    Player.HUMAN,
+                                    Player.HUMAN,
+                                    new GameProperties(setup.getTimePerSide(),
+                                            setup.getTimePerMove(),
+                                            true,
+                                            true,
+                                            true,
                                             true));
                             game.importPosition(new PGNParser(setup.getPgn()));
+
                         } else if (!setup.getFen().equals(""))
                             game = new Game("White", "Black",
-                                    new GameProperties(setup.getFen(), setup.getTimePerSide(), setup.getTimePerMove(),
-                                            true, true, true,
+                                    Player.HUMAN,
+                                    Player.HUMAN,
+                                    new GameProperties(setup.getFen(),
+                                            setup.getTimePerSide(),
+                                            setup.getTimePerMove(),
+                                            true,
+                                            true,
+                                            true,
                                             true));
                         else
-                            game = new Game("White", "Black",
-                                    new GameProperties(setup.getTimePerSide(), setup.getTimePerMove(), true, true, true,
+                            game = new Game("White",
+                                    "Black",
+                                    Player.HUMAN,
+                                    Player.HUMAN,
+                                    new GameProperties(setup.getTimePerSide(),
+                                            setup.getTimePerMove(),
+                                            true,
+                                            true,
+                                            true,
                                             true));
 
                         game.addListener(this);
@@ -539,6 +562,8 @@ public class GameView extends HBox implements GameListener {
                 if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
                     return;
 
+                gameMenu.update();
+
                 Dialog<Void> over = new Dialog<Void>();
                 over.setTitle("Game Over");
 
@@ -570,6 +595,10 @@ public class GameView extends HBox implements GameListener {
                         java.awt.Toolkit.getDefaultToolkit().beep();
                 }
 
+            } else if(event.getType() == GameEvent.TYPE_PAUSED || event.getType() == GameEvent.TYPE_RESUMED) {
+                gameMenu.update();
+                infoPane.updateTimers();
+                board.getPausePane().setVisible(game.isPaused());
             }
 
         });

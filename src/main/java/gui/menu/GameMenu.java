@@ -1,6 +1,7 @@
 package gui.menu;
 
 import game.Game;
+import game.LAN.ErrorMessage;
 import gui.GameView;
 import gui.dialog.Export;
 import javafx.scene.control.Menu;
@@ -10,7 +11,7 @@ import javafx.scene.input.KeyCombination;
 
 public class GameMenu extends Menu {
 
-    private MenuItem newGame, undo, redo, resign, drawOffer, pause, resume, showPgn;
+    private MenuItem newGame, undo, redo, resign, drawOffer, pause, resume, disconnect, showPgn;
 
     private GameView board;
 
@@ -111,6 +112,19 @@ public class GameMenu extends Menu {
 
         });
 
+        disconnect = new MenuItem("Disconnect");
+        disconnect.setOnAction(e -> {
+
+            try {
+
+                board.getClient().stop(ErrorMessage.TERMINATE);
+
+            } catch (Exception ex) {
+
+            }
+
+        });
+
         showPgn = new MenuItem("Show PGN");
         showPgn.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
         showPgn.setOnAction(e -> {
@@ -125,6 +139,7 @@ public class GameMenu extends Menu {
                 pause, resume, new SeparatorMenuItem(),
                 undo, redo, new SeparatorMenuItem(),
                 resign, drawOffer, new SeparatorMenuItem(),
+                disconnect, new SeparatorMenuItem(),
                 showPgn);
 
     }
