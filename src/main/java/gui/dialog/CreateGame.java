@@ -70,35 +70,38 @@ public class CreateGame extends Stage {
         create = false;
 
         // Player Settings Boxes
-        Label oneLabel = new Label("Player 1 Name:");
+        Label oneLabel = new Label("Player 1:");
         oneField = new TextField("Player 1");
         // HBox oneNameArea = new HBox(oneLabel, oneField);
 
         color = new ChoiceBox<String>();
         color.getItems().addAll("Random", "White", "Black");
+        color.setMaxWidth(Double.MAX_VALUE);
         color.setValue("Random");
 
-        VBox oneBox = new VBox(oneLabel, oneField, color);
+        VBox oneBox = new VBox(oneLabel, color, oneField);
         oneBox.setFillWidth(true);
         // oneBox.setSpacing(5);
 
-        Label twoLabel = new Label("Player 2 Name:");
+        Label twoLabel = new Label("Player 2:");
         twoField = new TextField("Player 2");
         // HBox twoNameArea = new HBox(twoLabel, twoField);
 
         type = new ChoiceBox<String>();
-        type.getItems().addAll("Local", "Online"/* , "Bot" */);
-        type.setValue("Local");
+        type.setMaxWidth(Double.MAX_VALUE);
+
+        type.getItems().addAll("Two Player", "Online"/* , "Bot" */);
+        type.setValue("Two Player");
 
         type.setOnAction(ae -> {
 
-            boolean local = type.getValue().equals("Local");
+            boolean local = type.getValue().equals("Two Player");
 
             twoField.setDisable(!local);
 
         });
 
-        VBox twoBox = new VBox(twoLabel, twoField, type);
+        VBox twoBox = new VBox(twoLabel, type, twoField);
         twoBox.setFillWidth(true);
         // twoBox.setSpacing(5);
 
@@ -257,7 +260,7 @@ public class CreateGame extends Stage {
 
     private void startAction(ActionEvent ae) {
 
-        if (type.getValue().equals("Local")) {
+        if (type.getValue().equals("Two Player")) {
 
             try {
 
@@ -268,8 +271,10 @@ public class CreateGame extends Stage {
 
                 white = oneWhite;
 
-                long timePerSide = useTimeBox.isSelected() ? ((minPerSide.getValue() * 60) + (secPerSide.getValue())) : -1;
-                long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue())) : -1;
+                long timePerSide = useTimeBox.isSelected() ? ((minPerSide.getValue() * 60) + (secPerSide.getValue()))
+                        : -1;
+                long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue()))
+                        : -1;
 
                 game = new Game((oneWhite ? oneField.getText() : twoField.getText()),
                         (oneWhite ? twoField.getText() : oneField.getText()),
