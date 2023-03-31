@@ -110,7 +110,7 @@ public class GUITimer extends Label {
 
     private void frame() {
 
-        if (board.getGame() == null || board.getGame().getTimerTime(white) == -1) {
+        if (board.getGame() == null || board.getGame().getSettings().getTimePerSide() == -1) {
             setText("");
             return;
         }

@@ -5,6 +5,8 @@
 [White "Garry Kasparov"]
 [Black "Maxime Vachier-Lagrave"]
 [Result "0-1"]
+[SetUp "1"]
+[FEN "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 1"]
 
 1. Nf3 c5 2. c4 Nf6 3. g3 b6 4. Bg2 Bb7 5. Nc3 g6 6. O-O Bg7 7. d4 cxd4 8. Nxd4
 Bxg2 9. Kxg2 Qc8 10. b3 Qb7+ 11. f3 d5 12. cxd5 Nxd5 13. Nxd5 Qxd5 14. Be3 Nc6

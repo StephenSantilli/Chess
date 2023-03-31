@@ -26,7 +26,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
-public class GameSetup extends Stage {
+public class GameCreate extends Stage {
 
     private long timePerSide, timePerMove;
 
@@ -42,9 +42,15 @@ public class GameSetup extends Stage {
 
     private ChallengeSearch search;
 
+    private Game game;
+
     private boolean create;
     private String fen;
     private String pgn;
+
+    public Game getGame() {
+        return game;
+    }
 
     public String getFen() {
         return fen;
@@ -112,7 +118,7 @@ public class GameSetup extends Stage {
 
     };
 
-    public GameSetup(Window window, GameView board) {
+    public GameCreate(Window window) {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
@@ -143,7 +149,10 @@ public class GameSetup extends Stage {
         perSideDivider = new Label(":");
 
         minPerSide = new Spinner<Integer>(0, 9999, 10);
-        secPerSide = new Spinner<Integer>(0, 60, 0);
+        secPerSide = new Spinner<Integer>(0, 59, 0);
+
+        minPerSide.setEditable(true);
+        secPerSide.setEditable(true);
 
         minPerSide.setPrefWidth(100);
         secPerSide.setPrefWidth(100);
@@ -162,6 +171,9 @@ public class GameSetup extends Stage {
 
         minPerMove = new Spinner<Integer>(smVF);
         secPerMove = new Spinner<Integer>(ssVF);
+
+        minPerMove.setEditable(true);
+        secPerMove.setEditable(true);
 
         minPerMove.setPrefWidth(100);
         secPerMove.setPrefWidth(100);
@@ -203,9 +215,9 @@ public class GameSetup extends Stage {
 
             } else {
 
-                timePerSide = -1;
-                timePerMove = -1;
-
+                game = null;
+                client = null;
+                create = false;
                 hide();
 
             }
@@ -219,6 +231,9 @@ public class GameSetup extends Stage {
                     : ((minPerSide.getValue() * 60) + (secPerSide.getValue()));
             timePerMove = !timeBox.isSelected() ? -1
                     : ((minPerMove.getValue() * 60) + (secPerMove.getValue()));
+
+            
+
             create = true;
             hide();
 
@@ -312,7 +327,7 @@ public class GameSetup extends Stage {
             PGN fDialog = new PGN(getScene().getWindow());
 
             fDialog.setOnHidden(we -> {
-                
+
                 if (!fDialog.isCreate())
                     return;
 
@@ -342,42 +357,9 @@ public class GameSetup extends Stage {
 
         });
 
-        addEventHandler(WindowEvent.WINDOW_HIDDEN, we -> {
-            if (board.getGame() != null) {
+        // addEventHandler(WindowEvent.WINDOW_HIDING, we -> {
 
-                Dialog<ButtonType> confirm = new Dialog<>();
-                confirm.initOwner(window);
-                confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
-                confirm.setTitle("Confirm New Game");
-
-                ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
-                ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
-
-                confirm.getDialogPane().getButtonTypes().addAll(yes, no);
-
-                confirm.setOnHidden(ev -> {
-                    if (confirm.getResult().getText().equals("Yes")) {
-
-                        if (board.getGame().getResult() == Game.RESULT_IN_PROGRESS)
-                            board.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
-
-                        if (board.getClient() != null)
-                            board.getClient().stop();
-
-                        board.setGame(null);
-                        board.setCurrentPos(0);
-                        board.setClient(null);
-
-                        board.getBoard().boardUpdated();
-
-                    } else
-                        create = false;
-                });
-
-                confirm.showAndWait();
-
-            }
-        });
+        // });
 
     }
 }

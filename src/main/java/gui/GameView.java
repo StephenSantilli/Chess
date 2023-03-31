@@ -18,7 +18,7 @@ import gui.component.ChatArea;
 import gui.component.GameInfo;
 import gui.component.MoveList;
 import gui.dialog.Draw;
-import gui.dialog.GameSetup;
+import gui.dialog.GameStart;
 import gui.menu.BarMenu;
 import gui.menu.GameMenu;
 import gui.menu.ViewMenu;
@@ -34,6 +34,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -358,103 +359,108 @@ public class GameView extends HBox implements GameListener {
 
     public void startGame(WindowEvent we) {
 
-        final GameSetup setup = new GameSetup(getScene().getWindow(), this);
+        final GameStart setup = new GameStart(getScene().getWindow());
 
         setup.setOnHidden(e -> {
 
             if (setup.isCreate()) {
 
+                Dialog<ButtonType> confirm = new Dialog<>();
+                confirm.initOwner(getScene().getWindow());
+                confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
+                confirm.setTitle("Confirm New Game");
+
+                ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
+                ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
+
+                confirm.getDialogPane().getButtonTypes().addAll(yes, no);
+
+                confirm.showAndWait();
+
+                if (confirm.getResult().getText().equals("No"))
+                    return;
+
                 if (game != null)
                     game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
-                if (setup.getClient() == null) {
-                    try {
+                game = setup.getGame();
+                client = setup.getClient();
 
-                        color = TWO_PLAYER;
-                        if (!setup.getPgn().equals("")) {
+                if (client == null)
+                    color = TWO_PLAYER;
+                else
+                    color = setup.isWhite() ? WHITE : BLACK;
 
-                            PGNParser pgn = new PGNParser(setup.getPgn());
+                game.addListener(this);
+                try {
+                    game.startGame();
 
-                            game = new Game(pgn,
-                                    new GameSettings(setup.getTimePerSide(),
-                                            setup.getTimePerMove(),
-                                            true,
-                                            true,
-                                            true,
-                                            true),
-                                    false);
-                            // game.importPosition(new PGNParser(setup.getPgn()));
+                } catch (Exception ex) {
+                    Dialog<Void> eDg = new Dialog<>();
+                    eDg.initOwner(getScene().getWindow());
+                    eDg.setTitle("Error Creating Game");
+                    eDg.setContentText(ex.getMessage());
 
-                        } else if (!setup.getFen().equals(""))
-                            game = new Game("White", "Black",
-                                    Player.HUMAN,
-                                    Player.HUMAN,
-                                    new GameSettings(setup.getFen(),
-                                            setup.getTimePerSide(),
-                                            setup.getTimePerMove(),
-                                            true,
-                                            true,
-                                            true,
-                                            true));
-                        else
-                            game = new Game("White",
-                                    "Black",
-                                    Player.HUMAN,
-                                    Player.HUMAN,
-                                    new GameSettings(setup.getTimePerSide(),
-                                            setup.getTimePerMove(),
-                                            true,
-                                            true,
-                                            true,
-                                            true));
+                    eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
 
-                        game.addListener(this);
-
-                        game.startGame();
-                        board.boardUpdated();
-
-                    } catch (Exception ex) {
-
-                        Dialog<Void> eDg = new Dialog<>();
-                        eDg.initOwner(getScene().getWindow());
-                        eDg.setTitle("Error Creating Game");
-                        eDg.setContentText(ex.getMessage());
-
-                        eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
-
-                        eDg.showAndWait();
-
-                        ex.printStackTrace();
-
-                    }
-
-                } else {
-
-                    client = setup.getClient();
-                    game = client.getGame();
-                    color = client.isOppColor() ? BLACK : WHITE;
-
-                    game.addListener(this);
-
-                    if (color == BLACK)
-                        flip();
-
-                    board.boardUpdated();
-
+                    eDg.showAndWait();
                 }
-
                 moveList.initMoveList();
                 chatBox.update();
+                board.boardUpdated();
+                // if (setup.getClient() == null) {
+                // try {
 
-                if (!app.getStage().isFocused())
-                    app.getStage().toFront();
+                // color = TWO_PLAYER;
 
+                // game.addListener(this);
+
+                // game.startGame();
+                // board.boardUpdated();
+
+                // } catch (Exception ex) {
+
+                // Dialog<Void> eDg = new Dialog<>();
+                // eDg.initOwner(getScene().getWindow());
+                // eDg.setTitle("Error Creating Game");
+                // eDg.setContentText(ex.getMessage());
+
+                // eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+                // eDg.showAndWait();
+
+                // ex.printStackTrace();
+
+                // }
+
+                // } else {
+
+                // client = setup.getClient();
+                // game = client.getGame();
+                // color = client.isOppColor() ? BLACK : WHITE;
+
+                // game.addListener(this);
+
+                // if (color == BLACK)
+                // flip();
+
+                // board.boardUpdated();
+
+                // }
+
+                // moveList.initMoveList();
+                // chatBox.update();
+
+                // if (!app.getStage().isFocused())
+                // app.getStage().toFront();
+
+                // }
+
+                // });
             }
 
         });
-
         setup.showAndWait();
-
     }
 
     // Drawing

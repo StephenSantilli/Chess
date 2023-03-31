@@ -205,15 +205,13 @@ public class Game {
         result = RESULT_NOT_STARTED;
         resultReason = REASON_IN_PROGRESS;
 
-        // TODO: support setup tag, so you can start from non-default positions
-        positions.add(new Position(this));
-
         // TODO: support player type
         final String whiteName = pgn.getTags().getOrDefault("White", "White");
-        this.white = new Player((whiteName.equals("") ? "White" : whiteName), Player.HUMAN, true);
+        this.white = new Player((whiteName.equals("") ? "White" : whiteName), 
+                pgn.getTags().getOrDefault("WhiteType", Player.HUMAN), true);
 
         final String blackName = pgn.getTags().getOrDefault("Black", "Black");
-        this.black = new Player((blackName.equals("") ? "Black" : blackName), Player.HUMAN, false);
+        this.black = new Player((blackName.equals("") ? "Black" : blackName), pgn.getTags().getOrDefault("BlackType", Player.HUMAN), false);
 
         this.settings = new GameSettings(overridePGNSettings ? settings.getTimePerSide() : pgn.getTimePerSide(),
                 overridePGNSettings ? settings.getTimePerMove() : pgn.getTimePerMove(),
@@ -221,6 +219,14 @@ public class Game {
                 settings.canUndo(),
                 settings.isWhiteTimerManged(),
                 settings.isBlackTimerManaged());
+
+        // TODO: support setup tag, so you can start from non-default positions
+        final String setup = pgn.getTags().getOrDefault("SetUp", "");
+        final String fen = pgn.getTags().getOrDefault("FEN", "");
+        if (setup.equals("1") && !fen.equals("")) {
+            positions.add(new Position(fen, this));
+        } else
+            positions.add(new Position(this));
 
         ArrayList<PGNMove> pMoves = pgn.getParsedMoves();
 
@@ -247,8 +253,8 @@ public class Game {
 
         }
 
-        if (positions.size() == 1)
-            throw new Exception("Position import failed.");
+        // if (positions.size() == 1)
+        //     throw new Exception("Position import failed.");
 
         fireEvent(GameEvent.IMPORTED);
 
