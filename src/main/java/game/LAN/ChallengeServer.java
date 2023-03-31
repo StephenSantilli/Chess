@@ -102,7 +102,7 @@ public class ChallengeServer {
                     } catch (Exception er) {
                         er.printStackTrace();
                     }
-                }, "Challenge Sender");
+                }, "Challenge Sender").start();
 
             }
 
