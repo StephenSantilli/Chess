@@ -1,20 +1,29 @@
 package game;
 
-public class GameProperties {
+public class GameSettings {
 
     public static final String DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     private final String fen;
 
+    // TODO: allow black to make first move
     /**
-     * The time, in seconds, each side has in total. Should be {@code -1} if no
+     * Whether or not white makes the first move.
+     * 
+     * <p>
+     * <b>NOT CURRENTLY SUPPORTED</b>
+     */
+    private final boolean whiteStarts;
+
+    /**
+     * The time, in seconds, each side has in total. Should be {@code 0} if no
      * time control used.
      */
     private final long timePerSide;
 
     /**
      * The time, in seconds, each side gains per move made. Should be
-     * {@code -1} if no time control used, but {@code 0} if no timer added per move.
+     * {@code 0} if no time control is used or if no time is added per move.
      */
     private final long timePerMove;
 
@@ -37,6 +46,10 @@ public class GameProperties {
      * Whether or not black's timer should be automatically flipped/managed.
      */
     private final boolean blackTimerManaged;
+
+    public boolean isWhiteStarts() {
+        return whiteStarts;
+    }
 
     /**
      * @see #timePerSide
@@ -87,7 +100,7 @@ public class GameProperties {
         return blackTimerManaged;
     }
 
-    public GameProperties(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
+    public GameSettings(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
             boolean whiteTimerManaged, boolean blackTimerManaged) throws Exception {
 
         this(DEFAULT_FEN, timePerSide, timePerMove, canPause, canUndo,
@@ -95,11 +108,12 @@ public class GameProperties {
 
     }
 
-    public GameProperties(String FEN, long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
+    public GameSettings(String FEN, long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
             boolean whiteTimerManaged, boolean blackTimerManaged)
             throws Exception {
 
         this.fen = FEN;
+        this.whiteStarts = true;
         this.timePerSide = timePerSide <= 0 ? -1 : timePerSide;
         this.timePerMove = timePerMove <= 0 ? -1 : timePerMove;
         this.canPause = canPause;

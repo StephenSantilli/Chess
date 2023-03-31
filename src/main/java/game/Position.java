@@ -20,7 +20,8 @@ public class Position {
 
     /**
      * The number of turns completed in this game including the move that led to
-     * this position. Starts at {@code 0}.
+     * this position. Starts at {@code 0} for the default position as no moves have
+     * been made.
      */
     private int moveNumber;
 
@@ -74,9 +75,10 @@ public class Position {
     private char redoPromote;
 
     /**
-     * The system time at the start of this position.
+     * The timer end of the previous position, saved for if this position is
+     * restored by calling {@link Game#redo()}.
      */
-    private long systemTimeStart;
+    private long redoTimerEnd;
 
     /**
      * The amount of time on the timer at the end of this position.
@@ -123,14 +125,6 @@ public class Position {
         return capturedPieces;
     }
 
-    public long getSystemTimeStart() {
-        return systemTimeStart;
-    }
-
-    public void setSystemTimeStart(long timerStart) {
-        this.systemTimeStart = timerStart;
-    }
-
     public long getTimerEnd() {
         return timerEnd;
     }
@@ -152,6 +146,14 @@ public class Position {
 
     public void setRedoPromote(char redoPromote) {
         this.redoPromote = redoPromote;
+    }
+
+    public long getRedoTimerEnd() {
+        return redoTimerEnd;
+    }
+
+    public void setRedoTimerEnd(long redoTimerEnd) {
+        this.redoTimerEnd = redoTimerEnd;
     }
 
     /**
@@ -301,7 +303,6 @@ public class Position {
         this.capturedPieces = new ArrayList<Piece>();
 
         this.moveNumber = 0;
-        this.systemTimeStart = -1;
         this.timerEnd = -1;
         this.drawOfferer = NO_OFFER;
         this.fiftyMoveCounter = 0;
@@ -321,7 +322,6 @@ public class Position {
         this.pieces = new Piece[8][8];
         this.mateChecked = false;
 
-        this.systemTimeStart = -1;
         this.timerEnd = -1;
 
         this.drawOfferer = NO_OFFER;
@@ -485,7 +485,6 @@ public class Position {
         this.pieces = new Piece[8][8];
         this.mateChecked = false;
 
-        this.systemTimeStart = -1;
         this.timerEnd = -1;
 
         this.drawOfferer = NO_OFFER;
@@ -871,7 +870,7 @@ public class Position {
 
     /**
      * Gets a list of the pieces that are attacking the given square (able to
-     * capture the piece occupying it.) 
+     * capture the piece occupying it.)
      * 
      * 
      * @param s The square to search for attacking pieces at.

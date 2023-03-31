@@ -1,6 +1,6 @@
 package gui;
 
-import game.GameProperties;
+import game.GameSettings;
 import game.Player;
 
 import java.awt.Window;
@@ -373,23 +373,23 @@ public class GameView extends HBox implements GameListener {
                         color = TWO_PLAYER;
                         if (!setup.getPgn().equals("")) {
 
-                            game = new Game("White",
-                                    "Black",
-                                    Player.HUMAN,
-                                    Player.HUMAN,
-                                    new GameProperties(setup.getTimePerSide(),
+                            PGNParser pgn = new PGNParser(setup.getPgn());
+
+                            game = new Game(pgn,
+                                    new GameSettings(setup.getTimePerSide(),
                                             setup.getTimePerMove(),
                                             true,
                                             true,
                                             true,
-                                            true));
-                            game.importPosition(new PGNParser(setup.getPgn()));
+                                            true),
+                                    false);
+                            // game.importPosition(new PGNParser(setup.getPgn()));
 
                         } else if (!setup.getFen().equals(""))
                             game = new Game("White", "Black",
                                     Player.HUMAN,
                                     Player.HUMAN,
-                                    new GameProperties(setup.getFen(),
+                                    new GameSettings(setup.getFen(),
                                             setup.getTimePerSide(),
                                             setup.getTimePerMove(),
                                             true,
@@ -401,7 +401,7 @@ public class GameView extends HBox implements GameListener {
                                     "Black",
                                     Player.HUMAN,
                                     Player.HUMAN,
-                                    new GameProperties(setup.getTimePerSide(),
+                                    new GameSettings(setup.getTimePerSide(),
                                             setup.getTimePerMove(),
                                             true,
                                             true,
@@ -595,7 +595,7 @@ public class GameView extends HBox implements GameListener {
                         java.awt.Toolkit.getDefaultToolkit().beep();
                 }
 
-            } else if(event.getType() == GameEvent.TYPE_PAUSED || event.getType() == GameEvent.TYPE_RESUMED) {
+            } else if (event.getType() == GameEvent.TYPE_PAUSED || event.getType() == GameEvent.TYPE_RESUMED) {
                 gameMenu.update();
                 infoPane.updateTimers();
                 board.getPausePane().setVisible(game.isPaused());

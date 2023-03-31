@@ -95,7 +95,7 @@ public class PGN extends Stage {
             // hide();
         });
 
-        set = new Button("Start Game");
+        set = new Button("Set");
         set.setOnAction(ev -> {
             pgn = field.getText();
             create = true;

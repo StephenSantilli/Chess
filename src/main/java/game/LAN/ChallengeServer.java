@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
-import game.GameProperties;
+import game.GameSettings;
 
 /**
  * The server to be started when a challenge is created and you are waiting for
@@ -68,7 +68,7 @@ public class ChallengeServer {
                 Socket connection = tcpSocket.accept();
 
                 client = new Client(connection, challenge.getName(), challenge.getColor(),
-                        new GameProperties(challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true,
+                        new GameSettings(challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true,
                                 true),
                         gameCreatedCallback);
 

@@ -198,6 +198,42 @@ public class PGNParser {
     /** Used for any extra, non-standard tags. */
     private Map<String, String> tags;
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public long getTimePerSide() {
+
+        final String tc = tags.getOrDefault("TimeControl", "-");
+        if (!tc.matches("[\\d]+(\\+[\\d]+)?"))
+            return 0;
+
+        final String[] split = tc.split("\\+");
+
+        try {
+            return Integer.parseInt(split[0]);
+        } catch (Exception e) {
+            return 0;
+        }
+
+    }
+
+    public long getTimePerMove() {
+
+        final String tc = tags.getOrDefault("TimeControl", "-");
+        if (!tc.matches("[\\d]+(\\+[\\d]+)?"))
+            return 0;
+
+        final String[] split = tc.split("\\+");
+
+        try {
+            return Integer.parseInt(split[1]);
+        } catch (Exception e) {
+            return 0;
+        }
+
+    }
+
     public static void main(String[] args) throws Exception {
 
         Scanner s = new Scanner(new FileReader("./test pgns/chesscom with clock.pgn"));
@@ -265,7 +301,17 @@ public class PGNParser {
 
             if (includeClock && game.getSettings().getTimePerSide() > 0
                     && game.getPositions().get(i - 1).getTimerEnd() > 0) {
-                comment = "{[%clk " + millisToOutputFormat(game.getPositions().get(i - 1).getTimerEnd()) + "]}";
+
+                final boolean isTurn = p.isWhite() && i == game.getPositions().size() - 1;
+                int moveCount = (int) Math.ceil(p.getMoveNumber() / 2.0);
+
+                if (isTurn && game.getSettings().isWhiteStarts() != p.isWhite())
+                    --moveCount;
+
+                comment = "{[%clk "
+                        + millisToOutputFormat(
+                                game.getPositions().get(i - 1).getTimerEnd() + game.calcTimerDelta(moveCount))
+                        + "]}";
             }
 
             parsedMoves.add(new PGNMove(p.getMoveString(), comment, null, null, null));

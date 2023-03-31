@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import game.Chat;
 import game.Game;
-import game.GameProperties;
+import game.GameSettings;
 import game.Player;
 import game.GameEvent;
 import game.GameListener;
@@ -32,7 +32,7 @@ public class Client implements GameListener {
 
     private String name;
     private int color;
-    private GameProperties settings;
+    private GameSettings settings;
 
     private Runnable gameCreatedCallback;
 
@@ -78,7 +78,7 @@ public class Client implements GameListener {
         return game;
     }
 
-    public Client(Socket socket, String name, int color, GameProperties settings, Runnable gameCreatedCallback)
+    public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
             throws Exception {
 
         this.socket = socket;
@@ -167,7 +167,8 @@ public class Client implements GameListener {
 
                         game.makeMove(moveMsg.getOrigin(), moveMsg.getDestination(), moveMsg.getPromoteType());
 
-                        game.setTimer(oppColor, moveMsg.getTimerEnd());
+                        game.getLastPos().setTimerEnd(moveMsg.getTimerEnd());;
+                        // game.setTimer(oppColor, moveMsg.getTimerEnd());
 
                         send(new Message("moved", game.getLastPos().toString()));
 
@@ -330,7 +331,7 @@ public class Client implements GameListener {
                         !white ? name : rMsg.getName(),
                         Player.HUMAN,
                         Player.HUMAN,
-                        new GameProperties(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
+                        new GameSettings(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
                 oppColor = !white;
                 game.addListener(this);
 

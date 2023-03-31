@@ -73,6 +73,24 @@ public class PGNMove {
 
     }
 
+    public long getTimerEnd() {
+
+        Pattern pat = Pattern.compile("\\{\\[%clk (?<hrs>[\\d]+):(?<mins>[\\d]+):(?<secs>[\\d]+)\\]\\}");
+        Matcher matcher = pat.matcher(commentary);
+
+        long timerEnd = 0;
+
+        if (matcher.find()) {
+            timerEnd += Integer.parseInt(matcher.group("hrs")) * 60 * 60 * 1000;
+            timerEnd += Integer.parseInt(matcher.group("mins")) * 60 * 1000;
+            timerEnd += Integer.parseInt(matcher.group("secs")) * 1000;
+        } else
+            timerEnd = -1;
+
+        return timerEnd;
+
+    }
+
     public PGNMove(String move, String comment, String NAG, String result, String suffix) throws Exception {
 
         this.moveText = move;
