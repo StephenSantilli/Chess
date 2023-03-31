@@ -189,8 +189,10 @@ public class ChallengeSearch extends Stage {
                             Runnable gameCreated = () -> {
 
                                 searcher.stop();
+                                Platform.runLater(() -> {
 
-                                hide();
+                                    hide();
+                                });
 
                             };
 
@@ -228,12 +230,15 @@ public class ChallengeSearch extends Stage {
                     Runnable gameCreated = () -> {
 
                         searcher.stop();
+                        Platform.runLater(() -> {
 
-                        hide();
+                            hide();
+                        });
 
                     };
 
-                    client = new Client(InetAddress.getByName(dDialog.getIp()), App.prefs.get("username", "User"), -1, null, gameCreated);
+                    client = new Client(InetAddress.getByName(dDialog.getIp()), App.prefs.get("username", "User"), -1,
+                            null, gameCreated);
 
                     client.start();
 

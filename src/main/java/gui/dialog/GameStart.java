@@ -73,7 +73,7 @@ public class GameStart extends Stage {
                 ChallengeSearch searchDialog = new ChallengeSearch(window);
 
                 searchDialog.showAndWait();
-
+                
                 
                 client = searchDialog.getClient();
                 create = client != null;
