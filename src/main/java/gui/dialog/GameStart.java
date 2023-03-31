@@ -70,9 +70,17 @@ public class GameStart extends Stage {
 
             try {
 
-                ChallengeSearch searchDialog = new ChallengeSearch(window, null);
+                ChallengeSearch searchDialog = new ChallengeSearch(window);
 
                 searchDialog.showAndWait();
+
+                
+                client = searchDialog.getClient();
+                create = client != null;
+                game = client.getGame();
+                white = !client.isOppColor();
+
+                hide();
 
             } catch (Exception e) {
 

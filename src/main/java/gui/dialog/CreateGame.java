@@ -8,6 +8,7 @@ import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -279,7 +280,9 @@ public class CreateGame extends Stage {
                     create = true;
                     server.stop();
 
-                    hide();
+                    Platform.runLater(() -> {
+                        hide();
+                    });
 
                 };
 

@@ -46,6 +46,7 @@ public class ChallengeSearch extends Stage {
     private ArrayList<Challenge> challenges;
 
     private ChallengeSearcher searcher;
+
     private Client client;
 
     public Client getClient() {
@@ -78,7 +79,7 @@ public class ChallengeSearch extends Stage {
 
                 challenges = searcher.getChallenges();
                 setOList();
-                Thread.sleep(500);
+                Thread.sleep(250);
 
             }
 
@@ -101,9 +102,9 @@ public class ChallengeSearch extends Stage {
 
     };
 
-    public ChallengeSearch(Window window, Runnable gameCreatedCallback) throws Exception {
+    public ChallengeSearch(Window window) throws Exception {
 
-        initOwner(window);
+        // initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
 
@@ -225,11 +226,18 @@ public class ChallengeSearch extends Stage {
 
                     s.connect(new InetSocketAddress(InetAddress.getByName(dDialog.getIp()), Client.PORT));
 
-                    client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreatedCallback);
+                    Runnable gameCreated = () -> {
+
+                        searcher.stop();
+
+                        hide();
+
+                    };
+
+                    client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreated);
 
                     client.start();
 
-                    hide();
 
                 } catch (Exception e) {
 

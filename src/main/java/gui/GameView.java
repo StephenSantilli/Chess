@@ -365,23 +365,25 @@ public class GameView extends HBox implements GameListener {
 
             if (setup.isCreate()) {
 
-                Dialog<ButtonType> confirm = new Dialog<>();
-                confirm.initOwner(getScene().getWindow());
-                confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
-                confirm.setTitle("Confirm New Game");
+                if (game != null) {
+                    Dialog<ButtonType> confirm = new Dialog<>();
+                    confirm.initOwner(getScene().getWindow());
+                    confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
+                    confirm.setTitle("Confirm New Game");
 
-                ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
-                ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
+                    ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
+                    ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
 
-                confirm.getDialogPane().getButtonTypes().addAll(yes, no);
+                    confirm.getDialogPane().getButtonTypes().addAll(yes, no);
 
-                confirm.showAndWait();
+                    confirm.showAndWait();
 
-                if (confirm.getResult().getText().equals("No"))
-                    return;
+                    if (confirm.getResult().getText().equals("No"))
+                        return;
 
-                if (game != null)
-                    game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+                    if (game != null)
+                        game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+                }
 
                 game = setup.getGame();
                 client = setup.getClient();
@@ -395,7 +397,8 @@ public class GameView extends HBox implements GameListener {
 
                 try {
 
-                    game.startGame();
+                    if (client == null)
+                        game.startGame();
 
                 } catch (Exception ex) {
                     Dialog<Void> eDg = new Dialog<>();
