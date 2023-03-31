@@ -190,11 +190,17 @@ public class ChallengeSearch extends Stage {
 
                             s.connect(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
 
-                            client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreatedCallback);
+                            Runnable gameCreated = () -> {
+
+                                searcher.stop();
+
+                                hide();
+
+                            };
+
+                            client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreated);
 
                             client.start();
-
-                            hide();
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -237,7 +243,6 @@ public class ChallengeSearch extends Stage {
                     client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreated);
 
                     client.start();
-
 
                 } catch (Exception e) {
 
