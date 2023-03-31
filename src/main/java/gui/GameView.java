@@ -392,7 +392,9 @@ public class GameView extends HBox implements GameListener {
                     color = setup.isWhite() ? WHITE : BLACK;
 
                 game.addListener(this);
+
                 try {
+
                     game.startGame();
 
                 } catch (Exception ex) {
@@ -405,58 +407,15 @@ public class GameView extends HBox implements GameListener {
 
                     eDg.showAndWait();
                 }
+                currentPos = 0;
+
                 moveList.initMoveList();
                 chatBox.update();
-                board.boardUpdated();
-                // if (setup.getClient() == null) {
-                // try {
+                goToLastPos();
 
-                // color = TWO_PLAYER;
+                if (!app.getStage().isFocused())
+                    app.getStage().toFront();
 
-                // game.addListener(this);
-
-                // game.startGame();
-                // board.boardUpdated();
-
-                // } catch (Exception ex) {
-
-                // Dialog<Void> eDg = new Dialog<>();
-                // eDg.initOwner(getScene().getWindow());
-                // eDg.setTitle("Error Creating Game");
-                // eDg.setContentText(ex.getMessage());
-
-                // eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
-
-                // eDg.showAndWait();
-
-                // ex.printStackTrace();
-
-                // }
-
-                // } else {
-
-                // client = setup.getClient();
-                // game = client.getGame();
-                // color = client.isOppColor() ? BLACK : WHITE;
-
-                // game.addListener(this);
-
-                // if (color == BLACK)
-                // flip();
-
-                // board.boardUpdated();
-
-                // }
-
-                // moveList.initMoveList();
-                // chatBox.update();
-
-                // if (!app.getStage().isFocused())
-                // app.getStage().toFront();
-
-                // }
-
-                // });
             }
 
         });

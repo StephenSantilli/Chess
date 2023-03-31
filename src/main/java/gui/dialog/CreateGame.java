@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import game.Game;
 import game.GameSettings;
 import game.Player;
+import game.LAN.Challenge;
+import game.LAN.ChallengeServer;
 import game.LAN.Client;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -35,6 +37,8 @@ public class CreateGame extends Stage {
     private Button cancel, start;
 
     private boolean white;
+
+    private ChallengeServer server;
 
     private Game game;
     private Client client;
@@ -67,19 +71,24 @@ public class CreateGame extends Stage {
         // Player Settings Boxes
         Label oneLabel = new Label("Player 1 Name:");
         oneField = new TextField("Player 1");
-        HBox oneNameArea = new HBox(oneLabel, oneField);
+        // HBox oneNameArea = new HBox(oneLabel, oneField);
 
         color = new ChoiceBox<String>();
         color.getItems().addAll("Random", "White", "Black");
+        color.setValue("Random");
 
-        VBox oneBox = new VBox(oneNameArea, color);
+        VBox oneBox = new VBox(oneLabel, oneField, color);
+        oneBox.setFillWidth(true);
+        oneBox.setSpacing(5);
 
         Label twoLabel = new Label("Player 2 Name:");
         twoField = new TextField("Player 2");
-        HBox twoNameArea = new HBox(twoLabel, twoField);
+        // HBox twoNameArea = new HBox(twoLabel, twoField);
 
         type = new ChoiceBox<String>();
         type.getItems().addAll("Local", "Online"/* , "Bot" */);
+        type.setValue("Local");
+
         type.setOnAction(ae -> {
 
             boolean local = type.getValue().equals("Local");
@@ -88,11 +97,14 @@ public class CreateGame extends Stage {
 
         });
 
-        VBox twoBox = new VBox(twoNameArea, type);
+        VBox twoBox = new VBox(twoLabel, twoField, type);
+        twoBox.setFillWidth(true);
+        twoBox.setSpacing(5);
 
         HBox players = new HBox(oneBox, twoBox);
         players.setAlignment(Pos.CENTER);
         players.setFillHeight(true);
+        players.setSpacing(10);
         HBox.setHgrow(oneBox, Priority.ALWAYS);
         HBox.setHgrow(twoBox, Priority.ALWAYS);
 
@@ -200,6 +212,11 @@ public class CreateGame extends Stage {
 
     }
 
+    private void clearLabel() {
+        sLabel.setVisible(false);
+        sLabel.setText("");
+    }
+
     private void startAction(ActionEvent ae) {
 
         if (type.getValue().equals("Local")) {
@@ -236,15 +253,87 @@ public class CreateGame extends Stage {
 
         } else if (type.getValue().equals("Online")) {
 
+            try {
+
+                // boolean oneWhite = color.getValue().equals("White");
+
+                // if (color.getValue().equals("Random"))
+                // oneWhite = Math.random() >= 0.5;
+
+                // white = oneWhite;
+
+                int c = Challenge.CHALLENGE_RANDOM;
+                switch (color.getValue()) {
+                    case "White":
+                        c = Challenge.CHALLENGE_WHITE;
+                        break;
+                    case "Black":
+                        c = Challenge.CHALLENGE_BLACK;
+                        break;
+                }
+
+                Runnable gameCreated = () -> {
+
+                    client = server.getClient();
+                    game = client.getGame();
+                    create = true;
+                    server.stop();
+
+                    hide();
+
+                };
+
+                server = new ChallengeServer(
+                        new Challenge(oneField.getText(), c, ((minPerSide.getValue() * 60) + (secPerSide.getValue())),
+                                ((minPerMove.getValue() * 60) + (secPerMove.getValue())), null),
+                        gameCreated);
+
+                server.start();
+
+                showLabel("Challenge visible...", false);
+                setAllDisabled(true);
+
+            } catch (Exception e) {
+
+                showLabel(e.getMessage(), true);
+                setAllDisabled(false);
+                clearLabel();
+
+            }
+
         }
 
     }
 
+    private void setAllDisabled(boolean disable) {
+        start.setDisable(disable);
+        oneField.setDisable(disable);
+        twoField.setDisable(disable);
+        color.setDisable(disable);
+        type.setDisable(disable);
+        useTimeBox.setDisable(disable);
+        minPerSide.setDisable(disable);
+        secPerSide.setDisable(disable);
+        minPerMove.setDisable(disable);
+        secPerMove.setDisable(disable);
+    }
+
     private void cancelAction(ActionEvent ae) {
 
-        create = false;
-        game = null;
-        client = null;
+        if (server != null) {
+
+            server.stop();
+            setAllDisabled(false);
+            clearLabel();
+            server = null;
+
+        } else {
+            create = false;
+            game = null;
+            client = null;
+
+            hide();
+        }
 
     }
 

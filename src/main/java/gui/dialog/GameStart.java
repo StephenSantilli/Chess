@@ -46,9 +46,8 @@ public class GameStart extends Stage {
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
 
-
-
         cr = new Button("Create a new game");
+        cr.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         cr.setOnAction(ae -> {
 
             CreateGame createDialog = new CreateGame(window);
@@ -65,6 +64,8 @@ public class GameStart extends Stage {
         });
 
         find = new Button("Search for a LAN challenge");
+        find.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
         find.setOnAction(ae -> {
 
             try {
@@ -81,6 +82,7 @@ public class GameStart extends Stage {
 
         VBox buttons = new VBox(cr, find);
         buttons.setFillWidth(true);
+        buttons.setAlignment(Pos.CENTER);
 
         VBox.setVgrow(cr, Priority.ALWAYS);
         VBox.setVgrow(find, Priority.ALWAYS);
@@ -90,8 +92,9 @@ public class GameStart extends Stage {
         setOnShown(we -> {
 
             sizeToScene();
-            setWidth(500);
-            setMinWidth(500);
+            setWidth(250);
+            setMinWidth(250);
+            setHeight(250);
             setMinHeight(getHeight());
             setMaxHeight(getHeight());
             setMaxWidth(getWidth());
