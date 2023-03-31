@@ -77,6 +77,7 @@ public class App extends Application {
             VBox.setVgrow(b, Priority.ALWAYS);
 
             vb.getChildren().addAll(menu, b);
+            vb.setSpacing(0);
 
             scene.setOnKeyReleased(b::keyHandler);
 

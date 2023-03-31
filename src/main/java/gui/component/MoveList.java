@@ -5,6 +5,7 @@ import gui.GameView;
 
 import java.util.ArrayList;
 
+import game.Game;
 import game.Move;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -108,6 +109,34 @@ public class MoveList extends GridPane {
 
         }
 
+        String result = "";
+        switch (board.getGame().getResult()) {
+            case Game.RESULT_DRAW:
+                result = "1/2-1/2";
+                break;
+            case Game.RESULT_WHITE_WIN:
+                result = "1-0";
+                break;
+            case Game.RESULT_BLACK_WIN:
+                result = "0-1";
+                break;
+        }
+
+        if (!result.equals("")) {
+
+            Button res = new Button(result);
+            res.setId("movePaneButton");
+            res.setMaxWidth(Double.MAX_VALUE);
+            add(res, board.getGame().getLastPos().isWhite() ? 1 : 2,
+                    (int) Math.ceil((board.getGame().getLastPos().getMoveNumber() + 1) / 2.0) - 1);
+
+        }
+
+        sp.applyCss();
+        sp.layout();
+
+        sp.setVvalue(1);
+
     }
 
     private void execMove(int pos) {
@@ -131,8 +160,6 @@ public class MoveList extends GridPane {
 
         add(btn, m.isWhite() ? 1 : 2, row);
         requestFocus();
-        sp.setVvalue(1);
-
 
         if (m.isWhite() || pos == 1) {
 

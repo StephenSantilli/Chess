@@ -1,23 +1,21 @@
 .root {
-  -background: #FFF;
+  -background: #fffbf5;
   -accent: #698269;
-  -accent-active: #547767;
+  -accent-active: #395144;
   -lightsquare: #f0ebce;
   -darksquare: #698269;
-  -movebutton: rgba(238, 187, 77);
-  -movebuttonactive: rgb(204, 154, 55);
+  -movebutton: #cfb896;
+  -movebuttonactive: #aa8b56;
   -movesquare: rgba(238, 187, 77, 0.7);
   -activesquare: rgba(238, 187, 85, 0.7);
   -moveindicator: rgba(100, 100, 100, 0.4);
   -squareborder: rgba(200, 200, 200, 0.5);
-}
 
-GameView, BarMenu {
   -fx-background-color: -background;
 }
 
 PauseView {
-  -fx-background-color: rgba(50, 50, 50, 0.6);
+  -fx-background-color: rgba(50, 50, 50, .6);
 }
 
 #lightCoord {

@@ -17,8 +17,8 @@ import gui.board.Board;
 import gui.component.ChatArea;
 import gui.component.GameInfo;
 import gui.component.MoveList;
+import gui.dialog.CreateGame;
 import gui.dialog.Draw;
-import gui.dialog.GameStart;
 import gui.menu.BarMenu;
 import gui.menu.GameMenu;
 import gui.menu.ViewMenu;
@@ -242,10 +242,10 @@ public class GameView extends HBox implements GameListener {
         HBox.setHgrow(board, Priority.SOMETIMES);
         HBox.setHgrow(listAndChat, Priority.ALWAYS);
 
-        HBox.setMargin(infoPane, new Insets(10, 5, 10, 5));
-        HBox.setMargin(board, new Insets(10, 5, 10, 5));
-        HBox.setMargin(listAndChat, new Insets(10, 5, 10, 5));
-
+        // HBox.setMargin(infoPane, new Insets(10, 5, 10, 5));
+        // HBox.setMargin(board, new Insets(10, 5, 10, 5));
+        // HBox.setMargin(listAndChat, new Insets(10, 5, 10, 5));
+        setSpacing(10);
         setAlignment(Pos.CENTER);
 
         board.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
@@ -359,13 +359,14 @@ public class GameView extends HBox implements GameListener {
 
     public void startGame(WindowEvent we) {
 
-        final GameStart setup = new GameStart(getScene().getWindow());
+        final CreateGame setup = new CreateGame(getScene().getWindow());
 
         setup.setOnHidden(e -> {
 
             if (setup.isCreate()) {
 
                 if (game != null) {
+
                     Dialog<ButtonType> confirm = new Dialog<>();
                     confirm.initOwner(getScene().getWindow());
                     confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
@@ -383,6 +384,7 @@ public class GameView extends HBox implements GameListener {
 
                     if (game != null)
                         game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+
                 }
 
                 game = setup.getGame();
@@ -531,6 +533,7 @@ public class GameView extends HBox implements GameListener {
                     return;
 
                 gameMenu.update();
+                moveList.initMoveList();
 
                 Dialog<Void> over = new Dialog<Void>();
                 over.setTitle("Game Over");

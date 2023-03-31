@@ -30,12 +30,9 @@ public class MoveRow extends HBox {
 
     public MoveRow(int moveNumber, Move m1, Move m2) {
 
-        
         this.moveNumber = moveNumber;
         this.move1 = m1;
         this.move2 = m2;
-
-
 
         Label l = new Label(moveNumber + ".");
 
@@ -47,7 +44,7 @@ public class MoveRow extends HBox {
         HBox moves = new HBox();
 
         moves.setAlignment(Pos.CENTER);
-        
+
         HBox.setHgrow(moves, Priority.ALWAYS);
 
         Button btn1 = new Button(m1.getMoveNotation());

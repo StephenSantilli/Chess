@@ -35,7 +35,7 @@ public class CreateGame extends Stage {
     private CheckBox useTimeBox;
     private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove;
     private Label sLabel;
-    private Button cancel, start;
+    private Button search, cancel, start;
 
     private boolean white;
 
@@ -80,7 +80,7 @@ public class CreateGame extends Stage {
 
         VBox oneBox = new VBox(oneLabel, oneField, color);
         oneBox.setFillWidth(true);
-        oneBox.setSpacing(5);
+        // oneBox.setSpacing(5);
 
         Label twoLabel = new Label("Player 2 Name:");
         twoField = new TextField("Player 2");
@@ -100,12 +100,12 @@ public class CreateGame extends Stage {
 
         VBox twoBox = new VBox(twoLabel, twoField, type);
         twoBox.setFillWidth(true);
-        twoBox.setSpacing(5);
+        // twoBox.setSpacing(5);
 
         HBox players = new HBox(oneBox, twoBox);
         players.setAlignment(Pos.CENTER);
         players.setFillHeight(true);
-        players.setSpacing(10);
+        // players.setSpacing(10);
         HBox.setHgrow(oneBox, Priority.ALWAYS);
         HBox.setHgrow(twoBox, Priority.ALWAYS);
 
@@ -122,7 +122,7 @@ public class CreateGame extends Stage {
         // Time Control
         HBox perSide = new HBox();
         perSide.setAlignment(Pos.CENTER_LEFT);
-        perSide.setSpacing(5);
+        // perSide.setSpacing(5);
         Label perSideLabel = new Label("Time per side (M:S): ");
         Label perSideDivider = new Label(":");
 
@@ -132,15 +132,15 @@ public class CreateGame extends Stage {
         minPerSide.setEditable(true);
         secPerSide.setEditable(true);
 
-        minPerSide.setPrefWidth(100);
-        secPerSide.setPrefWidth(100);
+        minPerSide.setPrefWidth(75);
+        secPerSide.setPrefWidth(75);
 
         perSide.getChildren().addAll(perSideLabel, minPerSide, perSideDivider, secPerSide);
 
         HBox perMove = new HBox();
         perMove.setAlignment(Pos.CENTER_LEFT);
 
-        perMove.setSpacing(5);
+        // perMove.setSpacing(5);
         Label perMoveLabel = new Label("Time added per move (M:S): ");
         Label perMoveDivider = new Label(":");
 
@@ -152,12 +152,14 @@ public class CreateGame extends Stage {
 
         minPerMove.setEditable(true);
         secPerMove.setEditable(true);
-        minPerMove.setPrefWidth(100);
-        secPerMove.setPrefWidth(100);
+        minPerMove.setPrefWidth(75);
+        secPerMove.setPrefWidth(75);
 
         perMove.getChildren().addAll(perMoveLabel, minPerMove, perMoveDivider, secPerMove);
 
         VBox timeControl = new VBox(perSide, perMove);
+        // timeControl.setSpacing(10);
+        timeControl.setFillWidth(true);
 
         setDisabledTime(true);
 
@@ -171,23 +173,28 @@ public class CreateGame extends Stage {
         HBox statusLabel = new HBox(sLabel);
 
         // Buttons
+        search = new Button("Search for LAN Challenge");
+        search.setOnAction(this::searchAction);
+
         start = new Button("Start");
         start.setOnAction(this::startAction);
 
         cancel = new Button("Cancel");
         cancel.setOnAction(this::cancelAction);
 
-        HBox btns = new HBox(start, cancel);
+        HBox btns = new HBox(search, start, cancel);
         btns.setAlignment(Pos.CENTER_RIGHT);
-        btns.setSpacing(10);
+        // btns.setSpacing(10);
 
         VBox stgs = new VBox(players, presets, timeOpts, timeControl, statusLabel, btns);
         stgs.setFillWidth(true);
         stgs.setPadding(new Insets(10));
-        stgs.setSpacing(10);
+        // stgs.setSpacing(10);
         stgs.setAlignment(Pos.CENTER);
 
         Scene s = new Scene(stgs);
+        s.getStylesheets().add(getClass().getResource("/css/style.css").toString());
+        s.getStylesheets().add(getClass().getResource("/css/theme.css").toString());
 
         setOnShown(we -> {
 
@@ -218,6 +225,36 @@ public class CreateGame extends Stage {
         sLabel.setText("");
     }
 
+    private void searchAction(ActionEvent ae) {
+
+        try {
+
+            SearchDialog sd = new SearchDialog(getScene().getWindow());
+
+            sd.setOnHiding(we -> {
+
+                sd.getSearcher().stop();
+
+                this.client = sd.getClient();
+                if (client == null)
+                    return;
+
+                this.game = client.getGame();
+                this.create = true;
+                this.white = !client.isOppColor();
+
+                hide();
+
+            });
+
+            sd.show();
+
+        } catch (Exception e) {
+            showLabel("Error opening search dialog: " + e.getMessage(), true);
+        }
+
+    }
+
     private void startAction(ActionEvent ae) {
 
         if (type.getValue().equals("Local")) {
@@ -231,13 +268,16 @@ public class CreateGame extends Stage {
 
                 white = oneWhite;
 
+                long timePerSide = useTimeBox.isSelected() ? ((minPerSide.getValue() * 60) + (secPerSide.getValue())) : -1;
+                long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue())) : -1;
+
                 game = new Game((oneWhite ? oneField.getText() : twoField.getText()),
                         (oneWhite ? twoField.getText() : oneField.getText()),
                         Player.HUMAN,
                         Player.HUMAN,
                         new GameSettings(
-                                ((minPerSide.getValue() * 60) + (secPerSide.getValue())),
-                                ((minPerMove.getValue() * 60) + (secPerMove.getValue())),
+                                timePerSide,
+                                timePerMove,
                                 true,
                                 true,
                                 true,
@@ -310,6 +350,7 @@ public class CreateGame extends Stage {
 
     private void setAllDisabled(boolean disable) {
         start.setDisable(disable);
+        search.setDisable(disable);
         oneField.setDisable(disable);
         twoField.setDisable(disable);
         color.setDisable(disable);

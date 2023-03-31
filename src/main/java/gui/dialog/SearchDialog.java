@@ -34,7 +34,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
-public class ChallengeSearch extends Stage {
+public class SearchDialog extends Stage {
 
     private int timePerSide, timePerMove;
 
@@ -102,7 +102,7 @@ public class ChallengeSearch extends Stage {
 
     };
 
-    public ChallengeSearch(Window window) throws Exception {
+    public SearchDialog(Window window) throws Exception {
 
         // initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
@@ -230,17 +230,22 @@ public class ChallengeSearch extends Stage {
                     Runnable gameCreated = () -> {
 
                         searcher.stop();
+
                         Platform.runLater(() -> {
 
                             hide();
+
                         });
 
                     };
 
-                    client = new Client(InetAddress.getByName(dDialog.getIp()), App.prefs.get("username", "User"), -1,
-                            null, gameCreated);
+                    if (!dDialog.getIp().equals("")) {
+                        client = new Client(InetAddress.getByName(dDialog.getIp()), App.prefs.get("username", "User"),
+                                -1,
+                                null, gameCreated);
 
-                    client.start();
+                        client.start();
+                    }
 
                 } catch (Exception e) {
 
