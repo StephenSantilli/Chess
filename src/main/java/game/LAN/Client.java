@@ -16,6 +16,8 @@ import game.Player;
 import game.GameEvent;
 import game.GameListener;
 
+
+//TODO: BUG WHEN STARTING ANOTHER ONLINE GAME AFTER THE CURRENT ONE; ERROR MESSAGE IS SENT TO THE NEW GAME ABOUT THE TERMINATION OF THE LAST GAME
 public class Client implements GameListener {
 
     public static final int PORT = 49265;
