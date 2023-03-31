@@ -3,6 +3,8 @@ package game.LAN;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -16,8 +18,6 @@ import game.Player;
 import game.GameEvent;
 import game.GameListener;
 
-
-//TODO: BUG WHEN STARTING ANOTHER ONLINE GAME AFTER THE CURRENT ONE; ERROR MESSAGE IS SENT TO THE NEW GAME ABOUT THE TERMINATION OF THE LAST GAME
 public class Client implements GameListener {
 
     public static final int PORT = 49265;
@@ -105,11 +105,38 @@ public class Client implements GameListener {
 
     }
 
+    public Client(InetAddress address, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
+            throws Exception {
+
+        this.name = name;
+        this.color = color;
+        this.settings = settings;
+        this.gameCreatedCallback = gameCreatedCallback;
+
+        try {
+
+            this.socket = new Socket();
+            socket.connect(new InetSocketAddress(address, PORT));
+
+            this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.output = new PrintWriter(socket.getOutputStream(), true);
+
+            pingThread = Executors.newScheduledThreadPool(1);
+            pingThread.scheduleWithFixedDelay(pinger, 18000, 18000, TimeUnit.MILLISECONDS);
+
+            new Thread(listener, "Game Client Listener").start();
+
+        } catch (Exception e) {
+            stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to establish connection."));
+        }
+
+    }
+
     public void start() {
 
         send(new InitMessage(Game.VERSION, name));
 
-    } 
+    }
 
     private void send(Message message) {
 
@@ -169,7 +196,8 @@ public class Client implements GameListener {
 
                         game.makeMove(moveMsg.getOrigin(), moveMsg.getDestination(), moveMsg.getPromoteType());
 
-                        game.getLastPos().setTimerEnd(moveMsg.getTimerEnd());;
+                        game.getLastPos().setTimerEnd(moveMsg.getTimerEnd());
+                        ;
                         // game.setTimer(oppColor, moveMsg.getTimerEnd());
 
                         send(new Message("moved", game.getLastPos().toString()));

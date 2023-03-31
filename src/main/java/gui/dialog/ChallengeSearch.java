@@ -186,10 +186,6 @@ public class ChallengeSearch extends Stage {
 
                         try {
 
-                            Socket s = new Socket();
-
-                            s.connect(new InetSocketAddress(row.getItem().getAddress(), Client.PORT));
-
                             Runnable gameCreated = () -> {
 
                                 searcher.stop();
@@ -198,7 +194,8 @@ public class ChallengeSearch extends Stage {
 
                             };
 
-                            client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreated);
+                            client = new Client(row.getItem()
+                                    .getAddress(), App.prefs.get("username", "User"), -1, null, gameCreated);
 
                             client.start();
 
@@ -228,10 +225,6 @@ public class ChallengeSearch extends Stage {
             dDialog.setOnHidden(we -> {
                 try {
 
-                    Socket s = new Socket();
-
-                    s.connect(new InetSocketAddress(InetAddress.getByName(dDialog.getIp()), Client.PORT));
-
                     Runnable gameCreated = () -> {
 
                         searcher.stop();
@@ -240,7 +233,7 @@ public class ChallengeSearch extends Stage {
 
                     };
 
-                    client = new Client(s, App.prefs.get("username", "User"), -1, null, gameCreated);
+                    client = new Client(InetAddress.getByName(dDialog.getIp()), App.prefs.get("username", "User"), -1, null, gameCreated);
 
                     client.start();
 
