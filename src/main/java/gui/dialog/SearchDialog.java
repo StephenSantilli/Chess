@@ -25,6 +25,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
@@ -222,9 +224,11 @@ public class SearchDialog extends Stage {
         Button directConnect = new Button("Direct Connect");
         directConnect.setOnAction(ev -> {
 
-            DirectConnect dDialog = new DirectConnect(getScene().getWindow());
+            //DirectConnect dDialog = new DirectConnect(getScene().getWindow());
+            TextInputDialog dcDiag = new TextInputDialog();
+            dcDiag.getDialogPane().getButtonTypes().addAll(new ButtonType("Connect", ButtonData.APPLY), ButtonType.CANCEL);
 
-            dDialog.setOnHidden(we -> {
+            dcDiag.setOnHidden(we -> {
                 try {
 
                     Runnable gameCreated = () -> {
@@ -239,8 +243,8 @@ public class SearchDialog extends Stage {
 
                     };
 
-                    if (!dDialog.getIp().equals("")) {
-                        client = new Client(InetAddress.getByName(dDialog.getIp()), App.prefs.get("username", "User"),
+                    if (!dcDiag.getResult().equals("")) {
+                        client = new Client(InetAddress.getByName(dcDiag.getResult()), App.prefs.get("username", "User"),
                                 -1,
                                 null, gameCreated);
 
@@ -261,7 +265,7 @@ public class SearchDialog extends Stage {
                 }
             });
 
-            dDialog.show();
+            dcDiag.show();
 
         });
 
