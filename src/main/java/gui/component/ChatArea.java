@@ -1,14 +1,11 @@
 package gui.component;
 
 import java.util.Date;
-import java.text.SimpleDateFormat;
-
 import game.Chat;
 import game.Game;
 import gui.GameView;
 import javafx.application.Platform;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;

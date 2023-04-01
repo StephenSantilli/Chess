@@ -6,7 +6,7 @@ import gui.GameView;
 import javafx.scene.layout.Pane;
 
 public class Highlights extends Pane {
-    
+
     private GameView gameView;
 
     public Highlights(GameView gameView) {
@@ -29,22 +29,26 @@ public class Highlights extends Pane {
             final Square origin = pos.getMove().getOrigin();
 
             Pane oRect = new Pane();
+            oRect.setId("moveSquare");
+
             oRect.setMinSize(board.getSquareSize(), board.getSquareSize());
             oRect.setPrefSize(board.getSquareSize(), board.getSquareSize());
+
             oRect.setLayoutX(board.getXBySquare(origin));
             oRect.setLayoutY(board.getYBySquare(origin));
-            oRect.setId("moveSquare");
 
             oRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(origin));
 
             final Square destination = pos.getMove().getDestination();
 
             Pane dRect = new Pane();
+            dRect.setId("moveSquare");
+
             dRect.setMinSize(board.getSquareSize(), board.getSquareSize());
             dRect.setPrefSize(board.getSquareSize(), board.getSquareSize());
+
             dRect.setLayoutX(board.getXBySquare(destination));
             dRect.setLayoutY(board.getYBySquare(destination));
-            dRect.setId("moveSquare");
 
             dRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(destination));
 
@@ -54,15 +58,17 @@ public class Highlights extends Pane {
 
         if (board.getDragging() != null || board.getActive() != null) {
 
-            final Square aSquare = board.getDragging() != null ? board.getDragging().getPiece().getSquare() : board.getActive().getPiece().getSquare();
+            final Square aSquare = board.getDragging() != null ? board.getDragging().getPiece().getSquare()
+                    : board.getActive().getPiece().getSquare();
 
             Pane aRect = new Pane();
+            aRect.setId("activeSquare");
+
             aRect.setMinSize(board.getSquareSize(), board.getSquareSize());
             aRect.setPrefSize(board.getSquareSize(), board.getSquareSize());
+
             aRect.setLayoutX(board.getXBySquare(aSquare));
             aRect.setLayoutY(board.getYBySquare(aSquare));
-
-            aRect.setId("activeSquare");
 
             aRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(aSquare));
 

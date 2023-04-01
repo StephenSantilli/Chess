@@ -21,12 +21,14 @@ public class MoveIndicators extends Pane {
         getChildren().clear();
 
         final Board board = gameView.getBoard();
+        final double squareSize = board.getSquareSize();
 
-        if (gameView.getGame() == null || !gameView.isTurn() || board == null || board.getActive() == null
+        if (gameView.getGame() == null
+                || board == null
+                || board.getActive() == null
+                || !gameView.isTurn()
                 || gameView.getGame().getResult() != Game.RESULT_IN_PROGRESS)
             return;
-
-        final double squareSize = board.getSquareSize();
 
         ArrayList<Move> pMoves = gameView.getGame().getLastPos().getMoves();
 
@@ -35,8 +37,8 @@ public class MoveIndicators extends Pane {
             if (!m.getPiece().equals(board.getActive().getPiece()))
                 continue;
 
-            double x = board.getXBySquare(m.getDestination(), false);
-            double y = board.getYBySquare(m.getDestination(), false);
+            final double x = board.getXBySquare(m.getDestination(), false);
+            final double y = board.getYBySquare(m.getDestination(), false);
 
             if (m.isCapture() && m.getCaptureSquare().equals(m.getDestination())) {
 
@@ -44,9 +46,10 @@ public class MoveIndicators extends Pane {
                         (squareSize - (squareSize * .1)) / 2.0);
 
                 captureCircle.setId("captureCircle");
+                captureCircle.setStrokeWidth(squareSize * 0.04);
+
                 captureCircle.setLayoutX(x + (squareSize / 2.0));
                 captureCircle.setLayoutY(y + (squareSize / 2.0));
-                captureCircle.setStrokeWidth(squareSize * 0.04);
 
                 getChildren().add(captureCircle);
 
@@ -55,6 +58,7 @@ public class MoveIndicators extends Pane {
                 Ellipse nonCaptureCircle = new Ellipse(squareSize / 6.0, squareSize / 6.0);
 
                 nonCaptureCircle.setId("nonCaptureCircle");
+
                 nonCaptureCircle.setLayoutX(x + (squareSize / 2.0));
                 nonCaptureCircle.setLayoutY(y + (squareSize / 2.0));
 

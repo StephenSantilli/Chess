@@ -6,7 +6,6 @@ import javafx.scene.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 
 import java.awt.Taskbar;
 import java.awt.Toolkit;
@@ -31,12 +30,18 @@ public class App extends Application {
         return scene;
     }
 
+    public static void main(String[] args) {
+
+        launch(args);
+        System.exit(0);
+
+    }
+
     @Override
     public void start(Stage stage) {
 
         this.stage = stage;
 
-        // stage.setResizable(false);
         stage.setTitle("Chess " + Game.VERSION);
 
         stage.getIcons().add(new Image(getClass().getResource("/img/icon_16x16.png").toString()));
@@ -56,38 +61,32 @@ public class App extends Application {
             }
         }
 
-        VBox vb = new VBox();
+        VBox view = new VBox();
 
-        scene = new Scene(vb);
+        scene = new Scene(view);
+        stage.setScene(scene);
 
-        scene.setFill(Color.TRANSPARENT);
         scene.getStylesheets().add(getClass().getResource("/css/style.css").toString());
         scene.getStylesheets().add(getClass().getResource("/css/theme.css").toString());
 
-        stage.setScene(scene);
-
         try {
 
-            BarMenu menu = new BarMenu(scene.getWindow());
+            BarMenu menu = new BarMenu();
 
-            GameView b = new GameView(this, menu);
+            GameView gameView = new GameView(this, menu);
+            VBox.setVgrow(gameView, Priority.ALWAYS);
 
-            b.setManaged(true);
+            view.getChildren().addAll(menu, gameView);
 
-            VBox.setVgrow(b, Priority.ALWAYS);
+            scene.setOnKeyReleased(gameView::keyHandler);
 
-            vb.getChildren().addAll(menu, b);
-            vb.setSpacing(0);
-
-            scene.setOnKeyReleased(b::keyHandler);
-
-            stage.setOnShown(b::startGame);
-
-            stage.setOnCloseRequest(e -> {
+            stage.setOnShown(we -> gameView.startGame());
+            stage.setOnCloseRequest(we -> {
 
                 // TODO: save board position for resuming
-                if (b.getGame() != null && b.getGame().getResult() == Game.RESULT_IN_PROGRESS)
-                    b.getGame().markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+                final Game game = gameView.getGame();
+                if (game != null && game.getResult() == Game.RESULT_IN_PROGRESS)
+                    game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
 
                 Platform.exit();
 
@@ -95,11 +94,6 @@ public class App extends Application {
 
             stage.show();
             stage.sizeToScene();
-
-   
-
-            // stage.setMinHeight(stage.getHeight());
-            // stage.setMinWidth(stage.getWidth());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,12 +111,6 @@ public class App extends Application {
         }
 
         scene.getStylesheets().add(sheet.toString());
-    }
-
-    public static void main(String[] args) {
-
-        launch(args);
-        System.exit(0);
 
     }
 

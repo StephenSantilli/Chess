@@ -1,7 +1,5 @@
 package gui.dialog;
 
-import java.util.ArrayList;
-
 import game.Game;
 import game.GameSettings;
 import game.Player;

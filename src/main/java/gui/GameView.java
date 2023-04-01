@@ -1,18 +1,11 @@
 package gui;
 
-import game.GameSettings;
-import game.Player;
-
-import java.awt.Window;
-import java.util.stream.Collectors;
-
-import org.apache.xmlgraphics.util.dijkstra.Edge;
+import java.util.Optional;
 
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
 import game.LAN.Client;
-import game.PGN.PGNParser;
 import gui.board.Board;
 import gui.component.ChatArea;
 import gui.component.GameInfo;
@@ -23,13 +16,8 @@ import gui.menu.BarMenu;
 import gui.menu.GameMenu;
 import gui.menu.ViewMenu;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.event.Event;
 import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Menu;
@@ -44,8 +32,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class GameView extends HBox implements GameListener {
@@ -54,13 +40,14 @@ public class GameView extends HBox implements GameListener {
     public static final int WHITE = 1;
     public static final int BLACK = 2;
 
+    private Game game;
+    private Client client;
+
     private App app;
-    private Board board;
 
-    private GridPane listAndChat;
-
-    private Pane boardPane;
     private GameInfo infoPane;
+    private Board board;
+    private GridPane listAndChat;
 
     private MoveList moveList;
     private ScrollPane scrollMoveList;
@@ -72,9 +59,6 @@ public class GameView extends HBox implements GameListener {
 
     private Draw drawDialog;
 
-    private Game game;
-    private Client client;
-
     private int color;
     private int currentPos;
 
@@ -82,19 +66,6 @@ public class GameView extends HBox implements GameListener {
     private boolean autoFlip;
 
     // Getters/Setters
-    public boolean isTurn() {
-
-        if (color == TWO_PLAYER)
-            return true;
-
-        if (color == BLACK && !game.getLastPos().isWhite())
-            return true;
-        if (color == WHITE && game.getLastPos().isWhite())
-            return true;
-
-        return false;
-
-    }
 
     public App getApp() {
         return app;
@@ -102,10 +73,6 @@ public class GameView extends HBox implements GameListener {
 
     public Board getBoard() {
         return board;
-    }
-
-    public Pane getBoardPane() {
-        return boardPane;
     }
 
     public GameInfo getInfoPane() {
@@ -172,6 +139,14 @@ public class GameView extends HBox implements GameListener {
         return autoFlip;
     }
 
+    public boolean isTurn() {
+
+        return color == TWO_PLAYER
+                || (color == BLACK && !game.getLastPos().isWhite())
+                || (color == WHITE && game.getLastPos().isWhite());
+
+    }
+
     public GameView(App app, BarMenu menuBar) throws Exception {
 
         this.app = app;
@@ -180,28 +155,26 @@ public class GameView extends HBox implements GameListener {
         color = TWO_PLAYER;
         flipped = false;
 
+        // Info Pane
         infoPane = new GameInfo(this);
 
+        // Move list & chat box
         scrollMoveList = new ScrollPane();
+        scrollMoveList.setId("scrollMoveList");
+
         moveList = new MoveList(this, scrollMoveList);
 
         scrollMoveList.setContent(moveList);
         scrollMoveList.setMaxWidth(Double.MAX_VALUE);
 
-        scrollMoveList.setFitToWidth(true);
-        scrollMoveList.setFitToHeight(true);
-        scrollMoveList.setHbarPolicy(ScrollBarPolicy.NEVER);
-        scrollMoveList.setVbarPolicy(ScrollBarPolicy.NEVER);
-
         chatBox = new ChatArea(this);
         chatBox.setMaxWidth(Double.MAX_VALUE);
 
-        listAndChat = new GridPane();
-        listAndChat.setVgap(5);
-        listAndChat.setAlignment(Pos.CENTER_LEFT);
+        GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
+        GridPane.setHgrow(chatBox, Priority.ALWAYS);
 
-        listAndChat.add(scrollMoveList, 0, 0);
-        listAndChat.add(chatBox, 0, 1);
+        listAndChat = new GridPane();
+        listAndChat.setId("listAndChat");
 
         RowConstraints rm = new RowConstraints();
         rm.setFillHeight(true);
@@ -213,43 +186,25 @@ public class GameView extends HBox implements GameListener {
 
         ColumnConstraints col = new ColumnConstraints();
         col.setFillWidth(true);
-        GridPane.setHgrow(listAndChat, Priority.ALWAYS);
-        GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
-        GridPane.setHgrow(chatBox, Priority.ALWAYS);
         col.setMinWidth(250);
         col.setMaxWidth(350);
 
         listAndChat.getRowConstraints().setAll(rm, cm);
         listAndChat.getColumnConstraints().setAll(col);
-        listAndChat.setId("listAndChat");
 
+        listAndChat.add(scrollMoveList, 0, 0);
+        listAndChat.add(chatBox, 0, 1);
+
+        // Board
         board = new Board(this);
 
-        initMenus();
-
-        getChildren().addAll(infoPane, board, listAndChat);
-
-        listAndChat.setViewOrder(1);
-        infoPane.setViewOrder(1);
-        board.setViewOrder(0);
+        board.setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
+        board.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
 
         setOnMouseMoved(board.getMouseMoved());
         setOnMousePressed(board.getMousePressed());
         setOnMouseDragged(board.getMouseDragged());
         setOnMouseReleased(board.getMouseReleased());
-
-        HBox.setHgrow(infoPane, Priority.ALWAYS);
-        HBox.setHgrow(board, Priority.SOMETIMES);
-        HBox.setHgrow(listAndChat, Priority.ALWAYS);
-
-        // HBox.setMargin(infoPane, new Insets(10, 5, 10, 5));
-        // HBox.setMargin(board, new Insets(10, 5, 10, 5));
-        // HBox.setMargin(listAndChat, new Insets(10, 5, 10, 5));
-        setSpacing(10);
-        setAlignment(Pos.CENTER);
-
-        board.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
-        board.setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
 
         app.getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
 
@@ -261,12 +216,243 @@ public class GameView extends HBox implements GameListener {
 
         }));
 
-        board.boardUpdated();
+        // Menus
+        initMenus();
+
+        // Game view
+        getChildren().addAll(infoPane, board, listAndChat);
+
+        listAndChat.setViewOrder(1);
+        infoPane.setViewOrder(1);
+        board.setViewOrder(0);
+
+        HBox.setHgrow(infoPane, Priority.ALWAYS);
+        HBox.setHgrow(board, Priority.SOMETIMES);
+        HBox.setHgrow(listAndChat, Priority.ALWAYS);
+
+        board.draw();
 
     }
 
     // Actions
 
+    /**
+     * Sets the {@link #currentPos}.
+     * 
+     * @param pos The position to change to.
+     */
+    public void setPos(int pos) {
+
+        int old = currentPos;
+
+        currentPos = pos;
+
+        board.draw(Math.abs(pos - old) == 1, game.getPositions().get(old), game.getPositions().get(currentPos),
+                old > currentPos);
+
+        moveList.posChanged(currentPos);
+
+    }
+
+    /**
+     * Sets whether the board will automatically flip when a move has been made.
+     * 
+     * @param autoFlip Whether or not the board should autoflip.
+     */
+    public void setAutoFlip(boolean autoFlip) {
+
+        this.autoFlip = autoFlip;
+
+        if (game != null && game.getLastPos().isWhite() == flipped)
+            flip();
+
+    }
+
+    /**
+     * Increases {@link #currentPos} by one.
+     */
+    public void incPos() {
+
+        if (currentPos + 1 < game.getPositions().size()) {
+
+            setPos(currentPos + 1);
+
+        }
+
+    }
+
+    /**
+     * Decreases {@link #currentPos} by one.
+     */
+    public void decPos() {
+
+        if (currentPos - 1 >= 0) {
+
+            setPos(currentPos - 1);
+        }
+
+    }
+
+    /**
+     * Sets {@link #currentPos} to {@code 0}.
+     */
+    public void goToFirstPos() {
+
+        setPos(0);
+
+    }
+
+    /**
+     * Sets {@link #currentPos} to the last position of {@link #game}.
+     */
+    public void goToLastPos() {
+
+        setPos(game.getPositions().size() - 1);
+
+    }
+
+    /**
+     * Flips the board.
+     */
+    public void flip() {
+
+        flipped = !flipped;
+        board.draw();
+
+    }
+
+    /**
+     * Shows the user the game setup dialog.
+     */
+    public void startGame() {
+
+        final CreateGame setup = new CreateGame(getScene().getWindow());
+        setup.showAndWait();
+
+        if (setup.isCreate()) {
+
+            if (game != null) {
+
+                Dialog<ButtonType> confirm = new Dialog<>();
+                confirm.initOwner(getScene().getWindow());
+
+                confirm.setTitle("Confirm New Game");
+                confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
+
+                ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
+                ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
+
+                confirm.getDialogPane().getButtonTypes().setAll(yes, no);
+
+                Optional<ButtonType> result = confirm.showAndWait();
+
+                if (result.get().getButtonData().equals(ButtonData.CANCEL_CLOSE))
+                    return;
+
+                if (game != null)
+                    game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+
+            }
+
+            client = setup.getClient();
+
+            game = setup.getGame();
+            game.addListener(this);
+
+            if (client == null)
+                color = TWO_PLAYER;
+            else
+                color = setup.isWhite() ? WHITE : BLACK;
+
+            currentPos = 0;
+
+            try {
+
+                if (client == null)
+                    game.startGame();
+
+            } catch (Exception ex) {
+
+                Dialog<Void> errDialog = new Dialog<>();
+                errDialog.initOwner(getScene().getWindow());
+
+                errDialog.setTitle("Error Starting Game");
+                errDialog.setContentText(ex.getMessage());
+
+                errDialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+                errDialog.showAndWait();
+
+            }
+
+            moveList.initMoveList();
+            chatBox.update();
+
+            goToLastPos();
+
+            if (!app.getStage().isFocused())
+                app.getStage().toFront();
+
+        }
+
+    }
+
+    // Drawing
+
+    /**
+     * Takes the numeric reason code for the game ending and turns it into text.
+     * 
+     * @param reason The numeric reason code for why the game ended.
+     * @return The text reason.
+     */
+    public static String reasonToText(int reason) {
+
+        switch (reason) {
+
+            case Game.REASON_CHECKMATE:
+                return " by checkmate.";
+            case Game.REASON_FLAGFALL:
+                return " by flagfall.";
+            case Game.REASON_DEAD_INSUFFICIENT_MATERIAL:
+                return " due to insufficient material.";
+            case Game.REASON_DEAD_NO_POSSIBLE_MATE:
+                return " due to dead position (no possible checkmate.)";
+            case Game.REASON_FIFTY_MOVE:
+                return " by fifty move rule.";
+            case Game.REASON_REPETITION:
+                return " by repetition.";
+            case Game.REASON_STALEMATE:
+                return " by stalemate.";
+            case Game.REASON_RESIGNATION:
+                return " by resignation.";
+            default:
+                return ".";
+
+        }
+
+    }
+
+    // Initializers
+
+    /**
+     * Initializes the menus and adds them to the menu bar.
+     */
+    private void initMenus() {
+
+        viewMenu = new ViewMenu(this);
+        gameMenu = new GameMenu(this);
+
+        menuBar.addAll(gameMenu, viewMenu);
+
+    }
+
+    // Event Handlers
+
+    /**
+     * Handles key events.
+     * 
+     * @param ev The event from pressing the key.
+     */
     public void keyHandler(KeyEvent ev) {
 
         if (game == null)
@@ -296,178 +482,6 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    public void setPos(int pos) {
-
-        int old = currentPos;
-
-        currentPos = pos;
-
-        board.boardUpdated(Math.abs(pos - old) == 1, game.getPositions().get(old), game.getPositions().get(currentPos),
-                old > currentPos);
-
-        moveList.posChanged(currentPos);
-        gameMenu.update();
-
-    }
-
-    public void setAutoFlip(boolean autoFlip) {
-
-        this.autoFlip = autoFlip;
-
-        if (game != null && game.getLastPos().isWhite() == flipped)
-            flip();
-
-    }
-
-    void incPos() {
-
-        if (currentPos + 1 < game.getPositions().size()) {
-
-            setPos(currentPos + 1);
-
-        }
-
-    }
-
-    void decPos() {
-
-        if (currentPos - 1 >= 0) {
-
-            setPos(currentPos - 1);
-        }
-
-    }
-
-    void goToFirstPos() {
-
-        setPos(0);
-
-    }
-
-    void goToLastPos() {
-
-        setPos(game.getPositions().size() - 1);
-
-    }
-
-    public void flip() {
-
-        flipped = !flipped;
-        board.boardUpdated();
-
-    }
-
-    public void startGame(WindowEvent we) {
-
-        final CreateGame setup = new CreateGame(getScene().getWindow());
-
-        setup.setOnHidden(e -> {
-
-            if (setup.isCreate()) {
-
-                if (game != null) {
-
-                    Dialog<ButtonType> confirm = new Dialog<>();
-                    confirm.initOwner(getScene().getWindow());
-                    confirm.setContentText("Starting a new game will stop the current one. Are you sure?");
-                    confirm.setTitle("Confirm New Game");
-
-                    ButtonType yes = new ButtonType("Yes", ButtonData.OK_DONE);
-                    ButtonType no = new ButtonType("No", ButtonData.CANCEL_CLOSE);
-
-                    confirm.getDialogPane().getButtonTypes().addAll(yes, no);
-
-                    confirm.showAndWait();
-
-                    if (confirm.getResult().getText().equals("No"))
-                        return;
-
-                    if (game != null)
-                        game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
-
-                }
-
-                game = setup.getGame();
-                client = setup.getClient();
-
-                if (client == null)
-                    color = TWO_PLAYER;
-                else
-                    color = setup.isWhite() ? WHITE : BLACK;
-
-                game.addListener(this);
-
-                try {
-
-                    if (client == null)
-                        game.startGame();
-
-                } catch (Exception ex) {
-                    Dialog<Void> eDg = new Dialog<>();
-                    eDg.initOwner(getScene().getWindow());
-                    eDg.setTitle("Error Creating Game");
-                    eDg.setContentText(ex.getMessage());
-
-                    eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
-
-                    eDg.showAndWait();
-                }
-                currentPos = 0;
-
-                moveList.initMoveList();
-                chatBox.update();
-                goToLastPos();
-
-                if (!app.getStage().isFocused())
-                    app.getStage().toFront();
-
-            }
-
-        });
-        setup.showAndWait();
-    }
-
-    // Drawing
-
-    public static String reasonToText(int reason) {
-
-        switch (reason) {
-
-            case Game.REASON_CHECKMATE:
-                return " by checkmate.";
-            case Game.REASON_FLAGFALL:
-                return " by flagfall.";
-            case Game.REASON_DEAD_INSUFFICIENT_MATERIAL:
-                return " due to insufficient material.";
-            case Game.REASON_DEAD_NO_POSSIBLE_MATE:
-                return " due to dead position (no possible checkmate.)";
-            case Game.REASON_FIFTY_MOVE:
-                return " by fifty move rule.";
-            case Game.REASON_REPETITION:
-                return " by repetition.";
-            case Game.REASON_STALEMATE:
-                return " by stalemate.";
-            case Game.REASON_RESIGNATION:
-                return " by resignation.";
-            default:
-                return ".";
-
-        }
-
-    }
-
-    // Initializers
-    private void initMenus() {
-
-        viewMenu = new ViewMenu(this);
-        gameMenu = new GameMenu(this);
-
-        menuBar.getMenus().addAll(gameMenu, viewMenu, new Menu("Help"));
-
-    }
-
-    // Event Handlers
-
     @Override
     public void onPlayerEvent(GameEvent event) {
         if (game == null)
@@ -481,7 +495,7 @@ public class GameView extends HBox implements GameListener {
                 if (color == TWO_PLAYER && autoFlip && game.getLastPos().isWhite() == flipped)
                     flip();
 
-                board.boardUpdated(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
+                board.draw(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 
                 moveList.boardUpdated();
                 moveList.posChanged(currentPos);

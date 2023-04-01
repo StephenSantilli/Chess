@@ -1,8 +1,6 @@
 package gui.dialog;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 
 import game.Player;
@@ -115,7 +113,6 @@ public class SearchDialog extends Stage {
         challenges = new ArrayList<Challenge>();
 
         VBox items = new VBox();
-        items.setSpacing(5);
         items.setPadding(new Insets(10, 10, 10, 10));
 
         oList = FXCollections.observableArrayList();
@@ -219,14 +216,18 @@ public class SearchDialog extends Stage {
 
         HBox btns = new HBox();
         btns.setAlignment(Pos.CENTER_RIGHT);
-        btns.setSpacing(5);
 
         Button directConnect = new Button("Direct Connect");
         directConnect.setOnAction(ev -> {
 
-            //DirectConnect dDialog = new DirectConnect(getScene().getWindow());
             TextInputDialog dcDiag = new TextInputDialog();
-            dcDiag.getDialogPane().getButtonTypes().addAll(new ButtonType("Connect", ButtonData.APPLY), ButtonType.CANCEL);
+            dcDiag.setGraphic(null);
+            dcDiag.setHeaderText("Enter IP address...");
+            dcDiag.getEditor().setMinWidth(200);
+            dcDiag.setTitle("Direct Connect");
+            dcDiag.getDialogPane().getButtonTypes().setAll(new ButtonType("Connect", ButtonData.OK_DONE),
+                    ButtonType.CANCEL);
+            dcDiag.initOwner(getScene().getWindow());
 
             dcDiag.setOnHidden(we -> {
                 try {
@@ -243,8 +244,9 @@ public class SearchDialog extends Stage {
 
                     };
 
-                    if (!dcDiag.getResult().equals("")) {
-                        client = new Client(InetAddress.getByName(dcDiag.getResult()), App.prefs.get("username", "User"),
+                    if (dcDiag.getResult() != null && !dcDiag.getResult().equals("")) {
+                        client = new Client(InetAddress.getByName(dcDiag.getResult()),
+                                App.prefs.get("username", "User"),
                                 -1,
                                 null, gameCreated);
 
@@ -253,10 +255,12 @@ public class SearchDialog extends Stage {
 
                 } catch (Exception e) {
 
+                    client = null;
+
                     Dialog<Void> eDg = new Dialog<>();
                     eDg.initOwner(getScene().getWindow());
                     eDg.setTitle("Error Creating Game");
-                    eDg.setContentText(e.getMessage());
+                    eDg.setContentText("Error connecting to supplied IP: " + e.getMessage());
 
                     eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
 

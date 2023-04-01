@@ -45,14 +45,12 @@ public class FEN extends Stage {
 
         HBox btns = new HBox(set, cancel);
         btns.setAlignment(Pos.CENTER_RIGHT);
-        btns.setSpacing(10);
 
         field = new TextField();
         field.setPromptText("Enter FEN...");
 
         vb.getChildren().addAll(field, btns);
         vb.setPadding(new Insets(10));
-        vb.setSpacing(10);
 
         Scene s = new Scene(vb);
         

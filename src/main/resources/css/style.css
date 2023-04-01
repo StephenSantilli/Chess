@@ -1,12 +1,6 @@
 .root {
-  -fx-font-family: "Verdana", "sans-serif";
   -fx-fill: transparent;
 }
-
-/* #listAndChat {
-    -fx-border-width: 5;
-  -fx-border-color: red;
-} */
 
 HBox,
 VBox {
@@ -23,31 +17,33 @@ VBox {
 }
 
 GameView {
+  -fx-spacing: 10;
   -fx-padding: 10;
+  -fx-alignment: center;
+  -fx-font-family: "Verdana", "sans-serif";
+}
+
+#listAndChat {
+  -fx-vgap: 5;
+  -fx-alignment: center-left;
+}
+
+#scrollMoveList {
+  -fx-hbar-policy: never;
+  -fx-vbar-policy: never;
+  -fx-fit-to-width: true;
+  -fx-fit-to-height: true;
 }
 
 Board {
   -fx-alignment: center;
-  /* -fx-border-width: 2;
-  -fx-border-color: red; */
-}
-
-GameInfo {
-  /* -fx-border-width: 2;
-  -fx-border-color: red; */
 }
 
 PauseView {
   -fx-background-radius: 10;
 }
 
-#listAndChat {
-  /* -fx-border-width: 2;
-  -fx-border-color: red; */
-}
-
 #squareBorder {
-  /* -fx-border-width: 5; */
   -fx-background-color: transparent;
 }
 

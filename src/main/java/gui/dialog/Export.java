@@ -1,11 +1,8 @@
 package gui.dialog;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.Scanner;
-
 import gui.GameView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

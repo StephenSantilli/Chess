@@ -1,8 +1,6 @@
 package gui.board;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import game.Position;
 import game.Square;
@@ -44,6 +42,7 @@ public class Board extends StackPane {
     private MouseEvent resizing;
 
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
+
         Platform.runLater(() -> {
 
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
@@ -52,13 +51,101 @@ public class Board extends StackPane {
 
     };
 
-    private EventHandler<MouseEvent> mouseMoved = ev -> {
+    private final EventHandler<MouseEvent> mouseMoved = ev -> {
 
         setMouseType(ev.getSceneX(), ev.getSceneY());
 
     };
 
-    private EventHandler<MouseEvent> mouseReleased = e -> {
+    private final EventHandler<MouseEvent> mousePressed = ev -> {
+
+        if (ev.getButton() != MouseButton.PRIMARY)
+            return;
+
+        if (isResizingBounds(ev.getSceneX(), ev.getSceneY())) {
+
+            resizing = ev;
+            setMouseType(ev.getSceneX(), ev.getSceneY());
+
+            return;
+
+        }
+
+        if (gameView.getGame() == null
+                || gameView.getGame().isPaused())
+            return;
+
+        if (dragging != null) {
+
+            dragging.onMousePressed(ev);
+
+        } else {
+
+            final GUIPiece found = getGUIPieceAtSquare(
+                    getSquareByPoint(ev.getSceneX(), ev.getSceneY(), true));
+
+            if (found != null)
+                found.onMousePressed(ev);
+            else if (active != null)
+                active.onMousePressed(ev);
+
+        }
+
+        setMouseType(ev.getSceneX(), ev.getSceneY());
+
+    };
+
+    private final EventHandler<MouseEvent> mouseDragged = ev -> {
+
+        if (ev.getButton() != MouseButton.PRIMARY)
+            return;
+
+        if (resizing != null) {
+
+            // TODO: calculate the padding values, not just default to 280 and 40
+            squareSize = Math.min(
+                    Math.min(Math.max(20, ev.getSceneX()), getScene().getWidth() - 280),
+                    Math.min(Math.max(20, ev.getSceneY()), getScene().getHeight() - 40))
+                    / 8.0;
+            pieceSize = Math.round(squareSize * pieceSizeMultiplier);
+
+            setMinSize(squareSize * 8, squareSize * 8);
+            setMaxSize(squareSize * 8, squareSize * 8);
+            setPrefSize(squareSize * 8, squareSize * 8);
+
+            setWidth(squareSize * 8);
+            setHeight(squareSize * 8);
+
+            boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
+
+            squarePane.draw();
+            coordsPane.draw();
+
+            highlightPane.setVisible(false);
+            borderPane.setVisible(false);
+            moveIndicatorsPane.setVisible(false);
+            piecePane.setVisible(false);
+
+            return;
+
+        }
+
+        if (gameView.getGame() == null
+                || gameView.getGame().isPaused())
+            return;
+
+        if (dragging != null) {
+
+            dragging.onMouseDragged(ev);
+
+        }
+
+    };
+
+    private final EventHandler<MouseEvent> mouseReleased = e -> {
+
+        if (e.getButton() != MouseButton.PRIMARY)
+            return;
 
         if (resizing != null) {
 
@@ -71,7 +158,7 @@ public class Board extends StackPane {
                 moveIndicatorsPane.setVisible(true);
                 piecePane.setVisible(true);
                 piecePane.initPieceTranscoders();
-                boardUpdated();
+                draw();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -80,21 +167,19 @@ public class Board extends StackPane {
             return;
         }
 
-        if (gameView.getGame() == null)
-            return;
-
-        if (gameView.getGame().isPaused())
-            return;
-
-        if (e.getButton() != MouseButton.PRIMARY)
+        if (gameView.getGame() == null
+                || gameView.getGame().isPaused())
             return;
 
         if (dragging != null) {
+
             dragging.onMouseReleased(e);
+
         } else {
 
-            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) e.getSceneX(), (int) e.getSceneY(),
+            final GUIPiece found = getGUIPieceAtSquare(getSquareByPoint(e.getSceneX(), e.getSceneY(),
                     true));
+
             if (found != null)
                 found.onMouseReleased(e);
             else if (active != null)
@@ -113,93 +198,6 @@ public class Board extends StackPane {
         setMouseType(e.getSceneX(), e.getSceneY());
 
     };
-
-    private EventHandler<MouseEvent> mousePressed = ev -> {
-
-        if (isResizingBounds(ev.getSceneX(), ev.getSceneY())) {
-
-            resizing = ev;
-            setMouseType(ev.getSceneX(), ev.getSceneY());
-            return;
-
-        }
-
-        if (gameView.getGame() == null)
-            return;
-
-        if (gameView.getGame().isPaused())
-            return;
-
-        if (ev.getButton() != MouseButton.PRIMARY)
-            return;
-
-        if (dragging != null) {
-
-            dragging.onMousePressed(ev);
-
-        } else {
-
-            GUIPiece found = getGUIPieceAtSquare(getSquareByLoc((int) ev.getSceneX(), (int) ev.getSceneY(), true));
-
-            if (found != null)
-                found.onMousePressed(ev);
-            else if (active != null)
-                active.onMousePressed(ev);
-
-        }
-        setMouseType(ev.getSceneX(), ev.getSceneY());
-
-    };
-
-    private EventHandler<MouseEvent> mouseDragged = ev -> {
-
-        if (resizing != null) {
-            // System.out.println(ev.getX());
-            squareSize = Math.min(Math.min(Math.max(20, ev.getSceneX()), getScene().getWidth() - 280),
-                    Math.min(Math.max(20, ev.getSceneY()), getScene().getHeight() - 40))
-                    / 8.0;
-            pieceSize = Math.round(squareSize * pieceSizeMultiplier);
-
-            setMaxSize(squareSize * 8, squareSize * 8);
-            setPrefSize(squareSize * 8, squareSize * 8);
-            setMinSize(squareSize * 8, squareSize * 8);
-            setWidth(squareSize * 8);
-            setHeight(squareSize * 8);
-
-            boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
-            squarePane.draw();
-            coordsPane.draw();
-
-            highlightPane.setVisible(false);
-            borderPane.setVisible(false);
-            moveIndicatorsPane.setVisible(false);
-            piecePane.setVisible(false);
-
-            return;
-
-        }
-
-        if (gameView.getGame() == null)
-            return;
-
-        if (gameView.getGame().isPaused())
-            return;
-
-        if (ev.getButton() != MouseButton.PRIMARY)
-            return;
-
-        if (dragging != null) {
-
-            dragging.onMouseDragged(ev);
-
-        }
-
-    };
-
-    public boolean isResizingBounds(double x, double y) {
-        return (x >= boardBounds.getMaxX() - 10 && x <= boardBounds.getMaxX() + 10
-                && y >= boardBounds.getMaxY() - 10 && y <= boardBounds.getMaxY() + 10);
-    }
 
     public GameView getGameView() {
         return gameView;
@@ -289,6 +287,10 @@ public class Board extends StackPane {
         this.boardBounds = boardBounds;
     }
 
+    public ChangeListener<Number> getResizeEvent() {
+        return resizeEvent;
+    }
+
     public EventHandler<MouseEvent> getMouseMoved() {
         return mouseMoved;
     }
@@ -307,8 +309,6 @@ public class Board extends StackPane {
 
     public Board(GameView gameView) {
 
-        setId("Board");
-
         this.gameView = gameView;
 
         squarePane = new Squares(gameView);
@@ -318,6 +318,7 @@ public class Board extends StackPane {
         moveIndicatorsPane = new MoveIndicators(gameView);
         piecePane = new Pieces(gameView);
         pausePane = new PauseView();
+
         pausePane.setVisible(false);
 
         getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane,
@@ -326,9 +327,12 @@ public class Board extends StackPane {
         gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
 
             try {
+
                 squarePane.draw();
                 coordsPane.draw();
+
                 piecePane.initPieceTranscoders();
+
             } catch (Exception e) {
             }
 
@@ -336,15 +340,112 @@ public class Board extends StackPane {
 
     }
 
+    /**
+     * Draws the board from the current position. Will not animate any changes made.
+     */
+    public void draw() {
+        draw(false, null, null, false);
+    }
+
+    /**
+     * Draws the board view.
+     * 
+     * @param animate  Whether or not the change between {@code p1} and {@code p2}
+     *                 should be animated.
+     * @param p1       The current position drawn.
+     * @param p2       The new position to be drawn.
+     * @param backward Whether or not the change between the two positions is
+     *                 forwards or backwards.
+     */
+    public void draw(boolean animate, Position p1, Position p2, boolean backward) {
+
+        if (gameView.getGame() == null) {
+
+            borderPane.drawBorder(null);
+            activeUpdated();
+
+            gameView.getGameMenu().update();
+            gameView.getViewMenu().update();
+
+            gameView.getInfoPane().updateTimers();
+
+            gameView.getMoveList().initMoveList();
+
+            gameView.getInfoPane().getTopName().setText("");
+            gameView.getInfoPane().getBottomName().setText("");
+
+            setActive(null);
+            setDragging(null);
+
+            piecePane.draw();
+
+            return;
+
+        }
+
+        boolean ani = animate && dragging == null;
+        dragging = null;
+
+        // Don't animate when promotion move (if you did it/two player game)
+        if (gameView.getGame().getLastPos().getMove() != null
+                && gameView.getGame().getLastPos().getMove().getPromoteType() != '0'
+                && (gameView.getColor() == GameView.TWO_PLAYER
+                        || gameView.getGame().getLastPos().isWhite() != (gameView.getColor() == GameView.WHITE)))
+            ani = false;
+
+        piecePane.draw(backward, ani ? p1 : null, p2);
+
+        gameView.getInfoPane().getTopTimer().setWhite(gameView.isFlipped());
+        gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
+
+        gameView.getInfoPane().updateTimers();
+
+        gameView.getInfoPane().getTopName().setText(gameView.getGame().getPlayer(gameView.isFlipped()).getName());
+        gameView.getInfoPane().getBottomName().setText(gameView.getGame().getPlayer(!gameView.isFlipped()).getName());
+
+        borderPane.drawBorder(null);
+
+        activeUpdated();
+
+        gameView.getGameMenu().update();
+        gameView.getViewMenu().update();
+
+    }
+
+    /**
+     * Clears the active piece and the piece currently being dragged.
+     */
     public void clearSelection() {
 
         setActive(null);
         setDragging(null);
+
         borderPane.drawBorder(null);
-        boardUpdated();
+
+        draw();
 
     }
 
+    /**
+     * Updates the square highlights and moves indicator panes.
+     */
+    public void activeUpdated() {
+
+        highlightPane.draw();
+        moveIndicatorsPane.draw();
+
+    }
+
+    /**
+     * Shows the promote choice dialog. The user will be prompted to pick between a
+     * queen, rook, bishop, or knight of their own color.
+     * 
+     * @param square   The {@link Square} to draw the dialog at.
+     * @param white    Whether or not the pieces should be white.
+     * @param callback The {@link GUIPiece} to call and provide with the results
+     *                 when the user has made a selection.
+     * @throws Exception When there is an error from the Promote dialog.
+     */
     public void showPromoteDialog(Square square, boolean white, GUIPiece callback) throws Exception {
 
         Promote pD = new Promote(pieceSize, squareSize, white, gameView.isFlipped(),
@@ -371,71 +472,11 @@ public class Board extends StackPane {
     }
 
     /**
-     * Updates the square highlights and moves panes.
+     * Sets the mouse type based on the mouse position.
+     * 
+     * @param mouseX The x position of the mouse relative to the scene.
+     * @param mouseY The y position of the mouse relative to the scene.
      */
-    public void activeUpdated() {
-
-        highlightPane.draw();
-        moveIndicatorsPane.draw();
-
-    }
-
-    public void boardUpdated() {
-        boardUpdated(false, null, null, false);
-    }
-
-    public void boardUpdated(boolean animate, Position p1, Position p2, boolean backward) {
-
-        if (gameView.getGame() == null) {
-
-            borderPane.drawBorder(null);
-            activeUpdated();
-
-            gameView.getGameMenu().update();
-            gameView.getViewMenu().update();
-
-            gameView.getInfoPane().updateTimers();
-
-            gameView.getMoveList().initMoveList();
-
-            gameView.getInfoPane().getTopName().setText("");
-            gameView.getInfoPane().getBottomName().setText("");
-
-            active = null;
-            dragging = null;
-            piecePane.draw();
-
-            return;
-
-        }
-
-        boolean ani = animate && dragging == null;
-        dragging = null;
-
-        if (gameView.getGame().getLastPos().getMove() != null
-                && gameView.getGame().getLastPos().getMove().getPromoteType() != '0'
-                && (gameView.getColor() == GameView.TWO_PLAYER
-                        || gameView.getGame().getLastPos().isWhite() != (gameView.getColor() == GameView.WHITE)))
-            ani = false;
-
-        piecePane.draw(backward, ani ? p1 : null, p2);
-
-        gameView.getInfoPane().getTopTimer().setWhite(gameView.isFlipped());
-        gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
-
-        gameView.getInfoPane().updateTimers();
-
-        gameView.getInfoPane().getTopName().setText(gameView.getGame().getPlayer(gameView.isFlipped()).getName());
-        gameView.getInfoPane().getBottomName().setText(gameView.getGame().getPlayer(!gameView.isFlipped()).getName());
-
-        borderPane.drawBorder(null);
-        activeUpdated();
-
-        gameView.getGameMenu().update();
-        gameView.getViewMenu().update();
-
-    }
-
     public void setMouseType(double mouseX, double mouseY) {
 
         if (resizing != null || isResizingBounds(mouseX, mouseY)) {
@@ -446,17 +487,16 @@ public class Board extends StackPane {
         }
 
         if (gameView.getGame() == null || gameView.getGame().isPaused()) {
-            setCursor(Cursor.DEFAULT);
-            return;
-        }
 
-        if (dragging != null) {
+            setCursor(Cursor.DEFAULT);
+
+        } else if (dragging != null) {
 
             setCursor(Cursor.CLOSED_HAND);
 
-        } else if (getSquareByLoc(mouseX, mouseY, true).isValid()
+        } else if (getSquareByPoint(mouseX, mouseY, true).isValid()
                 && gameView.getGame().getPositions().get(gameView.getCurrentPos())
-                        .getPieceAtSquare(getSquareByLoc(mouseX, mouseY, true)) != null) {
+                        .getPieceAtSquare(getSquareByPoint(mouseX, mouseY, true)) != null) {
 
             setCursor(Cursor.OPEN_HAND);
 
@@ -468,6 +508,13 @@ public class Board extends StackPane {
 
     // Calculations
 
+    /**
+     * Finds the {@link GUIPiece} at a given square.
+     * 
+     * @param square The {@link Square} to search at.
+     * @return The {@link GUIPiece} found at the square. Will return {@code null} if
+     *         no piece found.
+     */
     public GUIPiece getGUIPieceAtSquare(Square square) {
 
         GUIPiece found = null;
@@ -486,6 +533,46 @@ public class Board extends StackPane {
     }
 
     /**
+     * Checks whether or not the mouse is within the resizing area (bottom right
+     * corner of the board.)
+     * 
+     * @param x The x location of the mouse relative to the scene.
+     * @param y The y location of the mouse relative to the scene.
+     * @return whether or not the mouse is within the resizing corner.
+     */
+    public boolean isResizingBounds(double x, double y) {
+
+        final double resizeSize = 10;
+
+        return (x >= boardBounds.getMaxX() - resizeSize && x <= boardBounds.getMaxX() + resizeSize
+                && y >= boardBounds.getMaxY() - resizeSize && y <= boardBounds.getMaxY() + resizeSize);
+
+    }
+
+    /**
+     * Gets the value of the -fx-background-radius value for each square, such that
+     * only corner squares will have rounded edges.
+     * 
+     * @param square The square to use.
+     */
+    public static String getSquareCornerRadius(Square square) {
+
+        final double cornerRadius = 10;
+
+        if (square.getFile() == 1 && square.getRank() == 1)
+            return "0 0 0 " + cornerRadius;
+        else if (square.getFile() == 8 && square.getRank() == 1)
+            return "0 0 " + cornerRadius + " 0";
+        else if (square.getFile() == 8 && square.getRank() == 8)
+            return "0 " + cornerRadius + " 0 0";
+        else if (square.getFile() == 1 && square.getRank() == 8)
+            return cornerRadius + " 0 0 0";
+
+        return "0 0 0 0";
+
+    }
+
+    /**
      * Gets the {@link Square} that {@code x} and {@code y} fall within.
      * 
      * <p>
@@ -499,7 +586,7 @@ public class Board extends StackPane {
      *                 relative values
      * @return The {@link Square} object
      */
-    public Square getSquareByLoc(double x, double y, boolean relative) {
+    public Square getSquareByPoint(double x, double y, boolean relative) {
 
         if (relative) {
             x -= boardBounds.getMinX();
@@ -591,25 +678,6 @@ public class Board extends StackPane {
         else
             return ((square.getRank() - 1) * squareSize) - rel;
 
-    }
-
-    public static String getSquareCornerRadius(Square square) {
-
-        if (square.getFile() == 1 && square.getRank() == 1)
-            return "0 0 0 10";
-        else if (square.getFile() == 8 && square.getRank() == 1)
-            return "0 0 10 0";
-        else if (square.getFile() == 8 && square.getRank() == 8)
-            return "0 10 0 0";
-        else if (square.getFile() == 1 && square.getRank() == 8)
-            return "10 0 0 0";
-
-        return "0 0 0 0";
-
-    }
-
-    public ChangeListener<Number> getResizeEvent() {
-        return resizeEvent;
     }
 
 }

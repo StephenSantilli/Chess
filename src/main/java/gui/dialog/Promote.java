@@ -34,6 +34,8 @@ public class Promote extends Stage {
 
         initStyle(StageStyle.UNDECORATED);
 
+        // TODO: use the existing transcoders, no need for new ones. throws Exception
+        // can be removed once this is done.
         ImageView queen = new PieceTranscoder(pieceSize, white, 'Q').getImageView();
         ImageView rook = new PieceTranscoder(pieceSize, white, 'R').getImageView();
         ImageView bishop = new PieceTranscoder(pieceSize, white, 'B').getImageView();

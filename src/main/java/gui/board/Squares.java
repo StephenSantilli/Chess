@@ -15,35 +15,34 @@ public class Squares extends Pane {
 
     public void draw() {
 
-        final Board board = gameView.getBoard();
-
         getChildren().clear();
 
+        final Board board = gameView.getBoard();
         final double squareSize = board.getSquareSize();
 
         for (int r = 8; r > 0; r--) {
 
             for (int f = 8; f > 0; f--) {
 
-                Region sq = new Region();
-                sq.setPrefSize(squareSize, squareSize);
-                sq.setMinSize(squareSize, squareSize);
+                final Square square = new Square(f, r);
+                final String radius = Board.getSquareCornerRadius(square);
 
-                Square square = new Square(f, r);
-
-                sq.setLayoutX(board.getXBySquare(square));
-                sq.setLayoutY(board.getYBySquare(square));
+                Region rect = new Region();
 
                 if (square.isLightSquare())
-                    sq.setId("lightSquare");
+                    rect.setId("lightSquare");
                 else
-                    sq.setId("darkSquare");
+                    rect.setId("darkSquare");
 
-                String radius = Board.getSquareCornerRadius(square);
+                rect.setPrefSize(squareSize, squareSize);
+                rect.setMinSize(squareSize, squareSize);
 
-                sq.setStyle("-fx-background-radius: " + radius);
+                rect.setLayoutX(board.getXBySquare(square));
+                rect.setLayoutY(board.getYBySquare(square));
 
-                getChildren().add(sq);
+                rect.setStyle("-fx-background-radius: " + radius + ";");
+
+                getChildren().add(rect);
 
             }
 

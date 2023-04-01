@@ -17,15 +17,15 @@ public class Pieces extends Pane {
     private GameView gameView;
 
     private ArrayList<GUIPiece> pieces;
-    private ArrayList<PieceTranscoder> transcoderPieces;
+    private ArrayList<PieceTranscoder> transcoders;
     private ArrayList<TranslateTransition> transitions;
 
     public ArrayList<GUIPiece> getPieces() {
         return pieces;
     }
 
-    public ArrayList<PieceTranscoder> getTranscoderPieces() {
-        return transcoderPieces;
+    public ArrayList<PieceTranscoder> getTranscoders() {
+        return transcoders;
     }
 
     public ArrayList<TranslateTransition> getTransitions() {
@@ -102,22 +102,32 @@ public class Pieces extends Pane {
 
                     if (!backward) {
 
+                        // Castle move
                         if (curr.getMove().isCastle() && curr.getMove().getRookDestination().equals(p.getSquare()))
-                            pieceMoveAnimation(guiP, curr.getMove().getRookOrigin(),
+                            pieceMoveAnimation(guiP,
+                                    curr.getMove().getRookOrigin(),
                                     curr.getMove().getRookDestination(),
                                     null);
+                        // Regular move
                         else
-                            pieceMoveAnimation(guiP, curr.getMove().getOrigin(), curr.getMove().getDestination(),
+                            pieceMoveAnimation(guiP,
+                                    curr.getMove().getOrigin(),
+                                    curr.getMove().getDestination(),
                                     curr.getMove().getCapturePiece());
 
                     } else {
 
+                        // Castle move
                         if (prev.getMove().isCastle() && prev.getMove().getRookOrigin().equals(p.getSquare()))
-                            pieceMoveAnimation(guiP, prev.getMove().getRookDestination(),
+                            pieceMoveAnimation(guiP,
+                                    prev.getMove().getRookDestination(),
                                     prev.getMove().getRookOrigin(),
                                     null);
+                        // Regular move
                         else
-                            pieceMoveAnimation(guiP, prev.getMove().getDestination(), prev.getMove().getOrigin(),
+                            pieceMoveAnimation(guiP,
+                                    prev.getMove().getDestination(),
+                                    prev.getMove().getOrigin(),
                                     prev.getMove().getCapturePiece());
 
                     }
@@ -232,9 +242,9 @@ public class Pieces extends Pane {
 
         PieceTranscoder found = null;
 
-        for (int i = 0; i < transcoderPieces.size() && found == null; i++) {
+        for (int i = 0; i < transcoders.size() && found == null; i++) {
 
-            PieceTranscoder pt = transcoderPieces.get(i);
+            PieceTranscoder pt = transcoders.get(i);
             if (pt.isColor() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
                 found = pt;
 
@@ -249,18 +259,18 @@ public class Pieces extends Pane {
         final Board board = gameView.getBoard();
         final double pieceSize = board.getPieceSize();
 
-        transcoderPieces = new ArrayList<PieceTranscoder>();
+        transcoders = new ArrayList<PieceTranscoder>();
 
         boolean color = true;
 
         for (int i = 0; i < 2; i++) {
 
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'K'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'Q'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'R'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'B'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'N'));
-            transcoderPieces.add(new PieceTranscoder(pieceSize, color, 'P'));
+            transcoders.add(new PieceTranscoder(pieceSize, color, 'K'));
+            transcoders.add(new PieceTranscoder(pieceSize, color, 'Q'));
+            transcoders.add(new PieceTranscoder(pieceSize, color, 'R'));
+            transcoders.add(new PieceTranscoder(pieceSize, color, 'B'));
+            transcoders.add(new PieceTranscoder(pieceSize, color, 'N'));
+            transcoders.add(new PieceTranscoder(pieceSize, color, 'P'));
 
             color = false;
 

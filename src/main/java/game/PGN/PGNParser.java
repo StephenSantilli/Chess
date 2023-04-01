@@ -1,11 +1,8 @@
 package game.PGN;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -234,18 +231,18 @@ public class PGNParser {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    // public static void main(String[] args) throws Exception {
 
-        Scanner s = new Scanner(new FileReader("./test pgns/chesscom with clock.pgn"));
-        String str = "";
-        while (s.hasNextLine()) {
-            str += s.nextLine().trim() + "\n";
-        }
-        PGNParser p = new PGNParser(str);
+    //     Scanner s = new Scanner(new FileReader("./test pgns/chesscom with clock.pgn"));
+    //     String str = "";
+    //     while (s.hasNextLine()) {
+    //         str += s.nextLine().trim() + "\n";
+    //     }
+    //     PGNParser p = new PGNParser(str);
 
-        // System.out.println(p.outputPGN());
+    //     System.out.println(p.outputPGN());
 
-    }
+    // }
 
     public PGNParser(String text) throws Exception {
 
