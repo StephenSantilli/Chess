@@ -268,7 +268,13 @@ public class Board extends StackPane {
     }
 
     public void setActive(GUIPiece active) {
+
+        if (this.active != null && (active == null || !this.active.getPiece().equals(active.getPiece())))
+            this.active.setAlreadyActive(false);
+
         this.active = active;
+
+        activeUpdated();
     }
 
     public GUIPiece getDragging() {
@@ -429,7 +435,7 @@ public class Board extends StackPane {
     /**
      * Updates the square highlights and moves indicator panes.
      */
-    public void activeUpdated() {
+    private void activeUpdated() {
 
         highlightPane.draw();
         moveIndicatorsPane.draw();

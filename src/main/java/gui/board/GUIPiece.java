@@ -178,8 +178,6 @@ public class GUIPiece {
 
                 final Move move = new Move(board.getActive().getPiece().getSquare(), targetSquare, game.getLastPos());
 
-                active.setAlreadyActive(false);
-
                 board.setDragging(null);
                 board.setActive(null);
 
@@ -234,14 +232,11 @@ public class GUIPiece {
 
                     GUIPiece pc = board.getGUIPieceAtSquare(targetSquare);
 
-                    board.getActive().setAlreadyActive(false);
-
+                    board.setDragging(null);
                     if (pc != null)
                         board.setActive(pc);
                     else
                         board.setActive(null);
-
-                    board.setDragging(null);
 
                     setPieceSquare(piece.getSquare());
 
@@ -262,12 +257,8 @@ public class GUIPiece {
 
             image.toFront();
 
-            board.getActive().setAlreadyActive(false);
-
-            board.setActive(this);
             board.setDragging(this);
-
-            board.activeUpdated();
+            board.setActive(this);
 
             setPieceX(ev.getSceneX());
             setPieceY(ev.getSceneY());
@@ -280,12 +271,9 @@ public class GUIPiece {
 
         } else {
 
-            board.getActive().setAlreadyActive(false);
-
-            board.setActive(null);
             board.setDragging(null);
+            board.setActive(null);
 
-            board.activeUpdated();
             board.getBorderPane().drawBorder(null);
 
         }
@@ -329,27 +317,30 @@ public class GUIPiece {
 
         board.getBorderPane().drawBorder(null);
 
+        final GUIPiece active = board.getActive();
+
         // No active piece or the target square is already the piece's square
         if ((board.getActive() == null
                 || (board.getActive() != null && board.getActive().getPiece().getSquare()
                         .equals(targetSquare)))) {
 
-            if (alreadyActive) {
-                board.setActive(null);
-                alreadyActive = false;
-            } else {
-                alreadyActive = true;
-            }
-
             board.setDragging(null);
 
-            board.activeUpdated();
+            if (active != null && active.isAlreadyActive()) {
+                board.setActive(null);
+            } else if (active != null) {
+                active.setAlreadyActive(true);
+            }
+
             setPieceSquare(piece.getSquare());
 
             return;
 
         } else {
-            alreadyActive = true;
+
+            if (active != null)
+                active.setAlreadyActive(true);
+
         }
 
         // There's a piece that was being dragged
@@ -360,8 +351,6 @@ public class GUIPiece {
             try {
 
                 final Piece d = board.getDragging().getPiece();
-
-                board.setActive(null);
 
                 final Move move = new Move(d.getSquare(),
                         targetSquare,
@@ -386,8 +375,9 @@ public class GUIPiece {
                     } else
                         game.makeMove(move.getOrigin(), move.getDestination(), '0');
 
-                } else
+                } else {
                     board.draw();
+                }
 
             } catch (Exception e) {
 
@@ -396,12 +386,12 @@ public class GUIPiece {
 
                     GUIPiece pc = board.getGUIPieceAtSquare(targetSquare);
 
+                    board.setDragging(null);
+
                     if (pc != null)
                         board.setActive(pc);
-                    else
-                        board.setActive(null);
-
-                    board.setDragging(null);
+                    // else
+                    // board.setActive(null);
 
                     setPieceSquare(piece.getSquare());
 
