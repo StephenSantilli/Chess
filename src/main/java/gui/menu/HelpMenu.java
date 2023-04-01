@@ -40,21 +40,21 @@ public class HelpMenu extends Menu {
 
         ImageView icon = new ImageView(getClass().getResource("/img/icon_48x48.png").toString());
 
-        aboutDialog.setGraphic(icon);
         aboutDialog.setHeaderText("Chess by Stephen Santilli");
+        aboutDialog.setGraphic(icon);
 
-        Text label = new Text("Pieces made by Cburnett, CC BY-SA 3.0 ");
+        Text start = new Text("Pieces made by Cburnett, CC BY-SA 3.0 ");
 
-        Hyperlink link = new Hyperlink("http://creativecommons.org/licenses/by-sa/3.0/");
-        link.setOnAction(le -> {
-            App.hostServices.showDocument(link.getText());
+        Hyperlink licenseLink = new Hyperlink("http://creativecommons.org/licenses/by-sa/3.0/");
+        licenseLink.setOnAction(le -> {
+            App.hostServices.showDocument(licenseLink.getText());
         });
 
         Text end = new Text(" - via Wikimedia Commons");
 
-        TextFlow flow = new TextFlow(label, link, end);
+        TextFlow pieceAttribution = new TextFlow(start, licenseLink, end);
 
-        VBox content = new VBox(flow);
+        VBox content = new VBox(pieceAttribution);
 
         aboutDialog.getDialogPane().setContent(content);
 
