@@ -31,6 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
@@ -104,6 +105,7 @@ public class SearchDialog extends Stage {
 
     public SearchDialog(Window window) throws Exception {
 
+        initStyle(StageStyle.UNIFIED);
         // initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());

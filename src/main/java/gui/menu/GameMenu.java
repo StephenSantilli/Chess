@@ -157,6 +157,8 @@ public class GameMenu extends Menu {
             resign.setDisable(true);
             drawOffer.setDisable(true);
 
+            disconnect.setDisable(true);
+
             showPgn.setDisable(true);
 
         } else {
@@ -166,6 +168,8 @@ public class GameMenu extends Menu {
 
             undo.setDisable(!board.getGame().canUndo());
             redo.setDisable(!board.getGame().canRedo());
+
+            disconnect.setDisable(board.getClient() == null);
 
             resign.setDisable(board.getGame().getResult() != Game.RESULT_IN_PROGRESS);
             drawOffer.setDisable(!board.getGame().canDrawOffer());

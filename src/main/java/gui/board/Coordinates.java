@@ -31,7 +31,6 @@ public class Coordinates extends Pane {
 
             Text l = new Text(r + "");
 
-            l.setTextOrigin(VPos.CENTER);
             l.setId(square.isLightSquare() ? "lightCoord" : "darkCoord");
 
             Bounds lb = l.getBoundsInLocal();
@@ -49,7 +48,6 @@ public class Coordinates extends Pane {
 
             Text l = new Text((char) (f + 96) + "");
 
-            l.setTextOrigin(VPos.CENTER);
             l.setId(square.isLightSquare() ? "lightCoord" : "darkCoord");
 
             Bounds lb = l.getBoundsInLocal();

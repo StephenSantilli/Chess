@@ -11,11 +11,7 @@ public class BarMenu extends MenuBar {
 
         setUseSystemMenuBar(true);
 
-        if (System.getProperty("os.name", "").toLowerCase().startsWith("mac")) {
-
-            getMenus().add(new Menu("Help"));
-
-        }
+        getMenus().add(new HelpMenu());
 
     }
 

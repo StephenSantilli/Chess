@@ -18,6 +18,7 @@ import gui.menu.BarMenu;
 public class App extends Application {
 
     public static Preferences prefs = Preferences.userNodeForPackage(App.class);
+    public static HostServices hostServices;
 
     private Stage stage;
     private Scene scene;
@@ -40,6 +41,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
 
+        this.hostServices = getHostServices();
         this.stage = stage;
 
         stage.setTitle("Chess " + Game.VERSION);

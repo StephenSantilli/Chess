@@ -384,14 +384,7 @@ public class GUIPiece {
                 // If this wasn't a promote move, and the position never changed
                 if (promoteMove == null/* && startPos == gameView.getCurrentPos() */) {
 
-                    GUIPiece pc = board.getGUIPieceAtSquare(targetSquare);
-
                     board.setDragging(null);
-
-                    if (pc != null)
-                        board.setActive(pc);
-                    // else
-                    // board.setActive(null);
 
                     setPieceSquare(piece.getSquare());
 

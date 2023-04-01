@@ -34,8 +34,8 @@ public class Squares extends Pane {
                 else
                     rect.setId("darkSquare");
 
-                rect.setPrefSize(squareSize, squareSize);
                 rect.setMinSize(squareSize, squareSize);
+                rect.setPrefSize(squareSize, squareSize);
 
                 rect.setLayoutX(board.getXBySquare(square));
                 rect.setLayoutY(board.getYBySquare(square));
