@@ -31,8 +31,8 @@ public class Board extends StackPane {
     private Pieces piecePane;
     private PauseView pausePane;
 
-    private double squareSize = 100;
-    private double pieceSize = Math.round(squareSize * pieceSizeMultiplier);
+    private double pieceSize = 90;
+    private double squareSize = Math.round(pieceSize / pieceSizeMultiplier);
 
     private GUIPiece active;
     private GUIPiece dragging;

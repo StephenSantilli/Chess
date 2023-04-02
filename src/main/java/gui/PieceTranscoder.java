@@ -54,7 +54,6 @@ public class PieceTranscoder extends ImageTranscoder {
 
         ImageView i = new ImageView(SwingFXUtils.toFXImage(img, null));
 
-        i.setSmooth(false);
         i.setManaged(false);
         i.setPreserveRatio(true);
         i.setFitWidth(pieceSize);
