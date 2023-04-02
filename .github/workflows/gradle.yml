@@ -32,30 +32,30 @@ jobs:
     - name: Upload DMG as an artifact
       uses: actions/upload-artifact@v3
       with:
-        name: chess-${{ matrix.os }}-dmg
+        name: chess-macos-dmg
         path: build/jpackage/*.dmg
         if-no-files-found: ignore
     - name: Upload EXE as an artifact
       uses: actions/upload-artifact@v3
       with:
-        name: chess-${{ matrix.os }}-exe
+        name: chess-windows-exe
         path: build/jpackage/*.exe
         if-no-files-found: ignore
     - name: Upload MSI as an artifact
       uses: actions/upload-artifact@v3
       with:
-        name: chess-${{ matrix.os }}-msi
+        name: chess-windows-msi
         path: build/jpackage/*.msi
         if-no-files-found: ignore
     - name: Upload DEB as an artifact
       uses: actions/upload-artifact@v3
       with:
-        name: chess-${{ matrix.os }}-deb
+        name: chess-ubuntu-deb
         path: build/jpackage/*.deb
         if-no-files-found: ignore
     - name: Upload RPM as an artifact
       uses: actions/upload-artifact@v3
       with:
-        name: chess-${{ matrix.os }}-rpm
+        name: chess-ubuntu-rpm
         path: build/jpackage/*.rpm
         if-no-files-found: ignore
