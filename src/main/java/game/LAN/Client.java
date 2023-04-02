@@ -17,6 +17,8 @@ import game.GameSettings;
 import game.Player;
 import game.GameEvent;
 import game.GameListener;
+import game.Result;
+import game.ResultReason;
 
 public class Client implements GameListener {
 
@@ -89,19 +91,20 @@ public class Client implements GameListener {
         this.settings = settings;
         this.gameCreatedCallback = gameCreatedCallback;
 
-        try {
+        // try {
 
-            this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.output = new PrintWriter(socket.getOutputStream(), true);
+        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.output = new PrintWriter(socket.getOutputStream(), true);
 
-            pingThread = Executors.newScheduledThreadPool(1);
-            pingThread.scheduleWithFixedDelay(pinger, 18000, 18000, TimeUnit.MILLISECONDS);
+        pingThread = Executors.newScheduledThreadPool(1);
+        pingThread.scheduleWithFixedDelay(pinger, 18000, 18000, TimeUnit.MILLISECONDS);
 
-            new Thread(listener, "Game Client Listener").start();
+        new Thread(listener, "Game Client Listener").start();
 
-        } catch (Exception e) {
-            stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to establish connection."));
-        }
+        // } catch (Exception e) {
+        // stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to establish
+        // connection."));
+        // }
 
     }
 
@@ -113,22 +116,23 @@ public class Client implements GameListener {
         this.settings = settings;
         this.gameCreatedCallback = gameCreatedCallback;
 
-        try {
+        // try {
 
-            this.socket = new Socket();
-            socket.connect(new InetSocketAddress(address, PORT));
+        this.socket = new Socket();
+        socket.connect(new InetSocketAddress(address, PORT), 5000);
 
-            this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.output = new PrintWriter(socket.getOutputStream(), true);
+        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.output = new PrintWriter(socket.getOutputStream(), true);
 
-            pingThread = Executors.newScheduledThreadPool(1);
-            pingThread.scheduleWithFixedDelay(pinger, 18000, 18000, TimeUnit.MILLISECONDS);
+        pingThread = Executors.newScheduledThreadPool(1);
+        pingThread.scheduleWithFixedDelay(pinger, 18000, 18000, TimeUnit.MILLISECONDS);
 
-            new Thread(listener, "Game Client Listener").start();
+        new Thread(listener, "Game Client Listener").start();
 
-        } catch (Exception e) {
-            stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to establish connection."));
-        }
+        // } catch (Exception e) {
+        // stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to establish
+        // connection."));
+        // }
 
     }
 
@@ -170,7 +174,7 @@ public class Client implements GameListener {
 
             if (msg.equals(Message.STARTED) || msg.equals(Message.START)) {
 
-                if (game.getResult() == Game.RESULT_NOT_STARTED) {
+                if (game.getResult() == Result.NOT_STARTED) {
 
                     try {
 
@@ -259,8 +263,8 @@ public class Client implements GameListener {
 
             } else if (msg.equals(Message.RESIGN)) {
 
-                game.markGameOver(!oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN,
-                        Game.REASON_RESIGNATION);
+                game.markGameOver(!oppColor ? Result.WHITE_WIN : Result.BLACK_WIN,
+                        ResultReason.RESIGNATION);
 
             } else if (msg.getArgs().get(0).equals("chat")) {
 
@@ -407,8 +411,8 @@ public class Client implements GameListener {
             output.close();
             socket.close();
 
-            if (game != null && game.getResult() == Game.RESULT_IN_PROGRESS)
-                game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+            if (game != null && game.getResult() == Result.IN_PROGRESS)
+                game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
 
         } catch (Exception e) {
 
@@ -430,7 +434,7 @@ public class Client implements GameListener {
                 stop(new ErrorMessage(ErrorMessage.FATAL, "Error sending move."));
             }
 
-        } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.RESULT_TERMINATED) {
+        } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Result.TERMINATED) {
 
             stop(new ErrorMessage(ErrorMessage.FATAL, "Game terminated."));
 
@@ -440,14 +444,14 @@ public class Client implements GameListener {
             send(Message.DRAW_OFFER);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResultReason() == (oppColor ? Game.REASON_WHITE_OFFERED_DRAW
-                        : Game.REASON_BLACK_OFFERED_DRAW)) {
+                && game.getResultReason() == (oppColor ? ResultReason.WHITE_OFFERED_DRAW
+                        : ResultReason.BLACK_OFFERED_DRAW)) {
 
             send(Message.DRAW_ACCEPT);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResult() == (oppColor ? Game.RESULT_WHITE_WIN : Game.RESULT_BLACK_WIN)
-                && game.getResultReason() == Game.REASON_RESIGNATION) {
+                && game.getResult() == (oppColor ? Result.WHITE_WIN : Result.BLACK_WIN)
+                && game.getResultReason() == ResultReason.RESIGNATION) {
 
             send(Message.RESIGN);
 

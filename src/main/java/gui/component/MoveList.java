@@ -5,7 +5,6 @@ import gui.GameView;
 
 import java.util.ArrayList;
 
-import game.Game;
 import game.Move;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -111,14 +110,16 @@ public class MoveList extends GridPane {
 
         String result = "";
         switch (board.getGame().getResult()) {
-            case Game.RESULT_DRAW:
+            case DRAW:
                 result = "1/2-1/2";
                 break;
-            case Game.RESULT_WHITE_WIN:
+            case WHITE_WIN:
                 result = "1-0";
                 break;
-            case Game.RESULT_BLACK_WIN:
+            case BLACK_WIN:
                 result = "0-1";
+                break;
+            default:
                 break;
         }
 

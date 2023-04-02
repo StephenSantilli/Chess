@@ -7,7 +7,12 @@ VBox {
   -fx-spacing: 10;
 }
 
-#lightCoord, #darkCoord {
+TableColumn {
+  -fx-max-width: Infinity;
+}
+
+#lightCoord,
+#darkCoord {
   -fx-text-origin: center;
 }
 

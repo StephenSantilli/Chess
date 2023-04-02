@@ -1,6 +1,6 @@
 package gui.component;
 
-import game.Game;
+import game.Result;
 import gui.GameView;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -57,7 +57,7 @@ public class GUITimer extends Label {
 
             setId("guitimeractive");
 
-            if (!board.getGame().isPaused() && board.getGame().getResult() == Game.RESULT_IN_PROGRESS)
+            if (!board.getGame().isPaused() && board.getGame().getResult() == Result.IN_PROGRESS)
                 tl.play();
             else {
                 tl.pause();

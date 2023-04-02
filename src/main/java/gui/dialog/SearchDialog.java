@@ -2,6 +2,7 @@ package gui.dialog;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import game.Player;
 import game.LAN.Challenge;
@@ -10,7 +11,6 @@ import game.LAN.Client;
 import gui.App;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -25,15 +25,13 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import javafx.util.Callback;
 
 public class SearchDialog extends Stage {
 
@@ -105,10 +103,11 @@ public class SearchDialog extends Stage {
 
     public SearchDialog(Window window) throws Exception {
 
-        initStyle(StageStyle.UNIFIED);
-        // initOwner(window);
+        initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
+
+        setResizable(false);
 
         searcher = new ChallengeSearcher();
 
@@ -123,90 +122,68 @@ public class SearchDialog extends Stage {
         challengeTable.setPlaceholder(new Label("Searching for challenges..."));
 
         TableColumn<Challenge, String> nameCol = new TableColumn<>("Name");
-        nameCol.setMaxWidth(Integer.MAX_VALUE);
-        nameCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(p.getValue().getName());
-                    }
-                });
+
+        nameCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper<>(p.getValue().getName());
+        });
 
         TableColumn<Challenge, String> colorCol = new TableColumn<>("Your Color");
-        colorCol.setMaxWidth(Integer.MAX_VALUE);
 
-        colorCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(
-                                p.getValue().getColor() == Challenge.CHALLENGE_RANDOM ? "Random"
-                                        : (p.getValue().getColor() == Challenge.CHALLENGE_WHITE ? "Black" : "White"));
-                    }
-                });
+        colorCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper<>(
+                    p.getValue().getColor() == Challenge.CHALLENGE_RANDOM ? "Random"
+                            : (p.getValue().getColor() == Challenge.CHALLENGE_WHITE ? "Black" : "White"));
+        });
 
         TableColumn<Challenge, String> sideTimeCol = new TableColumn<>("Time Per\nSide (s)");
-        sideTimeCol.setMaxWidth(Integer.MAX_VALUE);
 
-        sideTimeCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(
-                                p.getValue().getTimePerSide() > 0 ? (p.getValue().getTimePerSide() + "") : "-");
-
-                    }
-                });
+        sideTimeCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper<>(
+                    p.getValue().getTimePerSide() > 0 ? (p.getValue().getTimePerSide() + "") : "-");
+        });
 
         TableColumn<Challenge, String> moveTimeCol = new TableColumn<>("Time Added\nPer Move (s)");
-        moveTimeCol.setMaxWidth(Integer.MAX_VALUE);
 
-        moveTimeCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(
-                                p.getValue().getTimePerMove() > 0 ? (p.getValue().getTimePerMove() + "") : "-");
-                    }
-                });
+        moveTimeCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper<>(
+                    p.getValue().getTimePerMove() > 0 ? (p.getValue().getTimePerMove() + "") : "-");
+        });
 
         TableColumn<Challenge, String> addressCol = new TableColumn<>("Address");
-        addressCol.setMaxWidth(Integer.MAX_VALUE);
 
-        addressCol.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Challenge, String>, ObservableValue<String>>() {
-                    public ObservableValue<String> call(CellDataFeatures<Challenge, String> p) {
-                        return new ReadOnlyObjectWrapper<>(p.getValue().getAddress().toString());
-                    }
-                });
+        addressCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper<>(p.getValue().getAddress().toString());
+        });
 
         challengeTable.setRowFactory(tv -> {
 
             TableRow<Challenge> row = new TableRow<>();
-            row.setOnMouseClicked(ev -> {
+            row.setOnMouseClicked(me -> {
 
-                if (ev.getButton().equals(MouseButton.PRIMARY)) {
+                if (me.getButton().equals(MouseButton.PRIMARY) && me.getClickCount() >= 2) {
 
-                    if (ev.getClickCount() >= 2) {
+                    try {
 
-                        try {
+                        Runnable gameCreated = () -> {
 
-                            Runnable gameCreated = () -> {
+                            searcher.stop();
+                            Platform.runLater(() -> hide());
 
-                                searcher.stop();
-                                Platform.runLater(() -> {
+                        };
 
-                                    hide();
-                                });
+                        client = new Client(row.getItem()
+                                .getAddress(),
+                                App.prefs.get("p1name", "User"),
+                                -1,
+                                null,
+                                gameCreated);
 
-                            };
+                        client.start();
 
-                            client = new Client(row.getItem()
-                                    .getAddress(), App.prefs.get("username", "User"), -1, null, gameCreated);
-
-                            client.start();
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+
                 }
             });
 
@@ -214,7 +191,7 @@ public class SearchDialog extends Stage {
 
         });
 
-        challengeTable.getColumns().setAll(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol);
+        challengeTable.getColumns().setAll(Arrays.asList(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol));
 
         HBox btns = new HBox();
         btns.setAlignment(Pos.CENTER_RIGHT);
@@ -247,12 +224,14 @@ public class SearchDialog extends Stage {
                     };
 
                     if (dcDiag.getResult() != null && !dcDiag.getResult().equals("")) {
+
                         client = new Client(InetAddress.getByName(dcDiag.getResult()),
-                                App.prefs.get("username", "User"),
+                                App.prefs.get("p1name", "User"),
                                 -1,
                                 null, gameCreated);
 
                         client.start();
+
                     }
 
                 } catch (Exception e) {
@@ -262,7 +241,7 @@ public class SearchDialog extends Stage {
                     Dialog<Void> eDg = new Dialog<>();
                     eDg.initOwner(getScene().getWindow());
                     eDg.setTitle("Error Creating Game");
-                    eDg.setContentText("Error connecting to supplied IP: " + e.getMessage());
+                    eDg.setContentText("Error connecting: " + e.getMessage());
 
                     eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
 
@@ -303,6 +282,9 @@ public class SearchDialog extends Stage {
         searcher.search(searchDoneCallback);
 
         Scene s = new Scene(items);
+        s.setFill(Color.TRANSPARENT);
+        s.getStylesheets().setAll(window.getScene().getStylesheets());
+
         setOnShown(we -> {
 
             new Thread(hostUpdateChecker, "Host Update Checker").start();
@@ -310,7 +292,7 @@ public class SearchDialog extends Stage {
 
         });
 
-        setTitle("Search for Challenges");
+        setTitle("Search for LAN Challenges");
         setScene(s);
 
     }

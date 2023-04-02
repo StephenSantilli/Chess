@@ -13,6 +13,8 @@ import java.net.URL;
 import java.util.prefs.Preferences;
 
 import game.Game;
+import game.Result;
+import game.ResultReason;
 import gui.menu.BarMenu;
 
 public class App extends Application {
@@ -41,7 +43,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
 
-        this.hostServices = getHostServices();
+        App.hostServices = getHostServices();
         this.stage = stage;
 
         stage.setTitle("Chess " + Game.VERSION);
@@ -87,8 +89,8 @@ public class App extends Application {
 
                 // TODO: save board position for resuming
                 final Game game = gameView.getGame();
-                if (game != null && game.getResult() == Game.RESULT_IN_PROGRESS)
-                    game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+                if (game != null && game.getResult() == Result.IN_PROGRESS)
+                    game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
 
                 Platform.exit();
 

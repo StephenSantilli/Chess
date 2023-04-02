@@ -5,6 +5,8 @@ import java.util.Optional;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
+import game.Result;
+import game.ResultReason;
 import game.LAN.Client;
 import gui.board.Board;
 import gui.component.ChatArea;
@@ -17,19 +19,15 @@ import gui.menu.GameMenu;
 import gui.menu.ViewMenu;
 import javafx.application.Platform;
 import javafx.geometry.BoundingBox;
-import javafx.geometry.Pos;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.WindowEvent;
@@ -350,7 +348,7 @@ public class GameView extends HBox implements GameListener {
                     return;
 
                 if (game != null)
-                    game.markGameOver(Game.RESULT_TERMINATED, Game.REASON_OTHER);
+                    game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
 
             }
 
@@ -405,25 +403,25 @@ public class GameView extends HBox implements GameListener {
      * @param reason The numeric reason code for why the game ended.
      * @return The text reason.
      */
-    public static String reasonToText(int reason) {
+    public static String reasonToText(ResultReason reason) {
 
         switch (reason) {
 
-            case Game.REASON_CHECKMATE:
+            case CHECKMATE:
                 return " by checkmate.";
-            case Game.REASON_FLAGFALL:
+            case FLAGFALL:
                 return " by flagfall.";
-            case Game.REASON_DEAD_INSUFFICIENT_MATERIAL:
+            case DEAD_INSUFFICIENT_MATERIAL:
                 return " due to insufficient material.";
-            case Game.REASON_DEAD_NO_POSSIBLE_MATE:
+            case DEAD_NO_POSSIBLE_MATE:
                 return " due to dead position (no possible checkmate.)";
-            case Game.REASON_FIFTY_MOVE:
+            case FIFTY_MOVE:
                 return " by fifty move rule.";
-            case Game.REASON_REPETITION:
+            case REPETITION:
                 return " by repetition.";
-            case Game.REASON_STALEMATE:
+            case STALEMATE:
                 return " by stalemate.";
-            case Game.REASON_RESIGNATION:
+            case RESIGNATION:
                 return " by resignation.";
             default:
                 return ".";
@@ -543,7 +541,9 @@ public class GameView extends HBox implements GameListener {
                 if (game == null)
                     return;
 
-                if (game.getResult() <= Game.RESULT_IN_PROGRESS || game.getResult() == Game.RESULT_TERMINATED)
+                if (game.getResult() == Result.NOT_STARTED
+                        || game.getResult() == Result.IN_PROGRESS
+                        || game.getResult() == Result.TERMINATED)
                     return;
 
                 gameMenu.update();
@@ -553,11 +553,11 @@ public class GameView extends HBox implements GameListener {
                 over.setTitle("Game Over");
 
                 String msg = "";
-                if (game.getResult() == Game.RESULT_DRAW) {
+                if (game.getResult() == Result.DRAW) {
                     msg = "Draw";
-                } else if (game.getResult() == Game.RESULT_BLACK_WIN) {
+                } else if (game.getResult() == Result.BLACK_WIN) {
                     msg = "Black win";
-                } else if (game.getResult() == Game.RESULT_WHITE_WIN) {
+                } else if (game.getResult() == Result.WHITE_WIN) {
                     msg = "White win";
                 }
 

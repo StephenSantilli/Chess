@@ -1,20 +1,16 @@
 package gui.menu;
 
 import gui.App;
-import javafx.geometry.Pos;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.StageStyle;
 
 public class HelpMenu extends Menu {
 
@@ -34,7 +30,6 @@ public class HelpMenu extends Menu {
 
         Dialog<Void> aboutDialog = new Dialog<Void>();
 
-        aboutDialog.initStyle(StageStyle.UNIFIED);
 
         aboutDialog.getDialogPane().getButtonTypes().setAll(new ButtonType("Ok"));
 

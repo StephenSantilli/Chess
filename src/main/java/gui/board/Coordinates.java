@@ -3,7 +3,6 @@ package gui.board;
 import game.Square;
 import gui.GameView;
 import javafx.geometry.Bounds;
-import javafx.geometry.VPos;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 

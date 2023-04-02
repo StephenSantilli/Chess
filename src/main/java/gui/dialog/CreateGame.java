@@ -6,6 +6,7 @@ import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
+import gui.App;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -28,7 +29,7 @@ import javafx.stage.Window;
 
 public class CreateGame extends Stage {
 
-    private TextField oneField, twoField;
+    private TextField oneName, twoName;
     private ChoiceBox<String> color, type;
     private CheckBox useTimeBox;
     private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove;
@@ -61,7 +62,7 @@ public class CreateGame extends Stage {
 
     public CreateGame(Window window) {
 
-        // initOwner(window);
+        initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
 
@@ -69,21 +70,18 @@ public class CreateGame extends Stage {
 
         // Player Settings Boxes
         Label oneLabel = new Label("Player 1:");
-        oneField = new TextField("Player 1");
-        // HBox oneNameArea = new HBox(oneLabel, oneField);
+        oneName = new TextField(App.prefs.get("p1name", "Player 1"));
 
         color = new ChoiceBox<String>();
         color.getItems().addAll("Random", "White", "Black");
-        color.setMaxWidth(Double.MAX_VALUE);
         color.setValue("Random");
+        color.setMaxWidth(Double.MAX_VALUE);
 
-        VBox oneBox = new VBox(oneLabel, color, oneField);
+        VBox oneBox = new VBox(oneLabel, color, oneName);
         oneBox.setFillWidth(true);
-        // oneBox.setSpacing(5);
 
         Label twoLabel = new Label("Player 2:");
-        twoField = new TextField("Player 2");
-        // HBox twoNameArea = new HBox(twoLabel, twoField);
+        twoName = new TextField(App.prefs.get("p2name", "Player 2"));
 
         type = new ChoiceBox<String>();
         type.setMaxWidth(Double.MAX_VALUE);
@@ -95,18 +93,17 @@ public class CreateGame extends Stage {
 
             boolean local = type.getValue().equals("Two Player");
 
-            twoField.setDisable(!local);
+            twoName.setDisable(!local);
 
         });
 
-        VBox twoBox = new VBox(twoLabel, type, twoField);
+        VBox twoBox = new VBox(twoLabel, type, twoName);
         twoBox.setFillWidth(true);
-        // twoBox.setSpacing(5);
 
         HBox players = new HBox(oneBox, twoBox);
         players.setAlignment(Pos.CENTER);
         players.setFillHeight(true);
-        // players.setSpacing(10);
+
         HBox.setHgrow(oneBox, Priority.ALWAYS);
         HBox.setHgrow(twoBox, Priority.ALWAYS);
 
@@ -123,7 +120,6 @@ public class CreateGame extends Stage {
         // Time Control
         HBox perSide = new HBox();
         perSide.setAlignment(Pos.CENTER_LEFT);
-        // perSide.setSpacing(5);
         Label perSideLabel = new Label("Time per side (M:S): ");
         Label perSideDivider = new Label(":");
 
@@ -141,7 +137,6 @@ public class CreateGame extends Stage {
         HBox perMove = new HBox();
         perMove.setAlignment(Pos.CENTER_LEFT);
 
-        // perMove.setSpacing(5);
         Label perMoveLabel = new Label("Time added per move (M:S): ");
         Label perMoveDivider = new Label(":");
 
@@ -159,7 +154,6 @@ public class CreateGame extends Stage {
         perMove.getChildren().addAll(perMoveLabel, minPerMove, perMoveDivider, secPerMove);
 
         VBox timeControl = new VBox(perSide, perMove);
-        // timeControl.setSpacing(10);
         timeControl.setFillWidth(true);
 
         setDisabledTime(true);
@@ -185,17 +179,14 @@ public class CreateGame extends Stage {
 
         HBox btns = new HBox(search, start, cancel);
         btns.setAlignment(Pos.CENTER_RIGHT);
-        // btns.setSpacing(10);
 
         VBox stgs = new VBox(players, presets, timeOpts, timeControl, statusLabel, btns);
         stgs.setFillWidth(true);
         stgs.setPadding(new Insets(10));
-        // stgs.setSpacing(10);
         stgs.setAlignment(Pos.CENTER);
 
         Scene s = new Scene(stgs);
-        s.getStylesheets().add(getClass().getResource("/css/style.css").toString());
-        s.getStylesheets().add(getClass().getResource("/css/theme.css").toString());
+        s.getStylesheets().setAll(window.getScene().getStylesheets());
 
         setOnShown(we -> {
 
@@ -230,6 +221,8 @@ public class CreateGame extends Stage {
 
         try {
 
+            App.prefs.put("p1name", oneName.getText());
+
             SearchDialog sd = new SearchDialog(getScene().getWindow());
 
             sd.setOnHiding(we -> {
@@ -258,6 +251,9 @@ public class CreateGame extends Stage {
 
     private void startAction(ActionEvent ae) {
 
+        App.prefs.put("p1name", oneName.getText());
+        App.prefs.put("p2name", twoName.getText());
+
         if (type.getValue().equals("Two Player")) {
 
             try {
@@ -274,8 +270,8 @@ public class CreateGame extends Stage {
                 long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue()))
                         : -1;
 
-                game = new Game((oneWhite ? oneField.getText() : twoField.getText()),
-                        (oneWhite ? twoField.getText() : oneField.getText()),
+                game = new Game((oneWhite ? oneName.getText() : twoName.getText()),
+                        (oneWhite ? twoName.getText() : oneName.getText()),
                         Player.HUMAN,
                         Player.HUMAN,
                         new GameSettings(
@@ -298,13 +294,6 @@ public class CreateGame extends Stage {
         } else if (type.getValue().equals("Online")) {
 
             try {
-
-                // boolean oneWhite = color.getValue().equals("White");
-
-                // if (color.getValue().equals("Random"))
-                // oneWhite = Math.random() >= 0.5;
-
-                // white = oneWhite;
 
                 int c = Challenge.CHALLENGE_RANDOM;
                 switch (color.getValue()) {
@@ -330,7 +319,7 @@ public class CreateGame extends Stage {
                 };
 
                 server = new ChallengeServer(
-                        new Challenge(oneField.getText(), c, ((minPerSide.getValue() * 60) + (secPerSide.getValue())),
+                        new Challenge(oneName.getText(), c, ((minPerSide.getValue() * 60) + (secPerSide.getValue())),
                                 ((minPerMove.getValue() * 60) + (secPerMove.getValue())), null),
                         gameCreated);
 
@@ -354,8 +343,8 @@ public class CreateGame extends Stage {
     private void setAllDisabled(boolean disable) {
         start.setDisable(disable);
         search.setDisable(disable);
-        oneField.setDisable(disable);
-        twoField.setDisable(disable);
+        oneName.setDisable(disable);
+        twoName.setDisable(disable);
         color.setDisable(disable);
         type.setDisable(disable);
         useTimeBox.setDisable(disable);
