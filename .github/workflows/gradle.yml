@@ -1,4 +1,4 @@
-name: Gradle Build
+name: Build Installers
 
 on: [workflow_dispatch]
 
@@ -8,54 +8,48 @@ jobs:
     strategy:
       matrix:
         os: [macOS-latest, windows-latest, ubuntu-latest]
-        java: [ '19.0.2' ]
+        java: ["19.0.2"]
       fail-fast: false
     name: ${{ matrix.os }}
     steps:
-    - name: Git checkout
-      uses: actions/checkout@v3
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        distribution: oracle
-        java-version: ${{ matrix.java }}
-    - name: Echo JAVA_HOME
-      run: echo $JAVA_HOME
-    - name: Verify Gradle Wrapper
-      uses: gradle/wrapper-validation-action@v1
-    - name: Execute build
-      run: ./gradlew --info --stacktrace build
-    - name: Execute runtime
-      run: ./gradlew --info --stacktrace runtime
-    - name: Execute jpackage
-      run: ./gradlew --info --stacktrace jpackage
-    - name: Upload DMG as an artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: chess-macos-dmg
-        path: build/jpackage/*.dmg
-        if-no-files-found: ignore
-    - name: Upload EXE as an artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: chess-windows-exe
-        path: build/jpackage/*.exe
-        if-no-files-found: ignore
-    - name: Upload MSI as an artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: chess-windows-msi
-        path: build/jpackage/*.msi
-        if-no-files-found: ignore
-    - name: Upload DEB as an artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: chess-ubuntu-deb
-        path: build/jpackage/*.deb
-        if-no-files-found: ignore
-    - name: Upload RPM as an artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: chess-ubuntu-rpm
-        path: build/jpackage/*.rpm
-        if-no-files-found: ignore
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: oracle
+          java-version: ${{ matrix.java }}
+      - name: Echo JAVA_HOME
+        run: echo $JAVA_HOME
+      - name: Verify Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: Execute build
+        run: ./gradlew --info --stacktrace build
+      - name: Execute runtime
+        run: ./gradlew --info --stacktrace runtime
+      - name: Execute jpackage
+        run: ./gradlew --info --stacktrace jpackage
+      - name: Upload DMG as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chess-macos-dmg
+          path: build/jpackage/*.dmg
+          if-no-files-found: ignore
+      - name: Upload EXE as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chess-windows-exe
+          path: build/jpackage/*.exe
+          if-no-files-found: ignore
+      - name: Upload DEB as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chess-ubuntu-deb
+          path: build/jpackage/*.deb
+          if-no-files-found: ignore
+      - name: Upload RPM as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chess-ubuntu-rpm
+          path: build/jpackage/*.rpm
+          if-no-files-found: ignore
