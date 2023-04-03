@@ -65,6 +65,7 @@ public class CreateGame extends Stage {
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
+        setResizable(false);
 
         create = false;
 
