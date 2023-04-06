@@ -296,7 +296,7 @@ public class Position {
      * 
      * @param game The game this position is associated with.
      */
-    public Position(Game game) {
+    public Position() {
 
         white = true;
         this.mateChecked = false;
@@ -308,11 +308,11 @@ public class Position {
         this.fiftyMoveCounter = 0;
 
         initDefaultPosition();
-        initMoves(true, game);
+        initMoves(true);
 
     }
 
-    public Position(String fen, Game game) throws Exception {
+    public Position(String fen) throws Exception {
 
         String[] a = fen.split(" ");
 
@@ -463,7 +463,7 @@ public class Position {
             }
         }
 
-        initMoves(true, game);
+        initMoves(true);
 
     }
 
@@ -474,12 +474,11 @@ public class Position {
      * @param prev         The previous position to use as a baseline for this
      *                     position.
      * @param move         The move to be made.
-     * @param game         The game this position is associated with.
      * @param white        Whether or not it is white's turn after this move is
      *                     made.
      * @param checkForMate Whether or not checkmate should be checked for.
      */
-    public Position(Position prev, Move move, Game game, boolean white, boolean checkForMate, char promoteType)
+    public Position(Position prev, Move move, boolean white, boolean checkForMate, char promoteType)
             throws Exception {
 
         this.pieces = new Piece[8][8];
@@ -613,7 +612,7 @@ public class Position {
         move.updateMoveNotation(prev);
         this.move = move;
 
-        initMoves(checkForMate, game);
+        initMoves(checkForMate);
 
         if (move.isCapture() || move.getPiece().getCode() == 'P') {
             this.fiftyMoveCounter = 0;
@@ -623,7 +622,7 @@ public class Position {
 
     }
 
-    public void setPromote(char promo, Game game) throws Exception {
+    public void setPromote(char promo) throws Exception {
 
         if (promo != '?' && promo != 'Q' && promo != 'R' && promo != 'B' && promo != 'N')
             throw new Exception("Invalid promote type.");
@@ -653,8 +652,8 @@ public class Position {
 
         if (!move.getPiece().equals(getPieceAtSquare(mps))) {
 
-            initMoves(true, game);
-            move.updateMoveNotation(game.getLastPos());
+            initMoves(true);
+            move.updateMoveNotation(this);
 
         }
 
@@ -666,7 +665,7 @@ public class Position {
      * @param checkForMate
      * @param g
      */
-    private void initMoves(boolean checkForMate, Game g) {
+    private void initMoves(boolean checkForMate) {
 
         this.moves = new ArrayList<Move>();
 
@@ -713,7 +712,7 @@ public class Position {
 
         if (checkForMate) {
 
-            setCheckmate(g);
+            setCheckmate();
 
             if (this.inCheck == false) {
 
@@ -726,7 +725,7 @@ public class Position {
 
                         try {
 
-                            final Position test = new Position(this, c, g, !c.isWhite(), false, '0');
+                            final Position test = new Position(this, c, !c.isWhite(), false, '0');
 
                             if (!test.isGivingCheck())
                                 moves.add(c);
@@ -747,10 +746,8 @@ public class Position {
      * Sets whether or not the position is check mate. (The color whose turn it is
      * isn't able to make any moves and is in check.) Also will filter out any moves
      * that are not legal.
-     * 
-     * @param game The game to check.
      */
-    private void setCheckmate(Game game) {
+    private void setCheckmate() {
 
         this.mateChecked = true;
         this.checkMate = true;
@@ -766,7 +763,7 @@ public class Position {
             }
 
             try {
-                Position test = new Position(this, m, game, !white, false, '0');
+                Position test = new Position(this, m, !white, false, '0');
                 if (!test.isGivingCheck())
                     checkMate = false;
                 else {

@@ -15,6 +15,34 @@ import game.PGN.PGNParser;
 
 public class Game {
 
+    public enum Result {
+
+        NOT_STARTED,
+        IN_PROGRESS,
+        WHITE_WIN,
+        BLACK_WIN,
+        DRAW,
+        TERMINATED
+
+    }
+
+    public enum Reason {
+
+        IN_PROGRESS,
+        CHECKMATE,
+        FLAGFALL,
+        WHITE_OFFERED_DRAW,
+        BLACK_OFFERED_DRAW,
+        STALEMATE,
+        DEAD_INSUFFICIENT_MATERIAL,
+        DEAD_NO_POSSIBLE_MATE,
+        REPETITION,
+        FIFTY_MOVE,
+        RESIGNATION,
+        OTHER;
+
+    }
+
     public static final String VERSION = Game.class.getPackage().getImplementationVersion() != null
             ? Game.class.getPackage().getImplementationVersion()
             : "DEV";
@@ -48,7 +76,7 @@ public class Game {
      * <p>
      * The reason for the result of the game.
      */
-    private ResultReason resultReason;
+    private Reason resultReason;
 
     /**
      * The system time that the active timer was started.
@@ -61,6 +89,12 @@ public class Game {
     private boolean paused;
 
     /**
+     * The player that offered a draw. {@code null} if no draw has been offered or
+     * the previous draw offer has been declined.
+     */
+    private Player drawOfferer;
+
+    /**
      * The service that checks for flagfall in the background.
      */
     private ScheduledExecutorService flagfallChecker;
@@ -71,10 +105,10 @@ public class Game {
     Runnable flagfall = () -> {
 
         if (getTimerTime(true) <= 0)
-            markGameOver(Result.BLACK_WIN, ResultReason.FLAGFALL);
+            markGameOver(Game.Result.BLACK_WIN, Game.Reason.FLAGFALL);
 
         if (getTimerTime(false) <= 0)
-            markGameOver(Result.WHITE_WIN, ResultReason.FLAGFALL);
+            markGameOver(Game.Result.WHITE_WIN, Game.Reason.FLAGFALL);
 
     };
 
@@ -94,7 +128,7 @@ public class Game {
         return result;
     }
 
-    public ResultReason getResultReason() {
+    public Reason getResultReason() {
         return resultReason;
     }
 
@@ -148,13 +182,13 @@ public class Game {
 
         this.settings = settings;
 
-        result = Result.NOT_STARTED;
-        resultReason = ResultReason.IN_PROGRESS;
+        result = Game.Result.NOT_STARTED;
+        resultReason = Game.Reason.IN_PROGRESS;
 
         if (settings.getFen().equals(GameSettings.DEFAULT_FEN))
-            positions.add(new Position(this));
+            positions.add(new Position());
         else
-            positions.add(new Position(settings.getFen(), this));
+            positions.add(new Position(settings.getFen()));
 
     }
 
@@ -163,17 +197,16 @@ public class Game {
         positions = new ArrayList<Position>();
         messages = new ArrayList<Chat>();
         this.listeners = new ArrayList<GameListener>();
-        result = Result.NOT_STARTED;
-        resultReason = ResultReason.IN_PROGRESS;
+        result = Game.Result.NOT_STARTED;
+        resultReason = Game.Reason.IN_PROGRESS;
 
-        // TODO: support player type
         final String whiteName = pgn.getTags().getOrDefault("White", "White");
-        this.white = new Player((whiteName.equals("") ? "White" : whiteName),
-                pgn.getTags().getOrDefault("WhiteType", Player.HUMAN), true);
+        final String whiteType = pgn.getTags().getOrDefault("WhiteType", Player.HUMAN);
+        this.white = new Player(whiteName, whiteType, true);
 
         final String blackName = pgn.getTags().getOrDefault("Black", "Black");
-        this.black = new Player((blackName.equals("") ? "Black" : blackName),
-                pgn.getTags().getOrDefault("BlackType", Player.HUMAN), false);
+        final String blackType = pgn.getTags().getOrDefault("BlackType", Player.HUMAN);
+        this.black = new Player(blackName, blackType, false);
 
         this.settings = new GameSettings(overridePGNSettings ? settings.getTimePerSide() : pgn.getTimePerSide(),
                 overridePGNSettings ? settings.getTimePerMove() : pgn.getTimePerMove(),
@@ -182,13 +215,13 @@ public class Game {
                 settings.isWhiteTimerManged(),
                 settings.isBlackTimerManaged());
 
-        // TODO: support setup tag, so you can start from non-default positions
         final String setup = pgn.getTags().getOrDefault("SetUp", "");
         final String fen = pgn.getTags().getOrDefault("FEN", "");
+
         if (setup.equals("1") && !fen.equals("")) {
-            positions.add(new Position(fen, this));
+            positions.add(new Position(fen));
         } else
-            positions.add(new Position(this));
+            positions.add(new Position());
 
         ArrayList<PGNMove> pMoves = pgn.getParsedMoves();
 
@@ -203,7 +236,7 @@ public class Game {
                 if (!((promote + "").matches("[QRBN]")))
                     promote = '0';
 
-                positions.add(new Position(getLastPos(), getLastPos().getMoveByPGN(m), this, !getLastPos().isWhite(),
+                positions.add(new Position(getLastPos(), getLastPos().getMoveByPGN(m), !getLastPos().isWhite(),
                         true, promote));
 
                 getPreviousPos().setTimerEnd(
@@ -342,7 +375,7 @@ public class Game {
             return;
 
         start = new Date();
-        result = Result.IN_PROGRESS;
+        result = Game.Result.IN_PROGRESS;
 
         startTimer();
 
@@ -355,35 +388,29 @@ public class Game {
 
         fireEvent(GameEvent.STARTED);
 
-        if (getLastPos().isCheckmate()) {
-
-            markGameOver(getLastPos().isWhite() ? Result.BLACK_WIN : Result.WHITE_WIN, ResultReason.CHECKMATE);
-            return;
-
-        }
-
-        if (getLastPos().isInsufficientMaterial()) {
-
-            markGameOver(Result.DRAW, ResultReason.DEAD_INSUFFICIENT_MATERIAL);
-            return;
-
-        }
-
-        if (getLastPos().isStalemate()) {
-
-            markGameOver(Result.DRAW, ResultReason.STALEMATE);
-            return;
-
-        }
+        checkGameOver();
 
     }
 
-    public void markGameOver(Result result, ResultReason resultReason) {
+    public void checkGameOver() {
+
+        if (getLastPos().isCheckmate())
+            markGameOver(getLastPos().isWhite() ? Game.Result.BLACK_WIN : Game.Result.WHITE_WIN, Game.Reason.CHECKMATE);
+
+        else if (getLastPos().isInsufficientMaterial())
+            markGameOver(Game.Result.DRAW, Game.Reason.DEAD_INSUFFICIENT_MATERIAL);
+
+        else if (getLastPos().isStalemate())
+            markGameOver(Game.Result.DRAW, Game.Reason.STALEMATE);
+
+    }
+
+    public void markGameOver(Result result, Reason resultReason) {
 
         this.result = result;
         this.resultReason = resultReason;
 
-        if (result == Result.NOT_STARTED || result == Result.IN_PROGRESS)
+        if (result == Game.Result.NOT_STARTED || result == Game.Result.IN_PROGRESS)
             return;
 
         if (flagfallChecker != null)
@@ -400,7 +427,7 @@ public class Game {
         if (paused)
             throw new Exception("Game is paused.");
 
-        if (result != Result.IN_PROGRESS)
+        if (result != Game.Result.IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
         Move move = null;
@@ -420,7 +447,7 @@ public class Game {
                 && (promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N'))
             throw new Exception("Invalid promotion type.");
 
-        Position movePosition = new Position(getLastPos(), move, this, !getLastPos().isWhite(), true, promoteType);
+        Position movePosition = new Position(getLastPos(), move, !getLastPos().isWhite(), true, promoteType);
 
         if (movePosition.isGivingCheck())
             throw new Exception("Cannot move into check.");
@@ -441,26 +468,16 @@ public class Game {
                 move,
                 move.isWhite()));
 
-        if (movePosition.isCheckmate()) {
+        checkGameOver();
 
-            markGameOver((movePosition.isWhite() ? Result.BLACK_WIN : Result.WHITE_WIN), ResultReason.CHECKMATE);
-
-        } else if (movePosition.isInsufficientMaterial()) {
-
-            markGameOver(Result.DRAW, ResultReason.DEAD_INSUFFICIENT_MATERIAL);
-
-        } else if (movePosition.isStalemate()) {
-
-            markGameOver(Result.DRAW, ResultReason.STALEMATE);
-
-        } else
+        if (result == Game.Result.IN_PROGRESS)
             startTimer();
 
     }
 
     public boolean canPause() {
 
-        return result == Result.IN_PROGRESS && settings.canPause() && !isPaused();
+        return result == Game.Result.IN_PROGRESS && settings.canPause() && !isPaused();
 
     }
 
@@ -479,7 +496,7 @@ public class Game {
 
     public boolean canResume() {
 
-        return result == Result.IN_PROGRESS && settings.canPause() && isPaused();
+        return result == Game.Result.IN_PROGRESS && settings.canPause() && isPaused();
 
     }
 
@@ -519,16 +536,14 @@ public class Game {
         getLastPos().setRedo(redo);
         redo.setRedoPromote(redo.getMove().getPromoteType());
 
-        // getLastPos().setTimerEnd(-1);
-
         if (redo.getMove().getPromoteType() != '0')
-            redo.setPromote('?', null);
+            redo.setPromote('?');
 
         redo.setRedoTimerEnd(getLastPos().getTimerEnd());
 
-        if (result != Result.NOT_STARTED && result != Result.IN_PROGRESS) {
-            result = Result.IN_PROGRESS;
-            resultReason = ResultReason.IN_PROGRESS;
+        if (result != Game.Result.NOT_STARTED && result != Game.Result.IN_PROGRESS) {
+            result = Game.Result.IN_PROGRESS;
+            resultReason = Game.Reason.IN_PROGRESS;
         }
 
         fireEvent(new GameEvent(
@@ -567,7 +582,7 @@ public class Game {
         positions.add(redo);
 
         if (redo.getRedoPromote() != '0')
-            redo.setPromote(redo.getRedoPromote(), this);
+            redo.setPromote(redo.getRedoPromote());
 
         fireEvent(new GameEvent(
                 GameEvent.TYPE_MOVE,
@@ -584,7 +599,7 @@ public class Game {
 
     public boolean canDrawOffer() {
 
-        return result == Result.IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
+        return result == Game.Result.IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
 
     }
 
@@ -603,7 +618,7 @@ public class Game {
 
     public void acceptDrawOffer() throws Exception {
 
-        if (result != Result.IN_PROGRESS)
+        if (result != Game.Result.IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
         if (getLastPos().getDrawOfferer() == Position.NO_OFFER)
@@ -612,10 +627,10 @@ public class Game {
         if (!canDrawOffer())
             throw new Exception("Cannot accept draw.");
 
-        markGameOver(Result.DRAW,
+        markGameOver(Game.Result.DRAW,
                 (getLastPos().getDrawOfferer() == Position.WHITE)
-                        ? ResultReason.WHITE_OFFERED_DRAW
-                        : ResultReason.BLACK_OFFERED_DRAW);
+                        ? Game.Reason.WHITE_OFFERED_DRAW
+                        : Game.Reason.BLACK_OFFERED_DRAW);
 
         sendMessage(new Chat(getPlayer(getLastPos().getDrawOfferer() == Position.WHITE), new Date().getTime(),
                 getPlayer(getLastPos().getDrawOfferer() == Position.WHITE).getName() + " accepted the draw offer."));

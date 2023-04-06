@@ -422,7 +422,7 @@ public class PGNParser {
                     if (value.matches("1-0|0-1|1\\/2-1\\/2|\\*"))
                         tags.put(key, value);
                     else
-                        throw new Exception("Invalid result.");
+                        throw new Exception("Invalid Game.Result.");
                     break;
                 case "TimeControl":
                     if (value.matches("\\?|-|([\\d]+\\/[\\d]+)|([\\d]+(\\+[\\d]+)?)|(\\*[\\d]+)"))
@@ -442,7 +442,7 @@ public class PGNParser {
          * == null || black == null
          * || result == null)
          * throw new Exception(
-         * "Part of seven tag roster is missing. You must include at least Event, Site, Date, Round, White, Black, and Result."
+         * "Part of seven tag roster is missing. You must include at least Event, Site, Date, Round, White, Black, and Game.Result."
          * );
          */
 

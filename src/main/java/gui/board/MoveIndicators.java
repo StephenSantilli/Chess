@@ -2,8 +2,7 @@ package gui.board;
 
 import java.util.ArrayList;
 
-import game.Result;
-import game.Move;
+import game.*;
 import gui.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Ellipse;
@@ -27,7 +26,7 @@ public class MoveIndicators extends Pane {
                 || board == null
                 || board.getActive() == null
                 || !gameView.isTurn()
-                || gameView.getGame().getResult() != Result.IN_PROGRESS)
+                || gameView.getGame().getResult() != Game.Result.IN_PROGRESS)
             return;
 
         ArrayList<Move> pMoves = gameView.getGame().getLastPos().getMoves();

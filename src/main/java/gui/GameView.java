@@ -5,8 +5,8 @@ import java.util.Optional;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
-import game.Result;
-import game.ResultReason;
+import game.Game.Reason;
+import game.Game.Result;
 import game.LAN.Client;
 import gui.board.Board;
 import gui.component.ChatArea;
@@ -348,7 +348,7 @@ public class GameView extends HBox implements GameListener {
                     return;
 
                 if (game != null)
-                    game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
+                    game.markGameOver(Result.TERMINATED, Game.Reason.OTHER);
 
             }
 
@@ -403,7 +403,7 @@ public class GameView extends HBox implements GameListener {
      * @param reason The numeric reason code for why the game ended.
      * @return The text reason.
      */
-    public static String reasonToText(ResultReason reason) {
+    public static String reasonToText(Reason reason) {
 
         switch (reason) {
 

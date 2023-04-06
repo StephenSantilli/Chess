@@ -13,8 +13,6 @@ import java.net.URL;
 import java.util.prefs.Preferences;
 
 import game.Game;
-import game.Result;
-import game.ResultReason;
 import gui.menu.BarMenu;
 
 public class App extends Application {
@@ -89,8 +87,8 @@ public class App extends Application {
 
                 // TODO: save board position for resuming
                 final Game game = gameView.getGame();
-                if (game != null && game.getResult() == Result.IN_PROGRESS)
-                    game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
+                if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
+                    game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
 
                 Platform.exit();
 

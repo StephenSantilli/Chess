@@ -1,18 +1,2 @@
 package game;
 
-public enum ResultReason {
-
-    IN_PROGRESS,
-    CHECKMATE,
-    FLAGFALL,
-    WHITE_OFFERED_DRAW,
-    BLACK_OFFERED_DRAW,
-    STALEMATE,
-    DEAD_INSUFFICIENT_MATERIAL,
-    DEAD_NO_POSSIBLE_MATE,
-    REPETITION,
-    FIFTY_MOVE,
-    RESIGNATION,
-    OTHER;
-
-}

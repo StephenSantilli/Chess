@@ -14,11 +14,12 @@ import java.util.concurrent.TimeUnit;
 import game.Chat;
 import game.Game;
 import game.GameSettings;
+import game.Move;
 import game.Player;
+import game.Game.Reason;
+import game.Game.Result;
 import game.GameEvent;
 import game.GameListener;
-import game.Result;
-import game.ResultReason;
 
 public class Client implements GameListener {
 
@@ -47,7 +48,6 @@ public class Client implements GameListener {
     private Runnable pinger = () -> {
 
         pingSent = System.currentTimeMillis();
-        send(new Message("ping"));
 
     };
 
@@ -162,8 +162,6 @@ public class Client implements GameListener {
 
             ping = System.currentTimeMillis() - pingSent;
 
-            System.out.println(ping + "ms");
-
         }
 
         if (game == null) {
@@ -174,7 +172,7 @@ public class Client implements GameListener {
 
             if (msg.equals(Message.STARTED) || msg.equals(Message.START)) {
 
-                if (game.getResult() == Result.NOT_STARTED) {
+                if (game.getResult() == Game.Result.NOT_STARTED) {
 
                     try {
 
@@ -263,8 +261,8 @@ public class Client implements GameListener {
 
             } else if (msg.equals(Message.RESIGN)) {
 
-                game.markGameOver(!oppColor ? Result.WHITE_WIN : Result.BLACK_WIN,
-                        ResultReason.RESIGNATION);
+                game.markGameOver(!oppColor ? Game.Result.WHITE_WIN : Game.Result.BLACK_WIN,
+                        Game.Reason.RESIGNATION);
 
             } else if (msg.getArgs().get(0).equals("chat")) {
 
@@ -393,6 +391,7 @@ public class Client implements GameListener {
     public void stop(ErrorMessage reason) {
 
         try {
+
             if (closed)
                 return;
 
@@ -400,19 +399,22 @@ public class Client implements GameListener {
             pingThread.shutdownNow();
 
             if (reason != null) {
+
                 game.sendMessage(new Chat(game.getPlayer(oppColor), (new Date().getTime()),
                         (reason.getSeverity() == ErrorMessage.FATAL ? "Fatal " : "") + "Error from "
                                 + game.getPlayer(oppColor).getName() + ": " + reason.getReason(),
                         true, true));
+
                 send(reason);
+
             }
 
             input.close();
             output.close();
             socket.close();
 
-            if (game != null && game.getResult() == Result.IN_PROGRESS)
-                game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
+            if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
+                game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
 
         } catch (Exception e) {
 
@@ -434,7 +436,7 @@ public class Client implements GameListener {
                 stop(new ErrorMessage(ErrorMessage.FATAL, "Error sending move."));
             }
 
-        } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Result.TERMINATED) {
+        } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.Result.TERMINATED) {
 
             stop(new ErrorMessage(ErrorMessage.FATAL, "Game terminated."));
 
@@ -444,14 +446,14 @@ public class Client implements GameListener {
             send(Message.DRAW_OFFER);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResultReason() == (oppColor ? ResultReason.WHITE_OFFERED_DRAW
-                        : ResultReason.BLACK_OFFERED_DRAW)) {
+                && game.getResultReason() == (oppColor ? Game.Reason.WHITE_OFFERED_DRAW
+                        : Game.Reason.BLACK_OFFERED_DRAW)) {
 
             send(Message.DRAW_ACCEPT);
 
         } else if (event.getType() == GameEvent.TYPE_OVER
-                && game.getResult() == (oppColor ? Result.WHITE_WIN : Result.BLACK_WIN)
-                && game.getResultReason() == ResultReason.RESIGNATION) {
+                && game.getResult() == (oppColor ? Game.Result.WHITE_WIN : Game.Result.BLACK_WIN)
+                && game.getResultReason() == Game.Reason.RESIGNATION) {
 
             send(Message.RESIGN);
 
@@ -463,6 +465,80 @@ public class Client implements GameListener {
 
         } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() != oppColor) {
             send(Message.DRAW_DECLINE);
+        }
+
+    }
+
+    public void pe(GameEvent event) {
+
+        switch (event.getType()) {
+
+            case MOVE:
+
+                if (event.isWhite() != oppColor) {
+
+                    try {
+
+                        final Move curr = event.getCurr().getMove();
+
+                        MoveMessage msg = new MoveMessage(curr.getOrigin(),
+                                curr.getDestination(),
+                                curr.getPromoteType(),
+                                event.getPrev().getTimerEnd());
+
+                        send(msg);
+
+                    } catch (Exception ex) {
+
+                        stop(new ErrorMessage(ErrorMessage.FATAL, "Error sending move."));
+
+                    }
+
+                }
+
+                break;
+
+            case OVER:
+
+                if (game.getResult() == Result.TERMINATED)
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Game terminated."));
+                else if (game.getResult() == (oppColor ? Result.WHITE_WIN : Result.BLACK_WIN)
+                        && game.getResultReason() == Reason.RESIGNATION)
+                    send(Message.RESIGN);
+                else if (game.getResultReason() == (oppColor ? Reason.WHITE_OFFERED_DRAW : Reason.BLACK_OFFERED_DRAW))
+                    send(Message.DRAW_ACCEPT);
+
+                break;
+
+            case DRAW_OFFER:
+
+                send(Message.DRAW_OFFER);
+
+                break;
+
+            case DRAW_DECLINED:
+
+                send(Message.DRAW_DECLINE);
+
+                break;
+
+            case MESSAGE:
+
+                if (event.getMessage() != null
+                        && event.getMessage().getPlayer().isWhite() != oppColor)
+                    return;
+
+                final Chat msg = event.getMessage();
+                final ChatMessage cMsg = new ChatMessage(new Date(msg.getTimestamp()),
+                        msg.getMessage());
+
+                send(cMsg);
+
+                break;
+
+            default:
+                return;
+
         }
 
     }
