@@ -18,6 +18,7 @@ import game.Move;
 import game.Player;
 import game.Game.Reason;
 import game.Game.Result;
+import game.GameEvent.Type;
 import game.GameEvent;
 import game.GameListener;
 
@@ -425,7 +426,7 @@ public class Client implements GameListener {
     @Override
     public void onPlayerEvent(GameEvent event) {
 
-        if (event.getType() == GameEvent.TYPE_MOVE && event.getCurr().isWhite() == oppColor) {
+        if (event.getType() == Type.MOVE && event.getCurr().isWhite() == oppColor) {
             try {
 
                 send(new MoveMessage(event.getCurr().getMove().getOrigin(),
@@ -436,34 +437,34 @@ public class Client implements GameListener {
                 stop(new ErrorMessage(ErrorMessage.FATAL, "Error sending move."));
             }
 
-        } else if (event.getType() == GameEvent.TYPE_OVER && game.getResult() == Game.Result.TERMINATED) {
+        } else if (event.getType() == Type.OVER && game.getResult() == Game.Result.TERMINATED) {
 
             stop(new ErrorMessage(ErrorMessage.FATAL, "Game terminated."));
 
-        } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER && game.getLastPos().getDrawOfferer() != 0
+        } else if (event.getType() == Type.DRAW_OFFER && game.getLastPos().getDrawOfferer() != 0
                 && (game.getLastPos().getDrawOfferer() == 1) != oppColor) {
 
             send(Message.DRAW_OFFER);
 
-        } else if (event.getType() == GameEvent.TYPE_OVER
+        } else if (event.getType() == Type.OVER
                 && game.getResultReason() == (oppColor ? Game.Reason.WHITE_OFFERED_DRAW
                         : Game.Reason.BLACK_OFFERED_DRAW)) {
 
             send(Message.DRAW_ACCEPT);
 
-        } else if (event.getType() == GameEvent.TYPE_OVER
+        } else if (event.getType() == Type.OVER
                 && game.getResult() == (oppColor ? Game.Result.WHITE_WIN : Game.Result.BLACK_WIN)
                 && game.getResultReason() == Game.Reason.RESIGNATION) {
 
             send(Message.RESIGN);
 
-        } else if (event.getType() == GameEvent.TYPE_MESSAGE && event.getMessage() != null
+        } else if (event.getType() == Type.MESSAGE && event.getMessage() != null
                 && event.getMessage().getPlayer().isWhite() != oppColor) {
 
             if (!event.getMessage().isSystemMessage())
                 send(new ChatMessage(new Date(event.getMessage().getTimestamp()), event.getMessage().getMessage()));
 
-        } else if (event.getType() == GameEvent.TYPE_DRAW_DECLINED && event.isWhite() != oppColor) {
+        } else if (event.getType() == Type.DRAW_DECLINED && event.isWhite() != oppColor) {
             send(Message.DRAW_DECLINE);
         }
 

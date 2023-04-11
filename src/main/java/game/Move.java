@@ -244,7 +244,7 @@ public class Move {
         return modifier;
 
     }
-// rnbqk2r/pppppppp/8/4Pp2/8/8/PPPPPPPP/RNBQKBNR w KQkq f6 0 1
+    
     private boolean checkIfEnPassant(Position pos) {
 
         if (piece.getCode() != 'P')

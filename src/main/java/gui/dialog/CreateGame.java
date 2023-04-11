@@ -6,16 +6,19 @@ import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
+import game.PGN.PGNParser;
 import gui.App;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
@@ -29,12 +32,13 @@ import javafx.stage.Window;
 
 public class CreateGame extends Stage {
 
-    private TextField oneName, twoName;
+    private TextField oneName, twoName, fenField;
     private ChoiceBox<String> color, type;
-    private CheckBox useTimeBox;
+    private CheckBox useTimeBox, useFenBox;
     private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove;
     private Label sLabel;
-    private Button search, cancel, start;
+    private Button fromPgn, search, cancel, start;
+    private Separator sep;
 
     private boolean white;
 
@@ -80,6 +84,7 @@ public class CreateGame extends Stage {
 
         VBox oneBox = new VBox(oneLabel, color, oneName);
         oneBox.setFillWidth(true);
+        oneBox.setSpacing(5);
 
         Label twoLabel = new Label("Player 2:");
         twoName = new TextField(App.prefs.get("p2name", "Player 2"));
@@ -95,11 +100,13 @@ public class CreateGame extends Stage {
             boolean local = type.getValue().equals("Two Player");
 
             twoName.setDisable(!local);
+            start.setText(local ? "Start" : "Send Challenge");
 
         });
 
         VBox twoBox = new VBox(twoLabel, type, twoName);
         twoBox.setFillWidth(true);
+        twoBox.setSpacing(5);
 
         HBox players = new HBox(oneBox, twoBox);
         players.setAlignment(Pos.CENTER);
@@ -163,12 +170,32 @@ public class CreateGame extends Stage {
             setDisabledTime(!useTimeBox.isSelected());
         });
 
+        useFenBox = new CheckBox("Use custom FEN");
+        useFenBox.setSelected(false);
+
+        useFenBox.setOnAction(ev -> {
+            setDisabledFen(!useFenBox.isSelected());
+        });
+
+        fenField = new TextField(GameSettings.DEFAULT_FEN);
+        fenField.setDisable(true);
+
+        VBox fen = new VBox(useFenBox, fenField);
+        fen.setSpacing(5);
+        fen.setFillWidth(true);
+
         // Status Label
+        sep = new Separator(Orientation.HORIZONTAL);
+
         sLabel = new Label("");
         sLabel.setVisible(false);
+        sep.setVisible(false);
         HBox statusLabel = new HBox(sLabel);
 
         // Buttons
+        fromPgn = new Button("Start from PGN");
+        fromPgn.setOnAction(this::importPgn);
+
         search = new Button("Search for LAN Challenge");
         search.setOnAction(this::searchAction);
 
@@ -178,15 +205,17 @@ public class CreateGame extends Stage {
         cancel = new Button("Cancel");
         cancel.setOnAction(this::cancelAction);
 
-        HBox btns = new HBox(search, start, cancel);
+        HBox btns = new HBox(fromPgn, search, start, cancel);
         btns.setAlignment(Pos.CENTER_RIGHT);
+        btns.setSpacing(5);
 
-        VBox stgs = new VBox(players, presets, timeOpts, timeControl, statusLabel, btns);
-        stgs.setFillWidth(true);
-        stgs.setPadding(new Insets(10));
-        stgs.setAlignment(Pos.CENTER);
+        VBox opts = new VBox(players, presets, timeOpts, timeControl, fen, statusLabel, btns);
+        opts.setFillWidth(true);
+        opts.setPadding(new Insets(10));
+        opts.setAlignment(Pos.CENTER);
+        VBox.setVgrow(opts, Priority.ALWAYS);
 
-        Scene s = new Scene(stgs);
+        Scene s = new Scene(opts);
         s.getStylesheets().setAll(window.getScene().getStylesheets());
 
         setOnShown(we -> {
@@ -205,9 +234,50 @@ public class CreateGame extends Stage {
 
     }
 
+    private void importPgn(ActionEvent ae) {
+
+        PGN pDialog = new PGN(getOwner());
+
+        pDialog.showAndWait();
+
+        if (pDialog.isCreate() && !pDialog.getPgn().equals("")) {
+
+            try {
+
+                PGNParser parser = new PGNParser(pDialog.getPgn());
+
+                game = new Game(parser,
+                        new GameSettings(
+                                useFenBox.isDisable() ? GameSettings.DEFAULT_FEN : fenField.getText(),
+                                0,
+                                0,
+                                true,
+                                true,
+                                true,
+                                true),
+                        false);
+
+                create = true;
+                hide();
+
+            } catch (Exception e) {
+
+                showLabel(e.getMessage(), true);
+
+            }
+
+        }
+
+    }
+
+    private void setDisabledFen(boolean disable) {
+        fenField.setDisable(disable);
+    }
+
     private void showLabel(String text, boolean error) {
 
         sLabel.setVisible(true);
+        sep.setVisible(true);
         sLabel.setTextFill(error ? Color.RED : Color.BLACK);
         sLabel.setText(text);
 
@@ -215,6 +285,7 @@ public class CreateGame extends Stage {
 
     private void clearLabel() {
         sLabel.setVisible(false);
+        sep.setVisible(false);
         sLabel.setText("");
     }
 
@@ -275,7 +346,7 @@ public class CreateGame extends Stage {
                         (oneWhite ? twoName.getText() : oneName.getText()),
                         Player.HUMAN,
                         Player.HUMAN,
-                        new GameSettings(
+                        new GameSettings((useFenBox.isDisable() ? GameSettings.DEFAULT_FEN : fenField.getText()),
                                 timePerSide,
                                 timePerMove,
                                 true,
@@ -326,7 +397,7 @@ public class CreateGame extends Stage {
 
                 server.start();
 
-                showLabel("Challenge visible...", false);
+                showLabel("Challenge visible on local network...", false);
                 setAllDisabled(true);
 
             } catch (Exception e) {
@@ -345,14 +416,13 @@ public class CreateGame extends Stage {
         start.setDisable(disable);
         search.setDisable(disable);
         oneName.setDisable(disable);
-        twoName.setDisable(disable);
+        boolean local = type.getValue().equals("Two Player");
+        twoName.setDisable(!local);
         color.setDisable(disable);
         type.setDisable(disable);
         useTimeBox.setDisable(disable);
-        minPerSide.setDisable(disable);
-        secPerSide.setDisable(disable);
-        minPerMove.setDisable(disable);
-        secPerMove.setDisable(disable);
+        setDisabledTime(!useTimeBox.isSelected());
+        cancel.setText(disable ? "Stop" : "Cancel");
     }
 
     private void cancelAction(ActionEvent ae) {

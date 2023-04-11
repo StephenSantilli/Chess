@@ -3,15 +3,24 @@ package game;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.random.RandomGenerator;
 
+import game.GameEvent.Type;
 import game.PGN.PGNMove;
 import game.PGN.PGNParser;
+import game.pieces.Bishop;
+import game.pieces.King;
+import game.pieces.Knight;
+import game.pieces.Queen;
+import game.pieces.Rook;
 
 public class Game {
 
@@ -208,13 +217,6 @@ public class Game {
         final String blackType = pgn.getTags().getOrDefault("BlackType", Player.HUMAN);
         this.black = new Player(blackName, blackType, false);
 
-        this.settings = new GameSettings(overridePGNSettings ? settings.getTimePerSide() : pgn.getTimePerSide(),
-                overridePGNSettings ? settings.getTimePerMove() : pgn.getTimePerMove(),
-                settings.canPause(),
-                settings.canUndo(),
-                settings.isWhiteTimerManged(),
-                settings.isBlackTimerManaged());
-
         final String setup = pgn.getTags().getOrDefault("SetUp", "");
         final String fen = pgn.getTags().getOrDefault("FEN", "");
 
@@ -222,6 +224,14 @@ public class Game {
             positions.add(new Position(fen));
         } else
             positions.add(new Position());
+
+        this.settings = new GameSettings(setup.equals("1") && !fen.equals("") ? fen : GameSettings.DEFAULT_FEN,
+                overridePGNSettings ? settings.getTimePerSide() : pgn.getTimePerSide(),
+                overridePGNSettings ? settings.getTimePerMove() : pgn.getTimePerMove(),
+                settings.canPause(),
+                settings.canUndo(),
+                settings.isWhiteTimerManged(),
+                settings.isBlackTimerManaged());
 
         ArrayList<PGNMove> pMoves = pgn.getParsedMoves();
 
@@ -248,10 +258,23 @@ public class Game {
 
         }
 
-        // if (positions.size() == 1)
-        // throw new Exception("Position import failed.");
+        fireEvent(new GameEvent(Type.IMPORTED));
 
-        fireEvent(GameEvent.IMPORTED);
+        final String res = pgn.getTags().getOrDefault("Result", "*");
+        switch (res) {
+            case "1/2-1/2":
+                result = Result.DRAW;
+                resultReason = Reason.OTHER;
+                break;
+            case "1-0":
+                result = Result.WHITE_WIN;
+                resultReason = Reason.OTHER;
+                break;
+            case "0-1":
+                result = Result.BLACK_WIN;
+                resultReason = Reason.OTHER;
+                break;
+        }
 
     }
 
@@ -375,7 +398,12 @@ public class Game {
             return;
 
         start = new Date();
-        result = Game.Result.IN_PROGRESS;
+
+        final String res = result.toString();
+        final String reas = resultReason.toString();
+
+        result = Result.IN_PROGRESS;
+        resultReason = Reason.IN_PROGRESS;
 
         startTimer();
 
@@ -386,9 +414,12 @@ public class Game {
 
         }
 
-        fireEvent(GameEvent.STARTED);
+        fireEvent(new GameEvent(Type.STARTED));
 
         checkGameOver();
+
+        if (result == Result.IN_PROGRESS && Result.valueOf(res) != Result.IN_PROGRESS)
+            markGameOver(Result.valueOf(res), Reason.valueOf(reas));
 
     }
 
@@ -417,8 +448,7 @@ public class Game {
             flagfallChecker.shutdownNow();
 
         stopTimer();
-
-        fireEvent(GameEvent.OVER);
+        fireEvent(new GameEvent(Type.OVER));
 
     }
 
@@ -460,7 +490,7 @@ public class Game {
         positions.add(movePosition);
 
         fireEvent(new GameEvent(
-                GameEvent.TYPE_MOVE,
+                Type.MOVE,
                 positions.size() - 2,
                 positions.size() - 1,
                 getPreviousPos(),
@@ -490,7 +520,7 @@ public class Game {
 
         stopTimer();
 
-        fireEvent(GameEvent.PAUSED);
+        fireEvent(new GameEvent(Type.PAUSED));
 
     }
 
@@ -509,7 +539,7 @@ public class Game {
 
         startTimer();
 
-        fireEvent(GameEvent.RESUMED);
+        fireEvent(new GameEvent(Type.RESUMED));
 
     }
 
@@ -547,7 +577,7 @@ public class Game {
         }
 
         fireEvent(new GameEvent(
-                GameEvent.TYPE_MOVE,
+                Type.MOVE,
                 positions.size(),
                 positions.size() - 1,
                 redo,
@@ -585,7 +615,7 @@ public class Game {
             redo.setPromote(redo.getRedoPromote());
 
         fireEvent(new GameEvent(
-                GameEvent.TYPE_MOVE,
+                Type.MOVE,
                 positions.size() - 2,
                 positions.size() - 1,
                 getPreviousPos(),
@@ -609,7 +639,7 @@ public class Game {
             throw new Exception("Cannot offer a draw.");
 
         getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
-        fireEvent(GameEvent.DRAW_OFFER);
+        fireEvent(new GameEvent(Type.DRAW_OFFER));
 
         sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
                 getPlayer(offererWhite).getName() + " sent a draw offer.", true));
@@ -646,7 +676,7 @@ public class Game {
 
         getLastPos().setDrawOfferer(Position.NO_OFFER);
 
-        fireEvent(new GameEvent(GameEvent.TYPE_DRAW_DECLINED, !offererWhite));
+        fireEvent(new GameEvent(Type.DRAW_DECLINED, !offererWhite));
 
         sendMessage(new Chat(getPlayer(!offererWhite), new Date().getTime(),
                 getPlayer(!offererWhite).getName() + " declined the draw offer.", true));

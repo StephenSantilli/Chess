@@ -3,13 +3,6 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Position",
-            "request": "launch",
-            "mainClass": "game.Position",
-            "projectName": "Chess"
-        },
-        {
-            "type": "java",
             "name": "Launch App",
             "request": "launch",
             "mainClass": "gui.Chess",

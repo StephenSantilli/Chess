@@ -19,8 +19,8 @@ public class Position {
     public static final int BLACK = 2;
 
     /**
-     * The number of turns completed in this game including the move that led to
-     * this position. Starts at {@code 0} for the default position as no moves have
+     * The number of moves made in this game (including the move that led to
+     * this position.) Starts at {@code 0} for the default position as no moves have
      * been made.
      */
     private int moveNumber;
@@ -347,7 +347,7 @@ public class Position {
         }
 
         try {
-            moveNumber = Integer.parseInt(a[5]) - 1;
+            moveNumber = (Integer.parseInt(a[5]) * 2) - 1 + (!white ? 0 : 1);
         } catch (Exception e) {
             throw new Exception("Invalid move number.");
         }
@@ -376,6 +376,12 @@ public class Position {
                     switch (Character.toUpperCase(c)) {
                         case 'K':
                             pieces[7 - r][f] = new King(f + 1, 8 - r, white);
+
+                            if (white)
+                                whiteKing = new Square(f + 1, 8 - r);
+                            else
+                                blackKing = new Square(f + 1, 8 - r);
+
                             break;
                         case 'Q':
                             pieces[7 - r][f] = new Queen(f + 1, 8 - r, white);
@@ -1084,7 +1090,7 @@ public class Position {
         fen += " " + fiftyMoveCounter;
 
         // Fullmove number
-        fen += " " + ((int) Math.ceil((moveNumber + 1) / 2.0));
+        fen += " " + ((int) Math.ceil(moveNumber / 2.0));
 
         return fen;
 

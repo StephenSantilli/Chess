@@ -7,6 +7,7 @@ import game.GameEvent;
 import game.GameListener;
 import game.Game.Reason;
 import game.Game.Result;
+import game.GameEvent.Type;
 import game.LAN.Client;
 import gui.board.Board;
 import gui.component.ChatArea;
@@ -486,7 +487,7 @@ public class GameView extends HBox implements GameListener {
             return;
         Platform.runLater(() -> {
 
-            if (event.getType() == GameEvent.TYPE_MOVE) {
+            if (event.getType() == Type.MOVE) {
 
                 currentPos = event.getCurrIndex();
 
@@ -506,7 +507,7 @@ public class GameView extends HBox implements GameListener {
                         app.getStage().toFront();
                 }
 
-            } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER) {
+            } else if (event.getType() == Type.DRAW_OFFER) {
 
                 if ((color == WHITE || color == BLACK) && game.getLastPos().getDrawOfferer() == color)
                     return;
@@ -536,7 +537,7 @@ public class GameView extends HBox implements GameListener {
 
                 drawDialog.show();
 
-            } else if (event.getType() == GameEvent.TYPE_OVER) {
+            } else if (event.getType() == Type.OVER) {
 
                 if (game == null)
                     return;
@@ -569,7 +570,7 @@ public class GameView extends HBox implements GameListener {
 
                 over.showAndWait();
 
-            } else if (event.getType() == GameEvent.TYPE_MESSAGE) {
+            } else if (event.getType() == Type.MESSAGE) {
 
                 chatBox.update();
 
@@ -580,7 +581,7 @@ public class GameView extends HBox implements GameListener {
                         java.awt.Toolkit.getDefaultToolkit().beep();
                 }
 
-            } else if (event.getType() == GameEvent.TYPE_PAUSED || event.getType() == GameEvent.TYPE_RESUMED) {
+            } else if (event.getType() == Type.PAUSED || event.getType() == Type.RESUMED) {
                 gameMenu.update();
                 infoPane.updateTimers();
                 board.getPausePane().setVisible(game.isPaused());
