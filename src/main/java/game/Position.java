@@ -347,7 +347,7 @@ public class Position {
         }
 
         try {
-            moveNumber = (Integer.parseInt(a[5]) * 2) - 1 + (!white ? 0 : 1);
+            moveNumber = ((Integer.parseInt(a[5]) - 1) * 2) + (white ? 0 : 1);
         } catch (Exception e) {
             throw new Exception("Invalid move number.");
         }
@@ -1090,7 +1090,7 @@ public class Position {
         fen += " " + fiftyMoveCounter;
 
         // Fullmove number
-        fen += " " + ((int) Math.ceil(moveNumber / 2.0));
+        fen += " " + ((int) Math.ceil(moveNumber / 2.0) + 1);
 
         return fen;
 

@@ -37,7 +37,7 @@ public class CreateGame extends Stage {
     private CheckBox useTimeBox, useFenBox;
     private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove;
     private Label sLabel;
-    private Button fromPgn, search, cancel, start;
+    private Button fromPgn, search, cancel, start, gen960;
     private Separator sep;
 
     private boolean white;
@@ -177,10 +177,17 @@ public class CreateGame extends Stage {
             setDisabledFen(!useFenBox.isSelected());
         });
 
+        gen960 = new Button("Generate Chess960 Start");
+        gen960.setOnAction(this::generate960);
+
+        HBox fenOpts = new HBox(useFenBox, gen960);
+        fenOpts.setSpacing(5);
+        fenOpts.setAlignment(Pos.CENTER_LEFT);
+
         fenField = new TextField(GameSettings.DEFAULT_FEN);
         fenField.setDisable(true);
 
-        VBox fen = new VBox(useFenBox, fenField);
+        VBox fen = new VBox(fenOpts, fenField);
         fen.setSpacing(5);
         fen.setFillWidth(true);
 
@@ -234,6 +241,19 @@ public class CreateGame extends Stage {
 
     }
 
+    private void generate960(ActionEvent ae) {
+
+        try {
+            fenField.setText(Game.generate960Start().toString());
+
+        } catch (Exception e) {
+
+            showLabel(e.getMessage(), true);
+
+        }
+
+    }
+
     private void importPgn(ActionEvent ae) {
 
         PGN pDialog = new PGN(getOwner());
@@ -272,6 +292,7 @@ public class CreateGame extends Stage {
 
     private void setDisabledFen(boolean disable) {
         fenField.setDisable(disable);
+        gen960.setDisable(disable);
     }
 
     private void showLabel(String text, boolean error) {
@@ -423,6 +444,7 @@ public class CreateGame extends Stage {
         useTimeBox.setDisable(disable);
         setDisabledTime(!useTimeBox.isSelected());
         cancel.setText(disable ? "Stop" : "Cancel");
+        setDisabledFen(disable);
     }
 
     private void cancelAction(ActionEvent ae) {
