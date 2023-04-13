@@ -1,12 +1,14 @@
 [Event "?"]
 [Site "?"]
-[Date "2023.04.10"]
+[Date "2023.04.12"]
 [Round "-"]
-[White "p2"]
-[Black "Stephen"]
+[White "Stephen"]
+[Black "p2"]
 [Result "*"]
 [WhiteType "human"]
 [BlackType "human"]
 [TimeControl "-"]
+[SetUp "1"]
+[FEN "rqbknbnr/pppppppp/8/8/8/8/PPPPPPPP/RQBKNBNR w KQkq - 0 1"]
 
-1. e4 d5 2. d3 e6 
+1. Nef3 Nef6 2. b3 c6 3. Qb2 Nd5 4. d3 Ndf6 5. Bd2 Nd5 

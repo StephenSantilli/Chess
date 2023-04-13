@@ -98,17 +98,6 @@ public class Move {
 
     }
 
-    private Piece findRook(Position pos) {
-
-        if (!castle)
-            return null;
-
-        boolean kingSide = destination.getFile() == 7;
-
-        return pos.getPieceAtSquare(new Square(kingSide ? 8 : 1, white ? 1 : 8));
-
-    }
-
     void setPromoteType(char promoteType) {
 
         if (moveNotation == null) {
@@ -132,15 +121,21 @@ public class Move {
 
         this.white = piece.isWhite();
         this.enPassant = checkIfEnPassant(pos);
+        checkValidCastle(pos);
         this.capture = checkIfCapture(pos);
         this.promoteType = checkIfPromote() ? '?' : '0';
-        this.castle = checkIfCastle(pos);
 
-        this.capturePiece = pos.getPieceAtSquare(getCaptureSquare());
+        this.capturePiece = capture ? pos.getPieceAtSquare(getCaptureSquare()) : null;
 
     }
 
     public Move(Square origin, Square destination, Position pos) throws Exception {
+
+        this(origin, destination, pos, false);
+
+    }
+
+    public Move(Square origin, Square destination, Position pos, boolean castle) throws Exception {
 
         this.origin = origin;
         this.destination = destination;
@@ -155,6 +150,8 @@ public class Move {
 
         if (piece == null)
             throw new Exception("There is no piece at that square.");
+
+        this.castle = castle;
 
         initMove(pos);
 
@@ -194,7 +191,7 @@ public class Move {
 
     private String getModifier(Position pos) {
 
-        ArrayList<Piece> attackers = pos.getPiecesByAttacking(destination);
+        ArrayList<Piece> attackers = pos.getPiecesByCanMoveTo(destination);
 
         int modFile = -1;
         int modRank = -1;
@@ -244,7 +241,7 @@ public class Move {
         return modifier;
 
     }
-    
+
     private boolean checkIfEnPassant(Position pos) {
 
         if (piece.getCode() != 'P')
@@ -270,7 +267,8 @@ public class Move {
 
         Move prevMove = pos.getMove();
 
-        if (prevMove == null || (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile()))
+        if (prevMove == null
+                || (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile()))
             return false;
 
         return true;
@@ -281,6 +279,9 @@ public class Move {
 
         if (enPassant)
             return true;
+
+        if (castle)
+            return false;
 
         Piece curr = pos.getPieceAtSquare(origin);
         Piece cap = pos.getPieceAtSquare(getCaptureSquare());
@@ -329,15 +330,17 @@ public class Move {
 
     public Square getRookOrigin() {
 
-        if (!castle)
-            return null;
+        // if (!castle)
+        // return null;
 
-        boolean kingSide = destination.getFile() == 7;
+        // boolean kingSide = destination.getFile() == 7;
 
-        int file = kingSide ? 8 : 1;
-        int rank = white ? 1 : 8;
+        // int file = kingSide ? 8 : 1;
+        // int rank = white ? 1 : 8;
 
-        return new Square(file, rank);
+        // return new Square(file, rank);
+
+        return rook.getSquare();
 
     }
 
@@ -355,10 +358,13 @@ public class Move {
 
     }
 
-    private boolean checkIfCastle(Position pos) throws Exception {
+    private void checkValidCastle(Position pos) throws Exception {
 
-        if (piece.getCode() != 'K' || getMoveDistance() == 1)
-            return false;
+        if (!castle)
+            return;
+
+        if (piece.getCode() != 'K'/* || getMoveDistance() == 1 */)
+            throw new Exception("Castler is not a king.");
 
         if (((white && destination.getRank() != 1) || (!white && destination.getRank() != 8))
                 || (destination.getFile() != 3 && destination.getFile() != 7))
@@ -369,11 +375,8 @@ public class Move {
         if (king == null || king.hasMoved())
             throw new Exception("King has already moved, cannot castle.");
 
-        boolean kingSide = getMoveDistance() == 2;
-        int file = kingSide ? 8 : 1;
-        int rank = white ? 1 : 8;
-
-        Piece rook = pos.getPieceAtSquare(new Square(file, rank));
+        boolean aSide = destination.getFile() == 3;
+        Piece rook = pos.getRook(aSide, piece.isWhite());
 
         if (rook == null || rook.hasMoved())
             throw new Exception("Rook already moved, cannot castle.");
@@ -383,154 +386,6 @@ public class Move {
         if (pos.isInCheck())
             throw new Exception("Cannot castle out of check.");
 
-        return true;
-
     }
 
-    @Deprecated
-    public Move(String move, Position pos, boolean white) throws Exception {
-
-        move = move.replaceAll("O", "0");
-        move = move.replaceAll("=", "");
-
-        this.capture = move.indexOf("x") > -1;
-        this.white = white;
-        this.enPassant = false;
-        this.promoteType = '0';
-        this.rook = findRook(pos);
-
-        char check = move.charAt(move.length() - 1);
-        if (check == '+' || check == '#') {
-            move = move.substring(0, move.length() - 1);
-        }
-
-        // castling
-        this.castle = false;
-        if (move.matches("0-0-0") || move.matches("0-0")) {
-
-            this.castle = true;
-            this.origin = new Square(5, white ? 1 : 8);
-
-            if (move.matches("0-0-0"))
-                this.destination = new Square(3, white ? 1 : 8);
-            else
-                this.destination = new Square(7, white ? 1 : 8);
-
-        } else {
-
-            // standard move
-
-            // piece type
-            String pString = move.substring(0, 1);
-            if (pString.matches("[a-h]"))
-                pString = "P";
-
-            char pChar = pString.charAt(0);
-
-            if (piece.getCode() == 'K')
-                pChar = 'K';
-
-            if (!(pChar + "").matches("[KQRBNP]"))
-                throw new Exception("Invalid piece type.");
-
-            if (piece.getCode() == 'P')
-                move = "P" + move;
-
-            // destination square
-            String dest = "";
-            int d = move.length();
-            for (; d > 1; d--) {
-
-                dest = move.substring(d - 2, d);
-                if (dest.matches("[a-h][1-8]"))
-                    break;
-
-            }
-            int dFile = dest.charAt(0) - 96;
-            int dRank = Integer.parseInt(dest.substring(1, 2));
-
-            if (dFile < 1 || dRank < 1 || dFile > 8 || dRank > 8)
-                throw new Exception("Destination out of bounds.");
-
-            destination = new Square(dFile, dRank);
-
-            // origin square
-            int prevFile = -1;
-            int prevRank = -1;
-            if (d - 2 != 1) {
-
-                String first = move.substring(1, 2);
-                if (first.matches("[a-h]"))
-                    prevFile = first.charAt(0) - 96;
-                else if (first.matches("[1-8]"))
-                    prevRank = Integer.parseInt(first);
-
-                String second = move.substring(2, 3);
-                if (prevRank == -1 && second.matches("[1-8]")) {
-                    prevRank = Integer.parseInt(second);
-                }
-
-            }
-
-            ArrayList<Piece> attacking = new ArrayList<Piece>();
-
-            for (int i = 0; i < pos.getMoves().size(); i++) {
-
-                Move a = pos.getMoves().get(i);
-                if (a.getDestination().equals(destination) && a.isWhite() == white)
-                    attacking.add(a.getPiece());
-
-            }
-
-            for (int i = 0; i < attacking.size(); i++) {
-                Piece a = attacking.get(i);
-                if (a.getCode() == pChar) {
-
-                    if (prevFile > 0) {
-                        if (a.getSquare().getFile() != prevFile)
-                            continue;
-                    }
-
-                    if (prevRank > 0) {
-                        if (a.getSquare().getRank() != prevRank)
-                            continue;
-                    }
-
-                    origin = a.getSquare();
-
-                }
-            }
-
-            if (origin == null)
-                throw new Exception("No piece can reach the destination square.");
-
-            // pawn moves - en passant & promotion
-            if (pChar == 'P') {
-
-                // en passant
-                if (pos.getPieceAtSquare(destination) == null && pos.getPieceAtSquare(
-                        new Square(destination.getFile(), destination.getRank() + (white ? 1 : -1))) != null) {
-
-                    enPassant = true;
-                }
-
-                // promotion
-                String lastChar = move.substring(move.length() - 1);
-                if (lastChar.matches("[KQRBN]")) {
-
-                    this.promoteType = move.charAt(move.length() - 1);
-
-                }
-
-            }
-
-        }
-
-        if (!capture && pos.getPieceAtSquare(destination) != null)
-            throw new Exception("Move not marked as a capture, but is a capture.");
-
-        if (capture && pos.getPieceAtSquare(destination) == null)
-            throw new Exception("Move marked as a capture, but is not a capture.");
-
-    }
 }

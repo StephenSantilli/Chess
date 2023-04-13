@@ -292,6 +292,48 @@ public class Position {
     }
 
     /**
+     * Gets the rook on the side specified and of the given color. Will only return
+     * the rook that is on the home file of that color.
+     * 
+     * @param aRook Whether or not to search for the a-side rook or the h-side rook.
+     * @param white Whether or not the rook is white.
+     * @return The rook.
+     */
+    public Piece getRook(boolean aRook, boolean white) {
+
+        final Square square = (white ? whiteKing : blackKing);
+
+        Piece rook = null;
+
+        if (!aRook) {
+
+            for (int i = square.getFile() + 1; i <= 8 && rook == null; i++) {
+
+                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
+
+                if (pc != null && pc.getCode() == 'R')
+                    rook = pc;
+
+            }
+
+        } else {
+
+            for (int i = square.getFile() - 1; i > 0 && rook == null; i--) {
+
+                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
+
+                if (pc != null && pc.getCode() == 'R')
+                    rook = pc;
+
+            }
+
+        }
+
+        return rook;
+
+    }
+
+    /**
      * Creates a new {@link Position} object in the default starting position.
      * 
      * @param game The game this position is associated with.
@@ -579,16 +621,22 @@ public class Position {
         movePiece.setSquare(move.getDestination());
         movePiece.setHasMoved(true);
 
-        pieces[move.getDestination().getRank() - 1][move.getDestination().getFile() - 1] = movePiece;
         pieces[move.getOrigin().getRank() - 1][move.getOrigin().getFile() - 1] = null;
-
+        
         if (move.isCastle()) {
-
+            
             final Piece rook = getPieceAtSquare(move.getRookOrigin());
-            rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
-            rook.setHasMoved(true);
+            // rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
+            rook.setSquare(move.getRookDestination());
 
+            pieces[move.getRookOrigin().getRank() - 1][move.getRookOrigin().getFile() - 1] = null;
+            pieces[move.getRookDestination().getRank() - 1][move.getRookDestination().getFile() - 1] = rook;
+
+            rook.setHasMoved(true);
+            
         }
+
+        pieces[move.getDestination().getRank() - 1][move.getDestination().getFile() - 1] = movePiece;
 
         if (move.getPromoteType() == '?' && checkForMate) {
 
@@ -716,35 +764,44 @@ public class Position {
         if (oppPieces.size() >= 1)
             givingCheck = true;
 
+        for (int x = 0; x < castleMoves.size(); x++) {
+
+            Move c = castleMoves.get(x);
+
+            boolean thruCheck = false;
+            final Piece king = c.getPiece();
+            final boolean aSide = king.getSquare().getFile() > c.getDestination().getFile();
+
+            for (int i = king.getSquare().getFile() + (aSide ? -1 : 1); thruCheck == false
+                    && ((aSide && i >= c.getDestination().getFile()
+                            || !aSide && i <= c.getDestination().getFile())); i += (aSide ? -1 : 1)) {
+
+                ArrayList<Piece> attackers = getPiecesByCanMoveTo(new Square(i, c.isWhite() ? 1 : 8));
+                attackers.removeIf((pc) -> pc.isWhite() == c.isWhite());
+
+                if (attackers.size() > 0)
+                    thruCheck = true;
+
+            }
+
+            if (thruCheck || c.isWhite() != white) {
+                castleMoves.remove(x);
+                --x;
+            }
+
+        }
+
         if (checkForMate) {
 
             setCheckmate();
 
             if (this.inCheck == false) {
 
-                for (Move c : castleMoves) {
+                // castleMoves.removeIf(m -> m.isWhite() != white);
 
-                    if ((c.getRookOrigin().getFile() == 1
-                            && canPieceMoveToSquare(c.getPiece(), new Square(4, c.getOrigin().getRank())))
-                            || (c.getRookOrigin().getFile() == 8
-                                    && canPieceMoveToSquare(c.getPiece(), new Square(6, c.getOrigin().getRank())))) {
+                moves.addAll(castleMoves);
 
-                        try {
-
-                            final Position test = new Position(this, c, !c.isWhite(), false, '0');
-
-                            if (!test.isGivingCheck())
-                                moves.add(c);
-
-                        } catch (Exception e) {
-
-                        }
-
-                    }
-
-                }
             }
-
         }
     }
 

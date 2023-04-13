@@ -155,6 +155,27 @@ public class GUIPiece {
 
     }
 
+    private Move isCastle(Piece active, Square target) {
+
+        if (active == null)
+            return null;
+
+        final Game game = gameView.getGame();
+
+        final Piece tarPc = game.getLastPos().getPieceAtSquare(target);
+
+        ArrayList<Move> castles = new ArrayList<>();
+        castles.addAll(game.getLastPos().getMoves());
+        castles.removeIf(
+                (m) -> !m.getPiece().equals(active) || !m.isCastle() ||  m.getRookOrigin() == null || !m.getRookOrigin().equals(tarPc.getSquare()));
+
+        if (castles.size() == 0)
+            return null;
+
+        return castles.get(0);
+
+    }
+
     /**
      * When the mouse has been pressed down.
      * 
@@ -166,9 +187,12 @@ public class GUIPiece {
         final Game game = gameView.getGame();
         final Board board = gameView.getBoard();
 
+        final Move isCas = isCastle(board.getActive() == null ? null : board.getActive().getPiece(), targetSquare);
+
         // If there's an active piece and it can move to square that was clicked
         if (board.getActive() != null
-                && game.getLastPos().canPieceMoveToSquare(board.getActive().getPiece(), targetSquare)) {
+                && (game.getLastPos().canPieceMoveToSquare(board.getActive().getPiece(), targetSquare)
+                        || isCas != null)) {
 
             // final int startPos = game.getPositions().size() - 1;
 
@@ -176,7 +200,8 @@ public class GUIPiece {
 
                 final GUIPiece active = board.getActive();
 
-                final Move move = new Move(board.getActive().getPiece().getSquare(), targetSquare, game.getLastPos());
+                final Move move = isCas != null ? isCas
+                        : new Move(board.getActive().getPiece().getSquare(), targetSquare, game.getLastPos());
 
                 board.setDragging(null);
                 board.setActive(null);
@@ -221,7 +246,7 @@ public class GUIPiece {
                         }
 
                     } else
-                        game.makeMove(move.getOrigin(), move.getDestination(), '0');
+                        game.makeMove(move.getOrigin(), move.getDestination(), '0', move.isCastle());
 
                 }
 
@@ -315,9 +340,12 @@ public class GUIPiece {
         final Game game = gameView.getGame();
         final Board board = gameView.getBoard();
 
+        
         board.getBorderPane().drawBorder(null);
-
+        
         final GUIPiece active = board.getActive();
+
+        final Move isCas = isCastle(board.getActive() == null ? null : board.getActive().getPiece(), targetSquare);
 
         // No active piece or the target square is already the piece's square
         if ((board.getActive() == null
@@ -352,7 +380,7 @@ public class GUIPiece {
 
                 final Piece d = board.getDragging().getPiece();
 
-                final Move move = new Move(d.getSquare(),
+                final Move move = isCas != null ? isCas : new Move(d.getSquare(),
                         targetSquare,
                         game.getPositions().get(gameView.getCurrentPos()));
 
@@ -373,7 +401,7 @@ public class GUIPiece {
                         board.showPromoteDialog(move.getDestination(), move.isWhite(), this);
 
                     } else
-                        game.makeMove(move.getOrigin(), move.getDestination(), '0');
+                        game.makeMove(move.getOrigin(), move.getDestination(), '0', move.isCastle());
 
                 } else {
                     board.draw();

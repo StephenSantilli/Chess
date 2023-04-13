@@ -233,14 +233,15 @@ public class PGNParser {
 
     // public static void main(String[] args) throws Exception {
 
-    //     Scanner s = new Scanner(new FileReader("./test pgns/chesscom with clock.pgn"));
-    //     String str = "";
-    //     while (s.hasNextLine()) {
-    //         str += s.nextLine().trim() + "\n";
-    //     }
-    //     PGNParser p = new PGNParser(str);
+    // Scanner s = new Scanner(new FileReader("./test pgns/chesscom with
+    // clock.pgn"));
+    // String str = "";
+    // while (s.hasNextLine()) {
+    // str += s.nextLine().trim() + "\n";
+    // }
+    // PGNParser p = new PGNParser(str);
 
-    //     System.out.println(p.outputPGN());
+    // System.out.println(p.outputPGN());
 
     // }
 
@@ -252,8 +253,8 @@ public class PGNParser {
         moves = new ArrayList<String>();
         parsedMoves = new ArrayList<PGNMove>();
 
-        parseTags();
-        parseMoves();
+        int moveTextEnd = parseTags();
+        parseMoves(moveTextEnd);
 
     }
 
@@ -378,17 +379,23 @@ public class PGNParser {
         return str;
     }
 
-    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)?\\s*(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O-O)|(O-O)))(?<suffix>[?!]{0,2})(((?<comm>\\s*\\{[^\\}]+\\}))|((?<NAG>\\s*\\$\\d{1,3}))|((?<res>\\s*((1\\-0)|(0\\-1)|(\\*)|(1\\/2\\-1\\/2))))){0,3}\\s*(?<eol>\\;[^\n]*)?";
+    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)?\\s*(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O-O[+#]?)|(O-O[+#]?)))(?<suffix>[?!]{0,2})(((?<comm>\\s*\\{[^\\}]+\\}))|((?<NAG>\\s*\\$\\d{1,3}))|((?<res>\\s*((1\\-0)|(0\\-1)|(\\*)|(1\\/2\\-1\\/2))))){0,3}\\s*(?<eol>\\;[^\n]*)?";
 
-    private void parseMoves() throws Exception {
+    private void parseMoves(int moveTextStart) throws Exception {
 
-        Matcher m = Pattern.compile(MOVE_REGEX).matcher(text);
+
+
+        Matcher m = Pattern.compile(MOVE_REGEX).matcher(text.substring(moveTextStart));
 
         while (m.find()) {
 
             String comment = m.group("comm");
+            String nag = m.group("NAG");
+            if(nag != null) 
+                nag = nag.replaceAll(" ", "").trim();
+            
 
-            parsedMoves.add(new PGNMove(m.group("move"), comment, m.group("NAG"), m.group("res"), m.group("suffix")));
+            parsedMoves.add(new PGNMove(m.group("move"), comment, nag, m.group("res"), m.group("suffix")));
 
         }
 
@@ -396,16 +403,19 @@ public class PGNParser {
 
     private static final String TAG_REGEX = "\\[([A-Za-z0-9_]+) ?\"([^\"\n]*)\"\\]";
 
-    private void parseTags() throws Exception {
+    private int parseTags() throws Exception {
 
         Matcher m = Pattern.compile(TAG_REGEX).matcher(text);
 
         ArrayList<String> t = new ArrayList<String>();
 
+        int end = 0;
+
         while (m.find()) {
 
             t.add(m.group(1));
             t.add(m.group(2));
+            end = m.end();
 
         }
 
@@ -435,7 +445,10 @@ public class PGNParser {
                     break;
             }
 
+            
         }
+
+        return end;
 
         /*
          * if (event == null || site == null || date == null || round == null || white

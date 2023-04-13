@@ -89,21 +89,22 @@ public class Pieces extends Pane {
 
                 if (prev != null && curr != null
                         && ((!backward && curr.getMove() != null) || (backward && prev.getMove() != null))
-                        // Either not backwards and the piece in the move of p2 is this piece
+                        // Either not backwards and the piece in the move of curr is the piece @ this square
                         && ((!backward && curr.getMove().getDestination().equals(p.getSquare()))
-                                // Or it is backwards and the piece in the move of p1 is this piece
+                                // Or it is backwards and the piece in the move of prev is this piece
                                 || (backward && prev.getMove().getOrigin().equals(p.getSquare()))
                                 // Same as first term, but for castle moves.
-                                || (!backward && curr.getMove().isCastle()
+                                || (!backward && curr.getMove().isCastle() && p.getCode() == 'R'
                                         && curr.getMove().getRookDestination().equals(p.getSquare()))
                                 // Same as second term, but for castle moves.
-                                || (backward && prev.getMove().isCastle()
+                                || (backward && prev.getMove().isCastle() && p.getCode() == 'R'
                                         && prev.getMove().getRookOrigin().equals(p.getSquare())))) {
 
                     if (!backward) {
 
                         // Castle move
-                        if (curr.getMove().isCastle() && curr.getMove().getRookDestination().equals(p.getSquare()))
+                        if (curr.getMove().isCastle() && p.getCode() == 'R'
+                                && curr.getMove().getRookDestination().equals(p.getSquare()))
                             pieceMoveAnimation(guiP,
                                     curr.getMove().getRookOrigin(),
                                     curr.getMove().getRookDestination(),
@@ -118,7 +119,8 @@ public class Pieces extends Pane {
                     } else {
 
                         // Castle move
-                        if (prev.getMove().isCastle() && prev.getMove().getRookOrigin().equals(p.getSquare()))
+                        if (prev.getMove().isCastle() && p.getCode() == 'R'
+                                && prev.getMove().getRookOrigin().equals(p.getSquare()))
                             pieceMoveAnimation(guiP,
                                     prev.getMove().getRookDestination(),
                                     prev.getMove().getRookOrigin(),

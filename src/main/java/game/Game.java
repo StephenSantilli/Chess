@@ -593,6 +593,10 @@ public class Game {
     }
 
     public void makeMove(Square origin, Square destination, char promoteType) throws Exception {
+        this.makeMove(origin, destination, promoteType, false);
+    }
+
+    public void makeMove(Square origin, Square destination, char promoteType, boolean isCastle) throws Exception {
 
         if (paused)
             throw new Exception("Game is paused.");
@@ -605,7 +609,7 @@ public class Game {
 
             Move a = getLastPos().getMoves().get(i);
 
-            if (a.getOrigin().equals(origin) && a.getDestination().equals(destination))
+            if (a.getOrigin().equals(origin) && a.getDestination().equals(destination) && isCastle == a.isCastle())
                 move = a;
 
         }
@@ -871,6 +875,11 @@ public class Game {
         if (!black.getType().equals(""))
             tags.put("BlackType", black.getType());
 
+        if(!settings.getFen().equals(GameSettings.DEFAULT_FEN)) {
+            tags.put("SetUp", "1");
+            tags.put("FEN", settings.getFen());
+        }
+        
         return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 
     }
