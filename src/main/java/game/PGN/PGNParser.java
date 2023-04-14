@@ -1,19 +1,35 @@
 package game.PGN;
 
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import game.Game;
 import game.Position;
+import game.Game.Result;
 
 /**
  * Class to parse a .pgn file following this specification:
  * http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
  */
 public class PGNParser {
+
+    public static void main(String[] args) throws Exception {
+
+        Scanner s = new Scanner(new FileReader("./test pgns/Untitled.pgn"));
+        String str = "";
+        while (s.hasNextLine()) {
+            str += s.nextLine().trim() + "\n";
+        }
+        PGNParser p = new PGNParser(str);
+
+        System.out.println(p.outputPGN(true));
+
+    }
 
     /** The content of the PGN file. */
     private String text;
@@ -24,179 +40,37 @@ public class PGNParser {
     /** The parsed moves. */
     private ArrayList<PGNMove> parsedMoves;
 
-    // /** The name of the tournament or match event. */
-    // private String event;
-
-    // /**
-    // * The location of the event. {@code [City], [Region] [IOC country code]}.
-    // * <br>
-    // * <br>
-    // * Ex: {@code New York City, NY USA}.
-    // */
-    // private String site;
-
-    // /**
-    // * The starting date of the event. {@code YYYY.MM.DD} format. {@code ??} used
-    // * when unknown.
-    // */
-    // private String date;
-
-    // /** The round of the game in the event. */
-    // private String round;
-
-    // /** The player of the white pieces. {@code Lastname, Firstname}. */
-    // private String white;
-
-    // /** The player of the white pieces. {@code Lastname, Firstname}. */
-    // private String black;
-
-    // /**
-    // * The result of the game. {@code [White score]-[Black score]} or {@code *}
-    // * (when game has not concluded.)
-    // * <br>
-    // * <br>
-    // * <b>Potential values:</b>
-    // * <ul>
-    // * <li>{@code 1-0}
-    // * <li>{@code 0-1}
-    // * <li>{@code 1/2-1/2}
-    // * <li>{@code *}
-    // */
-    // private String result;
-
-    // /** The person annotating the game. */
-    // private String annotator;
-
-    // /** The number of half-moves played. */
-    // private String plyCount;
-
-    // /**
-    // * The time control of the game.
-    // * {@code [moves]/[seconds]:[sudden death seconds]} or
-    // * {@code [seconds]+[additional seconds per move]}
-    // */
-    // private String timeControl;
-
-    // /**
-    // * The time the game was started at, in {@code HH:MM:SS} format. In local
-    // clock
-    // * time.
-    // */
-    // private String time;
-
-    // /** {@link #time}, but in UTC. */
-    // private String utcTime;
-
-    // /** {@link #date}, but in UTC. */
-    // private String utcDate;
-
-    // /**
-    // * The way the game was terminated.
-    // * <br>
-    // * <br>
-    // * <b>Potential values:</b>
-    // * <ul>
-    // * <li>abandoned
-    // * <li>adjudication
-    // * <li>death
-    // * <li>emergency
-    // * <li>normal
-    // * <li>rules infraction
-    // * <li>time forfeit
-    // * <li>unterminated
-    // */
-    // private String termination;
-
-    // /**
-    // * The type of play.
-    // * <br>
-    // * <br>
-    // * <b>Potential values:</b>
-    // * <ul>
-    // * <li>OTB (over-the-board)
-    // * <li>ICS (internet chess server)
-    // * <li>PM (paper mail)
-    // * <li>EM (email)
-    // * <li>TC (general telecommunication)
-    // */
-    // private String mode;
-
-    // /**
-    // * 0 if default initial board position used. {@code 1} if custom board
-    // position
-    // * used. Should be defined in {@link #FEN}.
-    // */
-    // private String setup;
-
-    // /**
-    // * The initial position of the board, in FEN notation. {@link #setup} must be
-    // * {@code 1}.
-    // */
-    // private String FEN;
-
-    // /** The FIDE title of the white player. */
-    // private String whiteTitle;
-
-    // /** The FIDE title of the white player. */
-    // private String blackTitle;
-
-    // /** The USCF title of the white player. */
-    // private String whiteUSCF;
-
-    // /** The USCF title of the black player. */
-    // private String blackUSCF;
-
-    // /**
-    // * The network address or email of the white player. '-' used for players
-    // * without an email.
-    // */
-    // private String whiteNA;
-
-    // /**
-    // * The network address or email of the black player. '-' used for players
-    // * without an
-    // * email.
-    // */
-    // private String blackNA;
-
-    // /** Whether or not the white player is {@code human} or {@code program}. */
-    // private String whiteType;
-
-    // /** Whether or not the black player is {@code human} or {@code program}. */
-    // private String blackType;
-
-    // /** The elo of the white player. */
-    // private String whiteElo;
-
-    // /** The elo of the black player. */
-    // private String blackElo;
-
-    // /**
-    // * A date value, formatted like {@link #date}, that is the starting date of
-    // the
-    // * event.
-    // */
-    // private String eventDate;
-
-    // /** The sponsor of the event. */
-    // private String eventSponsor;
-
-    // /** The section of the event. {@code Open} or {@code Reserve}. */
-    // private String section;
-
-    // /** The stage of the event, e.g., {@code Preliminary} or {@code Semifinal}.
-    // */
-    // private String stage;
-
-    // /** The board number in a team event, and also in a simultaneous exhibition.
-    // */
-    // private String board;
-
     /** Used for any extra, non-standard tags. */
     private Map<String, String> tags;
 
+    private String termination;
+
     public Map<String, String> getTags() {
         return tags;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public ArrayList<String> getMoves() {
+        return moves;
+    }
+
+    public ArrayList<PGNMove> getParsedMoves() {
+        return parsedMoves;
+    }
+
+    public PGNParser(String text) throws Exception {
+
+        // this.text = String.join(" ", text.trim().split("\n"));
+        this.text = text.trim();
+        tags = new HashMap<String, String>();
+        moves = new ArrayList<String>();
+        parsedMoves = new ArrayList<PGNMove>();
+
+        parse();
+
     }
 
     public long getTimePerSide() {
@@ -231,33 +105,6 @@ public class PGNParser {
 
     }
 
-    // public static void main(String[] args) throws Exception {
-
-    // Scanner s = new Scanner(new FileReader("./test pgns/chesscom with
-    // clock.pgn"));
-    // String str = "";
-    // while (s.hasNextLine()) {
-    // str += s.nextLine().trim() + "\n";
-    // }
-    // PGNParser p = new PGNParser(str);
-
-    // System.out.println(p.outputPGN());
-
-    // }
-
-    public PGNParser(String text) throws Exception {
-
-        // this.text = String.join(" ", text.trim().split("\n"));
-        this.text = text.trim();
-        tags = new HashMap<String, String>();
-        moves = new ArrayList<String>();
-        parsedMoves = new ArrayList<PGNMove>();
-
-        int moveTextEnd = parseTags();
-        parseMoves(moveTextEnd);
-
-    }
-
     public static String millisToOutputFormat(long time) {
 
         long hours = (time / 1000 / 60 / 60);
@@ -288,33 +135,6 @@ public class PGNParser {
         this.tags = tags;
         moves = new ArrayList<String>();
         parsedMoves = new ArrayList<PGNMove>();
-
-        // TODO: ADD SUPPORT FOR TAGS
-
-        for (int i = 1; i < game.getPositions().size(); i++) {
-
-            Position p = game.getPositions().get(i);
-
-            String comment = null;
-
-            if (includeClock && game.getSettings().getTimePerSide() > 0
-                    && game.getPositions().get(i - 1).getTimerEnd() > 0) {
-
-                final boolean isTurn = p.isWhite() && i == game.getPositions().size() - 1;
-                int moveCount = (int) Math.ceil(p.getMoveNumber() / 2.0);
-
-                if (isTurn && game.getSettings().isWhiteStarts() != p.isWhite())
-                    --moveCount;
-
-                comment = "{[%clk "
-                        + millisToOutputFormat(
-                                game.getPositions().get(i - 1).getTimerEnd() + game.calcTimerDelta(moveCount))
-                        + "]}";
-            }
-
-            parsedMoves.add(new PGNMove(p.getMoveString(), comment, null, null, null));
-
-        }
 
     }
 
@@ -350,14 +170,22 @@ public class PGNParser {
         String moveList = "";
         for (int i = 0; i < parsedMoves.size(); i++) {
 
-            moveList += ((i / 2) + 1) + ". " + parsedMoves.get(i) + " ";
+            PGNMove m = parsedMoves.get(i);
+
+            moveList += " " + ((i / 2) + 1) + ".";
+
+            moveList += " " + outputMove(m);
 
             if (i + 1 < parsedMoves.size()) {
 
-                if (!parsedMoves.get(i).getCommentary().equals("") || parsedMoves.get(i).getNAG() != 0)
-                    moveList += ((i / 2) + 1) + "... ";
+                PGNMove o = parsedMoves.get(++i);
 
-                moveList += parsedMoves.get(++i) + " ";
+                if (parsedMoves.get(i).getComments().size() > 0 ||
+                        parsedMoves.get(i).getNAG() != 0)
+                    moveList += " " + ((i / 2) + 1) + "...";
+
+                moveList += " " + outputMove(o);
+
             }
 
         }
@@ -374,105 +202,227 @@ public class PGNParser {
 
         }
         str += moveList;
+        str += " " + termination;
         str += "\n";
 
         return str;
     }
 
-    private static final String MOVE_REGEX = "(?<num>(\\d+(\\.\\.\\.)?)|\\d+\\.?)?\\s*(?<move>(((([QKRBNP][a-h]?[1-8]?)?([a-h][1-8])(=[QRBN])?)[+#]?)|(([QKRBNP]?[a-h]?[1-8]?)?(x[a-h][1-8])(=[QRBN])?[+#]?)|(O-O-O[+#]?)|(O-O[+#]?)))(?<suffix>[?!]{0,2})(((?<comm>\\s*\\{[^\\}]+\\}))|((?<NAG>\\s*\\$\\d{1,3}))|((?<res>\\s*((1\\-0)|(0\\-1)|(\\*)|(1\\/2\\-1\\/2))))){0,3}\\s*(?<eol>\\;[^\n]*)?";
+    private String outputMove(PGNMove move) {
 
-    private void parseMoves(int moveTextStart) throws Exception {
+        // TODO: move this to the tostring
+        String s = "";
 
+        s += move;
 
+        if (move.getNAG() > 0)
+            s += " $" + move.getNAG();
 
-        Matcher m = Pattern.compile(MOVE_REGEX).matcher(text.substring(moveTextStart));
+        for (int x = 0; x < move.getComments().size(); x++) {
 
-        while (m.find()) {
-
-            String comment = m.group("comm");
-            String nag = m.group("NAG");
-            if(nag != null) 
-                nag = nag.replaceAll(" ", "").trim();
-            
-
-            parsedMoves.add(new PGNMove(m.group("move"), comment, nag, m.group("res"), m.group("suffix")));
+            s += " {" + move.getComments().get(x) + "}";
 
         }
 
-    }
+        if (move.getRav().size() > 0) {
 
-    private static final String TAG_REGEX = "\\[([A-Za-z0-9_]+) ?\"([^\"\n]*)\"\\]";
+            s += " (";
 
-    private int parseTags() throws Exception {
+            for (int x = 0; x < move.getRav().size(); x++) {
 
-        Matcher m = Pattern.compile(TAG_REGEX).matcher(text);
+                PGNMove m = move.getRav().get(x);
 
-        ArrayList<String> t = new ArrayList<String>();
+                s += (x == 0 ? "" : " ") + (((parsedMoves.size() - 1 + x) / 2) + 1) + ".";
 
-        int end = 0;
+                s += " " + m;
 
-        while (m.find()) {
+                if (x + 1 < move.getRav().size()) {
 
-            t.add(m.group(1));
-            t.add(m.group(2));
-            end = m.end();
+                    PGNMove o = move.getRav().get(++x);
 
-        }
+                    if (o.getComments().size() > 0 || o.getNAG() != 0)
+                        s += " " + (((parsedMoves.size() - 1 + x) / 2) + 1) + "...";
 
-        for (int i = 0; i + 1 < t.size(); i++) {
+                    s += " " + outputMove(o);
 
-            String key = t.get(i);
-            String value = t.get(++i);
+                }
 
-            switch (key) {
+                // s += outputMove(move.getRav().get(x));
 
-                // case "Date":
-                // break;
-                case "Result":
-                    if (value.matches("1-0|0-1|1\\/2-1\\/2|\\*"))
-                        tags.put(key, value);
-                    else
-                        throw new Exception("Invalid Game.Result.");
-                    break;
-                case "TimeControl":
-                    if (value.matches("\\?|-|([\\d]+\\/[\\d]+)|([\\d]+(\\+[\\d]+)?)|(\\*[\\d]+)"))
-                        tags.put(key, value);
-                    else
-                        throw new Exception("Invalid time control.");
-                    break;
-                default:
-                    tags.put(key, value);
-                    break;
             }
 
-            
+            s += ")";
+
         }
 
-        return end;
-
-        /*
-         * if (event == null || site == null || date == null || round == null || white
-         * == null || black == null
-         * || result == null)
-         * throw new Exception(
-         * "Part of seven tag roster is missing. You must include at least Event, Site, Date, Round, White, Black, and Game.Result."
-         * );
-         */
-
-        // TODO: add checking for value validity
+        return s;
 
     }
 
-    public String getText() {
-        return text;
+    private static final String TOKEN_REGEX = "(?<termination>1-0|0-1|1/2-1/2|\\*)|(?<num>[\\d]+)|(?<period>\\.)|\\[|\\]|\\(|\\)|\\<|\\>|(?<nag>\\$[\\d]+)|(?<symbol>[A-Za-z0-9][A-Za-z0-9_+#=:\\-]*)|(?<str>\"[^\"]*\")|(?<comment>\\{[^}]*\\})|(?<eol>\\;([^\\n]*))|(?<suffix>[?!]{1,2})";
+
+    private void parse() throws Exception {
+
+        Matcher t = Pattern.compile(TOKEN_REGEX).matcher(text);
+        int ravDepth = 0;
+
+        while (t.find()) {
+
+            String tok = t.group();
+
+            if (tok.equals("[")) {
+
+                if (t.find()) {
+
+                    String key = t.group();
+
+                    if (t.find()) {
+
+                        String value = String.join("", t.group().split("\""));
+
+                        if (t.find()) {
+
+                            if (t.group().equals("]")) {
+
+                                tags.put(key, value);
+
+                            } else {
+                                throw new Exception("Tag @ " + t.start() + " not closed.");
+                            }
+
+                        } else {
+                            throw new Exception("Tag @ " + t.start() + " not closed.");
+                        }
+
+                    } else {
+                        throw new Exception("Tag and key found @ " + t.start() + ", but no value found.");
+                    }
+
+                } else {
+                    throw new Exception("Tag started @ " + t.start() + ", but no key found.");
+                }
+
+            } else if (tok.matches("1-0|0-1|1/2-1/2|\\*")) {
+
+                termination = tok;
+                // switch (tok) {
+                // case "1-0":
+                // termination = Result.WHITE_WIN;
+                // break;
+                // case "0-1":
+                // termination = Result.BLACK_WIN;
+                // break;
+                // case "1/2-1/2":
+                // termination = Result.DRAW;
+                // break;
+                // case "*":
+                // termination = Result.IN_PROGRESS;
+                // }
+
+                // Comments
+            } else if (tok.matches("\\{[^}]*\\}|\\;([^\\n]*)")) {
+
+                if (parsedMoves.size() == 0)
+                    throw new Exception("Error @ " + t.start() + ". Comment given before a move.");
+
+                boolean eol = tok.startsWith(";");
+                String comment = eol ? tok.substring(1) : tok.substring(1, tok.length() - 1);
+
+                getLast(ravDepth).get(getLast(ravDepth).size() - 1).getComments().add(comment.replaceAll("\n", " "));
+
+                // NAGs
+            } else if (tok.matches("\\$[\\d]+")) {
+
+                if (getLast(ravDepth).size() == 0)
+                    throw new Exception("Error @ " + t.start() + ". NAG given before a move.");
+
+                try {
+                    getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(Integer.parseInt(tok.substring(1)));
+                } catch (Exception e) {
+                    throw new Exception("Error @ " + t.start() + ". Invalid NAG.");
+                }
+
+                // Suffixes
+            } else if (tok.matches("[?!]{1,2}")) {
+
+                if (getLast(ravDepth).size() == 0)
+                    throw new Exception("Error @ " + t.start() + ". Suffix given before a move.");
+
+                switch (tok) {
+
+                    case "!":
+                        getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(1);
+                        break;
+                    case "?":
+                        getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(2);
+                        break;
+                    case "!!":
+                        getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(3);
+                        break;
+                    case "!?":
+                        getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(4);
+                        break;
+                    case "?!":
+                        getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(5);
+                        break;
+                    case "??":
+                        getLast(ravDepth).get(getLast(ravDepth).size() - 1).setNAG(6);
+                        break;
+                    default:
+                        throw new Exception("Error @ " + t.start() + ". Invalid suffix.");
+                }
+
+                // RAV
+            } else if (tok.matches("\\(")) {
+
+                ++ravDepth;
+
+                if (parsedMoves.size() == 0)
+                    throw new Exception("Error @ " + t.start() + ". RAV given before a move.");
+
+                // t.region(parseRav(t.end(), parsedMoves.get(parsedMoves.size() - 1)),
+                // t.regionEnd());
+
+                // Move numbers
+            } else if (tok.matches("\\)")) {
+                --ravDepth;
+
+                if (ravDepth < 0)
+                    throw new Exception("Error @ " + t.start() + ". Unmatched closing parentheses.");
+
+            } else if (tok.matches("[\\d]+")) {
+
+                // if ((int) Math.ceil((parsedMoves.size() + 1) / 2.0) != Integer.parseInt(tok))
+                // throw new Exception("Error @ " + t.start() + ". Unexpected move number.");
+
+                // TODO: check periods to see if they match the move (... for black moves etc.)
+
+            } else if (tok.matches("[A-Za-z0-9][A-Za-z0-9_+#=:\\-]*")) {
+
+                if (ravDepth == 0)
+                    parsedMoves.add(new PGNMove(tok));
+                else {
+
+                    ArrayList<PGNMove> a = getLast(ravDepth);
+                    a.add(new PGNMove(tok));
+
+                }
+
+            }
+
+        }
+
     }
 
-    public ArrayList<String> getMoves() {
-        return moves;
-    }
+    private ArrayList<PGNMove> getLast(int ravDepth) {
 
-    public ArrayList<PGNMove> getParsedMoves() {
-        return parsedMoves;
+        ArrayList<PGNMove> a = parsedMoves;
+        for (int i = 0; i < ravDepth; i++) {
+            a = a.get(a.size() - 1).getRav();
+        }
+
+        return a;
+
     }
 
 }

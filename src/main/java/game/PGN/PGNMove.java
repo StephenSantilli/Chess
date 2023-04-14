@@ -1,5 +1,6 @@
 package game.PGN;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,47 +14,39 @@ public class PGNMove {
      */
     private String moveText;
 
-    /** The commentary on the move. May be {@code null}. */
-    private String commentary;
-
-    /**
-     * Suffix for commentary. Matches up with the first six (excluding 0)
-     * {@link #NAGs}
-     * <br>
-     * <br>
-     * <b>Potential values:</b>
-     * <ul>
-     * <li>!
-     * <li>?
-     * <li>!!
-     * <li>!?
-     * <li>??
-     */
-    private String suffix;
-
-    /** The result of the game. See {@link PGNParser#result}. */
-    private String gameTermination;
-
     /**
      * The {@code int} corresponding to the numeric annotation glyph. Will be the
      * same as the index in {@link #NAGs}.
      */
     private int NAG;
 
-    public String getTag(String key) {
+    private ArrayList<String> comments;
 
-        Matcher m = Pattern.compile("\\[\\%(?<key>[^\\s]+) (?<value>[^\\]]+)\\]").matcher(commentary);
+    // TODO: multiple RAVs do not work
+    private ArrayList<PGNMove> rav;
 
-        while (m.find()) {
+    public String getMoveText() {
+        return moveText;
+    }
 
-            if (m.group("key").equals(key)) {
-                return m.group("value").trim().replaceAll("\n", "");
-            }
+    public int getNAG() {
+        return NAG;
+    }
 
-        }
+    public void setMoveText(String moveText) {
+        this.moveText = moveText;
+    }
 
-        return null;
+    public void setNAG(int nAG) {
+        NAG = nAG;
+    }
 
+    public ArrayList<PGNMove> getRav() {
+        return rav;
+    }
+
+    public ArrayList<String> getComments() {
+        return comments;
     }
 
     public String toString() {
@@ -61,47 +54,54 @@ public class PGNMove {
         String str = "";
 
         str += moveText;
-        str += suffix;
-        if (NAG > 5 || (suffix.equals("") && NAG > 0))
-            str += " $" + NAG;
-        if (!commentary.equals(""))
-            str += " " + commentary;
-        if (!gameTermination.equals(""))
-            str += " " + gameTermination;
 
         return str;
 
     }
 
-    public long getTimerEnd() {
+    public PGNMove(String move) throws Exception {
 
-        Pattern pat = Pattern.compile("\\{\\[%clk (?<hrs>[\\d]+):(?<mins>[\\d]+):(?<secs>[\\d]+)\\]\\}");
-        Matcher matcher = pat.matcher(commentary);
-
-        long timerEnd = 0;
-
-        if (matcher.find()) {
-            timerEnd += Integer.parseInt(matcher.group("hrs")) * 60 * 60 * 1000;
-            timerEnd += Integer.parseInt(matcher.group("mins")) * 60 * 1000;
-            timerEnd += Integer.parseInt(matcher.group("secs")) * 1000;
-        } else
-            timerEnd = -1;
-
-        return timerEnd;
+        this.moveText = move.trim();
+        this.comments = new ArrayList<>();
+        this.rav = new ArrayList<>();
 
     }
 
-    public PGNMove(String move, String comment, String NAG, String result, String suffix) throws Exception {
+    // public String getTag(String key) {
 
-        this.moveText = move;
+    // Matcher m = Pattern.compile("\\[\\%(?<key>[^\\s]+)
+    // (?<value>[^\\]]+)\\]").matcher(comments);
 
-        this.commentary = comment == null ? "" : comment.trim().replaceAll("\n", " ").replaceAll("  ", " ");
+    // while (m.find()) {
 
-        this.NAG = NAG == null ? 0 : Integer.parseInt(NAG.substring(1).trim());
+    // if (m.group("key").equals(key)) {
+    // return m.group("value").trim().replaceAll("\n", "");
+    // }
 
-        this.gameTermination = result == null ? "" : result.trim().replaceAll("\n", " ").replaceAll("  ", " ");
+    // }
 
-        this.suffix = suffix == null ? "" : suffix.trim().replaceAll("\n", " ").replaceAll("  ", " ");
+    // return null;
+
+    // }
+
+    public long getTimerEnd() {
+
+        // Pattern pat = Pattern.compile("\\{\\[%clk
+        // (?<hrs>[\\d]+):(?<mins>[\\d]+):(?<secs>[\\d]+)\\]\\}");
+        // Matcher matcher = pat.matcher(commentary);
+
+        // long timerEnd = 0;
+
+        // if (matcher.find()) {
+        // timerEnd += Integer.parseInt(matcher.group("hrs")) * 60 * 60 * 1000;
+        // timerEnd += Integer.parseInt(matcher.group("mins")) * 60 * 1000;
+        // timerEnd += Integer.parseInt(matcher.group("secs")) * 1000;
+        // } else
+        // timerEnd = -1;
+
+        // TODO Fix
+
+        return 0;
 
     }
 
@@ -171,29 +171,5 @@ public class PGNMove {
             "White has moderate time control pressure", "Black has moderate time control pressure",
             "White has severe time control pressure", "Black has severe time control pressure"
     };
-
-    public String getMoveText() {
-        return moveText;
-    }
-
-    public String getCommentary() {
-        return commentary;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public String getGameTermination() {
-        return gameTermination;
-    }
-
-    public int getNAG() {
-        return NAG;
-    }
-
-    public static String[] getNags() {
-        return NAGs;
-    }
 
 }
