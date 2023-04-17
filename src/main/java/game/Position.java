@@ -540,7 +540,8 @@ public class Position {
 
         Piece[][] prevPieces = prev.getPieces();
 
-        this.capturedPieces = prev.getCapturedPieces();
+        this.capturedPieces = new ArrayList<>();
+        prev.getCapturedPieces().forEach(capturedPieces::add);
 
         this.moveNumber = prev.getMoveNumber() + 1;
 

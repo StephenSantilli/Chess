@@ -3,7 +3,6 @@ package game;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,16 +10,9 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.random.RandomGenerator;
-
 import game.GameEvent.Type;
 import game.PGN.PGNMove;
 import game.PGN.PGNParser;
-import game.pieces.Bishop;
-import game.pieces.King;
-import game.pieces.Knight;
-import game.pieces.Queen;
-import game.pieces.Rook;
 
 public class Game {
 
@@ -97,6 +89,7 @@ public class Game {
      */
     private boolean paused;
 
+    //TODO: use this instead of position draw
     /**
      * The player that offered a draw. {@code null} if no draw has been offered or
      * the previous draw offer has been declined.
@@ -471,9 +464,6 @@ public class Game {
         final Position pos = positions.get(position);
 
         final boolean isTurn = pos.isWhite() == white;
- 
-        // if (isTurn && pos.getTimerEnd() > -1)
-        //     return pos.getTimerEnd();
 
         long lastTimerEnd = settings.getTimePerSide() * 1000;
 

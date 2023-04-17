@@ -158,6 +158,7 @@ public class Board extends StackPane {
                 moveIndicatorsPane.setVisible(true);
                 piecePane.setVisible(true);
                 piecePane.initPieceTranscoders();
+                gameView.getInfoPane().initPieceTranscoders();
                 draw();
 
             } catch (Exception ex) {
@@ -338,6 +339,7 @@ public class Board extends StackPane {
                 coordsPane.draw();
 
                 piecePane.initPieceTranscoders();
+                gameView.getInfoPane().initPieceTranscoders();
 
             } catch (Exception e) {
             }
@@ -406,6 +408,9 @@ public class Board extends StackPane {
         
         gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
         gameView.getInfoPane().getBottomTimerHistory().setWhite(!gameView.isFlipped());
+
+        gameView.getInfoPane().getTopCap().setWhite(gameView.isFlipped());
+        gameView.getInfoPane().getBottomCap().setWhite(!gameView.isFlipped());
 
         gameView.getInfoPane().updateTimers();
 

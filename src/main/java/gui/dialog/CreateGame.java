@@ -179,6 +179,7 @@ public class CreateGame extends Stage {
 
         gen960 = new Button("Generate Chess960 Start");
         gen960.setOnAction(this::generate960);
+        gen960.setDisable(true);
 
         HBox fenOpts = new HBox(useFenBox, gen960);
         fenOpts.setSpacing(5);
@@ -268,7 +269,7 @@ public class CreateGame extends Stage {
 
                 game = new Game(parser,
                         new GameSettings(
-                                useFenBox.isDisable() ? GameSettings.DEFAULT_FEN : fenField.getText(),
+                                !useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText(),
                                 0,
                                 0,
                                 true,
@@ -367,7 +368,7 @@ public class CreateGame extends Stage {
                         (oneWhite ? twoName.getText() : oneName.getText()),
                         Player.HUMAN,
                         Player.HUMAN,
-                        new GameSettings((useFenBox.isDisable() ? GameSettings.DEFAULT_FEN : fenField.getText()),
+                        new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
                                 timePerSide,
                                 timePerMove,
                                 true,

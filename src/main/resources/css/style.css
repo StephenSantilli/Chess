@@ -11,6 +11,11 @@ TableColumn {
   -fx-max-width: Infinity;
 }
 
+#pieceBox {
+  /* -fx-spacing: 5; */
+  -fx-alignment: center-right;
+}
+
 #lightCoord,
 #darkCoord {
   -fx-text-origin: center;
@@ -84,11 +89,15 @@ PauseView {
 .scroll-pane > .viewport {
   -fx-background-color: transparent;
   -fx-alignment: center-left;
+    -fx-border-radius: 5;
+  -fx-background-radius: 5;
 }
 
 .scroll-pane {
   -fx-background-color: transparent;
-  -fx-padding: 25 0 25 0;
+  /* -fx-padding: 25 0 25 0; */
+  -fx-border-radius: 5;
+  -fx-background-radius: 5;
   -fx-alignment: center-left;
 }
 

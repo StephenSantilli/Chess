@@ -82,7 +82,7 @@ PauseView {
   -fx-text-fill: ladder(-background, white 60%, black 40%);
 }
 
-#movePane {
+#scrollMoveList {
   -fx-background-color: -accent;
 }
 
