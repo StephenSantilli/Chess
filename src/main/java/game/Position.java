@@ -622,18 +622,19 @@ public class Position {
         movePiece.setHasMoved(true);
 
         pieces[move.getOrigin().getRank() - 1][move.getOrigin().getFile() - 1] = null;
-        
+
         if (move.isCastle()) {
-            
+
             final Piece rook = getPieceAtSquare(move.getRookOrigin());
-            // rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4, rook.getSquare().getRank()));
+            // rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4,
+            // rook.getSquare().getRank()));
             rook.setSquare(move.getRookDestination());
 
             pieces[move.getRookOrigin().getRank() - 1][move.getRookOrigin().getFile() - 1] = null;
             pieces[move.getRookDestination().getRank() - 1][move.getRookDestination().getFile() - 1] = rook;
 
             rook.setHasMoved(true);
-            
+
         }
 
         pieces[move.getDestination().getRank() - 1][move.getDestination().getFile() - 1] = movePiece;
@@ -647,6 +648,29 @@ public class Position {
             final Square mps = move.getDestination();
 
             switch (promoteType) {
+                case 'Q':
+                    setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'R':
+                    setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'B':
+                    setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+                case 'N':
+                    setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    break;
+            }
+
+        } else if (move.getPromoteType() != '0' && checkForMate) {
+
+            if (move.getPromoteType() != 'Q' && move.getPromoteType() != 'R'
+                    && move.getPromoteType() != 'B' && move.getPromoteType() != 'N')
+                throw new Exception("Invalid promote type.");
+
+            final Square mps = move.getDestination();
+
+            switch (move.getPromoteType()) {
                 case 'Q':
                     setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
                     break;
@@ -1180,11 +1204,11 @@ public class Position {
 
     }
 
-    public Move getMoveByPGN(String move) throws Exception {
+    public Move getMoveBySAN(String move) throws Exception {
 
         if (!mateChecked)
             throw new Exception(
-                    "Cannot find move by PGN if position has not been initialized with checkForMate as true.");
+                    "Cannot find move by SAN if position has not been initialized with checkForMate as true.");
 
         move = move.trim();
 
@@ -1194,15 +1218,15 @@ public class Position {
         int oFile = -1;
         int oRank = -1;
 
-        if (move.matches("0-0-0") || move.matches("O-O-O")) {
+        if (move.startsWith("0-0-0") || move.startsWith("O-O-O")) {
 
-            o = new Square(5, white ? 1 : 8);
+            o = new Square((white ? whiteKing : blackKing).getFile(), (white ? whiteKing : blackKing).getRank());
             d = new Square(3, white ? 1 : 8);
             piece = 'K';
 
-        } else if (move.matches("0-0") || move.matches("O-O")) {
+        } else if (move.startsWith("0-0") || move.startsWith("O-O")) {
 
-            o = new Square(5, white ? 1 : 8);
+            o = new Square((white ? whiteKing : blackKing).getFile(), (white ? whiteKing : blackKing).getRank());
             d = new Square(7, white ? 1 : 8);
             piece = 'K';
 
@@ -1284,7 +1308,21 @@ public class Position {
         if (possibleMoves.size() > 1)
             throw new Exception("Multiple possible moves.");
 
-        return possibleMoves.get(0);
+        Move found = possibleMoves.get(0);
+
+        Matcher findPromo = Pattern.compile("=(?<promo>[QRBN])").matcher(move);
+        if (findPromo.find()) {
+
+            char promo = findPromo.group("promo").charAt(0);
+
+            if (promo != 'Q' && promo != 'R' && promo != 'B' && promo != 'N')
+                throw new Exception("Invalid promote type supplied.");
+
+            found.setPromoteType(promo);
+
+        }
+
+        return found;
 
     }
 

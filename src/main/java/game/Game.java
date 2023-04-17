@@ -246,7 +246,7 @@ public class Game {
         final int knight1 = n5nTable1[n4];
         final int knight2 = n5nTable2[n4];
 
-        //Place first knight in the [knight1]th open square
+        // Place first knight in the [knight1]th open square
         int in1 = 0;
         int zn1 = 0;
         while (in1 <= knight1) {
@@ -372,7 +372,7 @@ public class Game {
                 settings.isWhiteTimerManged(),
                 settings.isBlackTimerManaged());
 
-        ArrayList<PGNMove> pMoves = pgn.getParsedMoves();
+        ArrayList<PGNMove> pMoves = pgn.getMoves();
 
         for (int i = 0; i < pMoves.size(); i++) {
 
@@ -385,11 +385,12 @@ public class Game {
                 if (!((promote + "").matches("[QRBN]")))
                     promote = '0';
 
-                positions.add(new Position(getLastPos(), getLastPos().getMoveByPGN(m), !getLastPos().isWhite(),
+                positions.add(new Position(getLastPos(), getLastPos().getMoveBySAN(m), !getLastPos().isWhite(),
                         true, promote));
 
                 getPreviousPos().setTimerEnd(
-                        pMoves.get(i).getTimerEnd() - calcTimerDelta(calcMovesPerSide(getPreviousPos().isWhite())));
+                        pMoves.get(i).getTimerEnd()
+                                - calcTimerDelta(calcMovesPerSide(getPreviousPos().isWhite(), positions.size() - 1)));
 
             } catch (Exception e) {
                 throw new Exception("Error importing PGN at move " + i + ", \"" + m + "\". " + e.getMessage());
@@ -423,9 +424,12 @@ public class Game {
      * @param white
      * @return
      */
-    public int calcMovesPerSide(boolean white) {
-        final boolean isTurn = getLastPos().isWhite() == white;
-        int moveCount = (int) Math.ceil(getLastPos().getMoveNumber() / 2.0);
+    public int calcMovesPerSide(boolean white, int position) {
+
+        final Position pos = positions.get(position);
+
+        final boolean isTurn = pos.isWhite() == white;
+        int moveCount = (int) Math.ceil(pos.getMoveNumber() / 2.0);
 
         if (isTurn && settings.isWhiteStarts() != white)
             --moveCount;
@@ -462,16 +466,18 @@ public class Game {
      * @param white
      * @return
      */
-    public long getPrevTimerEnd(boolean white) {
+    public long getPrevTimerEnd(boolean white, int position) {
 
-        final boolean isTurn = getLastPos().isWhite() == white;
+        final Position pos = positions.get(position);
 
-        if (isTurn && getLastPos().getTimerEnd() > -1)
-            return getLastPos().getTimerEnd();
+        final boolean isTurn = pos.isWhite() == white;
+ 
+        // if (isTurn && pos.getTimerEnd() > -1)
+        //     return pos.getTimerEnd();
 
         long lastTimerEnd = settings.getTimePerSide() * 1000;
 
-        int index = isTurn ? positions.size() - 3 : positions.size() - 2;
+        int index = isTurn ? position - 2 : position - 1;
 
         if (index >= 0)
             lastTimerEnd = positions.get(index).getTimerEnd();
@@ -487,16 +493,22 @@ public class Game {
      * @return
      */
     public long getTimerTime(boolean white) {
+        return getTimerTime(white, positions.size() - 1);
+    }
 
-        final boolean isTurn = getLastPos().isWhite() == white;
+    public long getTimerTime(boolean white, int position) {
 
-        long lastTimerEnd = getPrevTimerEnd(white);
+        final Position pos = positions.get(position);
 
-        final int moveCount = calcMovesPerSide(white);
+        final boolean isTurn = pos.isWhite() == white;
 
-        lastTimerEnd += calcTimerDelta(moveCount);
+        long lastTimerEnd = getPrevTimerEnd(white, position);
 
-        if (isTurn)
+        final int moveCount = calcMovesPerSide(white, position);
+
+        lastTimerEnd += calcTimerDelta(Math.max(moveCount, 0));
+
+        if (isTurn && position == positions.size() - 1)
             lastTimerEnd -= getElapsed();
 
         if (lastTimerEnd < 0)
@@ -523,7 +535,7 @@ public class Game {
      */
     public void stopTimer() {
 
-        final long current = getPrevTimerEnd(getLastPos().isWhite());
+        final long current = getPrevTimerEnd(getLastPos().isWhite(), positions.size() - 1);
 
         getLastPos().setTimerEnd(current - getElapsed());
 
@@ -875,11 +887,11 @@ public class Game {
         if (!black.getType().equals(""))
             tags.put("BlackType", black.getType());
 
-        if(!settings.getFen().equals(GameSettings.DEFAULT_FEN)) {
+        if (!settings.getFen().equals(GameSettings.DEFAULT_FEN)) {
             tags.put("SetUp", "1");
             tags.put("FEN", settings.getFen());
         }
-        
+
         return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 
     }

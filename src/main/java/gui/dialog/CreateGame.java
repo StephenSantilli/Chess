@@ -228,8 +228,8 @@ public class CreateGame extends Stage {
         setOnShown(we -> {
 
             sizeToScene();
-            setWidth(400);
-            setMinWidth(400);
+            // setWidth(400);
+            // setMinWidth(400);
             setMinHeight(getHeight());
             setMaxHeight(getHeight());
             setMaxWidth(getWidth());

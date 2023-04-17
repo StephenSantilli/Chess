@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import game.Game.Result;
+
 public class PGNMove {
 
     /**
@@ -14,34 +16,49 @@ public class PGNMove {
      */
     private String moveText;
 
+    private int moveNumber;
+
     /**
      * The {@code int} corresponding to the numeric annotation glyph. Will be the
      * same as the index in {@link #NAGs}.
      */
-    private int NAG;
+    private int nag;
 
     private ArrayList<String> comments;
 
-    // TODO: multiple RAVs do not work
-    private ArrayList<PGNMove> rav;
+    private Result termination;
+
+    private ArrayList<ArrayList<PGNMove>> rav;
+
+    public Result getTermination() {
+        return termination;
+    }
+
+    public void setTermination(Result termination) {
+        this.termination = termination;
+    }
 
     public String getMoveText() {
         return moveText;
     }
 
-    public int getNAG() {
-        return NAG;
+    public int getNag() {
+        return nag;
+    }
+
+    public int getMoveNumber() {
+        return moveNumber;
     }
 
     public void setMoveText(String moveText) {
         this.moveText = moveText;
     }
 
-    public void setNAG(int nAG) {
-        NAG = nAG;
+    public void setNag(int nag) {
+        this.nag = nag;
     }
 
-    public ArrayList<PGNMove> getRav() {
+    public ArrayList<ArrayList<PGNMove>> getRav() {
         return rav;
     }
 
@@ -51,57 +68,120 @@ public class PGNMove {
 
     public String toString() {
 
-        String str = "";
+        String s = "";
 
-        str += moveText;
+        s += moveText;
 
-        return str;
+        if (nag > 0)
+            s += " $" + nag;
+
+        for (int x = 0; x < comments.size(); x++) {
+
+            s += " {" + comments.get(x) + "}";
+
+        }
+
+        if (rav.size() > 0) {
+
+            for (int i = 0; i < rav.size(); i++) {
+                s += " (";
+
+                ArrayList<PGNMove> r = rav.get(i);
+
+                for (int x = 0; x < r.size(); x++) {
+
+                    PGNMove m = r.get(x);
+                    boolean black = m.getMoveNumber() % 2 != 0;
+
+                    s += (x == 0 ? "" : " ") + (((m.getMoveNumber()) / 2) + 1) + (black ? "..." : ".");
+
+                    s += " " + m;
+
+                    if (!black && x + 1 < r.size()) {
+
+                        PGNMove o = r.get(++x);
+
+                        if (m.getComments().size() > 0 || m.getNag() != 0)
+                            s += " " + (((m.getMoveNumber()) / 2) + 1) + "...";
+
+                        s += " " + o;
+
+                    }
+
+                }
+
+                s += ")";
+            }
+
+        }
+
+        if (termination != null) {
+            switch (termination) {
+                case WHITE_WIN:
+                    s += " 1-0";
+                    break;
+                case BLACK_WIN:
+                    s += " 0-1";
+                    break;
+                case DRAW:
+                    s += " 1/2-1/2";
+                    break;
+                case IN_PROGRESS:
+                    s += " *";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return s;
 
     }
 
-    public PGNMove(String move) throws Exception {
+    public PGNMove(String move, int moveNumber) throws Exception {
 
         this.moveText = move.trim();
+        this.moveNumber = moveNumber;
         this.comments = new ArrayList<>();
         this.rav = new ArrayList<>();
 
     }
 
-    // public String getTag(String key) {
+    public String getTag(String key) {
 
-    // Matcher m = Pattern.compile("\\[\\%(?<key>[^\\s]+)
-    // (?<value>[^\\]]+)\\]").matcher(comments);
+        for (int i = 0; i < comments.size(); i++) {
 
-    // while (m.find()) {
+            Matcher m = Pattern.compile("\\[\\%(?<key>[^\\s]+)(?<value>[^\\]]+)\\]").matcher(comments.get(i));
 
-    // if (m.group("key").equals(key)) {
-    // return m.group("value").trim().replaceAll("\n", "");
-    // }
+            while (m.find()) {
 
-    // }
+                if (m.group("key").equals(key)) {
+                    return m.group("value").trim().replaceAll("\n", "");
+                }
 
-    // return null;
+            }
 
-    // }
+        }
+
+        return null;
+
+    }
 
     public long getTimerEnd() {
 
-        // Pattern pat = Pattern.compile("\\{\\[%clk
-        // (?<hrs>[\\d]+):(?<mins>[\\d]+):(?<secs>[\\d]+)\\]\\}");
-        // Matcher matcher = pat.matcher(commentary);
+        Pattern pat = Pattern.compile("(?<hrs>[\\d]+):(?<mins>[\\d]+):(?<secs>[\\d]+)");
+        Matcher matcher = pat.matcher(getTag("clk"));
 
-        // long timerEnd = 0;
+        long timerEnd = 0;
 
-        // if (matcher.find()) {
-        // timerEnd += Integer.parseInt(matcher.group("hrs")) * 60 * 60 * 1000;
-        // timerEnd += Integer.parseInt(matcher.group("mins")) * 60 * 1000;
-        // timerEnd += Integer.parseInt(matcher.group("secs")) * 1000;
-        // } else
-        // timerEnd = -1;
+        if (matcher.find()) {
+            timerEnd += Integer.parseInt(matcher.group("hrs")) * 60 * 60 * 1000;
+            timerEnd += Integer.parseInt(matcher.group("mins")) * 60 * 1000;
+            timerEnd += Integer.parseInt(matcher.group("secs")) * 1000;
+        } else
+            timerEnd = -1;
 
-        // TODO Fix
-
-        return 0;
+        return timerEnd;
 
     }
 

@@ -10,6 +10,8 @@
   -activesquare: rgba(238, 187, 85, 0.75);
   -moveindicator: rgba(100, 100, 100, 0.5);
   -squareborder: rgba(200, 200, 200, 0.5);
+  -timerhistory: #bbbbbb;
+  -timerhistoryactive: #dddddd;
 }
 
 GameView, BarMenu {
@@ -64,6 +66,16 @@ PauseView {
 #guitimeractive {
   -fx-background-color: -accent-active;
   -fx-text-fill: ladder(-accent-active, white 60%, black 40%);
+}
+
+#guitimerhistory {
+  -fx-background-color: -timerhistory;
+  -fx-text-fill: ladder(-timerhistory, white 60%, black 40%);
+}
+
+#guitimerhistoryactive {
+  -fx-background-color: -timerhistoryactive;
+  -fx-text-fill: ladder(-timerhistoryactive, white 60%, black 40%);
 }
 
 #nameLabel {

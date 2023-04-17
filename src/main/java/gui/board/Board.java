@@ -402,7 +402,10 @@ public class Board extends StackPane {
         piecePane.draw(backward, ani ? p1 : null, p2);
 
         gameView.getInfoPane().getTopTimer().setWhite(gameView.isFlipped());
+        gameView.getInfoPane().getTopTimerHistory().setWhite(gameView.isFlipped());
+        
         gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
+        gameView.getInfoPane().getBottomTimerHistory().setWhite(!gameView.isFlipped());
 
         gameView.getInfoPane().updateTimers();
 

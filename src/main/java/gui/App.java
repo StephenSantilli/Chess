@@ -3,6 +3,9 @@ package gui;
 import javafx.application.*;
 import javafx.stage.*;
 import javafx.scene.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -10,9 +13,11 @@ import javafx.scene.layout.VBox;
 import java.awt.Taskbar;
 import java.awt.Toolkit;
 import java.net.URL;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import game.Game;
+import gui.dialog.Export;
 import gui.menu.BarMenu;
 
 public class App extends Application {
@@ -85,12 +90,35 @@ public class App extends Application {
             stage.setOnShown(we -> gameView.startGame());
             stage.setOnCloseRequest(we -> {
 
-                // TODO: save board position for resuming
-                final Game game = gameView.getGame();
-                if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
-                    game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
 
-                Platform.exit();
+                final Game game = gameView.getGame();
+
+                Dialog<ButtonType> sure = new Dialog<>();
+                sure.setTitle("Are you sure?");
+                sure.setContentText("Are you sure? If you quit you will lose your game.");
+                sure.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO,
+                        new ButtonType("Export", ButtonData.OTHER));
+
+                if (gameView.getGame() != null) {
+                    Optional<ButtonType> res = sure.showAndWait();
+
+                    if (res.get().getButtonData().equals(ButtonData.OTHER)) {
+
+                        Export save = new Export(gameView);
+
+                        save.showAndWait();
+
+                    } else if (res.get().equals(ButtonType.YES)) {
+                        if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
+                            game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
+
+                        Platform.exit();
+                    } else {
+                        sure.hide();
+                    }
+                } else {
+                    Platform.exit();
+                }
 
             });
 

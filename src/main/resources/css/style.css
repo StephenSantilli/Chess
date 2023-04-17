@@ -56,14 +56,14 @@ PauseView {
   -fx-background-color: transparent;
 }
 
-#guitimer {
+#guitimer, #guitimerhistory {
   -fx-border-radius: 5 5 5 5;
   -fx-background-radius: 5 5 5 5;
   -fx-alignment: center;
   -fx-font-size: 24;
 }
 
-#guitimeractive {
+#guitimeractive, #guitimerhistoryactive {
   -fx-border-radius: 5 5 5 5;
   -fx-background-radius: 5 5 5 5;
   -fx-alignment: center;

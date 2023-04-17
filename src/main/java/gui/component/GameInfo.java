@@ -10,8 +10,10 @@ import javafx.scene.layout.VBox;
 public class GameInfo extends VBox {
 
     private GUITimer topTimer, bottomTimer;
+    private GUITimerHistory topTimerHistory, bottomTimerHistory;
     private Label topName, bottomName;
     private Region spacer;
+
     public GUITimer getTopTimer() {
         return topTimer;
     }
@@ -26,6 +28,22 @@ public class GameInfo extends VBox {
 
     public void setBottomTimer(GUITimer bottomTimer) {
         this.bottomTimer = bottomTimer;
+    }
+
+    public GUITimerHistory getTopTimerHistory() {
+        return topTimerHistory;
+    }
+
+    public void setTopTimerHistory(GUITimerHistory topHistory) {
+        this.topTimerHistory = topHistory;
+    }
+
+    public GUITimerHistory getBottomTimerHistory() {
+        return bottomTimerHistory;
+    }
+
+    public void setBottomTimerHistory(GUITimerHistory bottomHistory) {
+        this.bottomTimerHistory = bottomHistory;
     }
 
     public Label getTopName() {
@@ -47,14 +65,17 @@ public class GameInfo extends VBox {
     public GameInfo(GameView board) {
 
         // - Top timer
-        topTimer = new GUITimer(board, !board.isFlipped());
-        topTimer.setAlignment(Pos.CENTER);
-
         topName = new Label();
         topName.setId("nameLabel");
         topName.setAlignment(Pos.CENTER);
 
-        VBox topInfoBox = new VBox(topName, topTimer);
+        topTimer = new GUITimer(board, !board.isFlipped());
+        topTimer.setAlignment(Pos.CENTER);
+
+        topTimerHistory = new GUITimerHistory(board, !board.isFlipped());
+        topTimerHistory.setAlignment(Pos.CENTER);
+
+        VBox topInfoBox = new VBox(topName, topTimer, topTimerHistory);
         topInfoBox.setId("infoBox");
         topInfoBox.setAlignment(Pos.TOP_CENTER);
 
@@ -63,8 +84,10 @@ public class GameInfo extends VBox {
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         // - Bottom timer
-        this.bottomTimer = new GUITimer(board, board.isFlipped());
+        bottomTimerHistory = new GUITimerHistory(board, board.isFlipped());
+        bottomTimerHistory.setAlignment(Pos.CENTER);
 
+        bottomTimer = new GUITimer(board, board.isFlipped());
         bottomTimer.setAlignment(Pos.CENTER);
 
         bottomName = new Label();
@@ -72,7 +95,7 @@ public class GameInfo extends VBox {
 
         bottomName.setAlignment(Pos.CENTER);
 
-        VBox bottomInfoBox = new VBox(bottomTimer, bottomName);
+        VBox bottomInfoBox = new VBox(bottomTimerHistory, bottomTimer, bottomName);
         bottomInfoBox.setId("infoBox");
         topInfoBox.setAlignment(Pos.BOTTOM_CENTER);
 
@@ -82,10 +105,20 @@ public class GameInfo extends VBox {
     }
 
     public void updateTimers() {
-    
+
         topTimer.update();
         bottomTimer.update();
+        topTimerHistory.update();
+        bottomTimerHistory.update();
 
+    }
+
+    public Region getSpacer() {
+        return spacer;
+    }
+
+    public void setSpacer(Region spacer) {
+        this.spacer = spacer;
     }
 
 }
