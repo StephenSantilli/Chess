@@ -1,5 +1,7 @@
 package gui.dialog;
 
+import java.io.File;
+
 import game.Game;
 import game.GameSettings;
 import game.Player;
@@ -7,6 +9,8 @@ import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
 import game.PGN.PGNParser;
+import game.engine.EngineHook;
+import game.engine.UCIEngine;
 import gui.App;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -46,7 +50,12 @@ public class CreateGame extends Stage {
 
     private Game game;
     private Client client;
+    private EngineHook engine;
     private boolean create;
+
+    public EngineHook getEngine() {
+        return engine;
+    }
 
     public boolean isWhite() {
         return white;
@@ -92,14 +101,14 @@ public class CreateGame extends Stage {
         type = new ChoiceBox<String>();
         type.setMaxWidth(Double.MAX_VALUE);
 
-        type.getItems().addAll("Two Player", "Online"/* , "Bot" */);
+        type.getItems().addAll("Two Player", "Online", "Bot");
         type.setValue("Two Player");
 
         type.setOnAction(ae -> {
 
-            boolean local = type.getValue().equals("Two Player");
+            boolean local = !type.getValue().equals("Online");
 
-            twoName.setDisable(!local);
+            twoName.setDisable(!type.getValue().equals("Two Player"));
             start.setText(local ? "Start" : "Send Challenge");
 
         });
@@ -245,6 +254,7 @@ public class CreateGame extends Stage {
     private void generate960(ActionEvent ae) {
 
         try {
+
             fenField.setText(Game.generate960Start().toString());
 
         } catch (Exception e) {
@@ -427,6 +437,49 @@ public class CreateGame extends Stage {
                 showLabel(e.getMessage(), true);
                 setAllDisabled(false);
                 clearLabel();
+
+            }
+
+        } else if (type.getValue().equals("Bot")) {
+
+            try {
+
+                boolean oneWhite = color.getValue().equals("White");
+
+                if (color.getValue().equals("Random"))
+                    oneWhite = Math.random() >= 0.5;
+
+                white = oneWhite;
+
+                long timePerSide = useTimeBox.isSelected() ? ((minPerSide.getValue() * 60) + (secPerSide.getValue()))
+                        : -1;
+                long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue()))
+                        : -1;
+
+                UCIEngine en = new UCIEngine(new File("./Stockfish"));
+                en.setOption("Skill Level", "1");
+                en.waitReady();
+
+                game = new Game((oneWhite ? oneName.getText() : en.getName()),
+                        (oneWhite ? en.getName() : oneName.getText()),
+                        oneWhite ? Player.HUMAN : Player.PROGRAM,
+                        !oneWhite ? Player.HUMAN : Player.PROGRAM,
+                        new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
+                                timePerSide,
+                                timePerMove,
+                                true,
+                                true,
+                                true,
+                                true));
+
+                engine = new EngineHook(en, game, !oneWhite);
+
+                create = true;
+                hide();
+
+            } catch (Exception e) {
+
+                showLabel(e.getMessage(), true);
 
             }
 

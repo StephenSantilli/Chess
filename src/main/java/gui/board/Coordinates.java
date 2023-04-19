@@ -23,6 +23,9 @@ public class Coordinates extends Pane {
         final Board board = gameView.getBoard();
         final double squareSize = board.getSquareSize();
 
+        if(!gameView.isFlipped()) {
+            
+        }
         for (int r = 8; r > 0; r--) {
 
             final Square square = new Square(1, r);

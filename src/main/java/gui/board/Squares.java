@@ -25,7 +25,7 @@ public class Squares extends Pane {
             for (int f = 8; f > 0; f--) {
 
                 final Square square = new Square(f, r);
-                final String radius = Board.getSquareCornerRadius(square);
+                final String radius = Board.getSquareCornerRadius(square, gameView.isFlipped());
 
                 Region rect = new Region();
 

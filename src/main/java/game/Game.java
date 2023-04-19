@@ -1,5 +1,13 @@
 package game;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,11 +18,17 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
 import game.GameEvent.Type;
 import game.PGN.PGNMove;
 import game.PGN.PGNParser;
 
 public class Game {
+
+    public static void main(String[] args) throws IOException {
+
+    }
 
     public enum Result {
 
@@ -89,7 +103,7 @@ public class Game {
      */
     private boolean paused;
 
-    //TODO: use this instead of position draw
+    // TODO: use this instead of position draw
     /**
      * The player that offered a draw. {@code null} if no draw has been offered or
      * the previous draw offer has been declined.
@@ -496,6 +510,9 @@ public class Game {
 
         final int moveCount = calcMovesPerSide(white, position);
 
+        if (isTurn && pos.getTimerEnd() > -1)
+            lastTimerEnd = pos.getTimerEnd();
+
         lastTimerEnd += calcTimerDelta(Math.max(moveCount, 0));
 
         if (isTurn && position == positions.size() - 1)
@@ -525,7 +542,10 @@ public class Game {
      */
     public void stopTimer() {
 
-        final long current = getPrevTimerEnd(getLastPos().isWhite(), positions.size() - 1);
+        long current = getPrevTimerEnd(getLastPos().isWhite(), positions.size() - 1);
+
+        if (getLastPos().getTimerEnd() > -1)
+            current = getLastPos().getTimerEnd();
 
         getLastPos().setTimerEnd(current - getElapsed());
 
@@ -613,6 +633,10 @@ public class Game {
 
             if (a.getOrigin().equals(origin) && a.getDestination().equals(destination) && isCastle == a.isCastle())
                 move = a;
+            else if (a.isCastle() && getLastPos().getPieceAtSquare(destination) != null
+                    && getLastPos().getPieceAtSquare(destination).equals(a.getRook())) {
+                move = a;
+            }
 
         }
 

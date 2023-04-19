@@ -37,7 +37,7 @@ public class Highlights extends Pane {
             oRect.setLayoutX(board.getXBySquare(origin));
             oRect.setLayoutY(board.getYBySquare(origin));
 
-            oRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(origin));
+            oRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(origin, gameView.isFlipped()));
 
             final Square destination = pos.getMove().getDestination();
 
@@ -50,7 +50,7 @@ public class Highlights extends Pane {
             dRect.setLayoutX(board.getXBySquare(destination));
             dRect.setLayoutY(board.getYBySquare(destination));
 
-            dRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(destination));
+            dRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(destination, gameView.isFlipped()));
 
             getChildren().addAll(oRect, dRect);
 
@@ -70,7 +70,7 @@ public class Highlights extends Pane {
             aRect.setLayoutX(board.getXBySquare(aSquare));
             aRect.setLayoutY(board.getYBySquare(aSquare));
 
-            aRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(aSquare));
+            aRect.setStyle("-fx-background-radius: " + Board.getSquareCornerRadius(aSquare, gameView.isFlipped()));
 
             getChildren().addAll(aRect);
 

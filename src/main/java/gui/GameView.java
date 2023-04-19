@@ -9,6 +9,7 @@ import game.Game.Reason;
 import game.Game.Result;
 import game.GameEvent.Type;
 import game.LAN.Client;
+import game.engine.EngineHook;
 import gui.board.Board;
 import gui.component.ChatArea;
 import gui.component.GameInfo;
@@ -41,6 +42,7 @@ public class GameView extends HBox implements GameListener {
 
     private Game game;
     private Client client;
+    private EngineHook engine;
 
     private App app;
 
@@ -358,10 +360,14 @@ public class GameView extends HBox implements GameListener {
             game = setup.getGame();
             game.addListener(this);
 
-            if (client == null)
+            engine = setup.getEngine();
+
+            if (client == null && engine == null)
                 color = TWO_PLAYER;
-            else
+            else if (client != null)
                 color = setup.isWhite() ? WHITE : BLACK;
+            else if (engine != null)
+                color = !engine.isWhite() ? WHITE : BLACK;
 
             currentPos = 0;
 
@@ -388,6 +394,9 @@ public class GameView extends HBox implements GameListener {
             chatBox.update();
 
             goToLastPos();
+
+            if (!isFlipped() && color == BLACK)
+                flip();
 
             if (!app.getStage().isFocused())
                 app.getStage().toFront();

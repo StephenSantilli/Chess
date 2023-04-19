@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "UCIEngine",
+            "request": "launch",
+            "mainClass": "game.engine.UCIEngine",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
             "name": "PGNParser",
             "request": "launch",
             "mainClass": "game.PGN.PGNParser",

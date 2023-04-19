@@ -37,7 +37,7 @@ public class SquareBorders extends Pane {
 
         border.setStyle(
                 "-fx-border-width: " + strokeWidth + ";" +
-                        "-fx-border-radius: " + Board.getSquareCornerRadius(square) + ";");
+                        "-fx-border-radius: " + Board.getSquareCornerRadius(square, gameView.isFlipped()) + ";");
 
         getChildren().add(border);
 

@@ -14,6 +14,8 @@ TableColumn {
 #pieceBox {
   /* -fx-spacing: 5; */
   -fx-alignment: center-right;
+  /* -fx-border-color: red;
+  -fx-border-width: 5; */
 }
 
 #lightCoord,

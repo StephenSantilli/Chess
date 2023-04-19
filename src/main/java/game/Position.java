@@ -1,6 +1,8 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,8 +28,6 @@ public class Position {
     private int moveNumber;
 
     private Piece[][] pieces;
-
-    private ArrayList<Piece> capturedPieces;
 
     /**
      * All of the moves that can be made. If {@code checkForMate} is {@code true}
@@ -121,8 +121,77 @@ public class Position {
         return pieces;
     }
 
-    public ArrayList<Piece> getCapturedPieces() {
-        return capturedPieces;
+    public ArrayList<Piece> getCapturedPieces(boolean white) {
+
+        ArrayList<Piece> cap = new ArrayList<>();
+
+        int k = 1, q = 1, r = 2, b = 2, n = 2, p = 8;
+
+        for (int rk = 0; rk < 8; rk++) {
+
+            for (int f = 0; f < 8; f++) {
+
+                Piece a = pieces[rk][f];
+                if (a != null && a.isWhite() == white) {
+
+                    switch (a.getCode()) {
+                        case 'K':
+                            --k;
+                            break;
+                        case 'Q':
+                            --q;
+                            break;
+                        case 'R':
+                            --r;
+                            break;
+                        case 'B':
+                            --b;
+                            break;
+                        case 'N':
+                            --n;
+                            break;
+                        case 'P':
+                            --p;
+                            break;
+                    }
+                }
+
+            }
+
+        }
+
+        while (k > 0) {
+            cap.add(new King(0, 0, white));
+            --k;
+        }
+
+        while (q > 0) {
+            cap.add(new Queen(0, 0, white));
+            --q;
+        }
+
+        while (r > 0) {
+            cap.add(new Rook(0, 0, white));
+            --r;
+        }
+
+        while (b > 0) {
+            cap.add(new Bishop(0, 0, white));
+            --b;
+        }
+
+        while (n > 0) {
+            cap.add(new Knight(0, 0, white));
+            --n;
+        }
+
+        while (p > 0) {
+            cap.add(new Pawn(0, 0, white));
+            --p;
+        }
+
+        return cap;
+
     }
 
     public long getTimerEnd() {
@@ -342,7 +411,6 @@ public class Position {
 
         white = true;
         this.mateChecked = false;
-        this.capturedPieces = new ArrayList<Piece>();
 
         this.moveNumber = 0;
         this.timerEnd = -1;
@@ -367,8 +435,6 @@ public class Position {
         this.timerEnd = -1;
 
         this.drawOfferer = NO_OFFER;
-
-        this.capturedPieces = new ArrayList<Piece>();
 
         String[] ranks = a[0].split("/");
 
@@ -464,8 +530,6 @@ public class Position {
             }
         }
 
-        this.capturedPieces = new ArrayList<Piece>();
-
         Piece wkr = getPieceAtSquare(new Square(8, 1));
         Piece wqr = getPieceAtSquare(new Square(1, 1));
         Piece bkr = getPieceAtSquare(new Square(8, 8));
@@ -540,9 +604,6 @@ public class Position {
 
         Piece[][] prevPieces = prev.getPieces();
 
-        this.capturedPieces = new ArrayList<>();
-        prev.getCapturedPieces().forEach(capturedPieces::add);
-
         this.moveNumber = prev.getMoveNumber() + 1;
 
         for (int r = 0; r < prevPieces.length; r++) {
@@ -598,7 +659,6 @@ public class Position {
 
             final Square capSquare = move.getCaptureSquare();
 
-            capturedPieces.add(pieces[capSquare.getRank() - 1][capSquare.getFile() - 1]);
             pieces[capSquare.getRank() - 1][capSquare.getFile() - 1] = null;
 
         }
@@ -912,22 +972,25 @@ public class Position {
     }
 
     /**
-     * Gets the point total of the pieces that {@code white} has captured.
+     * Gets the point total of the pieces that {@code white} has.
      * 
-     * @param white The color of the capturer, or the opposite of the pieces that
-     *              were captured.
-     * @return A point total of the pieces captured.
+     * @param white The color
+     * @return A point total of the pieces.
      */
-    public int getCapturedPiecePoints(boolean white) {
+    public int getPoints(boolean white) {
 
         int points = 0;
 
-        for (Piece cap : capturedPieces) {
+        for (int r = 0; r < 8; r++) {
 
-            if (cap.isWhite() == white)
-                continue;
+            for (int f = 0; f < 8; f++) {
 
-            points += cap.getPoints();
+                Piece a = pieces[r][f];
+
+                if (a.isWhite() == white)
+                    points += a.getPoints();
+
+            }
 
         }
 

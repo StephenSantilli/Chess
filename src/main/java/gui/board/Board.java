@@ -405,7 +405,7 @@ public class Board extends StackPane {
 
         gameView.getInfoPane().getTopTimer().setWhite(gameView.isFlipped());
         gameView.getInfoPane().getTopTimerHistory().setWhite(gameView.isFlipped());
-        
+
         gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
         gameView.getInfoPane().getBottomTimerHistory().setWhite(!gameView.isFlipped());
 
@@ -420,6 +420,8 @@ public class Board extends StackPane {
         borderPane.drawBorder(null);
 
         activeUpdated();
+
+        coordsPane.draw();
 
         gameView.getGameMenu().update();
         gameView.getViewMenu().update();
@@ -569,18 +571,29 @@ public class Board extends StackPane {
      * 
      * @param square The square to use.
      */
-    public static String getSquareCornerRadius(Square square) {
+    public static String getSquareCornerRadius(Square square, boolean flipped) {
 
         final double cornerRadius = 10;
 
-        if (square.getFile() == 1 && square.getRank() == 1)
-            return "0 0 0 " + cornerRadius;
-        else if (square.getFile() == 8 && square.getRank() == 1)
-            return "0 0 " + cornerRadius + " 0";
-        else if (square.getFile() == 8 && square.getRank() == 8)
-            return "0 " + cornerRadius + " 0 0";
-        else if (square.getFile() == 1 && square.getRank() == 8)
-            return cornerRadius + " 0 0 0";
+        if (!flipped) {
+            if (square.getFile() == 1 && square.getRank() == 1)
+                return "0 0 0 " + cornerRadius;
+            else if (square.getFile() == 8 && square.getRank() == 1)
+                return "0 0 " + cornerRadius + " 0";
+            else if (square.getFile() == 8 && square.getRank() == 8)
+                return "0 " + cornerRadius + " 0 0";
+            else if (square.getFile() == 1 && square.getRank() == 8)
+                return cornerRadius + " 0 0 0";
+        } else {
+            if (square.getFile() == 1 && square.getRank() == 1)
+                return "0 " + cornerRadius + " 0 0";
+            else if (square.getFile() == 8 && square.getRank() == 1)
+                return cornerRadius + " 0 0 0";
+            else if (square.getFile() == 8 && square.getRank() == 8)
+                return "0 0 0 " + cornerRadius;
+            else if (square.getFile() == 1 && square.getRank() == 8)
+                return "0 0 " + cornerRadius + " 0";
+        }
 
         return "0 0 0 0";
 

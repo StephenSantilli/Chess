@@ -167,7 +167,7 @@ public class GUIPiece {
         ArrayList<Move> castles = new ArrayList<>();
         castles.addAll(game.getLastPos().getMoves());
         castles.removeIf(
-                (m) -> !m.getPiece().equals(active) || !m.isCastle() ||  m.getRookOrigin() == null || !m.getRookOrigin().equals(tarPc.getSquare()));
+                (m) -> !m.getPiece().equals(active) || !m.isCastle() ||  m.getRookOrigin() == null || (tarPc != null && !m.getRookOrigin().equals(tarPc.getSquare())));
 
         if (castles.size() == 0)
             return null;

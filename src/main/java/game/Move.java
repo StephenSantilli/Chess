@@ -74,7 +74,7 @@ public class Move {
      */
     @Override
     public String toString() {
-        return origin.toString() + " to " + destination.toString();
+        return origin.toString() + destination.toString() + (promoteType == '0' ? "" : promoteType);
     }
 
     @Override
