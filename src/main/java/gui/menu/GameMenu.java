@@ -1,7 +1,6 @@
 package gui.menu;
 
-import game.Result;
-import game.ResultReason;
+import game.*;
 import game.LAN.ErrorMessage;
 import gui.GameView;
 import gui.dialog.Export;
@@ -79,15 +78,15 @@ public class GameMenu extends Menu {
             if (board.getColor() == GameView.TWO_PLAYER) {
 
                 board.getGame().markGameOver(
-                        board.getGame().getLastPos().isWhite() ? Result.BLACK_WIN : Result.WHITE_WIN,
-                        ResultReason.RESIGNATION);
+                        board.getGame().getLastPos().isWhite() ? Game.Result.BLACK_WIN : Game.Result.WHITE_WIN,
+                        Game.Reason.RESIGNATION);
                 return;
 
             }
 
             board.getGame().markGameOver(
-                    board.getColor() == GameView.WHITE ? Result.BLACK_WIN : Result.WHITE_WIN,
-                    ResultReason.RESIGNATION);
+                    board.getColor() == GameView.WHITE ? Game.Result.BLACK_WIN : Game.Result.WHITE_WIN,
+                    Game.Reason.RESIGNATION);
 
         });
 
@@ -97,9 +96,9 @@ public class GameMenu extends Menu {
             if (board.getColor() == GameView.TWO_PLAYER) {
 
                 board.getGame().markGameOver(
-                        Result.DRAW,
-                        board.getGame().getLastPos().isWhite() ? ResultReason.WHITE_OFFERED_DRAW
-                                : ResultReason.BLACK_OFFERED_DRAW);
+                        Game.Result.DRAW,
+                        board.getGame().getLastPos().isWhite() ? Game.Reason.WHITE_OFFERED_DRAW
+                                : Game.Reason.BLACK_OFFERED_DRAW);
                 return;
 
             }
@@ -172,7 +171,7 @@ public class GameMenu extends Menu {
 
             disconnect.setDisable(board.getClient() == null);
 
-            resign.setDisable(board.getGame().getResult() != Result.IN_PROGRESS);
+            resign.setDisable(board.getGame().getResult() != Game.Result.IN_PROGRESS);
             drawOffer.setDisable(!board.getGame().canDrawOffer());
 
             showPgn.setDisable(false);

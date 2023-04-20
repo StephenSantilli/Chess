@@ -2,8 +2,7 @@ package gui.board;
 
 import java.util.ArrayList;
 
-import game.Result;
-import game.Move;
+import game.*;
 import gui.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Ellipse;
@@ -11,14 +10,21 @@ import javafx.scene.shape.Ellipse;
 public class MoveIndicators extends Pane {
 
     private GameView gameView;
+    private ArrayList<Square> moveSquares;
+
+    public ArrayList<Square> getMoveSquares() {
+        return moveSquares;
+    }
 
     public MoveIndicators(GameView gameView) {
         this.gameView = gameView;
+        moveSquares = new ArrayList<>();
     }
 
     public void draw() {
 
         getChildren().clear();
+        moveSquares.clear();
 
         final Board board = gameView.getBoard();
         final double squareSize = board.getSquareSize();
@@ -27,7 +33,7 @@ public class MoveIndicators extends Pane {
                 || board == null
                 || board.getActive() == null
                 || !gameView.isTurn()
-                || gameView.getGame().getResult() != Result.IN_PROGRESS)
+                || gameView.getGame().getResult() != Game.Result.IN_PROGRESS)
             return;
 
         ArrayList<Move> pMoves = gameView.getGame().getLastPos().getMoves();
@@ -37,10 +43,13 @@ public class MoveIndicators extends Pane {
             if (!m.getPiece().equals(board.getActive().getPiece()))
                 continue;
 
-            final double x = board.getXBySquare(m.getDestination(), false);
-            final double y = board.getYBySquare(m.getDestination(), false);
+            final Square dest = m.isCastle() ? m.getRookOrigin() : m.getDestination();
+            moveSquares.add(dest);
 
-            if (m.isCapture() && m.getCaptureSquare().equals(m.getDestination())) {
+            final double x = board.getXBySquare(dest, false);
+            final double y = board.getYBySquare(dest, false);
+
+            if ((m.isCapture() && m.getCaptureSquare().equals(dest)) || m.isCastle()) {
 
                 Ellipse captureCircle = new Ellipse((squareSize - (squareSize * .1)) / 2.0,
                         (squareSize - (squareSize * .1)) / 2.0);

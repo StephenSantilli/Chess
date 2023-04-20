@@ -3,9 +3,23 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Position",
+            "name": "UCIEngine",
             "request": "launch",
-            "mainClass": "game.Position",
+            "mainClass": "game.engine.UCIEngine",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
+            "name": "PGNParser",
+            "request": "launch",
+            "mainClass": "game.PGN.PGNParser",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
+            "name": "Game",
+            "request": "launch",
+            "mainClass": "game.Game",
             "projectName": "Chess"
         },
         {

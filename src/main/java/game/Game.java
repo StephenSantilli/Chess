@@ -1,19 +1,62 @@
 package game;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
+import game.GameEvent.Type;
 import game.PGN.PGNMove;
 import game.PGN.PGNParser;
 
 public class Game {
+
+    public static void main(String[] args) throws IOException {
+
+    }
+
+    public enum Result {
+
+        NOT_STARTED,
+        IN_PROGRESS,
+        WHITE_WIN,
+        BLACK_WIN,
+        DRAW,
+        TERMINATED
+
+    }
+
+    public enum Reason {
+
+        IN_PROGRESS,
+        CHECKMATE,
+        FLAGFALL,
+        WHITE_OFFERED_DRAW,
+        BLACK_OFFERED_DRAW,
+        STALEMATE,
+        DEAD_INSUFFICIENT_MATERIAL,
+        DEAD_NO_POSSIBLE_MATE,
+        REPETITION,
+        FIFTY_MOVE,
+        RESIGNATION,
+        OTHER;
+
+    }
 
     public static final String VERSION = Game.class.getPackage().getImplementationVersion() != null
             ? Game.class.getPackage().getImplementationVersion()
@@ -48,7 +91,7 @@ public class Game {
      * <p>
      * The reason for the result of the game.
      */
-    private ResultReason resultReason;
+    private Reason resultReason;
 
     /**
      * The system time that the active timer was started.
@@ -59,6 +102,13 @@ public class Game {
      * Whether or not the game is paused.
      */
     private boolean paused;
+
+    // TODO: use this instead of position draw
+    /**
+     * The player that offered a draw. {@code null} if no draw has been offered or
+     * the previous draw offer has been declined.
+     */
+    private Player drawOfferer;
 
     /**
      * The service that checks for flagfall in the background.
@@ -71,10 +121,10 @@ public class Game {
     Runnable flagfall = () -> {
 
         if (getTimerTime(true) <= 0)
-            markGameOver(Result.BLACK_WIN, ResultReason.FLAGFALL);
+            markGameOver(Game.Result.BLACK_WIN, Game.Reason.FLAGFALL);
 
         if (getTimerTime(false) <= 0)
-            markGameOver(Result.WHITE_WIN, ResultReason.FLAGFALL);
+            markGameOver(Game.Result.WHITE_WIN, Game.Reason.FLAGFALL);
 
     };
 
@@ -94,7 +144,7 @@ public class Game {
         return result;
     }
 
-    public ResultReason getResultReason() {
+    public Reason getResultReason() {
         return resultReason;
     }
 
@@ -127,6 +177,145 @@ public class Game {
     }
 
     /**
+     * Generates a Chess960 starting position using the algorithm found here:
+     * https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation
+     * 
+     * @return A Chess960 starting position.
+     */
+    public static Position generate960Start() throws Exception {
+
+        char[] pcs = new char[8];
+
+        // Generate random number from 0 to 959
+        Random rand = new Random();
+        final int n = rand.nextInt(0, 960);
+
+        final int n2 = n / 4;
+        final int b1 = n % 4;
+
+        // Place light-square bishop
+        switch (b1) {
+            case 0:
+                pcs[1] = 'B';
+                break;
+            case 1:
+                pcs[3] = 'B';
+                break;
+            case 2:
+                pcs[5] = 'B';
+                break;
+            case 3:
+                pcs[7] = 'B';
+                break;
+        }
+
+        final int n3 = n2 / 4;
+        final int b2 = n2 % 4;
+
+        // Place dark-square bishop
+        switch (b2) {
+            case 0:
+                pcs[0] = 'B';
+                break;
+            case 1:
+                pcs[2] = 'B';
+                break;
+            case 2:
+                pcs[4] = 'B';
+                break;
+            case 3:
+                pcs[6] = 'B';
+                break;
+        }
+
+        final int n4 = n3 / 6;
+        final int q = n3 % 6;
+
+        // Place queen in the [q]th open square
+        int iq = 0;
+        int zq = 0;
+        while (iq <= q) {
+
+            if (pcs[zq] == '\u0000')
+                iq++;
+
+            if (iq <= q)
+                zq++;
+
+        }
+
+        pcs[zq] = 'Q';
+
+        // Place Knights based on the N5N table
+        final int[] n5nTable1 = { 0, 0, 0, 0, 1, 1, 1, 2, 2, 3 };
+        final int[] n5nTable2 = { 1, 2, 3, 4, 2, 3, 4, 3, 4, 4 };
+
+        final int knight1 = n5nTable1[n4];
+        final int knight2 = n5nTable2[n4];
+
+        // Place first knight in the [knight1]th open square
+        int in1 = 0;
+        int zn1 = 0;
+        while (in1 <= knight1) {
+
+            if (pcs[zn1] == '\u0000')
+                in1++;
+
+            if (in1 <= knight1)
+                zn1++;
+
+        }
+
+        // Place second knight in the [knight2]th open square
+        int in2 = 0;
+        int zn2 = 0;
+        while (in2 <= knight2) {
+
+            if (pcs[zn2] == '\u0000')
+                in2++;
+
+            if (in2 <= knight2)
+                zn2++;
+
+        }
+
+        pcs[zn1] = 'N';
+        pcs[zn2] = 'N';
+
+        int x = 0;
+
+        // Place rook in first open square
+        while (x < 8 && pcs[x] != '\u0000') {
+            ++x;
+        }
+
+        pcs[x] = 'R';
+        ++x;
+
+        // Place king in middle open square
+        while (x < 8 && pcs[x] != '\u0000') {
+            ++x;
+        }
+
+        pcs[x] = 'K';
+        ++x;
+
+        // Place rook in last open square
+        while (x < 8 && pcs[x] != '\u0000') {
+            ++x;
+        }
+
+        pcs[x] = 'R';
+
+        String fenRow = new String(pcs);
+
+        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w KQkq - 0 1";
+
+        return new Position(fen);
+
+    }
+
+    /**
      * Initializes a new Game with the specified time control and marks if there
      * will be an opponent.
      * 
@@ -148,13 +337,13 @@ public class Game {
 
         this.settings = settings;
 
-        result = Result.NOT_STARTED;
-        resultReason = ResultReason.IN_PROGRESS;
+        result = Game.Result.NOT_STARTED;
+        resultReason = Game.Reason.IN_PROGRESS;
 
         if (settings.getFen().equals(GameSettings.DEFAULT_FEN))
-            positions.add(new Position(this));
+            positions.add(new Position());
         else
-            positions.add(new Position(settings.getFen(), this));
+            positions.add(new Position(settings.getFen()));
 
     }
 
@@ -163,34 +352,34 @@ public class Game {
         positions = new ArrayList<Position>();
         messages = new ArrayList<Chat>();
         this.listeners = new ArrayList<GameListener>();
-        result = Result.NOT_STARTED;
-        resultReason = ResultReason.IN_PROGRESS;
+        result = Game.Result.NOT_STARTED;
+        resultReason = Game.Reason.IN_PROGRESS;
 
-        // TODO: support player type
         final String whiteName = pgn.getTags().getOrDefault("White", "White");
-        this.white = new Player((whiteName.equals("") ? "White" : whiteName),
-                pgn.getTags().getOrDefault("WhiteType", Player.HUMAN), true);
+        final String whiteType = pgn.getTags().getOrDefault("WhiteType", Player.HUMAN);
+        this.white = new Player(whiteName, whiteType, true);
 
         final String blackName = pgn.getTags().getOrDefault("Black", "Black");
-        this.black = new Player((blackName.equals("") ? "Black" : blackName),
-                pgn.getTags().getOrDefault("BlackType", Player.HUMAN), false);
+        final String blackType = pgn.getTags().getOrDefault("BlackType", Player.HUMAN);
+        this.black = new Player(blackName, blackType, false);
 
-        this.settings = new GameSettings(overridePGNSettings ? settings.getTimePerSide() : pgn.getTimePerSide(),
+        final String setup = pgn.getTags().getOrDefault("SetUp", "");
+        final String fen = pgn.getTags().getOrDefault("FEN", "");
+
+        if (setup.equals("1") && !fen.equals("")) {
+            positions.add(new Position(fen));
+        } else
+            positions.add(new Position());
+
+        this.settings = new GameSettings(setup.equals("1") && !fen.equals("") ? fen : GameSettings.DEFAULT_FEN,
+                overridePGNSettings ? settings.getTimePerSide() : pgn.getTimePerSide(),
                 overridePGNSettings ? settings.getTimePerMove() : pgn.getTimePerMove(),
                 settings.canPause(),
                 settings.canUndo(),
                 settings.isWhiteTimerManged(),
                 settings.isBlackTimerManaged());
 
-        // TODO: support setup tag, so you can start from non-default positions
-        final String setup = pgn.getTags().getOrDefault("SetUp", "");
-        final String fen = pgn.getTags().getOrDefault("FEN", "");
-        if (setup.equals("1") && !fen.equals("")) {
-            positions.add(new Position(fen, this));
-        } else
-            positions.add(new Position(this));
-
-        ArrayList<PGNMove> pMoves = pgn.getParsedMoves();
+        ArrayList<PGNMove> pMoves = pgn.getMoves();
 
         for (int i = 0; i < pMoves.size(); i++) {
 
@@ -203,11 +392,12 @@ public class Game {
                 if (!((promote + "").matches("[QRBN]")))
                     promote = '0';
 
-                positions.add(new Position(getLastPos(), getLastPos().getMoveByPGN(m), this, !getLastPos().isWhite(),
+                positions.add(new Position(getLastPos(), getLastPos().getMoveBySAN(m), !getLastPos().isWhite(),
                         true, promote));
 
                 getPreviousPos().setTimerEnd(
-                        pMoves.get(i).getTimerEnd() - calcTimerDelta(calcMovesPerSide(getPreviousPos().isWhite())));
+                        pMoves.get(i).getTimerEnd()
+                                - calcTimerDelta(calcMovesPerSide(getPreviousPos().isWhite(), positions.size() - 1)));
 
             } catch (Exception e) {
                 throw new Exception("Error importing PGN at move " + i + ", \"" + m + "\". " + e.getMessage());
@@ -215,10 +405,23 @@ public class Game {
 
         }
 
-        // if (positions.size() == 1)
-        // throw new Exception("Position import failed.");
+        fireEvent(new GameEvent(Type.IMPORTED));
 
-        fireEvent(GameEvent.IMPORTED);
+        final String res = pgn.getTags().getOrDefault("Result", "*");
+        switch (res) {
+            case "1/2-1/2":
+                result = Result.DRAW;
+                resultReason = Reason.OTHER;
+                break;
+            case "1-0":
+                result = Result.WHITE_WIN;
+                resultReason = Reason.OTHER;
+                break;
+            case "0-1":
+                result = Result.BLACK_WIN;
+                resultReason = Reason.OTHER;
+                break;
+        }
 
     }
 
@@ -228,9 +431,12 @@ public class Game {
      * @param white
      * @return
      */
-    public int calcMovesPerSide(boolean white) {
-        final boolean isTurn = getLastPos().isWhite() == white;
-        int moveCount = (int) Math.ceil(getLastPos().getMoveNumber() / 2.0);
+    public int calcMovesPerSide(boolean white, int position) {
+
+        final Position pos = positions.get(position);
+
+        final boolean isTurn = pos.isWhite() == white;
+        int moveCount = (int) Math.ceil(pos.getMoveNumber() / 2.0);
 
         if (isTurn && settings.isWhiteStarts() != white)
             --moveCount;
@@ -267,16 +473,15 @@ public class Game {
      * @param white
      * @return
      */
-    public long getPrevTimerEnd(boolean white) {
+    public long getPrevTimerEnd(boolean white, int position) {
 
-        final boolean isTurn = getLastPos().isWhite() == white;
+        final Position pos = positions.get(position);
 
-        if (isTurn && getLastPos().getTimerEnd() > -1)
-            return getLastPos().getTimerEnd();
+        final boolean isTurn = pos.isWhite() == white;
 
         long lastTimerEnd = settings.getTimePerSide() * 1000;
 
-        int index = isTurn ? positions.size() - 3 : positions.size() - 2;
+        int index = isTurn ? position - 2 : position - 1;
 
         if (index >= 0)
             lastTimerEnd = positions.get(index).getTimerEnd();
@@ -292,16 +497,25 @@ public class Game {
      * @return
      */
     public long getTimerTime(boolean white) {
+        return getTimerTime(white, positions.size() - 1);
+    }
 
-        final boolean isTurn = getLastPos().isWhite() == white;
+    public long getTimerTime(boolean white, int position) {
 
-        long lastTimerEnd = getPrevTimerEnd(white);
+        final Position pos = positions.get(position);
 
-        final int moveCount = calcMovesPerSide(white);
+        final boolean isTurn = pos.isWhite() == white;
 
-        lastTimerEnd += calcTimerDelta(moveCount);
+        long lastTimerEnd = getPrevTimerEnd(white, position);
 
-        if (isTurn)
+        final int moveCount = calcMovesPerSide(white, position);
+
+        if (isTurn && pos.getTimerEnd() > -1)
+            lastTimerEnd = pos.getTimerEnd();
+
+        lastTimerEnd += calcTimerDelta(Math.max(moveCount, 0));
+
+        if (isTurn && position == positions.size() - 1)
             lastTimerEnd -= getElapsed();
 
         if (lastTimerEnd < 0)
@@ -328,7 +542,10 @@ public class Game {
      */
     public void stopTimer() {
 
-        final long current = getPrevTimerEnd(getLastPos().isWhite());
+        long current = getPrevTimerEnd(getLastPos().isWhite(), positions.size() - 1);
+
+        if (getLastPos().getTimerEnd() > -1)
+            current = getLastPos().getTimerEnd();
 
         getLastPos().setTimerEnd(current - getElapsed());
 
@@ -342,7 +559,12 @@ public class Game {
             return;
 
         start = new Date();
+
+        final String res = result.toString();
+        final String reas = resultReason.toString();
+
         result = Result.IN_PROGRESS;
+        resultReason = Reason.IN_PROGRESS;
 
         startTimer();
 
@@ -353,54 +575,55 @@ public class Game {
 
         }
 
-        fireEvent(GameEvent.STARTED);
+        fireEvent(new GameEvent(Type.STARTED));
 
-        if (getLastPos().isCheckmate()) {
+        checkGameOver();
 
-            markGameOver(getLastPos().isWhite() ? Result.BLACK_WIN : Result.WHITE_WIN, ResultReason.CHECKMATE);
-            return;
-
-        }
-
-        if (getLastPos().isInsufficientMaterial()) {
-
-            markGameOver(Result.DRAW, ResultReason.DEAD_INSUFFICIENT_MATERIAL);
-            return;
-
-        }
-
-        if (getLastPos().isStalemate()) {
-
-            markGameOver(Result.DRAW, ResultReason.STALEMATE);
-            return;
-
-        }
+        if (result == Result.IN_PROGRESS && Result.valueOf(res) != Result.IN_PROGRESS && Result
+                .valueOf(res) != Result.NOT_STARTED)
+            markGameOver(Result.valueOf(res), Reason.valueOf(reas));
 
     }
 
-    public void markGameOver(Result result, ResultReason resultReason) {
+    public void checkGameOver() {
+
+        if (getLastPos().isCheckmate())
+            markGameOver(getLastPos().isWhite() ? Game.Result.BLACK_WIN : Game.Result.WHITE_WIN, Game.Reason.CHECKMATE);
+
+        else if (getLastPos().isInsufficientMaterial())
+            markGameOver(Game.Result.DRAW, Game.Reason.DEAD_INSUFFICIENT_MATERIAL);
+
+        else if (getLastPos().isStalemate())
+            markGameOver(Game.Result.DRAW, Game.Reason.STALEMATE);
+
+    }
+
+    public void markGameOver(Result result, Reason resultReason) {
 
         this.result = result;
         this.resultReason = resultReason;
 
-        if (result == Result.NOT_STARTED || result == Result.IN_PROGRESS)
+        if (result == Game.Result.NOT_STARTED || result == Game.Result.IN_PROGRESS)
             return;
 
         if (flagfallChecker != null)
             flagfallChecker.shutdownNow();
 
         stopTimer();
-
-        fireEvent(GameEvent.OVER);
+        fireEvent(new GameEvent(Type.OVER));
 
     }
 
     public void makeMove(Square origin, Square destination, char promoteType) throws Exception {
+        this.makeMove(origin, destination, promoteType, false);
+    }
+
+    public void makeMove(Square origin, Square destination, char promoteType, boolean isCastle) throws Exception {
 
         if (paused)
             throw new Exception("Game is paused.");
 
-        if (result != Result.IN_PROGRESS)
+        if (result != Game.Result.IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
         Move move = null;
@@ -408,8 +631,12 @@ public class Game {
 
             Move a = getLastPos().getMoves().get(i);
 
-            if (a.getOrigin().equals(origin) && a.getDestination().equals(destination))
+            if (a.getOrigin().equals(origin) && a.getDestination().equals(destination) && isCastle == a.isCastle())
                 move = a;
+            else if (a.isCastle() && getLastPos().getPieceAtSquare(destination) != null
+                    && getLastPos().getPieceAtSquare(destination).equals(a.getRook())) {
+                move = a;
+            }
 
         }
 
@@ -420,7 +647,7 @@ public class Game {
                 && (promoteType != 'Q' && promoteType != 'R' && promoteType != 'B' && promoteType != 'N'))
             throw new Exception("Invalid promotion type.");
 
-        Position movePosition = new Position(getLastPos(), move, this, !getLastPos().isWhite(), true, promoteType);
+        Position movePosition = new Position(getLastPos(), move, !getLastPos().isWhite(), true, promoteType);
 
         if (movePosition.isGivingCheck())
             throw new Exception("Cannot move into check.");
@@ -433,7 +660,7 @@ public class Game {
         positions.add(movePosition);
 
         fireEvent(new GameEvent(
-                GameEvent.TYPE_MOVE,
+                Type.MOVE,
                 positions.size() - 2,
                 positions.size() - 1,
                 getPreviousPos(),
@@ -441,26 +668,16 @@ public class Game {
                 move,
                 move.isWhite()));
 
-        if (movePosition.isCheckmate()) {
+        checkGameOver();
 
-            markGameOver((movePosition.isWhite() ? Result.BLACK_WIN : Result.WHITE_WIN), ResultReason.CHECKMATE);
-
-        } else if (movePosition.isInsufficientMaterial()) {
-
-            markGameOver(Result.DRAW, ResultReason.DEAD_INSUFFICIENT_MATERIAL);
-
-        } else if (movePosition.isStalemate()) {
-
-            markGameOver(Result.DRAW, ResultReason.STALEMATE);
-
-        } else
+        if (result == Game.Result.IN_PROGRESS)
             startTimer();
 
     }
 
     public boolean canPause() {
 
-        return result == Result.IN_PROGRESS && settings.canPause() && !isPaused();
+        return result == Game.Result.IN_PROGRESS && settings.canPause() && !isPaused();
 
     }
 
@@ -473,13 +690,13 @@ public class Game {
 
         stopTimer();
 
-        fireEvent(GameEvent.PAUSED);
+        fireEvent(new GameEvent(Type.PAUSED));
 
     }
 
     public boolean canResume() {
 
-        return result == Result.IN_PROGRESS && settings.canPause() && isPaused();
+        return result == Game.Result.IN_PROGRESS && settings.canPause() && isPaused();
 
     }
 
@@ -492,7 +709,7 @@ public class Game {
 
         startTimer();
 
-        fireEvent(GameEvent.RESUMED);
+        fireEvent(new GameEvent(Type.RESUMED));
 
     }
 
@@ -519,20 +736,18 @@ public class Game {
         getLastPos().setRedo(redo);
         redo.setRedoPromote(redo.getMove().getPromoteType());
 
-        // getLastPos().setTimerEnd(-1);
-
         if (redo.getMove().getPromoteType() != '0')
-            redo.setPromote('?', null);
+            redo.setPromote('?');
 
         redo.setRedoTimerEnd(getLastPos().getTimerEnd());
 
-        if (result != Result.NOT_STARTED && result != Result.IN_PROGRESS) {
-            result = Result.IN_PROGRESS;
-            resultReason = ResultReason.IN_PROGRESS;
+        if (result != Game.Result.NOT_STARTED && result != Game.Result.IN_PROGRESS) {
+            result = Game.Result.IN_PROGRESS;
+            resultReason = Game.Reason.IN_PROGRESS;
         }
 
         fireEvent(new GameEvent(
-                GameEvent.TYPE_MOVE,
+                Type.MOVE,
                 positions.size(),
                 positions.size() - 1,
                 redo,
@@ -567,10 +782,10 @@ public class Game {
         positions.add(redo);
 
         if (redo.getRedoPromote() != '0')
-            redo.setPromote(redo.getRedoPromote(), this);
+            redo.setPromote(redo.getRedoPromote());
 
         fireEvent(new GameEvent(
-                GameEvent.TYPE_MOVE,
+                Type.MOVE,
                 positions.size() - 2,
                 positions.size() - 1,
                 getPreviousPos(),
@@ -584,7 +799,7 @@ public class Game {
 
     public boolean canDrawOffer() {
 
-        return result == Result.IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
+        return result == Game.Result.IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
 
     }
 
@@ -594,7 +809,7 @@ public class Game {
             throw new Exception("Cannot offer a draw.");
 
         getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
-        fireEvent(GameEvent.DRAW_OFFER);
+        fireEvent(new GameEvent(Type.DRAW_OFFER));
 
         sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
                 getPlayer(offererWhite).getName() + " sent a draw offer.", true));
@@ -603,7 +818,7 @@ public class Game {
 
     public void acceptDrawOffer() throws Exception {
 
-        if (result != Result.IN_PROGRESS)
+        if (result != Game.Result.IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
         if (getLastPos().getDrawOfferer() == Position.NO_OFFER)
@@ -612,10 +827,10 @@ public class Game {
         if (!canDrawOffer())
             throw new Exception("Cannot accept draw.");
 
-        markGameOver(Result.DRAW,
+        markGameOver(Game.Result.DRAW,
                 (getLastPos().getDrawOfferer() == Position.WHITE)
-                        ? ResultReason.WHITE_OFFERED_DRAW
-                        : ResultReason.BLACK_OFFERED_DRAW);
+                        ? Game.Reason.WHITE_OFFERED_DRAW
+                        : Game.Reason.BLACK_OFFERED_DRAW);
 
         sendMessage(new Chat(getPlayer(getLastPos().getDrawOfferer() == Position.WHITE), new Date().getTime(),
                 getPlayer(getLastPos().getDrawOfferer() == Position.WHITE).getName() + " accepted the draw offer."));
@@ -631,7 +846,7 @@ public class Game {
 
         getLastPos().setDrawOfferer(Position.NO_OFFER);
 
-        fireEvent(new GameEvent(GameEvent.TYPE_DRAW_DECLINED, !offererWhite));
+        fireEvent(new GameEvent(Type.DRAW_DECLINED, !offererWhite));
 
         sendMessage(new Chat(getPlayer(!offererWhite), new Date().getTime(),
                 getPlayer(!offererWhite).getName() + " declined the draw offer.", true));
@@ -685,6 +900,11 @@ public class Game {
 
         if (!black.getType().equals(""))
             tags.put("BlackType", black.getType());
+
+        if (!settings.getFen().equals(GameSettings.DEFAULT_FEN)) {
+            tags.put("SetUp", "1");
+            tags.put("FEN", settings.getFen());
+        }
 
         return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 

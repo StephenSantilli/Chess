@@ -5,6 +5,8 @@ import gui.GameView;
 
 import java.util.ArrayList;
 
+import game.Game;
+import game.GameSettings;
 import game.Move;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -62,7 +64,7 @@ public class MoveList extends GridPane {
             Node c = getChildren().get(i);
 
             if (active != 0
-                    && getRowIndex(c) == ((active - 1) / 2)
+                    && getRowIndex(c) == calcRow(active + board.getGame().getPositions().get(0).getMoveNumber())
                     && getColumnIndex(
                             c) == (board.getGame().getPositions().get(active).isWhite() ? 2
                                     : 1)) {
@@ -108,6 +110,9 @@ public class MoveList extends GridPane {
 
         }
 
+        final Game game = board.getGame();
+        final GameSettings stgs = board.getGame().getSettings();
+
         String result = "";
         switch (board.getGame().getResult()) {
             case DRAW:
@@ -123,13 +128,39 @@ public class MoveList extends GridPane {
                 break;
         }
 
+        final boolean addEllipses = !stgs.getFen().equals(GameSettings.DEFAULT_FEN) && game.getPositions().size() > 0
+                && game.getPositions().get(0).getMoveNumber() != 0;
+
+        if (addEllipses) {
+
+            final boolean isWhite = game.getPositions().get(0).isWhite();
+
+            Button ellipses = new Button("...");
+
+            ellipses.setId("movePaneButton");
+            ellipses.setMaxWidth(Double.MAX_VALUE);
+            add(ellipses, isWhite ? 2 : 1,
+                    calcRow(game.getPositions().get(0).getMoveNumber()));
+
+        }
+
         if (!result.equals("")) {
 
             Button res = new Button(result);
             res.setId("movePaneButton");
             res.setMaxWidth(Double.MAX_VALUE);
-            add(res, board.getGame().getLastPos().isWhite() ? 1 : 2,
-                    (int) Math.ceil((board.getGame().getLastPos().getMoveNumber() + 1) / 2.0) - 1);
+
+            if (addEllipses) {
+
+                final boolean isWhite = game.getLastPos().isWhite();
+
+                add(res, isWhite ? 1 : 2,
+                        calcRow(game.getLastPos().getMoveNumber() + 1));
+
+            } else
+
+                add(res, board.getGame().getLastPos().isWhite() ? 1 : 2,
+                        calcRow(game.getLastPos().getMoveNumber() + 1));
 
         }
 
@@ -140,10 +171,17 @@ public class MoveList extends GridPane {
 
     }
 
+    private int calcRow(int moveNumber) {
+
+        return (int) Math.ceil((moveNumber /* - 1 */) / 2.0) - 1;
+
+    }
+
     private void execMove(int pos) {
 
         Position p = board.getGame().getPositions().get(pos);
-        int row = (int) Math.ceil((p.getMoveNumber()) / 2.0) - 1;
+        int row = calcRow(p.getMoveNumber());
+
         Move m = p.getMove();
         Button btn = new Button(p.getMoveString());
         btn.setMaxWidth(Double.MAX_VALUE);

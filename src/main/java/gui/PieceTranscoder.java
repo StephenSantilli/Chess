@@ -26,6 +26,10 @@ public class PieceTranscoder extends ImageTranscoder {
         return pieceCode;
     }
 
+    public double getPieceSize() {
+        return pieceSize;
+    }
+
     public PieceTranscoder(double pieceSize, boolean color, char pieceCode) throws Exception {
 
         super();

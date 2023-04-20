@@ -5,9 +5,11 @@ import java.util.Optional;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
-import game.Result;
-import game.ResultReason;
+import game.Game.Reason;
+import game.Game.Result;
+import game.GameEvent.Type;
 import game.LAN.Client;
+import game.engine.EngineHook;
 import gui.board.Board;
 import gui.component.ChatArea;
 import gui.component.GameInfo;
@@ -40,6 +42,7 @@ public class GameView extends HBox implements GameListener {
 
     private Game game;
     private Client client;
+    private EngineHook engine;
 
     private App app;
 
@@ -348,7 +351,7 @@ public class GameView extends HBox implements GameListener {
                     return;
 
                 if (game != null)
-                    game.markGameOver(Result.TERMINATED, ResultReason.OTHER);
+                    game.markGameOver(Result.TERMINATED, Game.Reason.OTHER);
 
             }
 
@@ -357,10 +360,14 @@ public class GameView extends HBox implements GameListener {
             game = setup.getGame();
             game.addListener(this);
 
-            if (client == null)
+            engine = setup.getEngine();
+
+            if (client == null && engine == null)
                 color = TWO_PLAYER;
-            else
+            else if (client != null)
                 color = setup.isWhite() ? WHITE : BLACK;
+            else if (engine != null)
+                color = !engine.isWhite() ? WHITE : BLACK;
 
             currentPos = 0;
 
@@ -388,6 +395,9 @@ public class GameView extends HBox implements GameListener {
 
             goToLastPos();
 
+            if (!isFlipped() && color == BLACK)
+                flip();
+
             if (!app.getStage().isFocused())
                 app.getStage().toFront();
 
@@ -403,7 +413,7 @@ public class GameView extends HBox implements GameListener {
      * @param reason The numeric reason code for why the game ended.
      * @return The text reason.
      */
-    public static String reasonToText(ResultReason reason) {
+    public static String reasonToText(Reason reason) {
 
         switch (reason) {
 
@@ -486,7 +496,7 @@ public class GameView extends HBox implements GameListener {
             return;
         Platform.runLater(() -> {
 
-            if (event.getType() == GameEvent.TYPE_MOVE) {
+            if (event.getType() == Type.MOVE) {
 
                 currentPos = event.getCurrIndex();
 
@@ -506,7 +516,7 @@ public class GameView extends HBox implements GameListener {
                         app.getStage().toFront();
                 }
 
-            } else if (event.getType() == GameEvent.TYPE_DRAW_OFFER) {
+            } else if (event.getType() == Type.DRAW_OFFER) {
 
                 if ((color == WHITE || color == BLACK) && game.getLastPos().getDrawOfferer() == color)
                     return;
@@ -536,7 +546,7 @@ public class GameView extends HBox implements GameListener {
 
                 drawDialog.show();
 
-            } else if (event.getType() == GameEvent.TYPE_OVER) {
+            } else if (event.getType() == Type.OVER) {
 
                 if (game == null)
                     return;
@@ -569,7 +579,7 @@ public class GameView extends HBox implements GameListener {
 
                 over.showAndWait();
 
-            } else if (event.getType() == GameEvent.TYPE_MESSAGE) {
+            } else if (event.getType() == Type.MESSAGE) {
 
                 chatBox.update();
 
@@ -580,7 +590,7 @@ public class GameView extends HBox implements GameListener {
                         java.awt.Toolkit.getDefaultToolkit().beep();
                 }
 
-            } else if (event.getType() == GameEvent.TYPE_PAUSED || event.getType() == GameEvent.TYPE_RESUMED) {
+            } else if (event.getType() == Type.PAUSED || event.getType() == Type.RESUMED) {
                 gameMenu.update();
                 infoPane.updateTimers();
                 board.getPausePane().setVisible(game.isPaused());

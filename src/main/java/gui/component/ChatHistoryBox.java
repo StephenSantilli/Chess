@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 
 public class ChatHistoryBox extends VBox {
 
@@ -42,13 +43,15 @@ public class ChatHistoryBox extends VBox {
 
             if (!c.isSystemMessage()) {
 
-                Label name = new Label(c.getPlayer().getName());
-                Label timestamp = new Label(dFormat.format(new Date(c.getTimestamp())));
-                Label message = new Label(c.getMessage());
+                Text name = new Text(c.getPlayer().getName());
+                Text timestamp = new Text(dFormat.format(new Date(c.getTimestamp())));
+                Text message = new Text(c.getMessage());
 
                 content.add(name, 0, 0);
                 content.add(timestamp, 1, 0);
                 content.add(message, 2, 0);
+
+
 
                 for (int j = 1; i + j <= game.getMessages().size(); j++) {
 
@@ -64,7 +67,8 @@ public class ChatHistoryBox extends VBox {
                         break;
                     }
 
-                    Label cmessage = new Label(cj.getMessage());
+                    Text cmessage = new Text(cj.getMessage());
+
 
                     content.add(cmessage, 2, j);
 
@@ -72,14 +76,16 @@ public class ChatHistoryBox extends VBox {
 
             } else {
 
-                Label message = new Label(c.getMessage());
+                Text message = new Text(c.getMessage());
+
+
                 if (c.isError())
-                    message.setTextFill(Color.RED);
+                    message.setFill(Color.RED);
 
                 content.add(message, 0, i);
 
             }
-            
+
             getChildren().add(content);
 
         }

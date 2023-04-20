@@ -3,6 +3,8 @@ package gui.dialog;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+
+import game.GameSettings;
 import gui.GameView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,7 +13,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
@@ -24,7 +28,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class Export extends Stage {
 
-    private TextArea ta;
+    private TextArea pgnArea;
+    private TextField fenArea;
 
     private boolean includeClock;
 
@@ -44,26 +49,53 @@ public class Export extends Stage {
         VBox vb = new VBox();
         vb.setPadding(new Insets(15, 15, 15, 15));
 
-        Scene s = new Scene(vb, 500, 400);
+        Scene s = new Scene(vb, 500, 450);
 
         setScene(s);
         setTitle("Export Game");
 
+        // FEN Area
+        Label fenLabel = new Label("FEN");
+        fenArea = new TextField(getFEN());
+        fenArea.setEditable(false);
+
+        VBox.setVgrow(fenArea, Priority.ALWAYS);
+
+        VBox fen = new VBox(fenLabel, fenArea);
+        fen.setSpacing(5);
+        fen.setFillWidth(true);
+
+        VBox.setVgrow(fen, Priority.ALWAYS);
+
+        // PGN Area
+        Label pgnLabel = new Label("PGN");
+
+        pgnArea = new TextArea(getPGN());
+        pgnArea.setEditable(false);
+
+        VBox.setVgrow(pgnArea, Priority.ALWAYS);
+
+        VBox pgn = new VBox(pgnLabel, pgnArea);
+        pgn.setSpacing(5);
+        pgn.setFillWidth(true);
+
+        VBox.setVgrow(pgn, Priority.ALWAYS);
+
+        // Include clock checkbox
         CheckBox cb = new CheckBox("Include clock");
-        cb.setSelected(true);
+        if (board.getGame().getSettings().getTimePerSide() > -1)
+            cb.setSelected(true);
+        else {
+            cb.setSelected(false);
+            cb.setDisable(true);
+        }
+
         cb.setOnAction(e -> {
             includeClock = cb.isSelected();
-            ta.setText(getPGN());
+            pgnArea.setText(getPGN());
         });
 
-        HBox hb = new HBox(cb);
-
-        String output = getPGN();
-
-        ta = new TextArea(output);
-        ta.setEditable(false);
-
-        VBox.setVgrow(ta, Priority.ALWAYS);
+        HBox opts = new HBox(cb);
 
         HBox buttons = new HBox();
 
@@ -72,6 +104,7 @@ public class Export extends Stage {
 
             FileChooser chooser = new FileChooser();
             chooser.getExtensionFilters().add(new ExtensionFilter("PGN File", "*.pgn"));
+            chooser.setTitle("Save PGN");
 
             File f = chooser.showSaveDialog(new Stage());
 
@@ -79,7 +112,7 @@ public class Export extends Stage {
 
                 try (PrintWriter scan = new PrintWriter(new FileWriter(f))) {
 
-                    String[] lines = ta.getText().split("\n");
+                    String[] lines = pgnArea.getText().split("\n");
                     for (int i = 0; i < lines.length; i++) {
 
                         scan.println(lines[i]);
@@ -105,7 +138,7 @@ public class Export extends Stage {
         copyButton.setOnAction(e -> {
 
             ClipboardContent content = new ClipboardContent();
-            content.putString(ta.getText());
+            content.putString(pgnArea.getText());
             Clipboard.getSystemClipboard().setContent(content);
 
         });
@@ -120,19 +153,43 @@ public class Export extends Stage {
         buttons.setAlignment(Pos.CENTER_RIGHT);
         buttons.getChildren().addAll(exportButton, copyButton, okButton);
 
-        vb.getChildren().addAll(hb, ta, buttons);
+        vb.getChildren().addAll(fen, pgn, opts, buttons);
 
-        vb.setSpacing(5);
-        buttons.setSpacing(5);
+        vb.setSpacing(10);
+        buttons.setSpacing(10);
 
-        ta.setPrefColumnCount(85);
-        ta.setPrefRowCount(15);
+        pgnArea.setPrefColumnCount(85);
+        pgnArea.setPrefRowCount(15);
 
+    }
+
+    public String getFEN() {
+
+        try {
+
+            return board.getGame().getLastPos().toString();
+
+        } catch (Exception e) {
+
+            Dialog<Void> eDialog = new Dialog<Void>();
+
+            eDialog.setTitle("Error Exporting Position");
+            eDialog.setContentText("An error occurred while exporting the position: " + e.getMessage());
+            eDialog.showAndWait();
+            hide();
+
+        }
+
+        return "";
     }
 
     public String getPGN() {
 
         try {
+
+            if (!board.getGame().getSettings().getFen().equals(GameSettings.DEFAULT_FEN)
+                    && board.getGame().getPositions().get(0).getMoveNumber() != 0)
+                return "Cannot export PGN from custom position that does not start at move 1.";
 
             return board.getGame().exportPosition(true, includeClock);
 
@@ -141,7 +198,8 @@ public class Export extends Stage {
             Dialog<Void> eDialog = new Dialog<Void>();
 
             eDialog.setTitle("Error Exporting Position");
-            eDialog.setContentText("An error occurred while exporting the position.");
+            eDialog.setContentText("An error occurred while exporting the position: " + e.getMessage());
+
             eDialog.showAndWait();
             hide();
 
