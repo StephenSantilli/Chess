@@ -14,10 +14,6 @@ import game.pieces.Rook;
 
 public class Position {
 
-    public static final int NO_OFFER = 0;
-    public static final int WHITE = 1;
-    public static final int BLACK = 2;
-
     /**
      * The number of moves made in this game (including the move that led to
      * this position.) Starts at {@code 0} for the default position as no moves have
@@ -82,17 +78,6 @@ public class Position {
      * The amount of time on the timer at the end of this position.
      */
     private long timerEnd;
-
-    /**
-     * The color of who offered the draw. If multiple draw offers, will only include
-     * last.
-     * 
-     * <ul>
-     * <li>0 - No draw offer
-     * <li>1 - White offered
-     * <li>2 - Black offered
-     */
-    private int drawOfferer;
 
     /**
      * Counter that counts the number of moves made since the last time a pawn was
@@ -308,14 +293,6 @@ public class Position {
         return checkMate;
     }
 
-    public int getDrawOfferer() {
-        return drawOfferer;
-    }
-
-    public void setDrawOfferer(int drawOfferer) {
-        this.drawOfferer = drawOfferer;
-    }
-
     public int getFiftyMoveCounter() {
         return fiftyMoveCounter;
     }
@@ -412,7 +389,6 @@ public class Position {
 
         this.moveNumber = 0;
         this.timerEnd = -1;
-        this.drawOfferer = NO_OFFER;
         this.fiftyMoveCounter = 0;
 
         initDefaultPosition();
@@ -432,7 +408,6 @@ public class Position {
 
         this.timerEnd = -1;
 
-        this.drawOfferer = NO_OFFER;
 
         String[] ranks = a[0].split("/");
 
@@ -595,8 +570,6 @@ public class Position {
         this.mateChecked = false;
 
         this.timerEnd = -1;
-
-        this.drawOfferer = NO_OFFER;
 
         this.white = white;
 

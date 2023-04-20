@@ -189,6 +189,10 @@ public class Game {
         return white ? this.white : this.black;
     }
 
+    public Player getDrawOfferer() {
+        return drawOfferer;
+    }
+
     /**
      * Generates a Chess960 starting position using the algorithm found here:
      * https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation
@@ -938,7 +942,7 @@ public class Game {
      */
     public boolean canDrawOffer() {
 
-        return result == Result.IN_PROGRESS && getLastPos().getDrawOfferer() == Position.NO_OFFER;
+        return result == Result.IN_PROGRESS && drawOfferer == null;
 
     }
 
@@ -955,11 +959,11 @@ public class Game {
         if (!canDrawOffer())
             throw new Exception("Cannot offer a draw.");
 
-        getLastPos().setDrawOfferer(offererWhite ? Position.WHITE : Position.BLACK);
+        drawOfferer = getPlayer(offererWhite);
         fireEvent(new GameEvent(Type.DRAW_OFFER));
 
-        sendMessage(new Chat(getPlayer(offererWhite), new Date().getTime(),
-                getPlayer(offererWhite).getName() + " sent a draw offer.", true));
+        sendMessage(new Chat(drawOfferer, new Date().getTime(),
+                drawOfferer.getName() + " sent a draw offer.", true));
 
     }
 
@@ -974,19 +978,21 @@ public class Game {
         if (result != Game.Result.IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
-        if (getLastPos().getDrawOfferer() == Position.NO_OFFER)
+        if (drawOfferer == null)
             throw new Exception("No draw offer.");
 
         if (canDrawOffer())
             throw new Exception("Cannot accept draw.");
 
         markGameOver(Game.Result.DRAW,
-                (getLastPos().getDrawOfferer() == Position.WHITE)
+                (drawOfferer.isWhite())
                         ? Game.Reason.WHITE_OFFERED_DRAW
                         : Game.Reason.BLACK_OFFERED_DRAW);
 
-        sendMessage(new Chat(getPlayer(getLastPos().getDrawOfferer() == Position.WHITE), new Date().getTime(),
-                getPlayer(getLastPos().getDrawOfferer() == Position.WHITE).getName() + " accepted the draw offer."));
+        final Player accepter = getPlayer(!drawOfferer.isWhite());
+        sendMessage(new Chat(accepter, new Date().getTime(), accepter.getName() + " accepted the draw offer."));
+
+        drawOfferer = null;
 
     }
 
@@ -1001,14 +1007,14 @@ public class Game {
         if (canDrawOffer())
             throw new Exception("No draw to decline.");
 
-        final boolean offererWhite = getLastPos().getDrawOfferer() == Position.WHITE;
+        final Player decliner = getPlayer(!drawOfferer.isWhite());
 
-        getLastPos().setDrawOfferer(Position.NO_OFFER);
+        fireEvent(new GameEvent(Type.DRAW_DECLINED, decliner.isWhite()));
 
-        fireEvent(new GameEvent(Type.DRAW_DECLINED, !offererWhite));
+        sendMessage(new Chat(decliner, new Date().getTime(),
+                decliner.getName() + " declined the draw offer.", true));
 
-        sendMessage(new Chat(getPlayer(!offererWhite), new Date().getTime(),
-                getPlayer(!offererWhite).getName() + " declined the draw offer.", true));
+        drawOfferer = null;
 
     }
 

@@ -245,7 +245,7 @@ public class Client implements GameListener {
 
             } else if (msg.equals(Message.DRAW_ACCEPT)) {
 
-                if (game.getLastPos().getDrawOfferer() != (oppColor ? 2 : 1)) {
+                if (game.getDrawOfferer() == null || game.getDrawOfferer().isWhite() != oppColor) {
 
                     stop(new ErrorMessage(ErrorMessage.FATAL, "No draw offer was sent."));
                     return;
@@ -441,8 +441,8 @@ public class Client implements GameListener {
 
             stop(new ErrorMessage(ErrorMessage.FATAL, "Game terminated."));
 
-        } else if (event.getType() == Type.DRAW_OFFER && game.getLastPos().getDrawOfferer() != 0
-                && (game.getLastPos().getDrawOfferer() == 1) != oppColor) {
+        } else if (event.getType() == Type.DRAW_OFFER && game.getDrawOfferer() != null
+                && game.getDrawOfferer().isWhite() != oppColor) {
 
             send(Message.DRAW_OFFER);
 

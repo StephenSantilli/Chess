@@ -1,11 +1,7 @@
 package gui.component;
 
-import game.*;
 import gui.GameView;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.scene.control.Label;
-import javafx.util.Duration;
 
 public class GUITimerHistory extends Label {
 
