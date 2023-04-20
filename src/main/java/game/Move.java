@@ -6,21 +6,84 @@ import game.pieces.Piece;
 
 public class Move {
 
+    /**
+     * The position this move is being made from.
+     */
+    private final Position position;
+
+    /**
+     * The starting square of the piece being moved.
+     */
     private Square origin;
+
+    /**
+     * The ending square of the piece being moved.
+     */
     private Square destination;
 
+    /**
+     * The piece being moved.
+     */
     private Piece piece;
+
+    /**
+     * The piece being captured. Will be {@code null} if the move is not a capture
+     * move.
+     */
     private Piece capturePiece;
+
+    /**
+     * The rook being castled with. Will be {@code null} if the move is not a castle
+     * move.
+     */
     private Piece rook;
 
+    /**
+     * The type of piece to promote to.
+     * 
+     * <p>
+     * <ul>
+     * <li>0 - No promote type, not a promotion move.
+     * <li>? - Promotion move, but promote type not yet supplied.
+     * <li>Q - Queen
+     * <li>R - Rook
+     * <li>B - Bishop
+     * <li>N - Knight
+     */
     private char promoteType;
 
+    /**
+     * Whether or not this move is a capture move.
+     */
     private boolean capture;
+
+    /**
+     * Whether or not this move is an en passant move.
+     */
     private boolean enPassant;
-    private boolean white;
+
+    /**
+     * Whether or not this is a castle move.
+     */
     private boolean castle;
 
+    /**
+     * Whether or not white is making this move.
+     */
+    private boolean white;
+
+    /**
+     * The short algebraic notation (SAN) for this move.
+     * 
+     * <p>
+     * Details can be found at
+     * https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
+     */
     private String moveNotation;
+
+    public Position getPosition() {
+        return position;
+    }
 
     public Square getOrigin() {
         return origin;
@@ -54,12 +117,12 @@ public class Move {
         return enPassant;
     }
 
-    public boolean isWhite() {
-        return white;
-    }
-
     public boolean isCastle() {
         return castle;
+    }
+
+    public boolean isWhite() {
+        return white;
     }
 
     public String getMoveNotation() {
@@ -77,6 +140,10 @@ public class Move {
         return origin.toString() + destination.toString() + (promoteType == '0' ? "" : promoteType);
     }
 
+    /**
+     * Checks whether or not the given move is equal to this move. Will be based on
+     * origin and destination, as well as if the move is a castle move.
+     */
     @Override
     public boolean equals(Object compare) {
 
@@ -85,10 +152,15 @@ public class Move {
 
         Move casted = (Move) (compare);
 
-        return origin.equals(casted.getOrigin()) && destination.equals(casted.getDestination());
+        return origin.equals(casted.getOrigin()) && destination.equals(casted.getDestination())
+                && castle == casted.isCastle();
 
     }
 
+    /**
+     * @return Gets the destance between the {@link #origin} and
+     *         {@link #destination} squares of the move.
+     */
     public int getMoveDistance() {
 
         int fileDistance = (int) Math.abs(origin.getFile() - destination.getFile());
@@ -98,44 +170,81 @@ public class Move {
 
     }
 
-    void setPromoteType(char promoteType) {
+    /**
+     * Sets the {@link #promoteType} of this move. If setting this after move has
+     * been made, {@link Position#setPromote(char)} should be used instead.
+     * 
+     * @param promoteType The promote type to set the move to.
+     * 
+     * @see #promoteType
+     * @see Position#setPromote(char)
+     */
+    public void setPromoteType(char promoteType) {
 
         if (moveNotation == null) {
+
             moveNotation = "" + promoteType;
             this.promoteType = promoteType;
+
             return;
+
         }
 
         int i = moveNotation.lastIndexOf(this.promoteType);
-        if (i > -1) {
+
+        if (i > -1)
             moveNotation = moveNotation.substring(0, i) + promoteType + moveNotation.substring(i + 1);
-        } else {
+        else
             moveNotation += promoteType;
-        }
 
         this.promoteType = promoteType;
 
     }
 
-    private void initMove(Position pos) throws Exception {
+    /**
+     * Initializes the move, checking if it is valid.
+     *
+     * @throws Exception If the move is invalid.
+     */
+    private void initMove() throws Exception {
 
-        this.white = piece.isWhite();
-        this.enPassant = checkIfEnPassant(pos);
-        checkValidCastle(pos);
-        this.capture = checkIfCapture(pos);
-        this.promoteType = checkIfPromote() ? '?' : '0';
+        white = piece.isWhite();
+        enPassant = checkIfEnPassant();
+        checkValidCastle();
+        capture = checkIfCapture();
+        promoteType = checkIfPromote() ? '?' : '0';
 
-        this.capturePiece = capture ? pos.getPieceAtSquare(getCaptureSquare()) : null;
+        capturePiece = capture ? position.getPieceAtSquare(getCaptureSquare()) : null;
 
     }
 
-    public Move(Square origin, Square destination, Position pos) throws Exception {
+    /**
+     * Initializes a new, non-castling move.
+     * 
+     * @param origin      The origin square of the move.
+     * @param destination The destination square of the move.
+     * @param position    The position the move being made from.
+     * @throws Exception If the move is invalid.
+     */
+    public Move(Square origin, Square destination, Position position) throws Exception {
 
-        this(origin, destination, pos, false);
+        this(origin, destination, position, false);
 
     }
 
-    public Move(Square origin, Square destination, Position pos, boolean castle) throws Exception {
+    /**
+     * Initializes a new move.
+     * 
+     * @param origin      The origin square of the move.
+     * @param destination The destination square of the move.
+     * @param position    The position the move being made from.
+     * @param castle      If the move is a castle move. Used to disambiguate when
+     *                    the king could move to the square or castle to it.
+     * @throws Exception If the move is invalid.
+     */
+    public Move(Square origin, Square destination, Position position, boolean castle) throws Exception {
+
+        this.position = position;
 
         this.origin = origin;
         this.destination = destination;
@@ -146,18 +255,61 @@ public class Move {
         if (!destination.isValid())
             throw new Exception("Invalid destination.");
 
-        this.piece = pos.getPieceAtSquare(origin);
+        this.piece = position.getPieceAtSquare(origin);
 
         if (piece == null)
             throw new Exception("There is no piece at that square.");
 
         this.castle = castle;
 
-        initMove(pos);
+        initMove();
 
     }
 
-    public void updateMoveNotation(Position pos) {
+    /**
+     * @return The square that the piece being captured is on before this move.
+     */
+    public Square getCaptureSquare() {
+
+        if (enPassant) {
+            return new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1));
+        } else
+            return destination;
+
+    }
+
+    /**
+     * @return The square the castling rook is on before this move is made.
+     *         {@code null} if not a castle move.
+     */
+    public Square getRookOrigin() {
+
+        return rook == null ? null : rook.getSquare();
+
+    }
+
+    /**
+     * @return The square the castling rook is on after the move is made.
+     *         {@code null} if not a castle move.
+     */
+    public Square getRookDestination() {
+
+        if (!castle)
+            return null;
+
+        boolean kingSide = destination.getFile() == 7;
+
+        int file = kingSide ? 6 : 4;
+        int rank = white ? 1 : 8;
+
+        return new Square(file, rank);
+
+    }
+
+    /**
+     * Sets/updates the {@link #moveNotation}.
+     */
+    public void updateMoveNotation() {
 
         String str = "";
 
@@ -165,16 +317,21 @@ public class Move {
 
             str += destination.getFile() == 7 ? "0-0" : "0-0-0";
             moveNotation = str;
+            
             return;
 
         }
 
         if (piece.getCode() != 'P') {
+
             str += piece.getCode();
-            str += getModifier(pos);
+            str += getModifier();
+
         } else {
+
             if (capture)
                 str += (char) (origin.getFile() + 96);
+
         }
 
         if (capture)
@@ -189,9 +346,20 @@ public class Move {
 
     }
 
-    private String getModifier(Position pos) {
+    /**
+     * Gets the "modifier" that should be included in the move notation for this
+     * move.
+     * 
+     * <p>
+     * The modifier is the section of the move notation that disambiguates when
+     * there are multiple of the same kind and color of piece that can move to the
+     * given square.
+     * 
+     * @return The modifier of the move notation.
+     */
+    private String getModifier() {
 
-        ArrayList<Piece> attackers = pos.getPiecesByCanMoveTo(destination);
+        ArrayList<Piece> attackers = position.getPiecesByCanMoveTo(destination);
 
         int modFile = -1;
         int modRank = -1;
@@ -242,7 +410,10 @@ public class Move {
 
     }
 
-    private boolean checkIfEnPassant(Position pos) {
+    /**
+     * @return If the move is an en passant move.
+     */
+    private boolean checkIfEnPassant() {
 
         if (piece.getCode() != 'P')
             return false;
@@ -253,19 +424,20 @@ public class Move {
         if (white && destination.getRank() != 6 || !white && destination.getRank() != 3)
             return false;
 
-        Piece destP = pos.getPieceAtSquare(destination);
+        final Piece destinationPiece = position.getPieceAtSquare(destination);
 
-        if (destP != null)
+        if (destinationPiece != null)
             return false;
 
-        if (pos.getEnPassantDestination() != null && pos.getEnPassantDestination().equals(destination))
+        if (position.getEnPassantDestination() != null && position.getEnPassantDestination().equals(destination))
             return true;
 
-        Piece p = pos.getPieceAtSquare(new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1)));
+        final Piece p = position
+                .getPieceAtSquare(new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1)));
         if (p == null || p.getCode() != 'P')
             return false;
 
-        Move prevMove = pos.getMove();
+        final Move prevMove = position.getMove();
 
         if (prevMove == null
                 || (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile()))
@@ -275,7 +447,11 @@ public class Move {
 
     }
 
-    private boolean checkIfCapture(Position pos) throws Exception {
+    /**
+     * @return If the move is a capture.
+     * @throws Exception If the move is not a valid capture.
+     */
+    private boolean checkIfCapture() throws Exception {
 
         if (enPassant)
             return true;
@@ -283,13 +459,14 @@ public class Move {
         if (castle)
             return false;
 
-        Piece curr = pos.getPieceAtSquare(origin);
-        Piece cap = pos.getPieceAtSquare(getCaptureSquare());
+        final Piece curr = position.getPieceAtSquare(origin);
+        final Piece cap = position.getPieceAtSquare(getCaptureSquare());
 
         if (cap != null && cap.isWhite() == curr.isWhite())
             throw new Exception("Cannot capture your own piece.");
 
         if (curr.getCode() == 'P') {
+
             if (getCaptureSquare().getFile() == origin.getFile()) {
 
                 if (cap != null)
@@ -307,58 +484,10 @@ public class Move {
 
     }
 
-    public Square getCaptureSquare() {
-
-        if (enPassant) {
-            return new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1));
-        } else
-            return destination;
-
-    }
-
-    private boolean checkIfPromote() {
-
-        if (piece.getCode() != 'P')
-            return false;
-
-        if (white && destination.getRank() != 8 || !white && destination.getRank() != 1)
-            return false;
-
-        return true;
-
-    }
-
-    public Square getRookOrigin() {
-
-        // if (!castle)
-        // return null;
-
-        // boolean kingSide = destination.getFile() == 7;
-
-        // int file = kingSide ? 8 : 1;
-        // int rank = white ? 1 : 8;
-
-        // return new Square(file, rank);
-
-        return rook.getSquare();
-
-    }
-
-    public Square getRookDestination() {
-
-        if (!castle)
-            return null;
-
-        boolean kingSide = destination.getFile() == 7;
-
-        int file = kingSide ? 6 : 4;
-        int rank = white ? 1 : 8;
-
-        return new Square(file, rank);
-
-    }
-
-    private void checkValidCastle(Position pos) throws Exception {
+    /**
+     * Checks if the move is a valid castle move.
+     */
+    private void checkValidCastle() throws Exception {
 
         if (!castle)
             return;
@@ -370,21 +499,36 @@ public class Move {
                 || (destination.getFile() != 3 && destination.getFile() != 7))
             throw new Exception("Invalid castle location.");
 
-        Piece king = pos.getPieceAtSquare(origin);
+        Piece king = position.getPieceAtSquare(origin);
 
         if (king == null || king.hasMoved())
             throw new Exception("King has already moved, cannot castle.");
 
         boolean aSide = destination.getFile() == 3;
-        Piece rook = pos.getRook(aSide, piece.isWhite());
+        Piece rook = position.getRook(aSide, piece.isWhite());
 
         if (rook == null || rook.hasMoved())
             throw new Exception("Rook already moved, cannot castle.");
 
         this.rook = rook;
 
-        if (pos.isInCheck())
+        if (position.isInCheck())
             throw new Exception("Cannot castle out of check.");
+
+    }
+
+    /**
+     * @return If the move is a promotion move.
+     */
+    private boolean checkIfPromote() {
+
+        if (piece.getCode() != 'P')
+            return false;
+
+        if (white && destination.getRank() != 8 || !white && destination.getRank() != 1)
+            return false;
+
+        return true;
 
     }
 

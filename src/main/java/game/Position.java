@@ -719,7 +719,7 @@ public class Position {
 
         }
 
-        move.updateMoveNotation(prev);
+        move.updateMoveNotation();
         this.move = move;
 
         initMoves(checkForMate);
@@ -763,7 +763,7 @@ public class Position {
         if (!move.getPiece().equals(getPieceAtSquare(mps))) {
 
             initMoves(true);
-            move.updateMoveNotation(this);
+            move.updateMoveNotation();
 
         }
 
