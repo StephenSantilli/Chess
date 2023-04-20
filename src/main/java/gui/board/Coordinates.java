@@ -23,12 +23,9 @@ public class Coordinates extends Pane {
         final Board board = gameView.getBoard();
         final double squareSize = board.getSquareSize();
 
-        if(!gameView.isFlipped()) {
-            
-        }
         for (int r = 8; r > 0; r--) {
 
-            final Square square = new Square(1, r);
+            final Square square = new Square(gameView.isFlipped() ? 8 : 1, r);
             final double inset = squareSize / 40;
 
             Text l = new Text(r + "");
@@ -45,7 +42,7 @@ public class Coordinates extends Pane {
 
         for (int f = 1; f <= 8; f++) {
 
-            final Square square = new Square(f, 1);
+            final Square square = new Square(f, gameView.isFlipped() ? 8 : 1);
             final double inset = squareSize / 40;
 
             Text l = new Text((char) (f + 96) + "");

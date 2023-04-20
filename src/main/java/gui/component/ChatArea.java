@@ -26,7 +26,7 @@ public class ChatArea extends VBox {
         historyBox = new ChatHistoryBox(gameView);
         scroller = new ScrollPane(historyBox);
         scroller.setFitToHeight(true);
-        scroller.setFitToWidth(true);
+        // scroller.setFitToWidth(true);
         setMaxWidth(Double.MAX_VALUE);
 
         enter = new TextField();
