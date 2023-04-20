@@ -14,6 +14,9 @@ import game.GameEvent.Type;
 import game.PGN.PGNMove;
 import game.PGN.PGNParser;
 
+/**
+ * A game of chess.
+ */
 public class Game {
 
     /**
@@ -341,7 +344,7 @@ public class Game {
      * @param blackType The type of the white player.
      * @param settings  The settings used for this game.
      */
-    public Game(String whiteName, String blackName, String whiteType, String blackType, GameSettings settings)
+    public Game(String whiteName, String blackName, Player.Type whiteType, Player.Type blackType, GameSettings settings)
             throws Exception {
 
         this.white = new Player(whiteName, whiteType, true);
@@ -383,12 +386,30 @@ public class Game {
 
         // White
         final String whiteName = pgn.getTags().getOrDefault("White", "White");
-        final String whiteType = pgn.getTags().getOrDefault("WhiteType", Player.HUMAN);
+        Player.Type whiteType = Player.Type.HUMAN;
+
+        String whiteTypeString = pgn.getTags().getOrDefault("WhiteType", Player.Type.HUMAN.getString());
+        switch (whiteTypeString) {
+            case "program":
+                whiteType = Player.Type.PROGRAM;
+            default:
+                whiteType = Player.Type.HUMAN;
+        }
+
         white = new Player(whiteName, whiteType, true);
 
         // Black
         final String blackName = pgn.getTags().getOrDefault("Black", "Black");
-        final String blackType = pgn.getTags().getOrDefault("BlackType", Player.HUMAN);
+        Player.Type blackType = Player.Type.HUMAN;
+
+        String blackTypeString = pgn.getTags().getOrDefault("BlackType", Player.Type.HUMAN.getString());
+        switch (blackTypeString) {
+            case "program":
+                blackType = Player.Type.PROGRAM;
+            default:
+                blackType = Player.Type.HUMAN;
+        }
+
         black = new Player(blackName, blackType, false);
 
         // If custom starting position used
@@ -1080,10 +1101,10 @@ public class Game {
 
         // White & Black's type
         if (!white.getType().equals(""))
-            tags.put("WhiteType", white.getType());
+            tags.put("WhiteType", white.getType().getString());
 
         if (!black.getType().equals(""))
-            tags.put("BlackType", black.getType());
+            tags.put("BlackType", black.getType().getString());
 
         // If the starting position is not the default
         if (!settings.getFen().equals(GameSettings.DEFAULT_FEN)) {

@@ -12,6 +12,10 @@ import game.pieces.Piece;
 import game.pieces.Queen;
 import game.pieces.Rook;
 
+/**
+ * A board position of a {@link Game}. Contains the pieces and their positions,
+ * as well as the moves that can be made from this position.
+ */
 public class Position {
 
     /**
@@ -21,6 +25,9 @@ public class Position {
      */
     private int moveNumber;
 
+    /**
+     * A 2D array that matches the board and stores the pieces.
+     */
     private Piece[][] pieces;
 
     /**
@@ -87,23 +94,135 @@ public class Position {
      */
     private int fiftyMoveCounter;
 
-    private Square enPassantDestination;
+    /**
+     * The square that can be en passanted from this position.
+     */
+    private Square enPassantTarget;
 
-    public Square getEnPassantDestination() {
-        return enPassantDestination;
-    }
-
+    /** Whether or not mate has been checked. */
     private boolean mateChecked;
 
+    /**
+     * @return {@link #enPassantTarget}
+     */
+    public Square getEnPassantTarget() {
+        return enPassantTarget;
+    }
+
+    /**
+     * @return {@link #moveNumber}
+     */
     public int getMoveNumber() {
         return moveNumber;
     }
 
-    /** All of the pieces in the position. Does not include captured pieces. */
+    /**
+     * @return {@link #pieces}
+     */
     public Piece[][] getPieces() {
         return pieces;
     }
 
+    public long getTimerEnd() {
+        return timerEnd;
+    }
+
+    public void setTimerEnd(long timerEnd) {
+        this.timerEnd = timerEnd;
+    }
+
+    /**
+     * @return The {@link Position} that was previously after this {@link Position}.
+     */
+    public Position getRedo() {
+        return redo;
+    }
+
+    /**
+     * Sets the redo {@link Position}.
+     * 
+     * @param redo The redo {@link Position}
+     */
+    public void setRedo(Position redo) {
+        this.redo = redo;
+    }
+
+    public char getRedoPromote() {
+        return redoPromote;
+    }
+
+    public void setRedoPromote(char redoPromote) {
+        this.redoPromote = redoPromote;
+    }
+
+    public long getRedoTimerEnd() {
+        return redoTimerEnd;
+    }
+
+    public void setRedoTimerEnd(long redoTimerEnd) {
+        this.redoTimerEnd = redoTimerEnd;
+    }
+
+    /**
+     * @return A list of the {@link Move} objects possible in this position. If
+     *         {@code checkForMate} is {@code true} when constructor is called,
+     *         moves that lead to check will not be included.
+     */
+    public ArrayList<Move> getMoves() {
+        return moves;
+    }
+
+    /**
+     * @return Gets the current {@link Move} that led to this position.
+     */
+    public Move getMove() {
+        return move;
+    }
+
+    /**
+     * @return Returns {@code true} if it is currently white's turn. Is the opposite
+     *         color of the move that led to this position.
+     */
+    public boolean isWhite() {
+        return white;
+    }
+
+    /**
+     * @return Returns {@code true} if the value of {@link #isWhite()} is giving
+     *         check to the other color.
+     */
+    public boolean isGivingCheck() {
+        return givingCheck;
+    }
+
+    /**
+     * @return Returns {@code true} if the value of {@link #isWhite()} is in check
+     *         from the other color.
+     */
+    public boolean isInCheck() {
+        return inCheck;
+    }
+
+    /**
+     * @return Returns {@code true} if the current position is check mate. May be
+     *         {@code null} if {@code checkForMate} was not true when constructor
+     *         was called.
+     */
+    public boolean isCheckmate() {
+        return checkMate;
+    }
+
+    public int getFiftyMoveCounter() {
+        return fiftyMoveCounter;
+    }
+
+    /**
+     * Constructs an array of all of the pieces that are not on the board in this
+     * position.
+     * 
+     * @param white The color of the captured pieces.
+     * @return The array of captured pieces.
+     */
     public ArrayList<Piece> getCapturedPieces(boolean white) {
 
         ArrayList<Piece> cap = new ArrayList<>();
@@ -177,37 +296,6 @@ public class Position {
 
     }
 
-    public long getTimerEnd() {
-        return timerEnd;
-    }
-
-    public void setTimerEnd(long timerEnd) {
-        this.timerEnd = timerEnd;
-    }
-
-    /**
-     * @return The {@link Position} that was previously after this {@link Position}.
-     */
-    public Position getRedo() {
-        return redo;
-    }
-
-    public char getRedoPromote() {
-        return redoPromote;
-    }
-
-    public void setRedoPromote(char redoPromote) {
-        this.redoPromote = redoPromote;
-    }
-
-    public long getRedoTimerEnd() {
-        return redoTimerEnd;
-    }
-
-    public void setRedoTimerEnd(long redoTimerEnd) {
-        this.redoTimerEnd = redoTimerEnd;
-    }
-
     /**
      * Returns a string representation of the move that led to this position.
      * 
@@ -223,78 +311,6 @@ public class Position {
 
         return str;
 
-    }
-
-    /**
-     * Sets the redo {@link Position}.
-     * 
-     * @param redo The redo {@link Position}
-     */
-    public void setRedo(Position redo) {
-        this.redo = redo;
-    }
-
-    /**
-     * @return A list of the {@link Piece} objects in this position. Does not
-     *         include captured pieces.
-     */
-    /*
-     * public ArrayList<Piece> getPieces() {
-     * return pieces;
-     * }
-     */
-
-    /**
-     * @return A list of the {@link Move} objects possible in this position. If
-     *         {@code checkForMate} is {@code true} when constructor is called,
-     *         moves that lead to check will not be included.
-     */
-    public ArrayList<Move> getMoves() {
-        return moves;
-    }
-
-    /**
-     * @return Gets the current {@link Move} that led to this position.
-     */
-    public Move getMove() {
-        return move;
-    }
-
-    /**
-     * @return Returns {@code true} if it is currently white's turn. Is the opposite
-     *         color of the move that led to this position.
-     */
-    public boolean isWhite() {
-        return white;
-    }
-
-    /**
-     * @return Returns {@code true} if the value of {@link #isWhite()} is giving
-     *         check to the other color.
-     */
-    public boolean isGivingCheck() {
-        return givingCheck;
-    }
-
-    /**
-     * @return Returns {@code true} if the value of {@link #isWhite()} is in check
-     *         from the other color.
-     */
-    public boolean isInCheck() {
-        return inCheck;
-    }
-
-    /**
-     * @return Returns {@code true} if the current position is check mate. May be
-     *         {@code null} if {@code checkForMate} was not true when constructor
-     *         was called.
-     */
-    public boolean isCheckmate() {
-        return checkMate;
-    }
-
-    public int getFiftyMoveCounter() {
-        return fiftyMoveCounter;
     }
 
     /**
@@ -379,8 +395,6 @@ public class Position {
 
     /**
      * Creates a new {@link Position} object in the default starting position.
-     * 
-     * @param game The game this position is associated with.
      */
     public Position() {
 
@@ -396,6 +410,11 @@ public class Position {
 
     }
 
+    /**
+     * Creates a new {@link Position} object from the given starting position.
+     * 
+     * @param fen The Forsyth-Edwards Notation (FEN) of the position to start from.
+     */
     public Position(String fen) throws Exception {
 
         String[] a = fen.split(" ");
@@ -407,7 +426,6 @@ public class Position {
         this.mateChecked = false;
 
         this.timerEnd = -1;
-
 
         String[] ranks = a[0].split("/");
 
@@ -497,7 +515,7 @@ public class Position {
 
         if (!a[3].equals("-")) {
             try {
-                enPassantDestination = new Square(a[3]);
+                enPassantTarget = new Square(a[3]);
             } catch (Exception e) {
                 throw new Exception("Invalid en passant target square.");
             }
@@ -562,6 +580,7 @@ public class Position {
      * @param white        Whether or not it is white's turn after this move is
      *                     made.
      * @param checkForMate Whether or not checkmate should be checked for.
+     * @param promoteType  The type of piece to promote to.
      */
     public Position(Position prev, Move move, boolean white, boolean checkForMate, char promoteType)
             throws Exception {
@@ -646,7 +665,7 @@ public class Position {
         }
 
         if (!movePiece.hasMoved() && movePiece.getCode() == 'P' && move.getMoveDistance() == 2) {
-            enPassantDestination = new Square(move.getDestination().getFile(),
+            enPassantTarget = new Square(move.getDestination().getFile(),
                     move.getDestination().getRank() + (move.isWhite() ? -1 : 1));
         }
 
@@ -732,6 +751,12 @@ public class Position {
 
     }
 
+    /**
+     * Sets the promote type and updates the moves accordingly.
+     * 
+     * @param promo The type of piece to promote to.
+     * @throws Exception If the promotion is invalid.
+     */
     public void setPromote(char promo) throws Exception {
 
         if (promo != '?' && promo != 'Q' && promo != 'R' && promo != 'B' && promo != 'N')
@@ -772,8 +797,7 @@ public class Position {
     /**
      * Initializes the list of moves.
      * 
-     * @param checkForMate
-     * @param g
+     * @param checkForMate If checkmate should be checked for.
      */
     private void initMoves(boolean checkForMate) {
 
@@ -969,6 +993,12 @@ public class Position {
 
     }
 
+    /**
+     * Sets the square of a piece.
+     * 
+     * @param square The square to set the piece to.
+     * @param piece  The piece to set.
+     */
     public void setSquare(Square square, Piece piece) {
 
         pieces[square.getRank() - 1][square.getFile() - 1] = piece;
@@ -978,13 +1008,13 @@ public class Position {
     /**
      * Finds the first occurance of a piece at the given square.
      * 
-     * @param s The square to search for a piece at
+     * @param square The square to search for a piece at
      * @return The {@link Piece} object. Will be {@code null}
      *         if no
      *         piece is at the square.
      */
-    public Piece getPieceAtSquare(Square s) {
-        return pieces[s.getRank() - 1][s.getFile() - 1];
+    public Piece getPieceAtSquare(Square square) {
+        return pieces[square.getRank() - 1][square.getFile() - 1];
     }
 
     /**
@@ -1014,17 +1044,17 @@ public class Position {
     /**
      * Gets a list of the pieces that are able to move to a given square.
      * 
-     * @param s The square to search for moves to.
+     * @param square The square to search for moves to.
      * @return An {@link ArrayList} of {@link Piece} objects
      */
-    public ArrayList<Piece> getPiecesByCanMoveTo(Square s) {
+    public ArrayList<Piece> getPiecesByCanMoveTo(Square square) {
 
         ArrayList<Piece> pieces = new ArrayList<Piece>();
 
         for (int i = 0; i < moves.size(); i++) {
 
             Move m = moves.get(i);
-            if (m.getDestination().equals(s))
+            if (m.getDestination().equals(square))
                 pieces.add(m.getPiece());
 
         }
@@ -1055,6 +1085,12 @@ public class Position {
 
     }
 
+    /**
+     * Gets the moves the given piece can make.
+     * 
+     * @param piece The piece to get the moves of.
+     * @return A list of the moves the piece can make.
+     */
     public ArrayList<Move> getPieceMoves(Piece piece) {
 
         ArrayList<Move> pieceMoves = new ArrayList<Move>();
@@ -1082,6 +1118,10 @@ public class Position {
 
     }
 
+    /**
+     * @return If the position has insufficient pieces on both sides to reach
+     *         checkmate.
+     */
     public boolean isInsufficientMaterial() {
 
         ArrayList<Piece> list = getPiecesAsArrayList();
@@ -1122,12 +1162,18 @@ public class Position {
 
     }
 
+    /**
+     * @return If the position is stalemate.
+     */
     public boolean isStalemate() {
 
         return moves.size() == 0;
 
     }
 
+    /**
+     * @return The pieces as an {@link ArrayList}.
+     */
     public ArrayList<Piece> getPiecesAsArrayList() {
 
         ArrayList<Piece> list = new ArrayList<Piece>();
@@ -1200,7 +1246,7 @@ public class Position {
         if (fen.charAt(fen.length() - 1) == ' ')
             fen += '-';
 
-        fen += " " + (enPassantDestination == null ? "-" : enPassantDestination.toString());
+        fen += " " + (enPassantTarget == null ? "-" : enPassantTarget.toString());
 
         // Fifty-move rule clock
         fen += " " + fiftyMoveCounter;
@@ -1218,9 +1264,10 @@ public class Position {
      * the given side. Does not mean that castling can occur during the current
      * turn, as temporary blocks like check may still be present.
      * 
-     * @param white
-     * @param kingSide
-     * @return Whether or not a castle is possible.
+     * @param white    The color to check if can castle.
+     * @param kingSide Whether to check castling king side (h side) or queen side (a
+     *                 side).
+     * @return Whether or the given castle is possible.
      */
     public boolean canCastle(boolean white, boolean kingSide) {
 
@@ -1239,6 +1286,14 @@ public class Position {
 
     }
 
+    /**
+     * Finds an available move by its short algebraic notation (SAN).
+     * 
+     * @param move The SAN of the move to find.
+     * @return The move found from the SAN.
+     * @throws Exception If the move notation is invalid or {@link #mateChecked} is
+     *                   not {@code true}.
+     */
     public Move getMoveBySAN(String move) throws Exception {
 
         if (!mateChecked)

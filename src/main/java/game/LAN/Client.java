@@ -327,8 +327,8 @@ public class Client implements GameListener {
             try {
                 game = new Game(color == Challenge.CHALLENGE_WHITE ? name : iMsg.getName(),
                         color == Challenge.CHALLENGE_BLACK ? name : iMsg.getName(),
-                        Player.HUMAN,
-                        Player.HUMAN,
+                        Player.Type.HUMAN,
+                        Player.Type.HUMAN,
                         settings);
             } catch (Exception e) {
                 stop(new ErrorMessage(ErrorMessage.FATAL, "Unable to create game."));
@@ -362,8 +362,8 @@ public class Client implements GameListener {
 
                 game = new Game(white ? name : rMsg.getName(),
                         !white ? name : rMsg.getName(),
-                        Player.HUMAN,
-                        Player.HUMAN,
+                        Player.Type.HUMAN,
+                        Player.Type.HUMAN,
                         new GameSettings(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
                 oppColor = !white;
                 game.addListener(this);

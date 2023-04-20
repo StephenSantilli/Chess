@@ -1,12 +1,15 @@
 package game;
 
+/**
+ * Interface for listening to {@link GameEvent}s.
+ */
 @FunctionalInterface
 public interface GameListener {
 
     /**
-     * Event to be fired when the board is updated. Does not fire when
-     * {@code currentPos} is
-     * changed.
+     * Called when an event pertaining to the game happens.
+     * 
+     * @param event The event that was fired.
      */
     public void onPlayerEvent(GameEvent event);
 

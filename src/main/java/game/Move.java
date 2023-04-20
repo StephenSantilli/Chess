@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import game.pieces.Piece;
 
+/**
+ * A representation of a chess move, that comes from a {@link Position}.
+ */
 public class Move {
 
     /**
@@ -317,7 +320,7 @@ public class Move {
 
             str += destination.getFile() == 7 ? "0-0" : "0-0-0";
             moveNotation = str;
-            
+
             return;
 
         }
@@ -429,7 +432,7 @@ public class Move {
         if (destinationPiece != null)
             return false;
 
-        if (position.getEnPassantDestination() != null && position.getEnPassantDestination().equals(destination))
+        if (position.getEnPassantTarget() != null && position.getEnPassantTarget().equals(destination))
             return true;
 
         final Piece p = position

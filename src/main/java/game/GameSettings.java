@@ -1,9 +1,14 @@
 package game;
 
+/**
+ * The settings for the {@link Game}.
+ */
 public class GameSettings {
 
+    /** The default starting position for standard chess. */
     public static final String DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+    /** The starting position of the game, in Forsyth-Edwards Notation (FEN). */
     private final String fen;
 
     // TODO: allow black to make first move
@@ -47,6 +52,9 @@ public class GameSettings {
      */
     private final boolean blackTimerManaged;
 
+    /**
+     * @see #whiteStarts
+     */
     public boolean isWhiteStarts() {
         return whiteStarts;
     }
@@ -100,6 +108,20 @@ public class GameSettings {
         return blackTimerManaged;
     }
 
+    /**
+     * Creates a new {@link GameSettings} object from the default starting position.
+     * 
+     * @param timePerSide       The amount of time each side has in seconds.
+     * @param timePerMove       The amount of time each side gains per move in
+     *                          seconds.
+     * @param canPause          If pausing is allowed.
+     * @param canUndo           If undoing and redoing is allowed.
+     * @param whiteTimerManaged If white's timer should be automatically started and
+     *                          stopped after moves.
+     * @param blackTimerManaged If black's timer should be automatically started and
+     *                          stopped after moves.
+     * @throws Exception If the settings provided are invalid.
+     */
     public GameSettings(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
             boolean whiteTimerManaged, boolean blackTimerManaged) throws Exception {
 
@@ -108,6 +130,21 @@ public class GameSettings {
 
     }
 
+    /**
+     * Creates a new {@link GameSettings} object from the default starting position.
+     * 
+     * @param FEN               The starting position in FEN notation.
+     * @param timePerSide       The amount of time each side has in seconds.
+     * @param timePerMove       The amount of time each side gains per move in
+     *                          seconds.
+     * @param canPause          If pausing is allowed.
+     * @param canUndo           If undoing and redoing is allowed.
+     * @param whiteTimerManaged If white's timer should be automatically started and
+     *                          stopped after moves.
+     * @param blackTimerManaged If black's timer should be automatically started and
+     *                          stopped after moves.
+     * @throws Exception If the settings provided are invalid.
+     */
     public GameSettings(String FEN, long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
             boolean whiteTimerManaged, boolean blackTimerManaged)
             throws Exception {

@@ -1,5 +1,8 @@
 package game;
 
+/**
+ * A representation of a square on a chess board.
+ */
 public class Square {
 
     /** The file of the {@link Square}. */
@@ -7,89 +10,6 @@ public class Square {
 
     /** The rank of the {@link Square}. */
     private int rank;
-
-    /**
-     * Creates a new {@link Square} object.
-     * 
-     * @param file The file (column).
-     * @param rank The rank (row).
-     */
-    public Square(int file, int rank) {
-
-        this.file = file;
-        this.rank = rank;
-
-    }
-
-    public Square(String square) throws Exception {
-
-        square = square.toLowerCase().trim();
-
-        if (!square.matches("[a-h][1-8]"))
-            throw new Exception("Square format invalid.");
-
-        this.file = (int) (square.toLowerCase().charAt(0)) - 96;
-        this.rank = (int) (square.toLowerCase().charAt(1)) - 48;
-
-        if (!isValid())
-            throw new Exception("Invalid square.");
-
-    }
-
-    /**
-     * Checks if square is a valid board position (within bounds).
-     * 
-     * @return If square is a valid board square.
-     */
-    public boolean isValid() {
-
-        return file > 0 && file <= 8 && rank > 0 && rank <= 8;
-
-    }
-
-    /**
-     * Checks if the square is a light square.
-     * 
-     * @return If the square is a light square.
-     */
-    public boolean isLightSquare() {
-
-        return ((rank % 2 == 0) && (file % 2 != 0)
-                ||
-                (rank % 2 != 0) && (file % 2 == 0));
-
-    }
-
-    /**
-     * A string representation of the square, with the file as a lowercase
-     * letter.<br>
-     * <br>
-     * Ex: "h4"
-     */
-    @Override
-    public String toString() {
-
-        return "" + (char) (96 + file) + rank;
-
-    }
-
-    /**
-     * Compares two Square objects.
-     * 
-     * @param compare The square to compare to.
-     * @return Whether or not the file and rank match.
-     */
-    @Override
-    public boolean equals(Object compare) {
-
-        if (!(compare instanceof Square))
-            return false;
-
-        Square casted = (Square) (compare);
-
-        return (file == casted.getFile()) && (rank == casted.getRank());
-
-    }
 
     /**
      * @return The file (column) of the square.
@@ -121,6 +41,94 @@ public class Square {
      */
     public void setRank(int rank) {
         this.rank = rank;
+    }
+
+    /**
+     * Creates a new {@link Square} object.
+     * 
+     * @param file The file (column).
+     * @param rank The rank (row).
+     */
+    public Square(int file, int rank) {
+
+        this.file = file;
+        this.rank = rank;
+
+    }
+
+    /**
+     * Creates a {@link Square} object from a string representation of the square.
+     * 
+     * <p>
+     * Square examples: a1, h8, e4, f7, etc.
+     * 
+     * @param square The square as a string.
+     * @throws Exception If {@code square} is in an invalid format.
+     */
+    public Square(String square) throws Exception {
+
+        square = square.toLowerCase().trim();
+
+        if (!square.matches("[a-h][1-8]"))
+            throw new Exception("Square format invalid.");
+
+        this.file = (int) (square.toLowerCase().charAt(0)) - 96;
+        this.rank = (int) (square.toLowerCase().charAt(1)) - 48;
+
+        if (!isValid())
+            throw new Exception("Invalid square.");
+
+    }
+
+    /**
+     * @return If square is a valid board square.
+     */
+    public boolean isValid() {
+
+        return file >= 1 && file <= 8 && rank >= 1 && rank <= 8;
+
+    }
+
+    /**
+     * @return If the square is a light square.
+     */
+    public boolean isLightSquare() {
+
+        return ((rank % 2 == 0) && (file % 2 != 0)
+                ||
+                (rank % 2 != 0) && (file % 2 == 0));
+
+    }
+
+    /**
+     * A string representation of the square, with the file as a lowercase
+     * letter and rank as the number.
+     * <p>
+     * Ex: "h4"
+     */
+    @Override
+    public String toString() {
+
+        return "" + (char) (96 + file) + rank;
+
+    }
+
+    /**
+     * Compares two Square objects.
+     * 
+     * @param compare The square to compare to.
+     * @return Whether or not the file and rank match.
+     */
+    @Override
+    public boolean equals(Object compare) {
+
+        if (!(compare instanceof Square))
+            return false;
+
+        Square casted = (Square) (compare);
+
+        return (file == casted.getFile()) && (rank == casted.getRank());
+
     }
 
 }

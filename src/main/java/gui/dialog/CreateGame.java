@@ -376,8 +376,8 @@ public class CreateGame extends Stage {
 
                 game = new Game((oneWhite ? oneName.getText() : twoName.getText()),
                         (oneWhite ? twoName.getText() : oneName.getText()),
-                        Player.HUMAN,
-                        Player.HUMAN,
+                        Player.Type.HUMAN,
+                        Player.Type.HUMAN,
                         new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
                                 timePerSide,
                                 timePerMove,
@@ -462,8 +462,8 @@ public class CreateGame extends Stage {
 
                 game = new Game((oneWhite ? oneName.getText() : en.getName()),
                         (oneWhite ? en.getName() : oneName.getText()),
-                        oneWhite ? Player.HUMAN : Player.PROGRAM,
-                        !oneWhite ? Player.HUMAN : Player.PROGRAM,
+                        oneWhite ? Player.Type.HUMAN : Player.Type.PROGRAM,
+                        !oneWhite ? Player.Type.HUMAN : Player.Type.PROGRAM,
                         new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
                                 timePerSide,
                                 timePerMove,
