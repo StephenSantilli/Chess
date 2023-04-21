@@ -112,8 +112,8 @@ public class EngineHook implements GameListener {
 
                 System.out.println(bm);
                 engine.waitReady();
-                // TODO set isCastle
-                game.makeMove(origin, destination, promoteType, false);
+
+                game.makeMove(origin, destination, promoteType);
             } catch (Exception e) {
                 e.printStackTrace();
             }

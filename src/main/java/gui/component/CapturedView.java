@@ -6,13 +6,9 @@ import game.Position;
 import game.pieces.Piece;
 import gui.GameView;
 import gui.PieceTranscoder;
-import javafx.scene.Group;
-import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 
 public class CapturedView extends VBox {
 

@@ -6,6 +6,9 @@ import game.Move;
 import game.Position;
 import game.Square;
 
+/**
+ * An abstract representation of a chess piece.
+ */
 abstract public class Piece {
 
     /** The current square of the piece. */
@@ -94,7 +97,7 @@ abstract public class Piece {
     /**
      * Checks if the given {@link Piece} object matches this {@link Piece} object.
      * 
-     * @param p The {@link Piece} object to compare
+     * @param compare The {@link Piece} object to compare
      * @return Whether or not the pieces are the same
      */
     @Override

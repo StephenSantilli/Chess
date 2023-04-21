@@ -6,7 +6,6 @@ import java.util.Date;
 import game.Chat;
 import game.Game;
 import gui.GameView;
-import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;

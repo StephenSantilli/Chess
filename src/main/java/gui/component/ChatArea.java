@@ -5,6 +5,8 @@ import game.Chat;
 import game.Game;
 import gui.GameView;
 import javafx.application.Platform;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Priority;
@@ -37,10 +39,22 @@ public class ChatArea extends VBox {
                 return;
 
             final Game game = gameView.getGame();
+            try {
 
-            gameView.getGame().sendMessage(new Chat(game.getPlayer(gameView.getColor() == GameView.WHITE),
-                    new Date().getTime(), enter.getText()));
-            enter.setText("");
+                gameView.getGame().sendMessage(new Chat(game.getPlayer(gameView.getColor() == GameView.WHITE),
+                        new Date().getTime(), enter.getText()));
+
+                enter.setText("");
+
+            } catch (Exception ex) {
+
+                Dialog<Void> eDg = new Dialog<>();
+                eDg.getDialogPane().getButtonTypes().setAll(ButtonType.OK);
+                eDg.setTitle("Error");
+                eDg.setContentText("Error sending chat message: " + ex.getMessage());
+                eDg.showAndWait();
+
+            }
 
         });
 

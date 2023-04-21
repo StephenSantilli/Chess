@@ -167,7 +167,8 @@ public class GUIPiece {
         ArrayList<Move> castles = new ArrayList<>();
         castles.addAll(game.getLastPos().getMoves());
         castles.removeIf(
-                (m) -> !m.getPiece().equals(active) || !m.isCastle() ||  m.getRookOrigin() == null || (tarPc != null && !m.getRookOrigin().equals(tarPc.getSquare())));
+                (m) -> !m.getPiece().equals(active) || !m.isCastle() || m.getRookOrigin() == null
+                        || (tarPc != null && !m.getRookOrigin().equals(tarPc.getSquare())));
 
         if (castles.size() == 0)
             return null;
@@ -193,8 +194,6 @@ public class GUIPiece {
         if (board.getActive() != null
                 && (game.getLastPos().canPieceMoveToSquare(board.getActive().getPiece(), targetSquare)
                         || isCas != null)) {
-
-            // final int startPos = game.getPositions().size() - 1;
 
             try {
 
@@ -246,14 +245,14 @@ public class GUIPiece {
                         }
 
                     } else
-                        game.makeMove(move.getOrigin(), move.getDestination(), '0', move.isCastle());
+                        game.makeMove(move.getOrigin(), move.isCastle() ? move.getRookOrigin() : move.getDestination(),
+                                '0');
 
                 }
 
             } catch (Exception e) {
 
-                // If this wasn't a promote move, and the position never changed
-                if (promoteMove == null/* && startPos == gameView.getCurrentPos() */) {
+                if (promoteMove == null) {
 
                     GUIPiece pc = board.getGUIPieceAtSquare(targetSquare);
 
@@ -340,9 +339,8 @@ public class GUIPiece {
         final Game game = gameView.getGame();
         final Board board = gameView.getBoard();
 
-        
         board.getBorderPane().drawBorder(null);
-        
+
         final GUIPiece active = board.getActive();
 
         final Move isCas = isCastle(board.getActive() == null ? null : board.getActive().getPiece(), targetSquare);
@@ -380,9 +378,10 @@ public class GUIPiece {
 
                 final Piece d = board.getDragging().getPiece();
 
-                final Move move = isCas != null ? isCas : new Move(d.getSquare(),
-                        targetSquare,
-                        game.getPositions().get(gameView.getCurrentPos()));
+                final Move move = isCas != null ? isCas
+                        : new Move(d.getSquare(),
+                                targetSquare,
+                                game.getPositions().get(gameView.getCurrentPos()));
 
                 if (gameView.isTurn()) {
 
@@ -401,7 +400,8 @@ public class GUIPiece {
                         board.showPromoteDialog(move.getDestination(), move.isWhite(), this);
 
                     } else
-                        game.makeMove(move.getOrigin(), move.getDestination(), '0', move.isCastle());
+                        game.makeMove(move.getOrigin(), move.isCastle() ? move.getRookOrigin() : move.getDestination(),
+                                '0');
 
                 } else {
                     board.draw();
