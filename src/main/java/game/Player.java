@@ -5,7 +5,6 @@ package game;
  */
 public class Player {
 
-    // TODO enforce name limit
     /**
      * The maximum length of a name.
      */
@@ -124,7 +123,10 @@ public class Player {
      * 
      * @param name The name of the player.
      */
-    public Player(String name) {
+    public Player(String name) throws Exception {
+
+        if (!name.matches(NAME_REGEX))
+            throw new Exception("Invalid name.");
 
         this.name = name;
 
@@ -137,7 +139,10 @@ public class Player {
      * @param type  The type of player.
      * @param white Whether or not the player is white.
      */
-    public Player(String name, Type type, boolean white) {
+    public Player(String name, Type type, boolean white) throws Exception {
+
+        if (!name.matches(NAME_REGEX))
+            throw new Exception("Invalid name.");
 
         this.name = name;
         this.type = type;

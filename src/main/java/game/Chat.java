@@ -5,7 +5,6 @@ package game;
  */
 public class Chat {
 
-    // TODO enforce chat limit
     /** The maximum length of a chat message. */
     public static final int MAX_LENGTH = 250;
 
@@ -65,8 +64,12 @@ public class Chat {
      * @param player    The player who created the chat message.
      * @param timestamp The timestamp of when the chat message was sent.
      * @param message   The message body.
+     * @throws Exception When chat message exceeds {@link #MAX_LENGTH}.
      */
-    public Chat(Player player, long timestamp, String message) {
+    public Chat(Player player, long timestamp, String message) throws Exception {
+
+        if (message.length() > MAX_LENGTH)
+            throw new Exception("Chat message too long. Must be less than " + MAX_LENGTH + " characters.");
 
         this.player = player;
         this.timestamp = timestamp;
@@ -83,8 +86,12 @@ public class Chat {
      * @param timestamp     The timestamp of when the chat message was sent.
      * @param message       The message body.
      * @param systemMessage If the message is a systemMessage.
+     * @throws Exception When chat message exceeds {@link #MAX_LENGTH}.
      */
-    public Chat(Player player, long timestamp, String message, boolean systemMessage) {
+    public Chat(Player player, long timestamp, String message, boolean systemMessage) throws Exception {
+
+        if (message.length() > MAX_LENGTH)
+            throw new Exception("Chat message too long. Must be less than " + MAX_LENGTH + " characters.");
 
         this.player = player;
         this.timestamp = timestamp;
@@ -102,8 +109,12 @@ public class Chat {
      * @param message       The message body.
      * @param systemMessage If the message is a systemMessage.
      * @param error         If the message is an error message.
+     * @throws Exception When chat message exceeds {@link #MAX_LENGTH}.
      */
-    public Chat(Player player, long timestamp, String message, boolean systemMessage, boolean error) {
+    public Chat(Player player, long timestamp, String message, boolean systemMessage, boolean error) throws Exception {
+
+        if (message.length() > MAX_LENGTH)
+            throw new Exception("Chat message too long. Must be less than " + MAX_LENGTH + " characters.");
 
         this.player = player;
         this.timestamp = timestamp;

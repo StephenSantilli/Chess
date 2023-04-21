@@ -198,7 +198,8 @@ public class Game {
 
     /**
      * Generates a Chess960 starting position using the algorithm found here:
-     * https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation
+     * <a href=
+     * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
      * 
      * @return A Chess960 starting position.
      */
@@ -671,7 +672,7 @@ public class Game {
     }
 
     /**
-     * Checks if the game is over based on teh current position. Checks for
+     * Checks if the game is over based on the current position. Checks for
      * checkmate, insufficient material, and stalemate.
      */
     public void checkGameOver() {
@@ -735,7 +736,7 @@ public class Game {
 
         // Finding the move based on the origin and destination.
         // Castle moves should be king moving to rook's square.
-        Move move = null;
+        Move move = null, maybe = null;
         for (int i = 0; move == null && i < getLastPos().getMoves().size(); i++) {
 
             Move a = getLastPos().getMoves().get(i);
@@ -745,9 +746,17 @@ public class Game {
             else if (a.isCastle() && getLastPos().getPieceAtSquare(destination) != null
                     && getLastPos().getPieceAtSquare(destination).equals(a.getRook())) {
                 move = a;
+            } else if (a.isCastle() && a.getOrigin().equals(origin) && a.getDestination().equals(destination)) {
+                // will mark a castle move that matches the origin and destination, but doesn't
+                // set it as the move in case there is a non castle move with the same origin
+                // and destination
+                maybe = a;
             }
 
         }
+
+        if (move == null && maybe != null)
+            move = maybe;
 
         if (move == null)
             throw new Exception("Invalid move.");
@@ -1062,7 +1071,7 @@ public class Game {
      * @return The game in PGN format.
      * @throws Exception If there was an error exporting the game.
      * 
-     * @see {@link game.PGN.PGNParser}
+     * @see game.PGN.PGNParser
      */
     public String exportPosition(boolean includeTags, boolean includeClock) throws Exception {
 

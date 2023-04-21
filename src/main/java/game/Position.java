@@ -47,7 +47,7 @@ public class Position {
 
     /**
      * Whether or not it is currently white's turn, not whether white made the move
-     * that led to this position. Will be the opposite of {@link move#isWhite()};
+     * that led to this position. Will be the opposite of {@link move#isWhite()}.
      */
     private boolean white;
 
@@ -217,86 +217,6 @@ public class Position {
     }
 
     /**
-     * Constructs an array of all of the pieces that are not on the board in this
-     * position.
-     * 
-     * @param white The color of the captured pieces.
-     * @return The array of captured pieces.
-     */
-    public ArrayList<Piece> getCapturedPieces(boolean white) {
-
-        ArrayList<Piece> cap = new ArrayList<>();
-
-        int k = 1, q = 1, r = 2, b = 2, n = 2, p = 8;
-
-        for (int rk = 0; rk < 8; rk++) {
-
-            for (int f = 0; f < 8; f++) {
-
-                Piece a = pieces[rk][f];
-                if (a != null && a.isWhite() == white) {
-
-                    switch (a.getCode()) {
-                        case 'K':
-                            --k;
-                            break;
-                        case 'Q':
-                            --q;
-                            break;
-                        case 'R':
-                            --r;
-                            break;
-                        case 'B':
-                            --b;
-                            break;
-                        case 'N':
-                            --n;
-                            break;
-                        case 'P':
-                            --p;
-                            break;
-                    }
-                }
-
-            }
-
-        }
-
-        while (k > 0) {
-            cap.add(new King(0, 0, white));
-            --k;
-        }
-
-        while (q > 0) {
-            cap.add(new Queen(0, 0, white));
-            --q;
-        }
-
-        while (r > 0) {
-            cap.add(new Rook(0, 0, white));
-            --r;
-        }
-
-        while (b > 0) {
-            cap.add(new Bishop(0, 0, white));
-            --b;
-        }
-
-        while (n > 0) {
-            cap.add(new Knight(0, 0, white));
-            --n;
-        }
-
-        while (p > 0) {
-            cap.add(new Pawn(0, 0, white));
-            --p;
-        }
-
-        return cap;
-
-    }
-
-    /**
      * Returns a string representation of the move that led to this position.
      * 
      * @return A {@link String} containing the move text.
@@ -406,166 +326,6 @@ public class Position {
         this.fiftyMoveCounter = 0;
 
         initDefaultPosition();
-        initMoves(true);
-
-    }
-
-    /**
-     * Creates a new {@link Position} object from the given starting position.
-     * 
-     * @param fen The Forsyth-Edwards Notation (FEN) of the position to start from.
-     */
-    public Position(String fen) throws Exception {
-
-        String[] a = fen.split(" ");
-
-        if (a.length != 6)
-            throw new Exception("Invalid FEN.");
-
-        this.pieces = new Piece[8][8];
-        this.mateChecked = false;
-
-        this.timerEnd = -1;
-
-        String[] ranks = a[0].split("/");
-
-        if (ranks.length != 8)
-            throw new Exception("Invalid ranks.");
-
-        if (a[1].equals("w"))
-            white = true;
-        else if (a[1].equals("b"))
-            white = false;
-        else
-            throw new Exception("Invalid color to move.");
-
-        try {
-            fiftyMoveCounter = Integer.parseInt(a[4]);
-        } catch (Exception e) {
-            throw new Exception("Invalid 50 move counter.");
-        }
-
-        try {
-            moveNumber = ((Integer.parseInt(a[5]) - 1) * 2) + (white ? 0 : 1);
-        } catch (Exception e) {
-            throw new Exception("Invalid move number.");
-        }
-
-        if (fiftyMoveCounter < 0)
-            throw new Exception("Fifty move counter cannot be less than 0.");
-
-        if (moveNumber + 1 < 1)
-            throw new Exception("Move number cannot be less than 1.");
-
-        for (int r = 0; r < 8; r++) {
-
-            for (int i = 0, f = 0; i < ranks[r].length(); i++) {
-
-                char c = ranks[r].charAt(i);
-
-                if (Character.isDigit(c)) {
-                    int amt = Integer.parseInt(c + "");
-                    f += amt;
-                    continue;
-                } else {
-
-                    if (!(c + "").matches("[KQBRNPkqbrnp]"))
-                        throw new Exception("Unexpected piece type.");
-                    boolean white = Character.isUpperCase(c);
-                    switch (Character.toUpperCase(c)) {
-                        case 'K':
-                            pieces[7 - r][f] = new King(f + 1, 8 - r, white);
-
-                            if (white)
-                                whiteKing = new Square(f + 1, 8 - r);
-                            else
-                                blackKing = new Square(f + 1, 8 - r);
-
-                            break;
-                        case 'Q':
-                            pieces[7 - r][f] = new Queen(f + 1, 8 - r, white);
-                            break;
-                        case 'R':
-                            pieces[7 - r][f] = new Rook(f + 1, 8 - r, white);
-                            break;
-                        case 'B':
-                            pieces[7 - r][f] = new Bishop(f + 1, 8 - r, white);
-                            break;
-                        case 'N':
-                            pieces[7 - r][f] = new Knight(f + 1, 8 - r, white);
-                            break;
-                        case 'P':
-                            pieces[7 - r][f] = new Pawn(f + 1, 8 - r, white);
-
-                            if ((white && r != 6) || (!white && r != 1))
-                                pieces[7 - r][f].setHasMoved(true);
-
-                            break;
-                        default:
-                            throw new Exception("Unexpected piece.");
-                    }
-
-                    ++f;
-
-                }
-
-            }
-
-        }
-
-        if (!a[3].equals("-")) {
-            try {
-                enPassantTarget = new Square(a[3]);
-            } catch (Exception e) {
-                throw new Exception("Invalid en passant target square.");
-            }
-        }
-
-        Piece wkr = getPieceAtSquare(new Square(8, 1));
-        Piece wqr = getPieceAtSquare(new Square(1, 1));
-        Piece bkr = getPieceAtSquare(new Square(8, 8));
-        Piece bqr = getPieceAtSquare(new Square(1, 8));
-
-        if (wkr != null && wkr.getCode() == 'R')
-            wkr.setHasMoved(true);
-
-        if (wqr != null && wqr.getCode() == 'R')
-            wqr.setHasMoved(true);
-
-        if (bkr != null && bkr.getCode() == 'R')
-            bkr.setHasMoved(true);
-
-        if (bqr != null && bqr.getCode() == 'R')
-            bqr.setHasMoved(true);
-
-        if (!a[2].equals("-")) {
-            for (int i = 0; i < a[2].length(); i++) {
-
-                char c = a[2].charAt(i);
-                switch (c) {
-                    case 'K':
-                        if (wkr != null && wkr.getCode() == 'R')
-                            wkr.setHasMoved(false);
-                        break;
-                    case 'Q':
-                        if (wqr != null && wqr.getCode() == 'R')
-                            wqr.setHasMoved(false);
-                        break;
-                    case 'k':
-                        if (bkr != null && bkr.getCode() == 'R')
-                            bkr.setHasMoved(false);
-                        break;
-                    case 'q':
-                        if (bqr != null && bqr.getCode() == 'R')
-                            bqr.setHasMoved(false);
-                        break;
-                    default:
-                        throw new Exception("Invalid castle status.");
-                }
-
-            }
-        }
-
         initMoves(true);
 
     }
@@ -748,6 +508,246 @@ public class Position {
         } else {
             this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
         }
+
+    }
+
+    /**
+     * Creates a new {@link Position} object from the given starting position.
+     * 
+     * @param fen The Forsyth-Edwards Notation (FEN) of the position to start from.
+     */
+    public Position(String fen) throws Exception {
+
+        String[] a = fen.split(" ");
+
+        if (a.length != 6)
+            throw new Exception("Invalid FEN.");
+
+        this.pieces = new Piece[8][8];
+        this.mateChecked = false;
+
+        this.timerEnd = -1;
+
+        String[] ranks = a[0].split("/");
+
+        if (ranks.length != 8)
+            throw new Exception("Invalid ranks.");
+
+        if (a[1].equals("w"))
+            white = true;
+        else if (a[1].equals("b"))
+            white = false;
+        else
+            throw new Exception("Invalid color to move.");
+
+        try {
+            fiftyMoveCounter = Integer.parseInt(a[4]);
+        } catch (Exception e) {
+            throw new Exception("Invalid 50 move counter.");
+        }
+
+        try {
+            moveNumber = ((Integer.parseInt(a[5]) - 1) * 2) + (white ? 0 : 1);
+        } catch (Exception e) {
+            throw new Exception("Invalid move number.");
+        }
+
+        if (fiftyMoveCounter < 0)
+            throw new Exception("Fifty move counter cannot be less than 0.");
+
+        if (moveNumber + 1 < 1)
+            throw new Exception("Move number cannot be less than 1.");
+
+        for (int r = 0; r < 8; r++) {
+
+            for (int i = 0, f = 0; i < ranks[r].length(); i++) {
+
+                char c = ranks[r].charAt(i);
+
+                if (Character.isDigit(c)) {
+                    int amt = Integer.parseInt(c + "");
+                    f += amt;
+                    continue;
+                } else {
+
+                    if (!(c + "").matches("[KQBRNPkqbrnp]"))
+                        throw new Exception("Unexpected piece type.");
+                    boolean white = Character.isUpperCase(c);
+                    switch (Character.toUpperCase(c)) {
+                        case 'K':
+                            pieces[7 - r][f] = new King(f + 1, 8 - r, white);
+
+                            if (white)
+                                whiteKing = new Square(f + 1, 8 - r);
+                            else
+                                blackKing = new Square(f + 1, 8 - r);
+
+                            break;
+                        case 'Q':
+                            pieces[7 - r][f] = new Queen(f + 1, 8 - r, white);
+                            break;
+                        case 'R':
+                            pieces[7 - r][f] = new Rook(f + 1, 8 - r, white);
+                            break;
+                        case 'B':
+                            pieces[7 - r][f] = new Bishop(f + 1, 8 - r, white);
+                            break;
+                        case 'N':
+                            pieces[7 - r][f] = new Knight(f + 1, 8 - r, white);
+                            break;
+                        case 'P':
+                            pieces[7 - r][f] = new Pawn(f + 1, 8 - r, white);
+
+                            if ((white && r != 6) || (!white && r != 1))
+                                pieces[7 - r][f].setHasMoved(true);
+
+                            break;
+                        default:
+                            throw new Exception("Unexpected piece.");
+                    }
+
+                    ++f;
+
+                }
+
+            }
+
+        }
+
+        if (!a[3].equals("-")) {
+            try {
+                enPassantTarget = new Square(a[3]);
+            } catch (Exception e) {
+                throw new Exception("Invalid en passant target square.");
+            }
+        }
+
+        Piece wkr = getPieceAtSquare(new Square(8, 1));
+        Piece wqr = getPieceAtSquare(new Square(1, 1));
+        Piece bkr = getPieceAtSquare(new Square(8, 8));
+        Piece bqr = getPieceAtSquare(new Square(1, 8));
+
+        if (wkr != null && wkr.getCode() == 'R')
+            wkr.setHasMoved(true);
+
+        if (wqr != null && wqr.getCode() == 'R')
+            wqr.setHasMoved(true);
+
+        if (bkr != null && bkr.getCode() == 'R')
+            bkr.setHasMoved(true);
+
+        if (bqr != null && bqr.getCode() == 'R')
+            bqr.setHasMoved(true);
+
+        if (!a[2].equals("-")) {
+            for (int i = 0; i < a[2].length(); i++) {
+
+                char c = a[2].charAt(i);
+                switch (c) {
+                    case 'K':
+                        if (wkr != null && wkr.getCode() == 'R')
+                            wkr.setHasMoved(false);
+                        break;
+                    case 'Q':
+                        if (wqr != null && wqr.getCode() == 'R')
+                            wqr.setHasMoved(false);
+                        break;
+                    case 'k':
+                        if (bkr != null && bkr.getCode() == 'R')
+                            bkr.setHasMoved(false);
+                        break;
+                    case 'q':
+                        if (bqr != null && bqr.getCode() == 'R')
+                            bqr.setHasMoved(false);
+                        break;
+                    default:
+                        throw new Exception("Invalid castle status.");
+                }
+
+            }
+        }
+
+        initMoves(true);
+
+    }
+
+    /**
+     * Constructs an array of all of the pieces that are not on the board in this
+     * position.
+     * 
+     * @param white The color of the captured pieces.
+     * @return The array of captured pieces.
+     */
+    public ArrayList<Piece> getCapturedPieces(boolean white) {
+
+        ArrayList<Piece> cap = new ArrayList<>();
+
+        int k = 1, q = 1, r = 2, b = 2, n = 2, p = 8;
+
+        for (int rk = 0; rk < 8; rk++) {
+
+            for (int f = 0; f < 8; f++) {
+
+                Piece a = pieces[rk][f];
+                if (a != null && a.isWhite() == white) {
+
+                    switch (a.getCode()) {
+                        case 'K':
+                            --k;
+                            break;
+                        case 'Q':
+                            --q;
+                            break;
+                        case 'R':
+                            --r;
+                            break;
+                        case 'B':
+                            --b;
+                            break;
+                        case 'N':
+                            --n;
+                            break;
+                        case 'P':
+                            --p;
+                            break;
+                    }
+                }
+
+            }
+
+        }
+
+        while (k > 0) {
+            cap.add(new King(0, 0, white));
+            --k;
+        }
+
+        while (q > 0) {
+            cap.add(new Queen(0, 0, white));
+            --q;
+        }
+
+        while (r > 0) {
+            cap.add(new Rook(0, 0, white));
+            --r;
+        }
+
+        while (b > 0) {
+            cap.add(new Bishop(0, 0, white));
+            --b;
+        }
+
+        while (n > 0) {
+            cap.add(new Knight(0, 0, white));
+            --n;
+        }
+
+        while (p > 0) {
+            cap.add(new Pawn(0, 0, white));
+            --p;
+        }
+
+        return cap;
 
     }
 
