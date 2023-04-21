@@ -106,8 +106,7 @@ public class PGNParser {
 
             String comment = null;
 
-            if (includeClock && game.getSettings().getTimePerSide() > 0
-                    && game.getPositions().get(i - 1).getTimerEnd() > 0) {
+            if (includeClock && game.getSettings().getTimePerSide() > 0) {
 
                 final boolean isTurn = p.isWhite() && i == game.getPositions().size() - 1;
                 int moveCount = (int) Math.ceil(p.getMoveNumber() / 2.0);
@@ -115,10 +114,14 @@ public class PGNParser {
                 if (isTurn && game.getSettings().isWhiteStarts() != p.isWhite())
                     --moveCount;
 
-                comment = "[%clk "
-                        + millisToOutputFormat(
-                                game.getPositions().get(i - 1).getTimerEnd() + game.calcTimerDelta(moveCount))
-                        + "]";
+                long time = game.getPositions().get(i - 1).getTimerEnd() + game.calcTimerDelta(moveCount);
+
+                if (time > -1) {
+                    comment = "[%clk "
+                            + millisToOutputFormat(time)
+                            + "]";
+                }
+
             }
 
             PGNMove m = new PGNMove(p.getMoveString(), p.getMoveNumber() - 1);

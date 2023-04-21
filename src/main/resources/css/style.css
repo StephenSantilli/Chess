@@ -12,10 +12,7 @@ TableColumn {
 }
 
 #pieceBox {
-  /* -fx-spacing: 5; */
   -fx-alignment: center-right;
-  /* -fx-border-color: red;
-  -fx-border-width: 5; */
 }
 
 #lightCoord,
@@ -63,14 +60,16 @@ PauseView {
   -fx-background-color: transparent;
 }
 
-#guitimer, #guitimerhistory {
+#guitimer,
+#guitimerhistory {
   -fx-border-radius: 5 5 5 5;
   -fx-background-radius: 5 5 5 5;
   -fx-alignment: center;
   -fx-font-size: 24;
 }
 
-#guitimeractive, #guitimerhistoryactive {
+#guitimeractive,
+#guitimerhistoryactive {
   -fx-border-radius: 5 5 5 5;
   -fx-background-radius: 5 5 5 5;
   -fx-alignment: center;
@@ -91,7 +90,7 @@ PauseView {
 .scroll-pane > .viewport {
   -fx-background-color: transparent;
   -fx-alignment: center-left;
-    -fx-border-radius: 5;
+  -fx-border-radius: 5;
   -fx-background-radius: 5;
 }
 
