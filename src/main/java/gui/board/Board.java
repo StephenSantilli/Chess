@@ -464,8 +464,7 @@ public class Board extends StackPane {
      */
     public void showPromoteDialog(Square square, boolean white, GUIPiece callback) throws Exception {
 
-        Promote pD = new Promote(pieceSize, squareSize, white, gameView.isFlipped(),
-                getScene().getWindow());
+        Promote pD = new Promote(gameView, white, getScene().getWindow());
 
         pD.setOnHidden(ev -> {
 

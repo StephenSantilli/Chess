@@ -52,9 +52,6 @@ public class CapturedView extends VBox {
 
         captured.forEach(colorCap::add);
 
-        Bounds bounds = localToScene(getLayoutBounds());
-        System.out.println(bounds);
-
         HBox curr = new HBox();
         curr.setId("pieceBox");
         curr.setScaleX(-1);

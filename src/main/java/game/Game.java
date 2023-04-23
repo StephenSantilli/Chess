@@ -119,7 +119,6 @@ public class Game {
      */
     private boolean paused;
 
-    // TODO: use this instead of position draw
     /**
      * The player that offered a draw. {@code null} if no draw has been offered or
      * the previous draw offer has been declined.
@@ -197,22 +196,46 @@ public class Game {
     }
 
     /**
-     * Generates a Chess960 starting position using the algorithm found here:
+     * Generates a random Chess960 starting position using the algorithm found here:
      * <a href=
      * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
      * 
-     * @return A Chess960 starting position.
+     * <p>
+     * A list of all start positions can be found here:
+     * <a href=
+     * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
+     * 
+     * @return A random Chess960 starting position.
      */
     public static Position generate960Start() throws Exception {
 
-        char[] pcs = new char[8];
-
         // Generate random number from 0 to 959
         Random rand = new Random();
-        final int n = rand.nextInt(0, 960);
+        final int startId = rand.nextInt(0, 960);
 
-        final int n2 = n / 4;
-        final int b1 = n % 4;
+        return generate960Start(startId);
+
+    }
+
+    /**
+     * Generates the given Chess960 starting position using the algorithm found
+     * here:
+     * <a href=
+     * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
+     * 
+     * <p>
+     * A list of all start positions can be found here:
+     * <a href=
+     * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
+     * 
+     * @return A Chess960 starting position based on the given id.
+     */
+    public static Position generate960Start(int startId) throws Exception {
+
+        char[] pcs = new char[8];
+
+        final int n2 = startId / 4;
+        final int b1 = startId % 4;
 
         // Place light-square bishop
         switch (b1) {
@@ -1109,10 +1132,10 @@ public class Game {
                     settings.getTimePerSide() + (settings.getTimePerMove() > 0 ? "+" + settings.getTimePerMove() : ""));
 
         // White & Black's type
-        if (!white.getType().equals(""))
+        if (white.getType() != null)
             tags.put("WhiteType", white.getType().getString());
 
-        if (!black.getType().equals(""))
+        if (black.getType() != null)
             tags.put("BlackType", black.getType().getString());
 
         // If the starting position is not the default

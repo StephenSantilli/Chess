@@ -1,6 +1,7 @@
 package gui.dialog;
 
 import java.io.File;
+import java.util.Random;
 
 import game.Game;
 import game.GameSettings;
@@ -14,6 +15,7 @@ import game.engine.UCIEngine;
 import gui.App;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -39,7 +41,7 @@ public class CreateGame extends Stage {
     private TextField oneName, twoName, fenField;
     private ChoiceBox<String> color, type;
     private CheckBox useTimeBox, useFenBox;
-    private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove;
+    private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove, startId;
     private Label sLabel;
     private Button fromPgn, search, cancel, start, gen960;
     private Separator sep;
@@ -110,6 +112,7 @@ public class CreateGame extends Stage {
 
             twoName.setDisable(!type.getValue().equals("Two Player"));
             start.setText(local ? "Start" : "Send Challenge");
+            sizeToScene();
 
         });
 
@@ -186,11 +189,28 @@ public class CreateGame extends Stage {
             setDisabledFen(!useFenBox.isSelected());
         });
 
-        gen960 = new Button("Generate Chess960 Start");
+        gen960 = new Button("Randomize (Chess960)");
         gen960.setOnAction(this::generate960);
         gen960.setDisable(true);
 
-        HBox fenOpts = new HBox(useFenBox, gen960);
+        IntegerSpinnerValueFactory siVf = new IntegerSpinnerValueFactory(0, 959, 518);
+        startId = new Spinner<>(siVf);
+        startId.setPrefWidth(75);
+        startId.setDisable(true);
+        startId.setEditable(true);
+
+        startId.valueProperty().addListener(v -> {
+            try {
+
+                fenField.setText(Game.generate960Start(startId.getValue()).toString());
+
+            } catch (Exception e) {
+                showLabel(e.getMessage(), true);
+
+            }
+        });
+
+        HBox fenOpts = new HBox(useFenBox, gen960, startId);
         fenOpts.setSpacing(5);
         fenOpts.setAlignment(Pos.CENTER_LEFT);
 
@@ -238,11 +258,6 @@ public class CreateGame extends Stage {
         setOnShown(we -> {
 
             sizeToScene();
-            // setWidth(400);
-            // setMinWidth(400);
-            setMinHeight(getHeight());
-            setMaxHeight(getHeight());
-            setMaxWidth(getWidth());
 
         });
 
@@ -255,7 +270,11 @@ public class CreateGame extends Stage {
 
         try {
 
-            fenField.setText(Game.generate960Start().toString());
+            // Generate random number from 0 to 959
+            Random rand = new Random();
+            final int sid = rand.nextInt(0, 960);
+
+            startId.getValueFactory().setValue(sid);
 
         } catch (Exception e) {
 
@@ -304,6 +323,7 @@ public class CreateGame extends Stage {
     private void setDisabledFen(boolean disable) {
         fenField.setDisable(disable);
         gen960.setDisable(disable);
+        startId.setDisable(disable);
     }
 
     private void showLabel(String text, boolean error) {

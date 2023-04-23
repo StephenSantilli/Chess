@@ -1,5 +1,10 @@
 package gui.dialog;
 
+import game.pieces.Bishop;
+import game.pieces.Knight;
+import game.pieces.Queen;
+import game.pieces.Rook;
+import gui.GameView;
 import gui.PieceTranscoder;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -25,7 +30,7 @@ public class Promote extends Stage {
         return result;
     }
 
-    public Promote(double pieceSize, double squareSize, boolean white, boolean flipped, Window owner) throws Exception {
+    public Promote(GameView gv, boolean white, Window owner) {
 
         this.result = 'X';
 
@@ -34,12 +39,14 @@ public class Promote extends Stage {
 
         initStyle(StageStyle.UNDECORATED);
 
-        // TODO: use the existing transcoders, no need for new ones. throws Exception
-        // can be removed once this is done.
-        ImageView queen = new PieceTranscoder(pieceSize, white, 'Q').getImageView();
-        ImageView rook = new PieceTranscoder(pieceSize, white, 'R').getImageView();
-        ImageView bishop = new PieceTranscoder(pieceSize, white, 'B').getImageView();
-        ImageView knight = new PieceTranscoder(pieceSize, white, 'N').getImageView();
+        ImageView queen = gv.getBoard().getPiecePane().getPieceTranscoder(new Queen(0, 0, white)).getImageView();
+        ImageView rook = gv.getBoard().getPiecePane().getPieceTranscoder(new Rook(0, 0, white)).getImageView();
+        ImageView bishop = gv.getBoard().getPiecePane().getPieceTranscoder(new Bishop(0, 0, white)).getImageView();
+        ImageView knight = gv.getBoard().getPiecePane().getPieceTranscoder(new Knight(0, 0, white)).getImageView();
+
+        final double pieceSize = gv.getBoard().getPieceSize();
+        final double squareSize = gv.getBoard().getSquareSize();
+        final boolean flipped = gv.isFlipped();
 
         Pane q = new Pane(queen);
         q.setPrefHeight(squareSize);
