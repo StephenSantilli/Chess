@@ -77,7 +77,7 @@ public class UCIEngine {
         String bt = " btime " + btime;
         if (btime <= 0)
             bt = "";
-        
+
         String wi = " winc " + winc;
         if (winc <= 0)
             wi = "";
@@ -108,7 +108,14 @@ public class UCIEngine {
 
     public UCIEngine(File enginePath) throws IOException {
 
-        ProcessBuilder pb = new ProcessBuilder("stockfish");
+        ProcessBuilder pb = null;
+
+        if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+            pb = new ProcessBuilder("cmd", "/c", "stockfish");
+        } else {
+            pb = new ProcessBuilder("stockfish");
+        }
+
         pb.directory(enginePath);
         pb.redirectErrorStream(true);
         Process p = pb.start();

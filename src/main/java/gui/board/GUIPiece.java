@@ -157,7 +157,7 @@ public class GUIPiece {
 
     private Move isCastle(Piece active, Square target) {
 
-        if (active == null)
+        if (active == null || target == null || !target.isValid())
             return null;
 
         final Game game = gameView.getGame();

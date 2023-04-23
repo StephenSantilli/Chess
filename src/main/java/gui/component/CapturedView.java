@@ -34,7 +34,7 @@ public class CapturedView extends VBox {
 
         this.gv = gv;
         this.white = white;
-        setFillWidth(true);
+        //setFillWidth(true);
 
     }
 
