@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import game.GameSettings;
 import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
@@ -127,6 +128,14 @@ public class SearchDialog extends Stage {
             return new ReadOnlyObjectWrapper<>(p.getValue().getName());
         });
 
+        TableColumn<Challenge, String> fenCol = new TableColumn<>("Starting FEN");
+
+        fenCol.setCellValueFactory(p -> {
+            return new ReadOnlyObjectWrapper<>(p.getValue().getFen().equals(GameSettings.DEFAULT_FEN)
+                    ? "Default"
+                    : p.getValue().getFen());
+        });
+
         TableColumn<Challenge, String> colorCol = new TableColumn<>("Your Color");
 
         colorCol.setCellValueFactory(p -> {
@@ -191,7 +200,8 @@ public class SearchDialog extends Stage {
 
         });
 
-        challengeTable.getColumns().setAll(Arrays.asList(nameCol, colorCol, sideTimeCol, moveTimeCol, addressCol));
+        challengeTable.getColumns()
+                .setAll(Arrays.asList(nameCol, fenCol, colorCol, sideTimeCol, moveTimeCol, addressCol));
 
         HBox btns = new HBox();
         btns.setAlignment(Pos.CENTER_RIGHT);

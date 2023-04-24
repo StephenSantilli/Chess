@@ -13,10 +13,14 @@ public class Challenge {
     public static final int CHALLENGE_WHITE = 1;
     public static final int CHALLENGE_BLACK = 2;
 
-    private String version, name;
+    private String version, name, fen;
     private int color;
     private long timePerSide, timePerMove;
     private InetAddress address;
+
+    public String getFen() {
+        return fen;
+    }
 
     public String getVersion() {
         return version;
@@ -42,10 +46,12 @@ public class Challenge {
         return address;
     }
 
-    public Challenge(String name, int color, long timePerSide, long timePerMove, InetAddress address) throws Exception {
+    public Challenge(String name, String fen, int color, long timePerSide, long timePerMove, InetAddress address)
+            throws Exception {
 
         this.version = Game.VERSION;
         this.name = name;
+        this.fen = fen;
         this.color = color;
         this.timePerSide = timePerSide;
         this.timePerMove = timePerMove;
@@ -71,20 +77,22 @@ public class Challenge {
 
         name = a.get(1);
 
+        fen = a.get(2);
+
         try {
-            color = Integer.parseInt(a.get(2));
+            color = Integer.parseInt(a.get(3));
         } catch (Exception e) {
             throw new Exception("Invalid color.");
         }
 
         try {
-            timePerSide = Integer.parseInt(a.get(3));
+            timePerSide = Integer.parseInt(a.get(4));
         } catch (Exception e) {
             throw new Exception("Invalid time per side.");
         }
 
         try {
-            timePerMove = Integer.parseInt(a.get(4));
+            timePerMove = Integer.parseInt(a.get(5));
         } catch (Exception e) {
             throw new Exception("Invalid time per move.");
         }
@@ -110,7 +118,7 @@ public class Challenge {
 
     public String toString() {
 
-        String str = version + ";" + name + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
+        String str = version + ";" + name + ";" + fen + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
         return str;
 
     }

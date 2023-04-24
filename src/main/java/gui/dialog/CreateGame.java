@@ -530,7 +530,10 @@ public class CreateGame extends Stage {
                 };
 
                 server = new ChallengeServer(
-                        new Challenge(oneName.getText(), c, ((minPerSide.getValue() * 60) + (secPerSide.getValue())),
+                        new Challenge(oneName.getText(),
+                                !useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText(),
+                                c,
+                                ((minPerSide.getValue() * 60) + (secPerSide.getValue())),
                                 ((minPerMove.getValue() * 60) + (secPerMove.getValue())), null),
                         gameCreated);
 
