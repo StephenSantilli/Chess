@@ -385,6 +385,19 @@ public class GameView extends HBox implements GameListener {
 
                 if (client == null)
                     game.startGame();
+                else {
+                    moveList.initMoveList();
+                    chatBox.update();
+                    engineMenu.setVisible(engine != null);
+
+                    goToLastPos();
+
+                    if (color != TWO_PLAYER && isFlipped() == (color == WHITE))
+                        flip();
+
+                    if (!app.getStage().isFocused())
+                        app.getStage().toFront();
+                }
 
             } catch (Exception ex) {
 
@@ -508,7 +521,6 @@ public class GameView extends HBox implements GameListener {
 
                 if (!app.getStage().isFocused())
                     app.getStage().toFront();
-                    
 
             } else if (event.getType() == Type.MOVE) {
 
