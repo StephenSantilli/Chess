@@ -342,6 +342,7 @@ public class Client implements GameListener {
                     (color == Challenge.CHALLENGE_WHITE ? (Challenge.CHALLENGE_BLACK + "")
                             : (Challenge.CHALLENGE_WHITE) + ""),
                     name,
+                    settings.getFen(),
                     settings.getTimePerSide() + "",
                     settings.getTimePerMove() + ""));
 
@@ -364,7 +365,7 @@ public class Client implements GameListener {
                         !white ? name : rMsg.getName(),
                         Player.Type.HUMAN,
                         Player.Type.HUMAN,
-                        new GameSettings(rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
+                        new GameSettings(rMsg.getFen(), rMsg.getTimePerSide(), rMsg.getTimePerMove(), false, false, !white, white));
                 oppColor = !white;
                 game.addListener(this);
 
