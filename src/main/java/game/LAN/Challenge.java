@@ -69,7 +69,7 @@ public class Challenge {
 
         ArrayList<String> a = msg.getArgs();
 
-        if (a.size() != 5) {
+        if (a.size() != 6) {
             throw new Exception("Invalid challenge.");
         }
 
