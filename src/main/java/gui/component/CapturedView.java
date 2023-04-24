@@ -6,9 +6,11 @@ import game.Position;
 import game.pieces.Piece;
 import gui.GameView;
 import gui.PieceTranscoder;
-import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
@@ -34,7 +36,7 @@ public class CapturedView extends VBox {
 
         this.gv = gv;
         this.white = white;
-        //setFillWidth(true);
+        // setFillWidth(true);
 
     }
 
@@ -85,6 +87,21 @@ public class CapturedView extends VBox {
             curr.setMaxWidth(Double.MAX_VALUE);
 
             im.setTranslateX((trans.getPieceSize() * (1 / 3.0) * (curr.getChildren().size() - 1)));
+
+        }
+
+        int delta = gv.getGame().getPositions().get(gv.getCurrentPos()).calculatePieceDelta();
+        if ((white && delta > 0) || (!white && delta < 0)) {
+            Label l = new Label("+" + (int) Math.abs(delta) + "");
+            l.setAlignment(Pos.CENTER_RIGHT);
+            Region r = new Region();
+            HBox.setHgrow(r, Priority.ALWAYS);
+            HBox deltaBox = new HBox(r, l);
+            // deltaBox.setAlignment(Pos.CENTER);
+            if (gv.isFlipped() != white)
+                getChildren().add(0, deltaBox);
+            else
+                getChildren().add(deltaBox);
 
         }
 

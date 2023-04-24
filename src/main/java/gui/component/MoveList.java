@@ -162,6 +162,8 @@ public class MoveList extends GridPane {
                 add(res, board.getGame().getLastPos().isWhite() ? 1 : 2,
                         calcRow(game.getLastPos().getMoveNumber() + 1));
 
+            res.requestFocus();
+
         }
 
         sp.applyCss();
@@ -199,6 +201,7 @@ public class MoveList extends GridPane {
 
         add(btn, m.isWhite() ? 1 : 2, row);
         requestFocus();
+        btn.requestFocus();
 
         if (m.isWhite() || pos == 1) {
 

@@ -17,6 +17,7 @@ import gui.component.MoveList;
 import gui.dialog.CreateGame;
 import gui.dialog.Draw;
 import gui.menu.BarMenu;
+import gui.menu.EngineMenu;
 import gui.menu.GameMenu;
 import gui.menu.ViewMenu;
 import javafx.application.Platform;
@@ -57,6 +58,7 @@ public class GameView extends HBox implements GameListener {
     private BarMenu menuBar;
     private GameMenu gameMenu;
     private ViewMenu viewMenu;
+    private EngineMenu engineMenu;
 
     private Draw drawDialog;
 
@@ -74,6 +76,14 @@ public class GameView extends HBox implements GameListener {
 
     public Board getBoard() {
         return board;
+    }
+
+    public EngineHook getEngine() {
+        return engine;
+    }
+
+    public void setEngine(EngineHook engine) {
+        this.engine = engine;
     }
 
     public GameInfo getInfoPane() {
@@ -390,17 +400,6 @@ public class GameView extends HBox implements GameListener {
 
             }
 
-            moveList.initMoveList();
-            chatBox.update();
-
-            goToLastPos();
-
-            if (!isFlipped() && color == BLACK)
-                flip();
-
-            if (!app.getStage().isFocused())
-                app.getStage().toFront();
-
         }
 
     }
@@ -449,8 +448,9 @@ public class GameView extends HBox implements GameListener {
 
         viewMenu = new ViewMenu(this);
         gameMenu = new GameMenu(this);
+        engineMenu = new EngineMenu(this);
 
-        menuBar.addAll(gameMenu, viewMenu);
+        menuBar.addAll(gameMenu, viewMenu, engineMenu);
 
     }
 
@@ -495,8 +495,22 @@ public class GameView extends HBox implements GameListener {
         if (game == null)
             return;
         Platform.runLater(() -> {
+            if (event.getType() == Type.STARTED) {
 
-            if (event.getType() == Type.MOVE) {
+                moveList.initMoveList();
+                chatBox.update();
+                engineMenu.setVisible(engine != null);
+
+                goToLastPos();
+
+                if (color != TWO_PLAYER && isFlipped() == (color == WHITE))
+                    flip();
+
+                if (!app.getStage().isFocused())
+                    app.getStage().toFront();
+                    
+
+            } else if (event.getType() == Type.MOVE) {
 
                 currentPos = event.getCurrIndex();
 

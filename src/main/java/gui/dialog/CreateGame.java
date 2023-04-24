@@ -1,7 +1,9 @@
 package gui.dialog;
 
 import java.io.File;
+import java.io.FileReader;
 import java.util.Random;
+import java.util.Scanner;
 
 import game.Game;
 import game.GameSettings;
@@ -15,14 +17,15 @@ import game.engine.UCIEngine;
 import gui.App;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
@@ -32,6 +35,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -43,7 +47,7 @@ public class CreateGame extends Stage {
     private CheckBox useTimeBox, useFenBox;
     private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove, startId;
     private Label sLabel;
-    private Button fromPgn, search, cancel, start, gen960;
+    private Button fromPgn, search, cancel, start, gen960, reset960;
     private Separator sep;
 
     private boolean white;
@@ -103,10 +107,60 @@ public class CreateGame extends Stage {
         type = new ChoiceBox<String>();
         type.setMaxWidth(Double.MAX_VALUE);
 
-        type.getItems().addAll("Two Player", "Online", "Bot");
+        type.getItems().setAll("Two Player", "Online");
+
+        String st = App.prefs.get("Engines", "");
+        if (!st.equals("")) {
+            String[] ss = st.split(";");
+            for (String e : ss) {
+                type.getItems().add("Engine (" + e + ")");
+            }
+            type.getItems().add("Clear engines...");
+
+        }
+
+        type.getItems().add("Register a new engine...");
+
         type.setValue("Two Player");
 
         type.setOnAction(ae -> {
+
+            if (type.getValue().startsWith("Register")) {
+                ae.consume();
+                registerNew();
+
+                type.getItems().setAll("Two Player", "Online");
+
+                String str = App.prefs.get("Engines", "");
+                if (!str.equals("")) {
+                    String[] ss = str.split(";");
+                    for (String e : ss) {
+                        type.getItems().add("Engine (" + e + ")");
+                    }
+                    type.getItems().add("Clear engines...");
+
+                }
+
+                type.getItems().add("Register a new engine...");
+
+                type.setValue("Two Player");
+
+                return;
+
+            } else if (type.getValue().startsWith("Clear")) {
+                ae.consume();
+                type.getItems().setAll("Two Player", "Online");
+
+                App.prefs.put("Engines", "");
+
+                type.getItems().add("Register a new engine...");
+
+                clearLabel();
+                type.setValue("Two Player");
+
+                return;
+
+            }
 
             boolean local = !type.getValue().equals("Online");
 
@@ -193,6 +247,10 @@ public class CreateGame extends Stage {
         gen960.setOnAction(this::generate960);
         gen960.setDisable(true);
 
+        reset960 = new Button("Reset");
+        reset960.setOnAction(ae -> startId.getValueFactory().setValue(518));
+        reset960.setDisable(true);
+
         IntegerSpinnerValueFactory siVf = new IntegerSpinnerValueFactory(0, 959, 518);
         startId = new Spinner<>(siVf);
         startId.setPrefWidth(75);
@@ -202,7 +260,7 @@ public class CreateGame extends Stage {
         startId.valueProperty().addListener(v -> {
             try {
 
-                fenField.setText(Game.generate960Start(startId.getValue()).toString());
+                fenField.setText(Game.generate960Start(startId.getValue()));
 
             } catch (Exception e) {
                 showLabel(e.getMessage(), true);
@@ -210,7 +268,7 @@ public class CreateGame extends Stage {
             }
         });
 
-        HBox fenOpts = new HBox(useFenBox, gen960, startId);
+        HBox fenOpts = new HBox(useFenBox, gen960, reset960, startId);
         fenOpts.setSpacing(5);
         fenOpts.setAlignment(Pos.CENTER_LEFT);
 
@@ -263,6 +321,34 @@ public class CreateGame extends Stage {
 
         setTitle("Create Game");
         setScene(s);
+
+    }
+
+    private void registerNew() {
+
+        FileChooser chooser = new FileChooser();
+        // chooser.getExtensionFilters().add(new ExtensionFilter("PGN File", "*.pgn"));
+
+        File f = chooser.showOpenDialog(new Stage());
+
+        if (f == null || !f.exists()) {
+
+            Dialog<Void> eDg = new Dialog<>();
+            eDg.initOwner(getScene().getWindow());
+            eDg.setTitle("Error registering engine.");
+            eDg.setContentText("Engine file not found.");
+
+            eDg.getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+            eDg.showAndWait();
+
+            return;
+
+        }
+
+        App.prefs.put("Engine (" + f.getName() + ")", f.getPath());
+        String engines = App.prefs.get("Engines", "");
+        App.prefs.put("Engines", engines + f.getName() + ";");
 
     }
 
@@ -324,6 +410,7 @@ public class CreateGame extends Stage {
         fenField.setDisable(disable);
         gen960.setDisable(disable);
         startId.setDisable(disable);
+        reset960.setDisable(disable);
     }
 
     private void showLabel(String text, boolean error) {
@@ -460,7 +547,7 @@ public class CreateGame extends Stage {
 
             }
 
-        } else if (type.getValue().equals("Bot")) {
+        } else if (type.getValue().startsWith("Engine")) {
 
             try {
 
@@ -476,9 +563,12 @@ public class CreateGame extends Stage {
                 long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue()))
                         : -1;
 
-                UCIEngine en = new UCIEngine(new File("./Stockfish"));
-                en.setOption("Skill Level", "1");
-                en.waitReady();
+                String path = App.prefs.get(type.getValue(), "");
+
+                if (path.equals(""))
+                    throw new Exception("Engine not found.");
+
+                UCIEngine en = new UCIEngine(new File(path));
 
                 game = new Game((oneWhite ? oneName.getText() : en.getName()),
                         (oneWhite ? en.getName() : oneName.getText()),
@@ -494,14 +584,20 @@ public class CreateGame extends Stage {
 
                 engine = new EngineHook(en, game, !oneWhite);
 
+                EngineSettings stgs = new EngineSettings(getOwner(), engine);
+                stgs.showAndWait();
+                en.waitReady();
+
                 create = true;
                 hide();
 
             } catch (Exception e) {
-
+                e.printStackTrace();
                 showLabel(e.getMessage(), true);
 
             }
+
+        } else if (type.getValue().startsWith("Register")) {
 
         }
 
@@ -516,9 +612,11 @@ public class CreateGame extends Stage {
         color.setDisable(disable);
         type.setDisable(disable);
         useTimeBox.setDisable(disable);
-        setDisabledTime(!useTimeBox.isSelected());
+        setDisabledTime(disable ? true : !useTimeBox.isSelected());
         cancel.setText(disable ? "Stop" : "Cancel");
-        setDisabledFen(disable);
+        setDisabledFen(disable ? true : !useFenBox.isSelected());
+        fromPgn.setDisable(disable);
+        useFenBox.setDisable(disable);
     }
 
     private void cancelAction(ActionEvent ae) {

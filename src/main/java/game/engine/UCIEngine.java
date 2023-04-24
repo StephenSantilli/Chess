@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class UCIEngine {
 
     public static void main(String[] args) throws IOException {
 
-        UCIEngine e = new UCIEngine(new File("./Stockfish"));
+        UCIEngine e = new UCIEngine(new File("./Stockfish/stockfish"));
         e.setOption("Skill Level", "1");
         e.waitReady();
         e.setPosition("startpos", "e2e4");
@@ -22,6 +24,12 @@ public class UCIEngine {
 
     protected BufferedReader input;
     protected BufferedWriter output;
+
+    protected ArrayList<UCIOption> opts;
+
+    public ArrayList<UCIOption> getOpts() {
+        return opts;
+    }
 
     public String getName() {
         return name;
@@ -60,7 +68,7 @@ public class UCIEngine {
 
     public void setPosition(String fen, String... moves) throws IOException {
 
-        println("position " + fen + " moves " + String.join(" ", moves));
+        println("position fen " + fen + " moves " + String.join(" ", moves));
 
     }
 
@@ -108,15 +116,17 @@ public class UCIEngine {
 
     public UCIEngine(File enginePath) throws IOException {
 
+        opts = new ArrayList<>();
+
         ProcessBuilder pb = null;
 
         if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
-            pb = new ProcessBuilder("cmd", "/c", "stockfish");
+            pb = new ProcessBuilder("cmd", "/c", enginePath.getName());
         } else {
-            pb = new ProcessBuilder("stockfish");
+            pb = new ProcessBuilder("./" + enginePath.getName());
         }
 
-        pb.directory(enginePath);
+        pb.directory(new File(enginePath.getParent()));
         pb.redirectErrorStream(true);
         Process p = pb.start();
         input = p.inputReader();
@@ -133,6 +143,60 @@ public class UCIEngine {
                 this.name = rec.substring(8);
             } else if (rec.startsWith("id author ")) {
                 this.author = rec.substring(10);
+            } else if (rec.startsWith("option name ")) {
+
+                String[] a = rec.split(" ");
+
+                String n = a[2];
+                int i = 0;
+                for (i = 3; i < a.length; i++) {
+
+                    if (a[i].equals("type"))
+                        break;
+
+                    n += " " + a[i];
+
+                }
+                ++i;
+
+                switch (a[i]) {
+                    case "check":
+                        boolean def = a[i + 2].equals("true");
+                        opts.add(new UCICheck(this, n, def, def));
+                        break;
+                    case "spin":
+                        opts.add(new UCISpin(this, n, Integer.parseInt(a[i + 2]), Integer.parseInt(a[i + 2]),
+                                Integer.parseInt(a[i + 4]), Integer.parseInt(a[i + 6])));
+                        break;
+                    case "combo":
+                        String cdef = i + 2 >= a.length ? "" : a[i + 2];
+
+                        ArrayList<String> carr = new ArrayList<>();
+                        carr.add("");
+                        i += 4;
+                        for (int z = 0; i < a.length; i++) {
+                            if (a[i].equals("var")) {
+                                ++z;
+                                continue;
+                            }
+                            if (carr.size() - 1 == z)
+                                carr.set(z, carr.get(z) + " " + a[i]);
+                            else
+                                carr.add(a[i]);
+                                
+                        }
+                        opts.add(new UCICombo(this, n, cdef, cdef, carr.toArray(new String[carr.size()])));
+                        break;
+                    case "button":
+                        opts.add(new UCIButton(this, n));
+                        break;
+                    case "string":
+                        String sdef = i + 2 >= a.length ? "" : a[i + 2];
+                        opts.add(new UCIString(this, n, sdef, sdef));
+                        break;
+
+                }
+
             }
 
             rec = input.readLine();

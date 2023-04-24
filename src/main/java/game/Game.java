@@ -206,8 +206,10 @@ public class Game {
      * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
      * 
      * @return A random Chess960 starting position.
+     * @throws Exception If startId is not between 0-959 (inclusive), or
+     *                   if there is an error creating the Position.
      */
-    public static Position generate960Start() throws Exception {
+    public static String generate960Start() throws Exception {
 
         // Generate random number from 0 to 959
         Random rand = new Random();
@@ -229,8 +231,13 @@ public class Game {
      * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
      * 
      * @return A Chess960 starting position based on the given id.
+     * @throws Exception If startId is not between 0-959 (inclusive), or if there is
+     *                   an error creating the Position.
      */
-    public static Position generate960Start(int startId) throws Exception {
+    public static String generate960Start(int startId) throws Exception {
+
+        if (startId < 0 || startId > 959)
+            throw new Exception("Invalid startId.");
 
         char[] pcs = new char[8];
 
@@ -355,7 +362,7 @@ public class Game {
 
         String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w KQkq - 0 1";
 
-        return new Position(fen);
+        return fen;
 
     }
 
@@ -757,29 +764,7 @@ public class Game {
         if (result != Game.Result.IN_PROGRESS)
             throw new Exception("Game is not in progress.");
 
-        // Finding the move based on the origin and destination.
-        // Castle moves should be king moving to rook's square.
-        Move move = null, maybe = null;
-        for (int i = 0; move == null && i < getLastPos().getMoves().size(); i++) {
-
-            Move a = getLastPos().getMoves().get(i);
-
-            if (!a.isCastle() && a.getOrigin().equals(origin) && a.getDestination().equals(destination))
-                move = a;
-            else if (a.isCastle() && getLastPos().getPieceAtSquare(destination) != null
-                    && getLastPos().getPieceAtSquare(destination).equals(a.getRook())) {
-                move = a;
-            } else if (a.isCastle() && a.getOrigin().equals(origin) && a.getDestination().equals(destination)) {
-                // will mark a castle move that matches the origin and destination, but doesn't
-                // set it as the move in case there is a non castle move with the same origin
-                // and destination
-                maybe = a;
-            }
-
-        }
-
-        if (move == null && maybe != null)
-            move = maybe;
+        Move move = getLastPos().findMove(origin, destination);
 
         if (move == null)
             throw new Exception("Invalid move.");

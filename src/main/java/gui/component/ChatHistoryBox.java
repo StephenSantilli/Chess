@@ -50,8 +50,6 @@ public class ChatHistoryBox extends VBox {
                 content.add(timestamp, 1, 0);
                 content.add(message, 2, 0);
 
-
-
                 for (int j = 1; i + j <= game.getMessages().size(); j++) {
 
                     if (i + j == game.getMessages().size()) {
@@ -68,7 +66,6 @@ public class ChatHistoryBox extends VBox {
 
                     Text cmessage = new Text(cj.getMessage());
 
-
                     content.add(cmessage, 2, j);
 
                 }
@@ -76,7 +73,6 @@ public class ChatHistoryBox extends VBox {
             } else {
 
                 Text message = new Text(c.getMessage());
-
 
                 if (c.isError())
                     message.setFill(Color.RED);

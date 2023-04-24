@@ -85,6 +85,7 @@ public class App extends Application {
 
             view.getChildren().addAll(menu, gameView);
 
+
             scene.setOnKeyReleased(gameView::keyHandler);
 
             stage.setOnShown(we -> gameView.startGame());

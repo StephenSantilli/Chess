@@ -93,6 +93,8 @@ public class ChatArea extends VBox {
                 scroller.layout();
 
                 scroller.setVvalue(scroller.getVmax());
+                gameView.getBoard().getResizeEvent().changed(null, 0, 0);
+
             });
 
         });

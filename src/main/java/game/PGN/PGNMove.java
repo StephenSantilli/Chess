@@ -170,7 +170,12 @@ public class PGNMove {
     public long getTimerEnd() {
 
         Pattern pat = Pattern.compile("(?<hrs>[\\d]+):(?<mins>[\\d]+):(?<secs>[\\d]+)");
-        Matcher matcher = pat.matcher(getTag("clk"));
+        String clk = getTag("clk");
+
+        if (clk == null || clk.equals(""))
+            return -1;
+            
+        Matcher matcher = pat.matcher(clk);
 
         long timerEnd = 0;
 

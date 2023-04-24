@@ -6,6 +6,7 @@ import game.Chat;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
+import game.Move;
 import game.Square;
 
 public class EngineHook implements GameListener {
@@ -13,12 +14,14 @@ public class EngineHook implements GameListener {
     private final Game game;
     private final UCIEngine engine;
     private final boolean white;
+    private int depth;
 
     public EngineHook(UCIEngine engine, Game game, boolean white) {
 
         this.game = game;
         this.engine = engine;
         this.white = white;
+        depth = 10;
 
         game.addListener(this);
 
@@ -38,10 +41,15 @@ public class EngineHook implements GameListener {
                 break;
             case MOVE:
 
-                if (event.getCurrIndex() < event.getPrevIndex())
-                    return;
+                if (event.getCurrIndex() < event.getPrevIndex()) {
 
-                if (event.isWhite() == white) {
+                    if (!(event.getCurrIndex() == 0 && event.getCurr().isWhite() == white)) {
+                        return;
+                    }
+
+                }
+
+                if (event.getCurr().isWhite() != white) {
                     try {
                         ArrayList<String> moveList = new ArrayList<>();
 
@@ -50,10 +58,21 @@ public class EngineHook implements GameListener {
                         }
 
                         String[] arr = new String[moveList.size()];
-                        engine.setPosition("startpos", moveList.toArray(arr));
+                        engine.setPosition(game.getPositions().get(0).toString(), moveList.toArray(arr));
 
-                        String bm = engine.getBestMove(10, game.getTimerTime(true), game.getTimerTime(false),
+                        String bm = engine.getBestMove(depth, game.getTimerTime(true), game.getTimerTime(false),
                                 game.getSettings().getTimePerMove() * 1000, game.getSettings().getTimePerMove() * 1000);
+
+                        Square origin = new Square(bm.substring(0, 2));
+                        Square destination = new Square(bm.substring(2, 4));
+
+                        if (game.getPositions().size() - 3 < 0)
+                            return;
+
+                        Move m = game.getPositions().get(game.getPositions().size() - 3).findMove(origin, destination);
+
+                        if (m == null)
+                            return;
 
                         game.sendMessage(new Chat(game.getPlayer(white), System.currentTimeMillis(),
                                 game.getPositions().size() > 2 &&
@@ -61,7 +80,7 @@ public class EngineHook implements GameListener {
                                                 (game.getPositions().get(game.getPositions().size() - 2).getMove()
                                                         .toString()))
                                                                 ? "That was the best move."
-                                                                : ("Best move was: " + bm)));
+                                                                : ("Best move was: " + m.getMoveNotation())));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -102,9 +121,9 @@ public class EngineHook implements GameListener {
                 }
 
                 String[] arr = new String[moveList.size()];
-                engine.setPosition("startpos", moveList.toArray(arr));
+                engine.setPosition(game.getPositions().get(0).toString(), moveList.toArray(arr));
 
-                String bm = engine.getBestMove(10, game.getTimerTime(true), game.getTimerTime(false),
+                String bm = engine.getBestMove(depth, game.getTimerTime(true), game.getTimerTime(false),
                         game.getSettings().getTimePerMove() * 1000, game.getSettings().getTimePerMove() * 1000);
                 Square origin = new Square(bm.substring(0, 2));
                 Square destination = new Square(bm.substring(2, 4));
@@ -114,6 +133,7 @@ public class EngineHook implements GameListener {
                 engine.waitReady();
 
                 game.makeMove(origin, destination, promoteType);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -133,6 +153,14 @@ public class EngineHook implements GameListener {
 
     public boolean isWhite() {
         return white;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
 }

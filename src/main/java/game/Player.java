@@ -8,7 +8,7 @@ public class Player {
     /**
      * The maximum length of a name.
      */
-    public static final int MAX_NAME_LENGTH = 20;
+    public static final int MAX_NAME_LENGTH = 100;
 
     /**
      * A regular expression that matches a valid name.

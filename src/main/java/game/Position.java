@@ -751,6 +751,52 @@ public class Position {
 
     }
 
+    public int calculatePieceDelta() {
+
+        int delta = 0;
+        for (int r = 0; r < 8; r++) {
+            for (int f = 0; f < 8; f++) {
+                Piece p = pieces[r][f];
+                if (p != null) {
+                    delta += (p.isWhite() ? 1 : -1) * p.getPoints();
+                }
+            }
+        }
+
+        return delta;
+
+    }
+
+    public Move findMove(Square origin, Square destination) {
+
+        // Finding the move based on the origin and destination.
+        // Castle moves should be king moving to rook's square.
+        Move move = null, maybe = null;
+        for (int i = 0; move == null && i < moves.size(); i++) {
+
+            Move a = moves.get(i);
+
+            if (!a.isCastle() && a.getOrigin().equals(origin) && a.getDestination().equals(destination))
+                move = a;
+            else if (a.isCastle() && getPieceAtSquare(destination) != null
+                    && getPieceAtSquare(destination).equals(a.getRook())) {
+                move = a;
+            } else if (a.isCastle() && a.getOrigin().equals(origin) && a.getDestination().equals(destination)) {
+                // will mark a castle move that matches the origin and destination, but doesn't
+                // set it as the move in case there is a non castle move with the same origin
+                // and destination
+                maybe = a;
+            }
+
+        }
+
+        if (move == null && maybe != null)
+            move = maybe;
+
+        return move;
+
+    }
+
     /**
      * Sets the promote type and updates the moves accordingly.
      * 

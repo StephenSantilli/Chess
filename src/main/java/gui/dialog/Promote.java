@@ -5,7 +5,6 @@ import game.pieces.Knight;
 import game.pieces.Queen;
 import game.pieces.Rook;
 import gui.GameView;
-import gui.PieceTranscoder;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;

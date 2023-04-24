@@ -4,8 +4,8 @@
   -accent-active: #547767;
   -lightsquare: #f0ebce;
   -darksquare: #698269;
-  -movebutton: rgba(238, 187, 77);
-  -movebuttonactive: rgb(204, 154, 55);
+  -movebutton: #f0ebce;
+  -movebuttonactive: #547767;
   -movesquare: rgba(238, 187, 77, 0.65);
   -activesquare: rgba(238, 187, 85, 0.75);
   -moveindicator: rgba(100, 100, 100, 0.5);
