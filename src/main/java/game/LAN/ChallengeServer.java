@@ -68,7 +68,7 @@ public class ChallengeServer {
                 Socket connection = tcpSocket.accept();
 
                 client = new Client(connection, challenge.getName(), challenge.getColor(),
-                        new GameSettings(challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true,
+                        new GameSettings(challenge.getFen(), challenge.getTimePerSide(), challenge.getTimePerMove(), false, false, true,
                                 true),
                         gameCreatedCallback);
 
