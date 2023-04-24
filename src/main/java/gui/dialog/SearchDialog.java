@@ -176,12 +176,14 @@ public class SearchDialog extends Stage {
                         Runnable gameCreated = () -> {
 
                             searcher.stop();
-                            Platform.runLater(() -> hide());
+                            Platform.runLater(() -> {
+                                if (isShowing())
+                                    hide();
+                            });
 
                         };
 
-                        client = new Client(row.getItem()
-                                .getAddress(),
+                        client = new Client(row.getItem().getAddress(),
                                 App.prefs.get("p1name", "User"),
                                 -1,
                                 null,
