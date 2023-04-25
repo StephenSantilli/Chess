@@ -767,7 +767,26 @@ public class Position {
 
     }
 
+    /**
+     * Finds a move based on the given origin and destination.
+     * 
+     * <p>
+     * Castle moves can be represented as either the king capturing the respective
+     * rook, or as the king moving to the castle destination square. However, in
+     * variants like Chess960, the king may be able to move to the same square it
+     * can castle to. In that case, the normal move always overrides the castle
+     * move.
+     * Castle moves can always be unambiguously represented as the king moving to
+     * the rook's square.
+     * 
+     * @param origin      The origin square of the move to search for
+     * @param destination The destination square of the move to search for
+     * @return The move found, or {@code null} if none found.
+     */
     public Move findMove(Square origin, Square destination) {
+
+        if (origin == null || destination == null || !origin.isValid() || !destination.isValid())
+            return null;
 
         // Finding the move based on the origin and destination.
         // Castle moves should be king moving to rook's square.
