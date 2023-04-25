@@ -54,6 +54,9 @@ public class GameMenu extends Menu {
         undo.setAccelerator(KeyCombination.keyCombination("Shortcut+Z"));
         undo.setOnAction(e -> {
 
+            if (board.getCurrentPos() != board.getGame().getPositions().size() - 1)
+                return;
+
             try {
                 board.getGame().undo();
             } catch (Exception ex) {
@@ -64,6 +67,9 @@ public class GameMenu extends Menu {
         redo = new MenuItem("Redo");
         redo.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+Z"));
         redo.setOnAction(e -> {
+
+            if (board.getCurrentPos() != board.getGame().getPositions().size() - 1)
+                return;
 
             try {
                 board.getGame().redo();

@@ -41,6 +41,14 @@ public class GUIPiece {
      */
     private Move promoteMove;
 
+    public Move getPromoteMove() {
+        return promoteMove;
+    }
+
+    public void setPromoteMove(Move promoteMove) {
+        this.promoteMove = promoteMove;
+    }
+
     private Runnable promoteCallback = () -> {
 
         if (promoteMove == null || promoteResponse == '0')
@@ -371,10 +379,11 @@ public class GUIPiece {
                     } else
                         game.makeMove(move.getOrigin(), move.getDestination(), '0');
 
-                } else {
-                    board.draw();
-                }
-
+                        
+                    } else {
+                        board.draw();
+                    }
+                    
             } catch (Exception e) {
 
                 // If this wasn't a promote move, and the position never changed

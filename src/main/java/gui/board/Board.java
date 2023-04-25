@@ -395,10 +395,10 @@ public class Board extends StackPane {
         dragging = null;
 
         // Don't animate when promotion move (if you did it/two player game)
-        if (gameView.getGame().getLastPos().getMove() != null
-                && gameView.getGame().getLastPos().getMove().getPromoteType() != '0'
-                && (gameView.getColor() == GameView.TWO_PLAYER
-                        || gameView.getGame().getLastPos().isWhite() != (gameView.getColor() == GameView.WHITE)))
+        if (p2 != null && p2.getMove() != null
+                && p2.getMove().getPromoteType() != '0'
+                && (getGUIPieceAtSquare(p2.getMove().getOrigin()) != null
+                        && (getGUIPieceAtSquare(p2.getMove().getOrigin()).getPromoteMove() != null)))
             ani = false;
 
         piecePane.draw(backward, ani ? p1 : null, p2);
