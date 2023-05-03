@@ -1,20 +1,49 @@
 .root {
-  -background: #FFF;
+  -background: #fff;
   -accent: #698269;
   -accent-active: #547767;
   -lightsquare: #f0ebce;
   -darksquare: #698269;
   -movebutton: #f0ebce;
   -movebuttonactive: #547767;
-  -movesquare: rgba(238, 187, 77, 0.65);
-  -activesquare: rgba(238, 187, 85, 0.75);
+  -highlighta: rgba(238, 187, 77, 0.65);
+  -highlightb: rgba(238, 187, 85, 0.75);
+  -highlightc: rgba(167, 227, 255, 0.75);
+  -highlightd: rgba(231, 89, 89, 0.75);
+  -highlighte: rgba(146, 253, 119, 0.75);
+  -highlightf: rgba(226, 141, 244, 0.75);
   -moveindicator: rgba(100, 100, 100, 0.5);
   -squareborder: rgba(200, 200, 200, 0.5);
   -timerhistory: #bbbbbb;
   -timerhistoryactive: #dddddd;
 }
 
-GameView, BarMenu {
+#highlightedA {
+  -fx-background-color: -highlighta;
+}
+
+#highlightedB {
+  -fx-background-color: -highlightb;
+}
+
+#highlightedC {
+  -fx-background-color: -highlightc;
+}
+
+#highlightedD {
+  -fx-background-color: -highlightd;
+}
+
+#highlightedE {
+  -fx-background-color: -highlighte;
+}
+
+#highlightedF {
+  -fx-background-color: -highlightf;
+}
+
+GameView,
+BarMenu {
   -fx-background-color: -background;
 }
 

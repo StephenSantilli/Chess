@@ -21,6 +21,11 @@ public class MoveIndicators extends Pane {
         moveSquares = new ArrayList<>();
     }
 
+    public void clear() {
+        getChildren().clear();
+        moveSquares.clear();
+    }
+
     public void draw() {
 
         getChildren().clear();

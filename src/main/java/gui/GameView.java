@@ -529,7 +529,8 @@ public class GameView extends HBox implements GameListener {
                 if (color == TWO_PLAYER && autoFlip && game.getLastPos().isWhite() == flipped)
                     flip();
 
-                board.draw(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
+
+                    board.draw(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 
                 moveList.boardUpdated();
                 moveList.posChanged(currentPos);

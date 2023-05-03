@@ -1,12 +1,14 @@
 package gui.board;
 
-import java.util.ArrayList;
-
 import game.Game;
 import game.Move;
 import game.Square;
 import game.pieces.Piece;
+
 import gui.GameView;
+
+import java.util.ArrayList;
+
 import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -26,6 +28,10 @@ public class GUIPiece {
      */
     private GameView gameView;
 
+    /**
+     * If the piece has been the active piece. If {@code true}, the next time it is
+     * released it should be deselected.
+     */
     private boolean alreadyActive;
 
     /**
@@ -41,14 +47,9 @@ public class GUIPiece {
      */
     private Move promoteMove;
 
-    public Move getPromoteMove() {
-        return promoteMove;
-    }
-
-    public void setPromoteMove(Move promoteMove) {
-        this.promoteMove = promoteMove;
-    }
-
+    /**
+     * The callback to be ran when the user has made a promote decision.
+     */
     private Runnable promoteCallback = () -> {
 
         if (promoteMove == null || promoteResponse == '0')
@@ -60,53 +61,33 @@ public class GUIPiece {
             promoteResponse = '0';
             promoteMove = null;
 
-        }
-
-        else {
+        } else {
 
             try {
-                gameView.getGame().makeMove(promoteMove.getOrigin(), promoteMove.getDestination(), promoteResponse);
-            } catch (Exception e) {
 
+                gameView.getGame().makeMove(promoteMove.getOrigin(), promoteMove.getDestination(), promoteResponse);
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
         }
 
     };
 
-    public Runnable getPromoteCallback() {
-        return promoteCallback;
-    }
-
-    public char getPromoteResponse() {
-        return promoteResponse;
-    }
-
-    public void setPromoteResponse(char promoteResponse) {
-        this.promoteResponse = promoteResponse;
-    }
-
-    public Piece getPiece() {
-        return piece;
-    }
-
-    public ImageView getImage() {
-        return image;
-    }
-
-    public boolean isAlreadyActive() {
-        return alreadyActive;
-    }
-
-    public void setAlreadyActive(boolean alreadyActive) {
-        this.alreadyActive = alreadyActive;
-    }
-
-    public GUIPiece(Piece piece, ImageView image, GameView board) {
+    /**
+     * Creates a new piece to be displayed in the GUI based on a {@link Piece}
+     * object.
+     * 
+     * @param piece    The piece to represent.
+     * @param image    The image that matches the piece.
+     * @param gameView The game view this piece is apart of.
+     */
+    public GUIPiece(Piece piece, ImageView image, GameView gameView) {
 
         this.piece = piece;
         this.image = image;
-        this.gameView = board;
+        this.gameView = gameView;
 
         this.promoteResponse = '0';
 
@@ -114,53 +95,73 @@ public class GUIPiece {
 
     }
 
-    private void setPieceX(double x) {
-
-        final double offset = gameView.getBoard().getBoardBounds().getMinX();
-        final double ax = x - (gameView.getBoard().getPieceSize() / 2.0) - offset;
-
-        if (x > gameView.getBoard().getBoardBounds().getMinX() && x < gameView.getBoard().getBoardBounds().getMaxX())
-            image.setLayoutX(ax);
-        else if (x <= gameView.getBoard().getBoardBounds().getMinX())
-            image.setLayoutX(
-                    gameView.getBoard().getBoardBounds().getMinX() - (gameView.getBoard().getPieceSize() / 2.0) - offset
-                            + 1);
-        else if (x >= gameView.getBoard().getBoardBounds().getMaxX())
-            image.setLayoutX(
-                    gameView.getBoard().getBoardBounds().getMaxX() - (gameView.getBoard().getPieceSize() / 2.0) - offset
-                            - 1);
-
+    /**
+     * @return {@link #promoteMove}
+     */
+    public Move getPromoteMove() {
+        return promoteMove;
     }
 
-    private void setPieceY(double y) {
-
-        final double offset = gameView.getBoard().getBoardBounds().getMinY();
-        final double ay = y - (gameView.getBoard().getPieceSize() / 2.0) - offset;
-
-        if (y >= gameView.getBoard().getBoardBounds().getMinY() && y <= gameView.getBoard().getBoardBounds().getMaxY())
-            image.setLayoutY(ay);
-        else if (y <= gameView.getBoard().getBoardBounds().getMinY())
-            image.setLayoutY(
-                    gameView.getBoard().getBoardBounds().getMinY() - (gameView.getBoard().getPieceSize() / 2.0) - offset
-                            + 1);
-        else if (y >= gameView.getBoard().getBoardBounds().getMaxY())
-            image.setLayoutY(
-                    gameView.getBoard().getBoardBounds().getMaxY() - (gameView.getBoard().getPieceSize() / 2.0) - offset
-                            - 1);
-
+    /**
+     * Sets {@link #promoteMove}.
+     * 
+     * @param promoteMove The promote move.
+     */
+    public void setPromoteMove(Move promoteMove) {
+        this.promoteMove = promoteMove;
     }
 
-    private void setPieceSquare(Square sq) {
+    /**
+     * @return {@link #promoteCallback}
+     */
+    public Runnable getPromoteCallback() {
+        return promoteCallback;
+    }
 
-        double x = gameView.getBoard().getXBySquare(sq);
-        double ax = x + ((gameView.getBoard().getSquareSize() - gameView.getBoard().getPieceSize()) / 2.0);
+    /**
+     * @return {@link #promoteResponse}
+     */
+    public char getPromoteResponse() {
+        return promoteResponse;
+    }
 
-        double y = gameView.getBoard().getYBySquare(sq);
-        double ay = y + ((gameView.getBoard().getSquareSize() - gameView.getBoard().getPieceSize()) / 2.0);
+    /**
+     * Sets {@link #promoteResponse}.
+     * 
+     * @param promoteResponse The promote response.
+     */
+    public void setPromoteResponse(char promoteResponse) {
+        this.promoteResponse = promoteResponse;
+    }
 
-        image.setLayoutX(ax);
-        image.setLayoutY(ay);
+    /**
+     * @return {@link #piece}
+     */
+    public Piece getPiece() {
+        return piece;
+    }
 
+    /**
+     * @return {@link #image}
+     */
+    public ImageView getImage() {
+        return image;
+    }
+
+    /**
+     * @return {@link #alreadyActive}
+     */
+    public boolean isAlreadyActive() {
+        return alreadyActive;
+    }
+
+    /**
+     * Sets {@link #alreadyActive}.
+     * 
+     * @param alreadyActive If already active.
+     */
+    public void setAlreadyActive(boolean alreadyActive) {
+        this.alreadyActive = alreadyActive;
     }
 
     /**
@@ -174,25 +175,28 @@ public class GUIPiece {
         final Game game = gameView.getGame();
         final Board board = gameView.getBoard();
 
-        // If there's an active piece and it can move to square that was clicked
+        if (game == null || game.getPositions().size() == 0)
+            return;
+
+        // If there's an active piece and it can move to the square clicked
         if (board.getActive() != null
-                && (game.getLastPos().findMove(board.getActive().getPiece().getSquare(), targetSquare) != null)) {
+                && game.getLastPos().findMove(board.getActive().getPiece().getSquare(), targetSquare) != null) {
+
+            final Move move = game.getLastPos().findMove(board.getActive().getPiece().getSquare(), targetSquare);
 
             try {
 
                 final GUIPiece active = board.getActive();
 
-                final Move move = game.getLastPos().findMove(board.getActive().getPiece().getSquare(), targetSquare);
-
                 board.setDragging(null);
                 board.setActive(null);
 
-                if (gameView.isTurn() && move != null) {
+                if (gameView.isTurn()) {
 
                     promoteResponse = '0';
 
                     // If this move is a promotion
-                    if (game.getLastPos().getMoves().contains(move) && move.getPromoteType() == '?') {
+                    if (move.getPromoteType() == '?') {
 
                         promoteMove = move;
 
@@ -211,6 +215,7 @@ public class GUIPiece {
                         ArrayList<TranslateTransition> transitions = board.getPiecePane().getTransitions();
                         transitions.clear();
 
+                        // If promote move is a capture
                         if (move.getCapturePiece() != null)
                             board.getPiecePane().getChildren()
                                     .remove(board.getGUIPieceAtSquare(move.getCaptureSquare()).getImage());
@@ -227,6 +232,7 @@ public class GUIPiece {
                         }
 
                     } else
+                        // Not a promote move
                         game.makeMove(move.getOrigin(), targetSquare,
                                 '0');
 
@@ -247,8 +253,6 @@ public class GUIPiece {
                     setPieceSquare(piece.getSquare());
 
                 }
-
-                // e.printStackTrace();
 
             }
 
@@ -301,7 +305,8 @@ public class GUIPiece {
 
         Square sq = gameView.getBoard().getSquareByPoint(
                 image.getLayoutX() + (gameView.getBoard().getPieceSize() / 2.0),
-                image.getLayoutY() + (gameView.getBoard().getPieceSize() / 2.0), false);
+                image.getLayoutY() + (gameView.getBoard().getPieceSize() / 2.0),
+                false);
 
         gameView.getBoard().getBorderPane().drawBorder(sq);
 
@@ -317,11 +322,14 @@ public class GUIPiece {
         if (promoteMove != null)
             return;
 
-        final Square targetSquare = gameView.getBoard().getSquareByPoint(ev.getSceneX(), ev.getSceneY(), true);
         final Game game = gameView.getGame();
         final Board board = gameView.getBoard();
+        final Square targetSquare = board.getSquareByPoint(ev.getSceneX(), ev.getSceneY(), true);
 
         board.getBorderPane().drawBorder(null);
+
+        if (game == null || game.getPositions().size() == 0)
+            return;
 
         final GUIPiece active = board.getActive();
 
@@ -332,11 +340,10 @@ public class GUIPiece {
 
             board.setDragging(null);
 
-            if (active != null && active.isAlreadyActive()) {
+            if (active != null && active.isAlreadyActive())
                 board.setActive(null);
-            } else if (active != null) {
+            else if (active != null)
                 active.setAlreadyActive(true);
-            }
 
             setPieceSquare(piece.getSquare());
 
@@ -352,20 +359,18 @@ public class GUIPiece {
         // There's a piece that was being dragged
         if (board.getDragging() != null) {
 
-            // final int startPos = gameView.getCurrentPos();
-
             try {
 
-                final Piece d = board.getDragging().getPiece();
+                final Piece dragPiece = board.getDragging().getPiece();
 
-                final Move move = game.getLastPos().findMove(d.getSquare(), targetSquare);
+                final Move move = game.getLastPos().findMove(dragPiece.getSquare(), targetSquare);
 
                 if (gameView.isTurn() && move != null) {
 
                     promoteResponse = '0';
 
                     // If promote move
-                    if (game.getLastPos().getMoves().contains(move) && move.getPromoteType() == '?') {
+                    if (move.getPromoteType() == '?') {
 
                         promoteMove = move;
                         GUIPiece capPiece = board.getGUIPieceAtSquare(move.getCaptureSquare());
@@ -374,20 +379,19 @@ public class GUIPiece {
                             board.getPiecePane().getChildren().remove(capPiece.getImage());
 
                         setPieceSquare(move.getDestination());
+                        board.getMoveIndicatorsPane().clear();
                         board.showPromoteDialog(move.getDestination(), move.isWhite(), this);
 
                     } else
                         game.makeMove(move.getOrigin(), move.getDestination(), '0');
 
-                        
-                    } else {
-                        board.draw();
-                    }
-                    
+                } else {
+                    board.draw();
+                }
+
             } catch (Exception e) {
 
-                // If this wasn't a promote move, and the position never changed
-                if (promoteMove == null/* && startPos == gameView.getCurrentPos() */) {
+                if (promoteMove == null) {
 
                     board.setDragging(null);
 
@@ -395,12 +399,82 @@ public class GUIPiece {
 
                 }
 
-                // e.printStackTrace();
-
             }
 
         } else
             setPieceSquare(piece.getSquare());
+
+    }
+
+    /**
+     * Sets the x value of a piece, keeping it within the bounds of the board.
+     * 
+     * <p>
+     * Useful for dragging the piece, as it won't allow the piece to go outside of
+     * the edges.
+     * 
+     * @param x The x location to set the piece to.
+     */
+    private void setPieceX(double x) {
+
+        final double offset = gameView.getBoard().getBoardBounds().getMinX();
+        final double ax = x - (gameView.getBoard().getPieceSize() / 2.0) - offset;
+
+        if (x > gameView.getBoard().getBoardBounds().getMinX() && x < gameView.getBoard().getBoardBounds().getMaxX())
+            image.setLayoutX(ax);
+        else if (x <= gameView.getBoard().getBoardBounds().getMinX())
+            image.setLayoutX(
+                    gameView.getBoard().getBoardBounds().getMinX() - (gameView.getBoard().getPieceSize() / 2.0) - offset
+                            + 1);
+        else if (x >= gameView.getBoard().getBoardBounds().getMaxX())
+            image.setLayoutX(
+                    gameView.getBoard().getBoardBounds().getMaxX() - (gameView.getBoard().getPieceSize() / 2.0) - offset
+                            - 1);
+
+    }
+
+    /**
+     * Sets the y value of a piece, keeping it within the bounds of the board.
+     * 
+     * <p>
+     * Useful for dragging the piece, as it won't allow the piece to go outside of
+     * the edges.
+     * 
+     * @param y The y location to set the piece to.
+     */
+    private void setPieceY(double y) {
+
+        final double offset = gameView.getBoard().getBoardBounds().getMinY();
+        final double ay = y - (gameView.getBoard().getPieceSize() / 2.0) - offset;
+
+        if (y >= gameView.getBoard().getBoardBounds().getMinY() && y <= gameView.getBoard().getBoardBounds().getMaxY())
+            image.setLayoutY(ay);
+        else if (y <= gameView.getBoard().getBoardBounds().getMinY())
+            image.setLayoutY(
+                    gameView.getBoard().getBoardBounds().getMinY() - (gameView.getBoard().getPieceSize() / 2.0) - offset
+                            + 1);
+        else if (y >= gameView.getBoard().getBoardBounds().getMaxY())
+            image.setLayoutY(
+                    gameView.getBoard().getBoardBounds().getMaxY() - (gameView.getBoard().getPieceSize() / 2.0) - offset
+                            - 1);
+
+    }
+
+    /**
+     * Sets the piece's layout position based on the given square.
+     * 
+     * @param square The square to set the piece to.
+     */
+    private void setPieceSquare(Square square) {
+
+        double x = gameView.getBoard().getXBySquare(square);
+        double ax = x + ((gameView.getBoard().getSquareSize() - gameView.getBoard().getPieceSize()) / 2.0);
+
+        double y = gameView.getBoard().getYBySquare(square);
+        double ay = y + ((gameView.getBoard().getSquareSize() - gameView.getBoard().getPieceSize()) / 2.0);
+
+        image.setLayoutX(ax);
+        image.setLayoutY(ay);
 
     }
 

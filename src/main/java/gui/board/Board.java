@@ -21,20 +21,54 @@ public class Board extends StackPane {
 
     private static final double pieceSizeMultiplier = .85;
 
-    private GameView gameView;
+    /**
+     * Gets the value of the -fx-background-radius value for each square, such that
+     * only corner squares will have rounded edges.
+     * 
+     * @param square The square to use.
+     */
+    public static String getSquareCornerRadius(Square square, boolean flipped) {
 
+        final double cornerRadius = 10;
+
+        if (!flipped) {
+            if (square.getFile() == 1 && square.getRank() == 1)
+                return "0 0 0 " + cornerRadius;
+            else if (square.getFile() == 8 && square.getRank() == 1)
+                return "0 0 " + cornerRadius + " 0";
+            else if (square.getFile() == 8 && square.getRank() == 8)
+                return "0 " + cornerRadius + " 0 0";
+            else if (square.getFile() == 1 && square.getRank() == 8)
+                return cornerRadius + " 0 0 0";
+        } else {
+            if (square.getFile() == 1 && square.getRank() == 1)
+                return "0 " + cornerRadius + " 0 0";
+            else if (square.getFile() == 8 && square.getRank() == 1)
+                return cornerRadius + " 0 0 0";
+            else if (square.getFile() == 8 && square.getRank() == 8)
+                return "0 0 0 " + cornerRadius;
+            else if (square.getFile() == 1 && square.getRank() == 8)
+                return "0 0 " + cornerRadius + " 0";
+        }
+
+        return "0 0 0 0";
+
+    }
+
+    private GameView gameView;
     private Squares squarePane;
     private Highlights highlightPane;
     private Coordinates coordsPane;
     private SquareBorders borderPane;
     private MoveIndicators moveIndicatorsPane;
     private Pieces piecePane;
+
     private PauseView pausePane;
-
     private double pieceSize = 90;
-    private double squareSize = Math.round(pieceSize / pieceSizeMultiplier);
 
+    private double squareSize = Math.round(pieceSize / pieceSizeMultiplier);
     private GUIPiece active;
+
     private GUIPiece dragging;
 
     private Bounds boardBounds;
@@ -58,6 +92,25 @@ public class Board extends StackPane {
     };
 
     private final EventHandler<MouseEvent> mousePressed = ev -> {
+
+        if (ev.getButton() == MouseButton.SECONDARY) {
+
+            final Square targetSquare = getSquareByPoint(ev.getSceneX(), ev.getSceneY(), true);
+
+            if (ev.isShortcutDown()) {
+                highlightPane.highlight(targetSquare, 2);
+            } else if (ev.isAltDown()) {
+                highlightPane.highlight(targetSquare, 3);
+            } else if (ev.isShiftDown()) {
+                highlightPane.highlight(targetSquare, 4);
+            } else
+                highlightPane.highlight(targetSquare, 5);
+
+            highlightPane.redraw();
+
+            return;
+
+        }
 
         if (ev.getButton() != MouseButton.PRIMARY)
             return;
@@ -200,6 +253,40 @@ public class Board extends StackPane {
 
     };
 
+    public Board(GameView gameView) {
+
+        this.gameView = gameView;
+
+        squarePane = new Squares(gameView);
+        highlightPane = new Highlights(gameView);
+        coordsPane = new Coordinates(gameView);
+        borderPane = new SquareBorders(gameView);
+        moveIndicatorsPane = new MoveIndicators(gameView);
+        piecePane = new Pieces(gameView);
+        pausePane = new PauseView();
+
+        pausePane.setVisible(false);
+
+        getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane,
+                pausePane);
+
+        gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
+
+            try {
+
+                squarePane.draw();
+                coordsPane.draw();
+
+                piecePane.initPieceTranscoders();
+                gameView.getInfoPane().initPieceTranscoders();
+
+            } catch (Exception e) {
+            }
+
+        }));
+
+    }
+
     public GameView getGameView() {
         return gameView;
     }
@@ -314,40 +401,6 @@ public class Board extends StackPane {
         return mouseDragged;
     }
 
-    public Board(GameView gameView) {
-
-        this.gameView = gameView;
-
-        squarePane = new Squares(gameView);
-        highlightPane = new Highlights(gameView);
-        coordsPane = new Coordinates(gameView);
-        borderPane = new SquareBorders(gameView);
-        moveIndicatorsPane = new MoveIndicators(gameView);
-        piecePane = new Pieces(gameView);
-        pausePane = new PauseView();
-
-        pausePane.setVisible(false);
-
-        getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane,
-                pausePane);
-
-        gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
-
-            try {
-
-                squarePane.draw();
-                coordsPane.draw();
-
-                piecePane.initPieceTranscoders();
-                gameView.getInfoPane().initPieceTranscoders();
-
-            } catch (Exception e) {
-            }
-
-        }));
-
-    }
-
     /**
      * Draws the board from the current position. Will not animate any changes made.
      */
@@ -366,6 +419,8 @@ public class Board extends StackPane {
      *                 forwards or backwards.
      */
     public void draw(boolean animate, Position p1, Position p2, boolean backward) {
+
+        resizeEvent.changed(null, null, null);
 
         if (gameView.getGame() == null) {
 
@@ -392,7 +447,8 @@ public class Board extends StackPane {
         }
 
         boolean ani = animate && dragging == null;
-        dragging = null;
+        setActive(null);
+        setDragging(null);
 
         // Don't animate when promotion move (if you did it/two player game)
         if (p2 != null && p2.getMove() != null
@@ -439,16 +495,6 @@ public class Board extends StackPane {
         borderPane.drawBorder(null);
 
         draw();
-
-    }
-
-    /**
-     * Updates the square highlights and moves indicator panes.
-     */
-    private void activeUpdated() {
-
-        highlightPane.draw();
-        moveIndicatorsPane.draw();
 
     }
 
@@ -509,6 +555,10 @@ public class Board extends StackPane {
 
             setCursor(Cursor.CLOSED_HAND);
 
+        } else if (moveIndicatorsPane.getMoveSquares().contains(getSquareByPoint(mouseX, mouseY, true))) {
+
+            setCursor(Cursor.HAND);
+
         } else if (getSquareByPoint(mouseX, mouseY, true).isValid()
                 && gameView.getGame().getPositions().get(gameView.getCurrentPos())
                         .getPieceAtSquare(getSquareByPoint(mouseX, mouseY, true)) != null) {
@@ -520,8 +570,6 @@ public class Board extends StackPane {
         }
 
     }
-
-    // Calculations
 
     /**
      * Finds the {@link GUIPiece} at a given square.
@@ -561,40 +609,6 @@ public class Board extends StackPane {
 
         return (x >= boardBounds.getMaxX() - resizeSize && x <= boardBounds.getMaxX() + resizeSize
                 && y >= boardBounds.getMaxY() - resizeSize && y <= boardBounds.getMaxY() + resizeSize);
-
-    }
-
-    /**
-     * Gets the value of the -fx-background-radius value for each square, such that
-     * only corner squares will have rounded edges.
-     * 
-     * @param square The square to use.
-     */
-    public static String getSquareCornerRadius(Square square, boolean flipped) {
-
-        final double cornerRadius = 10;
-
-        if (!flipped) {
-            if (square.getFile() == 1 && square.getRank() == 1)
-                return "0 0 0 " + cornerRadius;
-            else if (square.getFile() == 8 && square.getRank() == 1)
-                return "0 0 " + cornerRadius + " 0";
-            else if (square.getFile() == 8 && square.getRank() == 8)
-                return "0 " + cornerRadius + " 0 0";
-            else if (square.getFile() == 1 && square.getRank() == 8)
-                return cornerRadius + " 0 0 0";
-        } else {
-            if (square.getFile() == 1 && square.getRank() == 1)
-                return "0 " + cornerRadius + " 0 0";
-            else if (square.getFile() == 8 && square.getRank() == 1)
-                return cornerRadius + " 0 0 0";
-            else if (square.getFile() == 8 && square.getRank() == 8)
-                return "0 0 0 " + cornerRadius;
-            else if (square.getFile() == 1 && square.getRank() == 8)
-                return "0 0 " + cornerRadius + " 0";
-        }
-
-        return "0 0 0 0";
 
     }
 
@@ -703,6 +717,16 @@ public class Board extends StackPane {
             return ((squareSize * 7) - ((square.getRank() - 1) * squareSize)) - rel;
         else
             return ((square.getRank() - 1) * squareSize) - rel;
+
+    }
+
+    /**
+     * Updates the square highlights and moves indicator panes.
+     */
+    private void activeUpdated() {
+
+        highlightPane.draw();
+        moveIndicatorsPane.draw();
 
     }
 
