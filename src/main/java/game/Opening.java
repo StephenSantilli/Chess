@@ -1,57 +1,12 @@
 package game;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.*;
-
-import game.PGN.PGNParser;
-import game.Player.Type;
 
 /**
  * Openings database from https://github.com/lichess-org/chess-openings
  */
 public class Opening {
-
-    // public static void main(String[] args) {
-
-    //     try (Scanner s = new Scanner(new File("/Users/stephen/Documents/Chess/bin/main/csv/eco.tsv"))) {
-
-    //         String updated = "";
-
-    //         while (s.hasNextLine()) {
-
-    //             String line = s.nextLine();
-    //             String[] sp = line.split("\t");
-
-    //             try {
-    //                 Game game = new Game(new PGNParser(sp[2]), new GameSettings(0, 0, false,
-    //                         false, false, false),
-    //                         false);
-
-    //                 String fen = game.getLastPos().toString();
-    //                 updated += line + "\t" + fen.substring(0, fen.indexOf(" ")) + "\n";
-    //             } catch (Exception e) {
-    //                 System.out.println(e);
-    //                 System.out.println(line);
-    //             }
-
-    //         }
-
-    //         try (FileWriter w = new FileWriter("/Users/stephen/Documents/Chess/src/main/resources/csv/updated.tsv")) {
-
-    //             w.write(updated);
-    //             w.flush();
-
-    //         } catch (Exception e) {
-    //             e.printStackTrace();
-    //         }
-
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-
-    // }
 
     private final String code;
     private final String name;
@@ -75,6 +30,16 @@ public class Opening {
         this.sequence = sequence;
     }
 
+    /**
+     * Gets the opening of the position with the given FEN from the openings in the
+     * given file.
+     * 
+     * @param fen      The FEN of the position to check.
+     * @param openings A tab-separated values file, formatted
+     *                 {@code ECO code]\t[opening name]\t[opening sequence of
+     *                 moves]\t[opening FEN]}
+     * @return The opening that matches the position.
+     */
     public static Opening getOpening(String fen, File openings) {
 
         Opening found = null;

@@ -5,7 +5,6 @@ import java.util.Optional;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
-import game.Opening;
 import game.Game.Reason;
 import game.Game.Result;
 import game.GameEvent.Type;

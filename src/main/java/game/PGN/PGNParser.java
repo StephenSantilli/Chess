@@ -389,7 +389,7 @@ public class PGNParser {
                                         + getLast(ravDepth).size()) / 2.0) != Integer.parseInt(tok)))
                     throw new Exception("Error @ " + t.start() + ". Unexpected move number.");
 
-                // TODO: check periods to see if they match the move (... for black moves etc.)
+
 
             } else if (tok.matches("[A-Za-z0-9][A-Za-z0-9_+#=:\\-]*")) {
 

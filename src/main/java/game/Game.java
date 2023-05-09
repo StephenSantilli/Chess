@@ -1,17 +1,12 @@
 package game;
 
-import java.io.File;
-import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -130,8 +125,6 @@ public class Game {
      */
     private Player drawOfferer;
 
-    private Opening opening;
-
     /**
      * The service that checks for flagfall in the background.
      */
@@ -150,26 +143,56 @@ public class Game {
 
     };
 
+    /**
+     * Gets the settings of the game.
+     * 
+     * @return {@link #settings}
+     */
     public GameSettings getSettings() {
         return settings;
     }
 
+    /**
+     * Gets the chat messages sent during the game.
+     * 
+     * @return {@link #messages}
+     */
     public ArrayList<Chat> getMessages() {
         return messages;
     }
 
+    /**
+     * Gets the positions of the game.
+     * 
+     * @return {@link #positions}
+     */
     public ArrayList<Position> getPositions() {
         return positions;
     }
 
+    /**
+     * Gets the result of the game.
+     * 
+     * @return {@link #result}
+     */
     public Result getResult() {
         return result;
     }
 
+    /**
+     * Gets the reason for the result of the game.
+     * 
+     * @return {@link #resultReason}
+     */
     public Reason getResultReason() {
         return resultReason;
     }
 
+    /**
+     * Gets whether or not the game is paused.
+     * 
+     * @return {@link #paused}
+     */
     public boolean isPaused() {
         return paused;
     }
@@ -194,16 +217,23 @@ public class Game {
 
     }
 
+    /**
+     * Gets the player of the given color.
+     * 
+     * @param white If the white player should be returned. If {@code false} the black player will be returned.
+     * @return The {@link Player} requested.
+     */
     public Player getPlayer(boolean white) {
         return white ? this.white : this.black;
     }
 
+    /**
+     * Gets the player that offered the currently active draw offer. May be {@code null} if no draw is currently being offered.
+     * 
+     * @return {@link #drawOfferer}
+     */
     public Player getDrawOfferer() {
         return drawOfferer;
-    }
-
-    public Opening getOpening() {
-        return opening;
     }
 
     /**
@@ -241,6 +271,7 @@ public class Game {
      * <a href=
      * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
      * 
+     * @param startId the ID (from 0-959) of the Chess960 starting position.
      * @return A Chess960 starting position based on the given id.
      * @throws Exception If startId is not between 0-959 (inclusive), or if there is
      *                   an error creating the Position.
@@ -376,41 +407,6 @@ public class Game {
         return fen;
 
     }
-
-    // private static ArrayList<Opening> initOpenings() {
-
-    // try (Scanner s = new Scanner(new
-    // File(getClass().getResource("./csv/eco.csv").toString()))) {
-
-    // String total = "";
-
-    // String line = s.nextLine();
-
-    // while (s.hasNextLine()) {
-
-    // total += line;
-    // line = s.nextLine();
-
-    // }
-
-    // String[] lines = total.split("\n");
-
-    // for (int i = 0; i < lines.length; i++) {
-
-    // String[] sp = lines[i].split(",");
-
-    // String code = sp[0].substring(1, sp[0].length() - 1);
-    // String name = sp[1].substring(1, sp[1].length() - 1);
-    // String sequence = sp[2].substring(1, sp[2].length() - 1);
-    // openings.add(new Opening(code, name, sequence));
-
-    // }
-
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-
-    // }
 
     /**
      * Initializes a new Game with the specified settings.
@@ -1175,7 +1171,7 @@ public class Game {
             tags.put("FEN", settings.getFen());
         }
 
-
+        // Opening
         if (getLastPos().getOpening() != null) {
 
             tags.put("ECO", getLastPos().getOpening().getCode());
@@ -1186,7 +1182,6 @@ public class Game {
         return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 
     }
-
 
     /**
      * Registers a class that implements {@link GameListener} to receive

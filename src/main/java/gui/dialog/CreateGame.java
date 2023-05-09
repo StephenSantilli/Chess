@@ -1,10 +1,7 @@
 package gui.dialog;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.Random;
-import java.util.Scanner;
-
 import game.Game;
 import game.GameSettings;
 import game.Player;

@@ -2,7 +2,6 @@ package gui.board;
 
 import java.util.ArrayList;
 
-import game.Position;
 import game.Square;
 import gui.GameView;
 import javafx.scene.layout.Pane;
@@ -60,8 +59,6 @@ public class Arrows extends Pane {
         getChildren().clear();
 
         highlightedArrows.clear();
-
-        final Board board = gameView.getBoard();
 
         if (gameView.getGame() == null)
             return;
