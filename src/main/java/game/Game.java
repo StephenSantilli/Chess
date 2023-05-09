@@ -1,12 +1,17 @@
 package game;
 
+import java.io.File;
+import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +130,8 @@ public class Game {
      */
     private Player drawOfferer;
 
+    private Opening opening;
+
     /**
      * The service that checks for flagfall in the background.
      */
@@ -193,6 +200,10 @@ public class Game {
 
     public Player getDrawOfferer() {
         return drawOfferer;
+    }
+
+    public Opening getOpening() {
+        return opening;
     }
 
     /**
@@ -365,6 +376,41 @@ public class Game {
         return fen;
 
     }
+
+    // private static ArrayList<Opening> initOpenings() {
+
+    // try (Scanner s = new Scanner(new
+    // File(getClass().getResource("./csv/eco.csv").toString()))) {
+
+    // String total = "";
+
+    // String line = s.nextLine();
+
+    // while (s.hasNextLine()) {
+
+    // total += line;
+    // line = s.nextLine();
+
+    // }
+
+    // String[] lines = total.split("\n");
+
+    // for (int i = 0; i < lines.length; i++) {
+
+    // String[] sp = lines[i].split(",");
+
+    // String code = sp[0].substring(1, sp[0].length() - 1);
+    // String name = sp[1].substring(1, sp[1].length() - 1);
+    // String sequence = sp[2].substring(1, sp[2].length() - 1);
+    // openings.add(new Opening(code, name, sequence));
+
+    // }
+
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+
+    // }
 
     /**
      * Initializes a new Game with the specified settings.
@@ -1083,7 +1129,7 @@ public class Game {
      */
     public String exportPosition(boolean includeTags, boolean includeClock) throws Exception {
 
-        Map<String, String> tags = new HashMap<>();
+        Map<String, String> tags = new LinkedHashMap<>();
 
         // The start date
         DateFormat df = new SimpleDateFormat("yyyy.MM.dd");
@@ -1129,9 +1175,18 @@ public class Game {
             tags.put("FEN", settings.getFen());
         }
 
+
+        if (getLastPos().getOpening() != null) {
+
+            tags.put("ECO", getLastPos().getOpening().getCode());
+            tags.put("Opening", getLastPos().getOpening().getName());
+
+        }
+
         return new PGNParser(this, tags, includeClock).outputPGN(includeTags);
 
     }
+
 
     /**
      * Registers a class that implements {@link GameListener} to receive

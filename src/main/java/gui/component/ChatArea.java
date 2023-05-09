@@ -9,6 +9,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -28,6 +29,7 @@ public class ChatArea extends VBox {
         historyBox = new ChatHistoryBox(gameView);
         scroller = new ScrollPane(historyBox);
         scroller.setFitToHeight(true);
+        scroller.setId("chatScroller");
         // scroller.setFitToWidth(true);
         setMaxWidth(Double.MAX_VALUE);
 
@@ -76,19 +78,23 @@ public class ChatArea extends VBox {
             if (gameView.getColor() == GameView.TWO_PLAYER) {
                 historyBox.setDisable(true);
                 enter.setDisable(true);
-                // historyBox.setVisible(false);
-                // enter.setVisible(false);
+
                 setVisible(false);
+                GridPane.setRowSpan(gameView.getScrollMoveList(), 2);
+
                 return;
+
             } else {
                 historyBox.setDisable(false);
                 enter.setDisable(false);
-                // historyBox.setVisible(true);
-                // enter.setVisible(true);
+  
+                GridPane.setRowSpan(gameView.getScrollMoveList(), 1);
+
                 setVisible(true);
             }
 
             historyBox.draw(() -> {
+
                 applyCss();
                 scroller.layout();
 

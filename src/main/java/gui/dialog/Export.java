@@ -49,7 +49,7 @@ public class Export extends Stage {
         VBox vb = new VBox();
         vb.setPadding(new Insets(15, 15, 15, 15));
 
-        Scene s = new Scene(vb, 500, 450);
+        Scene s = new Scene(vb, 550, 500);
 
         setScene(s);
         setTitle("Export Game");
@@ -99,7 +99,7 @@ public class Export extends Stage {
 
         HBox buttons = new HBox();
 
-        Button exportButton = new Button("Export");
+        Button exportButton = new Button("Save");
         exportButton.setOnAction(e -> {
 
             FileChooser chooser = new FileChooser();

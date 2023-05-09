@@ -25,15 +25,15 @@ public class Highlights extends Pane {
      * The squares the user has highlighted, not the active, origin, or
      * destination squares.
      */
-    private ArrayList<HighlightSquare> highlighted;
+    private ArrayList<HighlightSquare> highlightedSquares;
 
-    public ArrayList<HighlightSquare> getHighlighted() {
-        return highlighted;
+    public ArrayList<HighlightSquare> getHighlightedSquares() {
+        return highlightedSquares;
     }
 
     public Highlights(GameView gameView) {
         this.gameView = gameView;
-        highlighted = new ArrayList<>();
+        highlightedSquares = new ArrayList<>();
 
     }
 
@@ -45,27 +45,27 @@ public class Highlights extends Pane {
         getChildren().removeIf(n -> {
 
             if (!(n instanceof HighlightSquare))
-                return false;
+                return true;
 
             HighlightSquare hs = (HighlightSquare) n;
 
-            return hs.getSquare().equals(square);
+            return hs.equals(rect);
 
         });
 
         if (contains) {
-            highlighted.remove(rect);
+            highlightedSquares.remove(rect);
             return;
         }
 
-        highlighted.add(rect);
+        highlightedSquares.add(rect);
 
     }
 
     public void draw() {
 
         getChildren().clear();
-        highlighted.clear();
+        highlightedSquares.clear();
 
         final Board board = gameView.getBoard();
 
@@ -105,9 +105,9 @@ public class Highlights extends Pane {
 
         ArrayList<Square> drawn = new ArrayList<>();
 
-        for (int i = highlighted.size() - 1; i >= 0; i--) {
+        for (int i = highlightedSquares.size() - 1; i >= 0; i--) {
 
-            final HighlightSquare hs = highlighted.get(i);
+            final HighlightSquare hs = highlightedSquares.get(i);
 
             if (!drawn.contains(hs.getSquare())) {
                 getChildren().add(hs);

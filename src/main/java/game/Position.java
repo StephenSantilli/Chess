@@ -1,5 +1,6 @@
 package game;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,6 +102,12 @@ public class Position {
 
     /** Whether or not mate has been checked. */
     private boolean mateChecked;
+
+    /**
+     * The opening that led to this position. May be null if this position was
+     * created from a custom FEN.
+     */
+    private Opening opening;
 
     /**
      * @return {@link #enPassantTarget}
@@ -214,6 +221,10 @@ public class Position {
 
     public int getFiftyMoveCounter() {
         return fiftyMoveCounter;
+    }
+
+    public Opening getOpening() {
+        return opening;
     }
 
     /**
@@ -508,6 +519,11 @@ public class Position {
         } else {
             this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
         }
+
+        opening = Opening.getOpening(this.toString(), new File(getClass().getResource("/tsv/openings.tsv").getPath()));
+
+        if (opening == null)
+            opening = prev.getOpening();
 
     }
 

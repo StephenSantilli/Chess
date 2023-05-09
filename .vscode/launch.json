@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Opening",
+            "request": "launch",
+            "mainClass": "game.Opening",
+            "projectName": "Chess"
+        },
+        {
+            "type": "java",
             "name": "UCIEngine",
             "request": "launch",
             "mainClass": "game.engine.UCIEngine",

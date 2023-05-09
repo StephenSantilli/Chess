@@ -62,6 +62,7 @@ public class Board extends StackPane {
     private SquareBorders borderPane;
     private MoveIndicators moveIndicatorsPane;
     private Pieces piecePane;
+    private Arrows arrowPane;
 
     private PauseView pausePane;
     private double pieceSize = 90;
@@ -74,13 +75,15 @@ public class Board extends StackPane {
     private Bounds boardBounds;
 
     private MouseEvent resizing;
+    private MouseEvent arrowing;
 
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
 
         Platform.runLater(() -> {
 
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
-
+            gameView.getOpeningLabel().update();
+            
         });
 
     };
@@ -92,25 +95,6 @@ public class Board extends StackPane {
     };
 
     private final EventHandler<MouseEvent> mousePressed = ev -> {
-
-        if (ev.getButton() == MouseButton.SECONDARY) {
-
-            final Square targetSquare = getSquareByPoint(ev.getSceneX(), ev.getSceneY(), true);
-
-            if (ev.isShortcutDown()) {
-                highlightPane.highlight(targetSquare, 2);
-            } else if (ev.isAltDown()) {
-                highlightPane.highlight(targetSquare, 3);
-            } else if (ev.isShiftDown()) {
-                highlightPane.highlight(targetSquare, 4);
-            } else
-                highlightPane.highlight(targetSquare, 5);
-
-            highlightPane.redraw();
-
-            return;
-
-        }
 
         if (ev.getButton() != MouseButton.PRIMARY)
             return;
@@ -150,6 +134,14 @@ public class Board extends StackPane {
 
     private final EventHandler<MouseEvent> mouseDragged = ev -> {
 
+        if (ev.getButton() == MouseButton.SECONDARY && arrowing == null) {
+
+            arrowing = ev;
+
+            return;
+
+        }
+
         if (ev.getButton() != MouseButton.PRIMARY)
             return;
 
@@ -175,6 +167,7 @@ public class Board extends StackPane {
             coordsPane.draw();
 
             highlightPane.setVisible(false);
+            arrowPane.setVisible(false);
             borderPane.setVisible(false);
             moveIndicatorsPane.setVisible(false);
             piecePane.setVisible(false);
@@ -197,6 +190,49 @@ public class Board extends StackPane {
 
     private final EventHandler<MouseEvent> mouseReleased = e -> {
 
+        if (arrowing != null) {
+
+            final Square start = getSquareByPoint(arrowing.getSceneX(), arrowing.getSceneY(), true);
+            final Square end = getSquareByPoint(e.getSceneX(), e.getSceneY(), true);
+
+            if (start.isValid() && end.isValid()) {
+
+                int color = 2;
+                if (e.isShortcutDown()) {
+                    color = 2;
+                } else if (e.isAltDown()) {
+                    color = 3;
+                } else if (e.isShiftDown()) {
+                    color = 4;
+                } else
+                    color = 5;
+
+                arrowPane.arrow(start, end, color);
+                arrowPane.redraw();
+            }
+
+            arrowing = null;
+            return;
+
+        } else if (e.getButton() == MouseButton.SECONDARY) {
+
+            final Square targetSquare = getSquareByPoint(e.getSceneX(), e.getSceneY(), true);
+
+            if (e.isShortcutDown()) {
+                highlightPane.highlight(targetSquare, 2);
+            } else if (e.isAltDown()) {
+                highlightPane.highlight(targetSquare, 3);
+            } else if (e.isShiftDown()) {
+                highlightPane.highlight(targetSquare, 4);
+            } else
+                highlightPane.highlight(targetSquare, 5);
+
+            highlightPane.redraw();
+
+            return;
+
+        }
+
         if (e.getButton() != MouseButton.PRIMARY)
             return;
 
@@ -207,6 +243,7 @@ public class Board extends StackPane {
             try {
 
                 highlightPane.setVisible(true);
+                arrowPane.setVisible(true);
                 borderPane.setVisible(true);
                 moveIndicatorsPane.setVisible(true);
                 piecePane.setVisible(true);
@@ -221,8 +258,7 @@ public class Board extends StackPane {
             return;
         }
 
-        if (gameView.getGame() == null
-                || gameView.getGame().isPaused())
+        if (gameView.getGame() == null || gameView.getGame().isPaused())
             return;
 
         if (dragging != null) {
@@ -264,10 +300,12 @@ public class Board extends StackPane {
         moveIndicatorsPane = new MoveIndicators(gameView);
         piecePane = new Pieces(gameView);
         pausePane = new PauseView();
+        arrowPane = new Arrows(gameView);
 
         pausePane.setVisible(false);
 
         getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane,
+                arrowPane,
                 pausePane);
 
         gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
@@ -442,6 +480,8 @@ public class Board extends StackPane {
 
             piecePane.draw();
 
+            gameView.getOpeningLabel().update();
+
             return;
 
         }
@@ -474,6 +514,8 @@ public class Board extends StackPane {
         gameView.getInfoPane().getBottomName().setText(gameView.getGame().getPlayer(!gameView.isFlipped()).getName());
 
         borderPane.drawBorder(null);
+
+        gameView.getOpeningLabel().update();
 
         activeUpdated();
 
@@ -726,6 +768,7 @@ public class Board extends StackPane {
     private void activeUpdated() {
 
         highlightPane.draw();
+        arrowPane.draw();
         moveIndicatorsPane.draw();
 
     }

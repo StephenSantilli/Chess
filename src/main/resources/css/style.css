@@ -2,6 +2,22 @@
   -fx-fill: transparent;
 }
 
+OpeningLabel, #chatScroller {
+  -fx-background-radius: 5;
+}
+
+#chatTimestamp, #chatName, #chatMessage {
+  -fx-font-size: 12;
+}
+
+#chatScroller {
+  -fx-padding: 10;
+}
+
+#openingBox {
+  -fx-padding: 0 0 0 10;
+}
+
 HBox,
 VBox {
   -fx-spacing: 10;
@@ -93,6 +109,8 @@ PauseView {
   -fx-border-radius: 5;
   -fx-background-radius: 5;
 }
+
+
 
 .scroll-pane {
   -fx-background-color: transparent;

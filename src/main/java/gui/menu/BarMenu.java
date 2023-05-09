@@ -2,6 +2,7 @@ package gui.menu;
 
 import java.util.Arrays;
 
+import gui.App;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 

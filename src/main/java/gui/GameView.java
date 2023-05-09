@@ -5,6 +5,7 @@ import java.util.Optional;
 import game.Game;
 import game.GameEvent;
 import game.GameListener;
+import game.Opening;
 import game.Game.Reason;
 import game.Game.Result;
 import game.GameEvent.Type;
@@ -14,6 +15,7 @@ import gui.board.Board;
 import gui.component.ChatArea;
 import gui.component.GameInfo;
 import gui.component.MoveList;
+import gui.component.OpeningLabel;
 import gui.dialog.CreateGame;
 import gui.dialog.Draw;
 import gui.menu.BarMenu;
@@ -50,6 +52,11 @@ public class GameView extends HBox implements GameListener {
     private GameInfo infoPane;
     private Board board;
     private GridPane listAndChat;
+
+    private OpeningLabel openingLabel;
+    public OpeningLabel getOpeningLabel() {
+        return openingLabel;
+    }
 
     private MoveList moveList;
     private ScrollPane scrollMoveList;
@@ -170,6 +177,8 @@ public class GameView extends HBox implements GameListener {
         infoPane = new GameInfo(this);
 
         // Move list & chat box
+        openingLabel = new OpeningLabel(this);
+
         scrollMoveList = new ScrollPane();
         scrollMoveList.setId("scrollMoveList");
 
@@ -183,28 +192,36 @@ public class GameView extends HBox implements GameListener {
 
         GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
         GridPane.setHgrow(chatBox, Priority.ALWAYS);
+        GridPane.setHgrow(openingLabel, Priority.ALWAYS);
 
         listAndChat = new GridPane();
         listAndChat.setId("listAndChat");
 
+        RowConstraints ro = new RowConstraints();
+        ro.setFillHeight(true);
+        ro.setPercentHeight(5);
+
         RowConstraints rm = new RowConstraints();
         rm.setFillHeight(true);
-        rm.setPercentHeight(70);
+        rm.setPercentHeight(65);
 
         RowConstraints cm = new RowConstraints();
         cm.setFillHeight(true);
-        cm.setPercentHeight(30);
+        cm.setPercentHeight(35);
 
         ColumnConstraints col = new ColumnConstraints();
         col.setFillWidth(true);
         col.setMinWidth(250);
         col.setMaxWidth(350);
 
-        listAndChat.getRowConstraints().setAll(rm, cm);
+        listAndChat.getRowConstraints().setAll(ro, rm, cm);
         listAndChat.getColumnConstraints().setAll(col);
 
-        listAndChat.add(scrollMoveList, 0, 0);
-        listAndChat.add(chatBox, 0, 1);
+        listAndChat.add(openingLabel, 0, 0);
+        listAndChat.add(scrollMoveList, 0, 1);
+        listAndChat.add(chatBox, 0, 2);
+
+        // GridPane.setRowSpan(scrollMoveList, 2);
 
         // Board
         board = new Board(this);
@@ -529,8 +546,7 @@ public class GameView extends HBox implements GameListener {
                 if (color == TWO_PLAYER && autoFlip && game.getLastPos().isWhite() == flipped)
                     flip();
 
-
-                    board.draw(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
+                board.draw(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 
                 moveList.boardUpdated();
                 moveList.posChanged(currentPos);

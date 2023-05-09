@@ -8,38 +8,62 @@
   -movebuttonactive: #547767;
   -highlighta: rgba(238, 187, 77, 0.65);
   -highlightb: rgba(238, 187, 85, 0.75);
-  -highlightc: rgba(167, 227, 255, 0.75);
+  -highlightc: rgba(226, 141, 244, 0.75);
   -highlightd: rgba(231, 89, 89, 0.75);
   -highlighte: rgba(146, 253, 119, 0.75);
-  -highlightf: rgba(226, 141, 244, 0.75);
+  -highlightf: rgba(167, 227, 255, 0.75);
   -moveindicator: rgba(100, 100, 100, 0.5);
   -squareborder: rgba(200, 200, 200, 0.5);
   -timerhistory: #bbbbbb;
   -timerhistoryactive: #dddddd;
 }
 
+OpeningLabel, #chatScroller {
+  -fx-background-color: -accent;
+}
+
+#openingText, #chatName, #chatMessage {
+  -fx-fill: ladder(-accent, white 60%, black 40%);
+}
+
+#chatTimestamp {
+  -fx-fill: ladder(-accent, lightgray 60%, darkgray 40%);
+}
+
 #highlightedA {
   -fx-background-color: -highlighta;
+  -fx-stroke: -highlighta;
+  -fx-fill: -highlighta;
 }
 
 #highlightedB {
   -fx-background-color: -highlightb;
+  -fx-stroke: -highlightb;
+  -fx-fill: -highlightb;
 }
 
 #highlightedC {
   -fx-background-color: -highlightc;
+  -fx-stroke: -highlightc;
+  -fx-fill: -highlightc;
 }
 
 #highlightedD {
   -fx-background-color: -highlightd;
+  -fx-stroke: -highlightd;
+  -fx-fill: -highlightd;
 }
 
 #highlightedE {
   -fx-background-color: -highlighte;
+  -fx-stroke: -highlighte;
+  -fx-fill: -highlighte;
 }
 
 #highlightedF {
   -fx-background-color: -highlightf;
+  -fx-stroke: -highlightf;
+  -fx-fill: -highlightf;
 }
 
 GameView,

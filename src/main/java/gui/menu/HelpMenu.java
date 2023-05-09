@@ -30,7 +30,6 @@ public class HelpMenu extends Menu {
 
         Dialog<Void> aboutDialog = new Dialog<Void>();
 
-
         aboutDialog.getDialogPane().getButtonTypes().setAll(new ButtonType("Ok"));
 
         ImageView icon = new ImageView(getClass().getResource("/img/icon_48x48.png").toString());
@@ -38,6 +37,7 @@ public class HelpMenu extends Menu {
         aboutDialog.setHeaderText("Chess by Stephen Santilli");
         aboutDialog.setGraphic(icon);
 
+        //Pieces attribution
         Text start = new Text("Pieces made by Cburnett, CC BY-SA 3.0 ");
 
         Hyperlink licenseLink = new Hyperlink("http://creativecommons.org/licenses/by-sa/3.0/");

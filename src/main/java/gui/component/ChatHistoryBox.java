@@ -42,12 +42,19 @@ public class ChatHistoryBox extends VBox {
 
             if (!c.isSystemMessage()) {
 
-                Text name = new Text(c.getPlayer().getName());
+                Text name = new Text(
+                        (c.getPlayer().getName().length() > 12 ? c.getPlayer().getName().substring(0, 9) + "..."
+                                : c.getPlayer().getName()) + ":");
+                name.setId("chatName");
+
                 Text timestamp = new Text(dFormat.format(new Date(c.getTimestamp())));
+                timestamp.setId("chatTimestamp");
+
                 Text message = new Text(c.getMessage());
+                message.setId("chatMessage");
 
                 content.add(name, 0, 0);
-                content.add(timestamp, 1, 0);
+                // content.add(timestamp, 1, 0);
                 content.add(message, 2, 0);
 
                 for (int j = 1; i + j <= game.getMessages().size(); j++) {
@@ -65,6 +72,7 @@ public class ChatHistoryBox extends VBox {
                     }
 
                     Text cmessage = new Text(cj.getMessage());
+                    cmessage.setId("chatName");
 
                     content.add(cmessage, 2, j);
 
