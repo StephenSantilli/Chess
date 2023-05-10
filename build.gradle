@@ -31,7 +31,7 @@ application {
 
 jar {
     manifest {
-        attributes 'Implementation-Version': '1.0.1'
+        attributes 'Implementation-Version': '1.0.2'
     }
 }
 
@@ -48,7 +48,7 @@ runtime {
         mainClass = 'gui.Chess'
         applicationName = 'Chess'
         imageName = 'Chess'
-        appVersion = '1.0.1'
+        appVersion = '1.0.2'
 
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
         def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'

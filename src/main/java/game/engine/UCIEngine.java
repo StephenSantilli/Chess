@@ -8,16 +8,6 @@ import java.util.ArrayList;
 
 public class UCIEngine {
 
-    public static void main(String[] args) throws IOException {
-
-        UCIEngine e = new UCIEngine(new File("./Stockfish/stockfish"));
-        e.setOption("Skill Level", "1");
-        e.waitReady();
-        e.setPosition("startpos", "e2e4");
-        // System.out.println(e.getBestMove(10));
-
-    }
-
     private String name;
     private String author;
 
@@ -182,7 +172,7 @@ public class UCIEngine {
                                 carr.set(z, carr.get(z) + " " + a[i]);
                             else
                                 carr.add(a[i]);
-                                
+
                         }
                         opts.add(new UCICombo(this, n, cdef, cdef, carr.toArray(new String[carr.size()])));
                         break;

@@ -17,6 +17,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.WindowEvent;
 
+/**
+ * A representation of a chess board.
+ */
 public class Board extends StackPane {
 
     private static final double pieceSizeMultiplier = .85;
@@ -25,7 +28,9 @@ public class Board extends StackPane {
      * Gets the value of the -fx-background-radius value for each square, such that
      * only corner squares will have rounded edges.
      * 
-     * @param square The square to use.
+     * @param square  The square to use.
+     * @param flipped If the board is flipped or not.
+     * @return the CSS value in order to draw the border radii.
      */
     public static String getSquareCornerRadius(Square square, boolean flipped) {
 
@@ -83,7 +88,7 @@ public class Board extends StackPane {
 
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
             gameView.getOpeningLabel().update();
-            
+
         });
 
     };
@@ -289,6 +294,11 @@ public class Board extends StackPane {
 
     };
 
+    /**
+     * Creates a new board.
+     * 
+     * @param gameView The gameView that houses this board.
+     */
     public Board(GameView gameView) {
 
         this.gameView = gameView;
@@ -659,7 +669,7 @@ public class Board extends StackPane {
      * 
      * <p>
      * If {@code relative} is {@code true}, the {@code x} and {@code y} values will
-     * be treated as coming from the outer {@link VBox} that encases the
+     * be treated as coming from the outer VBox that encases the
      * {@link GameView}.
      * 
      * @param x        The x location
@@ -705,7 +715,7 @@ public class Board extends StackPane {
      * 
      * <p>
      * If {@code relative} is {@code true}, the x value will be in the context of
-     * the outer {@link VBox} that encases the {@link GameView}.
+     * the outer VBox that encases the {@link GameView}.
      * 
      * @param square   The {@link Square} to get the x value for
      * @param relative Whether or not to treat the x value as relative
@@ -742,7 +752,7 @@ public class Board extends StackPane {
      * 
      * <p>
      * If {@code relative} is {@code true}, the y value will be in the context of
-     * the outer {@link VBox} that encases the {@link GameView}.
+     * the outer VBox that encases the {@link GameView}.
      * 
      * @param square   The {@link Square} to get the y value for
      * @param relative Whether or not to treat the y value as relative

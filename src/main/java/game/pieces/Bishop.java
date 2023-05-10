@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import game.Move;
 import game.Position;
 
+/**
+ * A representation of a Bishop.
+ */
 public class Bishop extends Piece {
 
     public Bishop(int file, int rank, boolean white) {

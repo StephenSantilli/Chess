@@ -45,62 +45,6 @@ public class GameEvent {
     private Chat message;
 
     /**
-     * @return {@link #type}
-     */
-    public Type getType() {
-        return type;
-    }
-
-    /**
-     * @return {@link #prevIndex}
-     */
-    public int getPrevIndex() {
-        return prevIndex;
-    }
-
-    /**
-     * @return {@link #currIndex}
-     */
-    public int getCurrIndex() {
-        return currIndex;
-    }
-
-    /**
-     * @return {@link #prev}
-     */
-    public Position getPrev() {
-        return prev;
-    }
-
-    /**
-     * @return {@link #curr}
-     */
-    public Position getCurr() {
-        return curr;
-    }
-
-    /**
-     * @return {@link #move}
-     */
-    public Move getMove() {
-        return move;
-    }
-
-    /**
-     * @return {@link #white}
-     */
-    public boolean isWhite() {
-        return white;
-    }
-
-    /**
-     * @return {@link #message}
-     */
-    public Chat getMessage() {
-        return message;
-    }
-
-    /**
      * Creates a new event.
      * 
      * @param type The type of event this is.
@@ -157,6 +101,62 @@ public class GameEvent {
         this.type = type;
         this.white = white;
 
+    }
+
+    /**
+     * @return {@link #type}
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * @return {@link #prevIndex}
+     */
+    public int getPrevIndex() {
+        return prevIndex;
+    }
+
+    /**
+     * @return {@link #currIndex}
+     */
+    public int getCurrIndex() {
+        return currIndex;
+    }
+
+    /**
+     * @return {@link #prev}
+     */
+    public Position getPrev() {
+        return prev;
+    }
+
+    /**
+     * @return {@link #curr}
+     */
+    public Position getCurr() {
+        return curr;
+    }
+
+    /**
+     * @return {@link #move}
+     */
+    public Move getMove() {
+        return move;
+    }
+
+    /**
+     * @return {@link #white}
+     */
+    public boolean isWhite() {
+        return white;
+    }
+
+    /**
+     * @return {@link #message}
+     */
+    public Chat getMessage() {
+        return message;
     }
 
 }

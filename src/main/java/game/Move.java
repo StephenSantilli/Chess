@@ -84,6 +84,54 @@ public class Move {
      */
     private String moveNotation;
 
+    /**
+     * Initializes a new, non-castling move.
+     * 
+     * @param origin      The origin square of the move.
+     * @param destination The destination square of the move.
+     * @param position    The position the move being made from.
+     * @throws Exception If the move is invalid.
+     */
+    public Move(Square origin, Square destination, Position position) throws Exception {
+
+        this(origin, destination, position, false);
+
+    }
+
+    /**
+     * Initializes a new move.
+     * 
+     * @param origin      The origin square of the move.
+     * @param destination The destination square of the move.
+     * @param position    The position the move being made from.
+     * @param castle      If the move is a castle move. Used to disambiguate when
+     *                    the king could move to the square or castle to it.
+     * @throws Exception If the move is invalid.
+     */
+    public Move(Square origin, Square destination, Position position, boolean castle) throws Exception {
+
+        this.position = position;
+
+        this.origin = origin;
+        this.destination = destination;
+
+        if (!origin.isValid())
+            throw new Exception("Invalid origin.");
+
+        if (!destination.isValid())
+            throw new Exception("Invalid destination.");
+
+        this.piece = position.getPieceAtSquare(origin);
+
+        if (piece == null)
+            throw new Exception("There is no piece at that square.");
+
+        this.castle = castle;
+
+        initMove();
+
+    }
+
     public Position getPosition() {
         return position;
     }
@@ -205,71 +253,6 @@ public class Move {
     }
 
     /**
-     * Initializes the move, checking if it is valid.
-     *
-     * @throws Exception If the move is invalid.
-     */
-    private void initMove() throws Exception {
-
-        white = piece.isWhite();
-        enPassant = checkIfEnPassant();
-        checkValidCastle();
-        capture = checkIfCapture();
-        promoteType = checkIfPromote() ? '?' : '0';
-
-        capturePiece = capture ? position.getPieceAtSquare(getCaptureSquare()) : null;
-
-    }
-
-    /**
-     * Initializes a new, non-castling move.
-     * 
-     * @param origin      The origin square of the move.
-     * @param destination The destination square of the move.
-     * @param position    The position the move being made from.
-     * @throws Exception If the move is invalid.
-     */
-    public Move(Square origin, Square destination, Position position) throws Exception {
-
-        this(origin, destination, position, false);
-
-    }
-
-    /**
-     * Initializes a new move.
-     * 
-     * @param origin      The origin square of the move.
-     * @param destination The destination square of the move.
-     * @param position    The position the move being made from.
-     * @param castle      If the move is a castle move. Used to disambiguate when
-     *                    the king could move to the square or castle to it.
-     * @throws Exception If the move is invalid.
-     */
-    public Move(Square origin, Square destination, Position position, boolean castle) throws Exception {
-
-        this.position = position;
-
-        this.origin = origin;
-        this.destination = destination;
-
-        if (!origin.isValid())
-            throw new Exception("Invalid origin.");
-
-        if (!destination.isValid())
-            throw new Exception("Invalid destination.");
-
-        this.piece = position.getPieceAtSquare(origin);
-
-        if (piece == null)
-            throw new Exception("There is no piece at that square.");
-
-        this.castle = castle;
-
-        initMove();
-
-    }
-
-    /**
      * @return The square that the piece being captured is on before this move.
      */
     public Square getCaptureSquare() {
@@ -346,6 +329,23 @@ public class Move {
             str += "=" + promoteType;
 
         moveNotation = str;
+
+    }
+
+    /**
+     * Initializes the move, checking if it is valid.
+     *
+     * @throws Exception If the move is invalid.
+     */
+    private void initMove() throws Exception {
+
+        white = piece.isWhite();
+        enPassant = checkIfEnPassant();
+        checkValidCastle();
+        capture = checkIfCapture();
+        promoteType = checkIfPromote() ? '?' : '0';
+
+        capturePiece = capture ? position.getPieceAtSquare(getCaptureSquare()) : null;
 
     }
 

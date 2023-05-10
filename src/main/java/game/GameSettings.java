@@ -11,15 +11,6 @@ public class GameSettings {
     /** The starting position of the game, in Forsyth-Edwards Notation (FEN). */
     private final String fen;
 
-    // TODO: allow black to make first move
-    /**
-     * Whether or not white makes the first move.
-     * 
-     * <p>
-     * <b>NOT CURRENTLY SUPPORTED</b>
-     */
-    private final boolean whiteStarts;
-
     /**
      * The time, in seconds, each side has in total. Should be {@code 0} if no
      * time control used.
@@ -53,10 +44,58 @@ public class GameSettings {
     private final boolean blackTimerManaged;
 
     /**
-     * @see #whiteStarts
+     * Creates a new {@link GameSettings} object from the default starting position.
+     * 
+     * @param timePerSide       The amount of time each side has in seconds.
+     * @param timePerMove       The amount of time each side gains per move in
+     *                          seconds.
+     * @param canPause          If pausing is allowed.
+     * @param canUndo           If undoing and redoing is allowed.
+     * @param whiteTimerManaged If white's timer should be automatically started and
+     *                          stopped after moves.
+     * @param blackTimerManaged If black's timer should be automatically started and
+     *                          stopped after moves.
+     * @throws Exception If the settings provided are invalid.
      */
-    public boolean isWhiteStarts() {
-        return whiteStarts;
+    public GameSettings(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
+            boolean whiteTimerManaged, boolean blackTimerManaged) throws Exception {
+
+        this(DEFAULT_FEN, timePerSide, timePerMove, canPause, canUndo,
+                whiteTimerManaged, blackTimerManaged);
+
+    }
+
+    /**
+     * Creates a new {@link GameSettings} object from the default starting position.
+     * 
+     * @param FEN               The starting position in FEN notation.
+     * @param timePerSide       The amount of time each side has in seconds.
+     * @param timePerMove       The amount of time each side gains per move in
+     *                          seconds.
+     * @param canPause          If pausing is allowed.
+     * @param canUndo           If undoing and redoing is allowed.
+     * @param whiteTimerManaged If white's timer should be automatically started and
+     *                          stopped after moves.
+     * @param blackTimerManaged If black's timer should be automatically started and
+     *                          stopped after moves.
+     * @throws Exception If the settings provided are invalid.
+     */
+    public GameSettings(String FEN, long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
+            boolean whiteTimerManaged, boolean blackTimerManaged)
+            throws Exception {
+
+        this.fen = FEN;
+
+        this.timePerSide = timePerSide <= 0 ? -1 : timePerSide;
+        this.timePerMove = timePerMove <= 0 ? -1 : timePerMove;
+        this.canPause = canPause;
+        this.canUndo = canUndo;
+        this.whiteTimerManaged = whiteTimerManaged;
+        this.blackTimerManaged = blackTimerManaged;
+
+        if ((!whiteTimerManaged || !blackTimerManaged) && (canPause || canUndo))
+            throw new Exception("Invalid settings.");
+
     }
 
     /**
@@ -106,61 +145,6 @@ public class GameSettings {
      */
     public boolean isBlackTimerManaged() {
         return blackTimerManaged;
-    }
-
-    /**
-     * Creates a new {@link GameSettings} object from the default starting position.
-     * 
-     * @param timePerSide       The amount of time each side has in seconds.
-     * @param timePerMove       The amount of time each side gains per move in
-     *                          seconds.
-     * @param canPause          If pausing is allowed.
-     * @param canUndo           If undoing and redoing is allowed.
-     * @param whiteTimerManaged If white's timer should be automatically started and
-     *                          stopped after moves.
-     * @param blackTimerManaged If black's timer should be automatically started and
-     *                          stopped after moves.
-     * @throws Exception If the settings provided are invalid.
-     */
-    public GameSettings(long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
-            boolean whiteTimerManaged, boolean blackTimerManaged) throws Exception {
-
-        this(DEFAULT_FEN, timePerSide, timePerMove, canPause, canUndo,
-                whiteTimerManaged, blackTimerManaged);
-
-    }
-
-    /**
-     * Creates a new {@link GameSettings} object from the default starting position.
-     * 
-     * @param FEN               The starting position in FEN notation.
-     * @param timePerSide       The amount of time each side has in seconds.
-     * @param timePerMove       The amount of time each side gains per move in
-     *                          seconds.
-     * @param canPause          If pausing is allowed.
-     * @param canUndo           If undoing and redoing is allowed.
-     * @param whiteTimerManaged If white's timer should be automatically started and
-     *                          stopped after moves.
-     * @param blackTimerManaged If black's timer should be automatically started and
-     *                          stopped after moves.
-     * @throws Exception If the settings provided are invalid.
-     */
-    public GameSettings(String FEN, long timePerSide, long timePerMove, boolean canPause, boolean canUndo,
-            boolean whiteTimerManaged, boolean blackTimerManaged)
-            throws Exception {
-
-        this.fen = FEN;
-        this.whiteStarts = true;
-        this.timePerSide = timePerSide <= 0 ? -1 : timePerSide;
-        this.timePerMove = timePerMove <= 0 ? -1 : timePerMove;
-        this.canPause = canPause;
-        this.canUndo = canUndo;
-        this.whiteTimerManaged = whiteTimerManaged;
-        this.blackTimerManaged = blackTimerManaged;
-
-        if ((!whiteTimerManaged || !blackTimerManaged) && (canPause || canUndo))
-            throw new Exception("Invalid settings.");
-
     }
 
 }

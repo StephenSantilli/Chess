@@ -15,12 +15,14 @@ public class EngineHook implements GameListener {
     private final UCIEngine engine;
     private final boolean white;
     private int depth;
+    private boolean bestMove;
 
     public EngineHook(UCIEngine engine, Game game, boolean white) {
 
         this.game = game;
         this.engine = engine;
         this.white = white;
+        bestMove = true;
         depth = 10;
 
         game.addListener(this);
@@ -71,7 +73,7 @@ public class EngineHook implements GameListener {
 
                         Move m = game.getPositions().get(game.getPositions().size() - 3).findMove(origin, destination);
 
-                        if (m == null)
+                        if (m == null || !bestMove)
                             return;
 
                         game.sendMessage(new Chat(game.getPlayer(white), System.currentTimeMillis(),
@@ -161,6 +163,14 @@ public class EngineHook implements GameListener {
 
     public void setDepth(int depth) {
         this.depth = depth;
+    }
+
+    public boolean isBestMove() {
+        return bestMove;
+    }
+
+    public void setBestMove(boolean bestMove) {
+        this.bestMove = bestMove;
     }
 
 }

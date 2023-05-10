@@ -1,6 +1,5 @@
 package game;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -108,221 +107,6 @@ public class Position {
      * created from a custom FEN.
      */
     private Opening opening;
-
-    /**
-     * @return {@link #enPassantTarget}
-     */
-    public Square getEnPassantTarget() {
-        return enPassantTarget;
-    }
-
-    /**
-     * @return {@link #moveNumber}
-     */
-    public int getMoveNumber() {
-        return moveNumber;
-    }
-
-    /**
-     * @return {@link #pieces}
-     */
-    public Piece[][] getPieces() {
-        return pieces;
-    }
-
-    public long getTimerEnd() {
-        return timerEnd;
-    }
-
-    public void setTimerEnd(long timerEnd) {
-        this.timerEnd = timerEnd;
-    }
-
-    /**
-     * @return The {@link Position} that was previously after this {@link Position}.
-     */
-    public Position getRedo() {
-        return redo;
-    }
-
-    /**
-     * Sets the redo {@link Position}.
-     * 
-     * @param redo The redo {@link Position}
-     */
-    public void setRedo(Position redo) {
-        this.redo = redo;
-    }
-
-    public char getRedoPromote() {
-        return redoPromote;
-    }
-
-    public void setRedoPromote(char redoPromote) {
-        this.redoPromote = redoPromote;
-    }
-
-    public long getRedoTimerEnd() {
-        return redoTimerEnd;
-    }
-
-    public void setRedoTimerEnd(long redoTimerEnd) {
-        this.redoTimerEnd = redoTimerEnd;
-    }
-
-    /**
-     * @return A list of the {@link Move} objects possible in this position. If
-     *         {@code checkForMate} is {@code true} when constructor is called,
-     *         moves that lead to check will not be included.
-     */
-    public ArrayList<Move> getMoves() {
-        return moves;
-    }
-
-    /**
-     * @return Gets the current {@link Move} that led to this position.
-     */
-    public Move getMove() {
-        return move;
-    }
-
-    /**
-     * @return Returns {@code true} if it is currently white's turn. Is the opposite
-     *         color of the move that led to this position.
-     */
-    public boolean isWhite() {
-        return white;
-    }
-
-    /**
-     * @return Returns {@code true} if the value of {@link #isWhite()} is giving
-     *         check to the other color.
-     */
-    public boolean isGivingCheck() {
-        return givingCheck;
-    }
-
-    /**
-     * @return Returns {@code true} if the value of {@link #isWhite()} is in check
-     *         from the other color.
-     */
-    public boolean isInCheck() {
-        return inCheck;
-    }
-
-    /**
-     * @return Returns {@code true} if the current position is check mate. May be
-     *         {@code null} if {@code checkForMate} was not true when constructor
-     *         was called.
-     */
-    public boolean isCheckmate() {
-        return checkMate;
-    }
-
-    public int getFiftyMoveCounter() {
-        return fiftyMoveCounter;
-    }
-
-    public Opening getOpening() {
-        return opening;
-    }
-
-    /**
-     * Returns a string representation of the move that led to this position.
-     * 
-     * @return A {@link String} containing the move text.
-     */
-    public String getMoveString() {
-
-        String str = move.getMoveNotation();
-        if (isCheckmate())
-            str += "#";
-        else if (isInCheck())
-            str += "+";
-
-        return str;
-
-    }
-
-    /**
-     * Checks if the board positions are exactly equal. Will return {@code false}
-     * even if pieces
-     * are in the same spots but their {@link Piece#hasMoved()} property is
-     * different. It will also return {@code false} if the pieces are in the same
-     * positions, but it is the opposite color's turn.
-     */
-    @Override
-    public boolean equals(Object compare) {
-
-        if (!(compare instanceof Position))
-            return false;
-
-        Position casted = (Position) (compare);
-
-        boolean same = true;
-
-        if (isWhite() != casted.isWhite())
-            same = false;
-
-        for (int r = 0; same && r < 8; r++) {
-
-            for (int f = 0; same && f < 8; f++) {
-
-                if (!pieces[r][f].equals(casted.getPieces()[r][f])) {
-
-                    same = false;
-
-                }
-
-            }
-
-        }
-
-        return same;
-
-    }
-
-    /**
-     * Gets the rook on the side specified and of the given color. Will only return
-     * the rook that is on the home file of that color.
-     * 
-     * @param aRook Whether or not to search for the a-side rook or the h-side rook.
-     * @param white Whether or not the rook is white.
-     * @return The rook.
-     */
-    public Piece getRook(boolean aRook, boolean white) {
-
-        final Square square = (white ? whiteKing : blackKing);
-
-        Piece rook = null;
-
-        if (!aRook) {
-
-            for (int i = square.getFile() + 1; i <= 8 && rook == null; i++) {
-
-                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
-
-                if (pc != null && pc.getCode() == 'R')
-                    rook = pc;
-
-            }
-
-        } else {
-
-            for (int i = square.getFile() - 1; i > 0 && rook == null; i--) {
-
-                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
-
-                if (pc != null && pc.getCode() == 'R')
-                    rook = pc;
-
-            }
-
-        }
-
-        return rook;
-
-    }
 
     /**
      * Creates a new {@link Position} object in the default starting position.
@@ -520,10 +304,16 @@ public class Position {
             this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
         }
 
-        opening = Opening.getOpening(this.toString(), new File(getClass().getResource("/tsv/openings.tsv").getPath()));
+        try {
 
-        if (opening == null)
-            opening = prev.getOpening();
+            opening = Opening.getOpening(this.toString(), getClass().getResourceAsStream("/tsv/openings.tsv"));
+
+            if (opening == null)
+                opening = prev.getOpening();
+
+        } catch (Exception e) {
+            throw new Exception("Error finding the opening associated with this position: " + e.getMessage());
+        }
 
     }
 
@@ -684,6 +474,262 @@ public class Position {
         }
 
         initMoves(true);
+
+    }
+
+    /**
+     * @return {@link #enPassantTarget}
+     */
+    public Square getEnPassantTarget() {
+        return enPassantTarget;
+    }
+
+    /**
+     * @return {@link #moveNumber}
+     */
+    public int getMoveNumber() {
+        return moveNumber;
+    }
+
+    /**
+     * @return {@link #pieces}
+     */
+    public Piece[][] getPieces() {
+        return pieces;
+    }
+
+    /**
+     * Gets the amount of time on the timer at the end of this position.
+     * 
+     * @return {@link #timerEnd}
+     */
+    public long getTimerEnd() {
+        return timerEnd;
+    }
+
+    /**
+     * Sets the amount of time on the timer at the end of this position.
+     * 
+     * @param timerEnd The time in milliseconds
+     */
+    public void setTimerEnd(long timerEnd) {
+        this.timerEnd = timerEnd;
+    }
+
+    /**
+     * @return The {@link Position} that was previously after this {@link Position}.
+     */
+    public Position getRedo() {
+        return redo;
+    }
+
+    /**
+     * Sets the redo {@link Position}.
+     * 
+     * @param redo The redo {@link Position}
+     */
+    public void setRedo(Position redo) {
+        this.redo = redo;
+    }
+
+    /**
+     * Gets the promotion type of the redo move.
+     * 
+     * @return {@link #redoPromote}
+     */
+    public char getRedoPromote() {
+        return redoPromote;
+    }
+
+    /**
+     * Sets the promotion type of the redo move.
+     * 
+     * @param redoPromote {@link #redoPromote}
+     */
+    public void setRedoPromote(char redoPromote) {
+        this.redoPromote = redoPromote;
+    }
+
+    /**
+     * Gets the timerEnd of the redo move.
+     * 
+     * @return The time on the timer at the end of the redo move.
+     */
+    public long getRedoTimerEnd() {
+        return redoTimerEnd;
+    }
+
+    /**
+     * Sets the timerEnd of the redo move.
+     * 
+     * @param redoTimerEnd The time in milliseconds
+     */
+    public void setRedoTimerEnd(long redoTimerEnd) {
+        this.redoTimerEnd = redoTimerEnd;
+    }
+
+    /**
+     * @return A list of the {@link Move} objects possible in this position. If
+     *         {@code checkForMate} is {@code true} when constructor is called,
+     *         moves that lead to check will not be included.
+     */
+    public ArrayList<Move> getMoves() {
+        return moves;
+    }
+
+    /**
+     * @return Gets the current {@link Move} that led to this position.
+     */
+    public Move getMove() {
+        return move;
+    }
+
+    /**
+     * @return Returns {@code true} if it is currently white's turn. Is the opposite
+     *         color of the move that led to this position.
+     */
+    public boolean isWhite() {
+        return white;
+    }
+
+    /**
+     * @return Returns {@code true} if the value of {@link #isWhite()} is giving
+     *         check to the other color.
+     */
+    public boolean isGivingCheck() {
+        return givingCheck;
+    }
+
+    /**
+     * @return Returns {@code true} if the value of {@link #isWhite()} is in check
+     *         from the other color.
+     */
+    public boolean isInCheck() {
+        return inCheck;
+    }
+
+    /**
+     * @return Returns {@code true} if the current position is check mate. May be
+     *         {@code null} if {@code checkForMate} was not true when constructor
+     *         was called.
+     */
+    public boolean isCheckmate() {
+        return checkMate;
+    }
+
+    /**
+     * Gets the fifty-move counter as it is after the move that led to this position
+     * is made.
+     * 
+     * @return {@link #fiftyMoveCounter}
+     */
+    public int getFiftyMoveCounter() {
+        return fiftyMoveCounter;
+    }
+
+    /**
+     * Gets the opening that led to this position.
+     * 
+     * @return {@link #opening}
+     */
+    public Opening getOpening() {
+        return opening;
+    }
+
+    /**
+     * Returns a string representation of the move that led to this position.
+     * 
+     * @return A {@link String} containing the move text.
+     */
+    public String getMoveString() {
+
+        String str = move.getMoveNotation();
+        if (isCheckmate())
+            str += "#";
+        else if (isInCheck())
+            str += "+";
+
+        return str;
+
+    }
+
+    /**
+     * Checks if the board positions are exactly equal. Will return {@code false}
+     * even if pieces
+     * are in the same spots but their {@link Piece#hasMoved()} property is
+     * different. It will also return {@code false} if the pieces are in the same
+     * positions, but it is the opposite color's turn.
+     */
+    @Override
+    public boolean equals(Object compare) {
+
+        if (!(compare instanceof Position))
+            return false;
+
+        Position casted = (Position) (compare);
+
+        boolean same = true;
+
+        if (isWhite() != casted.isWhite())
+            same = false;
+
+        for (int r = 0; same && r < 8; r++) {
+
+            for (int f = 0; same && f < 8; f++) {
+
+                if (!pieces[r][f].equals(casted.getPieces()[r][f])) {
+
+                    same = false;
+
+                }
+
+            }
+
+        }
+
+        return same;
+
+    }
+
+    /**
+     * Gets the rook on the side specified and of the given color. Will only return
+     * the rook that is on the home file of that color.
+     * 
+     * @param aRook Whether or not to search for the a-side rook or the h-side rook.
+     * @param white Whether or not the rook is white.
+     * @return The rook.
+     */
+    public Piece getRook(boolean aRook, boolean white) {
+
+        final Square square = (white ? whiteKing : blackKing);
+
+        Piece rook = null;
+
+        if (!aRook) {
+
+            for (int i = square.getFile() + 1; i <= 8 && rook == null; i++) {
+
+                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
+
+                if (pc != null && pc.getCode() == 'R')
+                    rook = pc;
+
+            }
+
+        } else {
+
+            for (int i = square.getFile() - 1; i > 0 && rook == null; i--) {
+
+                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
+
+                if (pc != null && pc.getCode() == 'R')
+                    rook = pc;
+
+            }
+
+        }
+
+        return rook;
 
     }
 
@@ -871,178 +917,6 @@ public class Position {
             initMoves(true);
             move.updateMoveNotation();
 
-        }
-
-    }
-
-    /**
-     * Initializes the list of moves.
-     * 
-     * @param checkForMate If checkmate should be checked for.
-     */
-    private void initMoves(boolean checkForMate) {
-
-        this.moves = new ArrayList<Move>();
-
-        ArrayList<Move> castleMoves = new ArrayList<Move>();
-
-        for (int r = 0; r < pieces.length; r++) {
-
-            for (int c = 0; c < pieces[r].length; c++) {
-
-                final Piece p = pieces[r][c];
-                if (p == null)
-                    continue;
-
-                ArrayList<Move> pMoves = p.getMoves(this);
-
-                if (p.getCode() != 'K' || p.hasMoved() == true) {
-
-                    moves.addAll(pMoves);
-
-                } else {
-
-                    for (Move m : pMoves) {
-
-                        if (m.isCastle())
-                            castleMoves.add(m);
-                        else
-                            moves.add(m);
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        ArrayList<Piece> ownPieces = getPiecesByAttacking(white ? whiteKing : blackKing);
-        if (ownPieces.size() >= 1)
-            inCheck = true;
-
-        ArrayList<Piece> oppPieces = getPiecesByAttacking(!white ? whiteKing : blackKing);
-        if (oppPieces.size() >= 1)
-            givingCheck = true;
-
-        for (int x = 0; x < castleMoves.size(); x++) {
-
-            Move c = castleMoves.get(x);
-
-            boolean thruCheck = false;
-            final Piece king = c.getPiece();
-            final boolean aSide = king.getSquare().getFile() > c.getDestination().getFile();
-
-            for (int i = king.getSquare().getFile() + (aSide ? -1 : 1); thruCheck == false
-                    && ((aSide && i >= c.getDestination().getFile()
-                            || !aSide && i <= c.getDestination().getFile())); i += (aSide ? -1 : 1)) {
-
-                ArrayList<Piece> attackers = getPiecesByCanMoveTo(new Square(i, c.isWhite() ? 1 : 8));
-                attackers.removeIf((pc) -> pc.isWhite() == c.isWhite());
-
-                if (attackers.size() > 0)
-                    thruCheck = true;
-
-            }
-
-            if (thruCheck || c.isWhite() != white) {
-                castleMoves.remove(x);
-                --x;
-            }
-
-        }
-
-        if (checkForMate) {
-
-            setCheckmate();
-
-            if (this.inCheck == false) {
-
-                // castleMoves.removeIf(m -> m.isWhite() != white);
-
-                moves.addAll(castleMoves);
-
-            }
-        }
-    }
-
-    /**
-     * Sets whether or not the position is check mate. (The color whose turn it is
-     * isn't able to make any moves and is in check.) Also will filter out any moves
-     * that are not legal.
-     */
-    private void setCheckmate() {
-
-        this.mateChecked = true;
-        this.checkMate = true;
-
-        for (int i = 0; i < moves.size(); i++) {
-
-            Move m = moves.get(i);
-
-            if (m.isWhite() != isWhite()) {
-                moves.remove(i);
-                --i;
-                continue;
-            }
-
-            try {
-                Position test = new Position(this, m, !white, false, '0');
-                if (!test.isGivingCheck())
-                    checkMate = false;
-                else {
-                    moves.remove(i);
-                    --i;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
-
-    }
-
-    /**
-     * Initializes the default board pieces and their positions.
-     */
-    private void initDefaultPosition() {
-
-        pieces = new Piece[8][8];
-
-        boolean color = true;
-        for (int i = 0; i < 2; i++) {
-
-            for (int j = 0; j < 8; j++) {
-
-                setSquare(new Square(j + 1, color ? 2 : 7), new Pawn(j + 1, color ? 2 : 7, color));
-
-            }
-
-            // Kings
-            Piece king = new King(5, color ? 1 : 8, color);
-            if (color)
-                whiteKing = king.getSquare();
-            else
-                blackKing = king.getSquare();
-
-            setSquare(king.getSquare(), king);
-
-            // Rooks
-            setSquare(new Square(1, color ? 1 : 8), new Rook(1, color ? 1 : 8, color));
-            setSquare(new Square(8, color ? 1 : 8), new Rook(8, color ? 1 : 8, color));
-
-            // Queen
-            setSquare(new Square(4, color ? 1 : 8), new Queen(4, color ? 1 : 8, color));
-
-            // Bishops
-            setSquare(new Square(3, color ? 1 : 8), new Bishop(3, color ? 1 : 8, color));
-            setSquare(new Square(6, color ? 1 : 8), new Bishop(6, color ? 1 : 8, color));
-
-            // Knight
-            setSquare(new Square(2, color ? 1 : 8), new Knight(2, color ? 1 : 8, color));
-            setSquare(new Square(7, color ? 1 : 8), new Knight(7, color ? 1 : 8, color));
-
-            color = false;
         }
 
     }
@@ -1494,6 +1368,178 @@ public class Position {
         }
 
         return found;
+
+    }
+
+    /**
+     * Initializes the list of moves.
+     * 
+     * @param checkForMate If checkmate should be checked for.
+     */
+    private void initMoves(boolean checkForMate) {
+
+        this.moves = new ArrayList<Move>();
+
+        ArrayList<Move> castleMoves = new ArrayList<Move>();
+
+        for (int r = 0; r < pieces.length; r++) {
+
+            for (int c = 0; c < pieces[r].length; c++) {
+
+                final Piece p = pieces[r][c];
+                if (p == null)
+                    continue;
+
+                ArrayList<Move> pMoves = p.getMoves(this);
+
+                if (p.getCode() != 'K' || p.hasMoved() == true) {
+
+                    moves.addAll(pMoves);
+
+                } else {
+
+                    for (Move m : pMoves) {
+
+                        if (m.isCastle())
+                            castleMoves.add(m);
+                        else
+                            moves.add(m);
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        ArrayList<Piece> ownPieces = getPiecesByAttacking(white ? whiteKing : blackKing);
+        if (ownPieces.size() >= 1)
+            inCheck = true;
+
+        ArrayList<Piece> oppPieces = getPiecesByAttacking(!white ? whiteKing : blackKing);
+        if (oppPieces.size() >= 1)
+            givingCheck = true;
+
+        for (int x = 0; x < castleMoves.size(); x++) {
+
+            Move c = castleMoves.get(x);
+
+            boolean thruCheck = false;
+            final Piece king = c.getPiece();
+            final boolean aSide = king.getSquare().getFile() > c.getDestination().getFile();
+
+            for (int i = king.getSquare().getFile() + (aSide ? -1 : 1); thruCheck == false
+                    && ((aSide && i >= c.getDestination().getFile()
+                            || !aSide && i <= c.getDestination().getFile())); i += (aSide ? -1 : 1)) {
+
+                ArrayList<Piece> attackers = getPiecesByCanMoveTo(new Square(i, c.isWhite() ? 1 : 8));
+                attackers.removeIf((pc) -> pc.isWhite() == c.isWhite());
+
+                if (attackers.size() > 0)
+                    thruCheck = true;
+
+            }
+
+            if (thruCheck || c.isWhite() != white) {
+                castleMoves.remove(x);
+                --x;
+            }
+
+        }
+
+        if (checkForMate) {
+
+            setCheckmate();
+
+            if (this.inCheck == false) {
+
+                // castleMoves.removeIf(m -> m.isWhite() != white);
+
+                moves.addAll(castleMoves);
+
+            }
+        }
+    }
+
+    /**
+     * Sets whether or not the position is check mate. (The color whose turn it is
+     * isn't able to make any moves and is in check.) Also will filter out any moves
+     * that are not legal.
+     */
+    private void setCheckmate() {
+
+        this.mateChecked = true;
+        this.checkMate = true;
+
+        for (int i = 0; i < moves.size(); i++) {
+
+            Move m = moves.get(i);
+
+            if (m.isWhite() != isWhite()) {
+                moves.remove(i);
+                --i;
+                continue;
+            }
+
+            try {
+                Position test = new Position(this, m, !white, false, '0');
+                if (!test.isGivingCheck())
+                    checkMate = false;
+                else {
+                    moves.remove(i);
+                    --i;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    /**
+     * Initializes the default board pieces and their positions.
+     */
+    private void initDefaultPosition() {
+
+        pieces = new Piece[8][8];
+
+        boolean color = true;
+        for (int i = 0; i < 2; i++) {
+
+            for (int j = 0; j < 8; j++) {
+
+                setSquare(new Square(j + 1, color ? 2 : 7), new Pawn(j + 1, color ? 2 : 7, color));
+
+            }
+
+            // Kings
+            Piece king = new King(5, color ? 1 : 8, color);
+            if (color)
+                whiteKing = king.getSquare();
+            else
+                blackKing = king.getSquare();
+
+            setSquare(king.getSquare(), king);
+
+            // Rooks
+            setSquare(new Square(1, color ? 1 : 8), new Rook(1, color ? 1 : 8, color));
+            setSquare(new Square(8, color ? 1 : 8), new Rook(8, color ? 1 : 8, color));
+
+            // Queen
+            setSquare(new Square(4, color ? 1 : 8), new Queen(4, color ? 1 : 8, color));
+
+            // Bishops
+            setSquare(new Square(3, color ? 1 : 8), new Bishop(3, color ? 1 : 8, color));
+            setSquare(new Square(6, color ? 1 : 8), new Bishop(6, color ? 1 : 8, color));
+
+            // Knight
+            setSquare(new Square(2, color ? 1 : 8), new Knight(2, color ? 1 : 8, color));
+            setSquare(new Square(7, color ? 1 : 8), new Knight(7, color ? 1 : 8, color));
+
+            color = false;
+        }
 
     }
 

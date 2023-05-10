@@ -24,41 +24,6 @@ public class Chat {
     private final boolean error;
 
     /**
-     * @return {@link #player}
-     */
-    public Player getPlayer() {
-        return player;
-    }
-
-    /**
-     * @return {@link #timestamp}
-     */
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    /**
-     * @return {@link #message}
-     */
-    public String getMessage() {
-        return message;
-    }
-
-    /**
-     * @return {@link #systemMessage}
-     */
-    public boolean isSystemMessage() {
-        return systemMessage;
-    }
-
-    /**
-     * @return {@link #error}
-     */
-    public boolean isError() {
-        return error;
-    }
-
-    /**
      * Creates a new chat message.
      * 
      * @param player    The player who created the chat message.
@@ -122,6 +87,41 @@ public class Chat {
         this.systemMessage = systemMessage;
         this.error = error;
 
+    }
+
+    /**
+     * @return {@link #player}
+     */
+    public Player getPlayer() {
+        return player;
+    }
+
+    /**
+     * @return {@link #timestamp}
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * @return {@link #message}
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * @return {@link #systemMessage}
+     */
+    public boolean isSystemMessage() {
+        return systemMessage;
+    }
+
+    /**
+     * @return {@link #error}
+     */
+    public boolean isError() {
+        return error;
     }
 
 }

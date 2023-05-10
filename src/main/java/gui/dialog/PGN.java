@@ -91,8 +91,9 @@ public class PGN extends Stage {
                 }
 
             }
+
             field.setText(pgn);
-            // hide();
+
         });
 
         set = new Button("Set");
@@ -125,8 +126,6 @@ public class PGN extends Stage {
         setMinHeight(400);
         setHeight(400);
         setOnShown(we -> {
-
-            // sizeToScene();
 
             setMaxHeight(getHeight());
             setMaxWidth(getWidth());

@@ -61,182 +61,6 @@ public class Game {
             : "DEV";
 
     /**
-     * The settings of the game.
-     */
-    private GameSettings settings;
-
-    /**
-     * The white player.
-     */
-    private Player white;
-
-    /**
-     * The black player.
-     */
-    private Player black;
-
-    /**
-     * A timestamp of when the game started.
-     */
-    private Date start;
-
-    /**
-     * A list of the chat messages sent throughout the game.
-     */
-    private ArrayList<Chat> messages;
-
-    /**
-     * A list of the positions in this game, in order.
-     */
-    private ArrayList<Position> positions;
-
-    /**
-     * A list of the registered listeners listening for game events.
-     * 
-     * @see #addListener(GameListener)
-     */
-    private ArrayList<GameListener> listeners;
-
-    /**
-     * <p>
-     * The result of the game.
-     */
-    private Result result;
-
-    /**
-     * <p>
-     * The reason for the result of the game.
-     */
-    private Reason resultReason;
-
-    /**
-     * The system time that the active timer was started.
-     */
-    private long timerStart;
-
-    /**
-     * Whether or not the game is paused.
-     */
-    private boolean paused;
-
-    /**
-     * The player that offered a draw. {@code null} if no draw has been offered or
-     * the previous draw offer has been declined.
-     */
-    private Player drawOfferer;
-
-    /**
-     * The service that checks for flagfall in the background.
-     */
-    private ScheduledExecutorService flagfallChecker;
-
-    /**
-     * The flagfall checker task.
-     */
-    Runnable flagfall = () -> {
-
-        if (getTimerTime(true) <= 0)
-            markGameOver(Game.Result.BLACK_WIN, Game.Reason.FLAGFALL);
-
-        if (getTimerTime(false) <= 0)
-            markGameOver(Game.Result.WHITE_WIN, Game.Reason.FLAGFALL);
-
-    };
-
-    /**
-     * Gets the settings of the game.
-     * 
-     * @return {@link #settings}
-     */
-    public GameSettings getSettings() {
-        return settings;
-    }
-
-    /**
-     * Gets the chat messages sent during the game.
-     * 
-     * @return {@link #messages}
-     */
-    public ArrayList<Chat> getMessages() {
-        return messages;
-    }
-
-    /**
-     * Gets the positions of the game.
-     * 
-     * @return {@link #positions}
-     */
-    public ArrayList<Position> getPositions() {
-        return positions;
-    }
-
-    /**
-     * Gets the result of the game.
-     * 
-     * @return {@link #result}
-     */
-    public Result getResult() {
-        return result;
-    }
-
-    /**
-     * Gets the reason for the result of the game.
-     * 
-     * @return {@link #resultReason}
-     */
-    public Reason getResultReason() {
-        return resultReason;
-    }
-
-    /**
-     * Gets whether or not the game is paused.
-     * 
-     * @return {@link #paused}
-     */
-    public boolean isPaused() {
-        return paused;
-    }
-
-    /**
-     * @return the most recent position, the last position in the list of
-     *         positions
-     */
-    public Position getLastPos() {
-        return positions.get(positions.size() - 1);
-    }
-
-    /**
-     * @return the second to last position in the list of positions.
-     */
-    public Position getPreviousPos() {
-
-        if (positions.size() == 1)
-            return null;
-
-        return positions.get(positions.size() - 2);
-
-    }
-
-    /**
-     * Gets the player of the given color.
-     * 
-     * @param white If the white player should be returned. If {@code false} the black player will be returned.
-     * @return The {@link Player} requested.
-     */
-    public Player getPlayer(boolean white) {
-        return white ? this.white : this.black;
-    }
-
-    /**
-     * Gets the player that offered the currently active draw offer. May be {@code null} if no draw is currently being offered.
-     * 
-     * @return {@link #drawOfferer}
-     */
-    public Player getDrawOfferer() {
-        return drawOfferer;
-    }
-
-    /**
      * Generates a random Chess960 starting position using the algorithm found here:
      * <a href=
      * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
@@ -409,6 +233,89 @@ public class Game {
     }
 
     /**
+     * The settings of the game.
+     */
+    private GameSettings settings;
+
+    /**
+     * The white player.
+     */
+    private Player white;
+
+    /**
+     * The black player.
+     */
+    private Player black;
+
+    /**
+     * A timestamp of when the game started.
+     */
+    private Date start;
+
+    /**
+     * A list of the chat messages sent throughout the game.
+     */
+    private ArrayList<Chat> messages;
+
+    /**
+     * A list of the positions in this game, in order.
+     */
+    private ArrayList<Position> positions;
+
+    /**
+     * A list of the registered listeners listening for game events.
+     * 
+     * @see #addListener(GameListener)
+     */
+    private ArrayList<GameListener> listeners;
+
+    /**
+     * <p>
+     * The result of the game.
+     */
+    private Result result;
+
+    /**
+     * <p>
+     * The reason for the result of the game.
+     */
+    private Reason resultReason;
+
+    /**
+     * The system time that the active timer was started.
+     */
+    private long timerStart;
+
+    /**
+     * Whether or not the game is paused.
+     */
+    private boolean paused;
+
+    /**
+     * The player that offered a draw. {@code null} if no draw has been offered or
+     * the previous draw offer has been declined.
+     */
+    private Player drawOfferer;
+
+    /**
+     * The service that checks for flagfall in the background.
+     */
+    private ScheduledExecutorService flagfallChecker;
+
+    /**
+     * The flagfall checker task.
+     */
+    Runnable flagfall = () -> {
+
+        if (getTimerTime(true) <= 0)
+            markGameOver(Game.Result.BLACK_WIN, Game.Reason.FLAGFALL);
+
+        if (getTimerTime(false) <= 0)
+            markGameOver(Game.Result.WHITE_WIN, Game.Reason.FLAGFALL);
+
+    };
+
+    /**
      * Initializes a new Game with the specified settings.
      * 
      * @param whiteName The name of the white player.
@@ -552,6 +459,101 @@ public class Game {
     }
 
     /**
+     * Gets the settings of the game.
+     * 
+     * @return {@link #settings}
+     */
+    public GameSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Gets the chat messages sent during the game.
+     * 
+     * @return {@link #messages}
+     */
+    public ArrayList<Chat> getMessages() {
+        return messages;
+    }
+
+    /**
+     * Gets the positions of the game.
+     * 
+     * @return {@link #positions}
+     */
+    public ArrayList<Position> getPositions() {
+        return positions;
+    }
+
+    /**
+     * Gets the result of the game.
+     * 
+     * @return {@link #result}
+     */
+    public Result getResult() {
+        return result;
+    }
+
+    /**
+     * Gets the reason for the result of the game.
+     * 
+     * @return {@link #resultReason}
+     */
+    public Reason getResultReason() {
+        return resultReason;
+    }
+
+    /**
+     * Gets whether or not the game is paused.
+     * 
+     * @return {@link #paused}
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * @return the most recent position, the last position in the list of
+     *         positions
+     */
+    public Position getLastPos() {
+        return positions.get(positions.size() - 1);
+    }
+
+    /**
+     * @return the second to last position in the list of positions.
+     */
+    public Position getPreviousPos() {
+
+        if (positions.size() == 1)
+            return null;
+
+        return positions.get(positions.size() - 2);
+
+    }
+
+    /**
+     * Gets the player of the given color.
+     * 
+     * @param white If the white player should be returned. If {@code false} the
+     *              black player will be returned.
+     * @return The {@link Player} requested.
+     */
+    public Player getPlayer(boolean white) {
+        return white ? this.white : this.black;
+    }
+
+    /**
+     * Gets the player that offered the currently active draw offer. May be
+     * {@code null} if no draw is currently being offered.
+     * 
+     * @return {@link #drawOfferer}
+     */
+    public Player getDrawOfferer() {
+        return drawOfferer;
+    }
+
+    /**
      * Calculates the number of moves each side has completed from the last
      * position.
      * 
@@ -577,7 +579,7 @@ public class Game {
         final boolean isTurn = pos.isWhite() == white;
         int moveCount = (int) Math.ceil(pos.getMoveNumber() / 2.0);
 
-        if (isTurn && settings.isWhiteStarts() != white)
+        if (isTurn && positions.get(0).isWhite() != white)
             --moveCount;
 
         return moveCount;
@@ -597,15 +599,13 @@ public class Game {
     }
 
     /**
-     * Gets the time elapsed of the currently running timer. Will be {@code 0} if
-     * the timer has not been started.
+     * Gets the {@code timerEnd} of the requested color's last completed (or second
+     * to last, if the given position has already been completed) turn from the
+     * last position.
      * 
-     * @return The time elapsed.
+     * @param white The color to get the {@code timerEnd} of.
+     * @return The previous timer end.
      */
-    private long getElapsed() {
-        return timerStart >= 0 ? System.currentTimeMillis() - timerStart : 0;
-    }
-
     public long getPrevTimerEnd(boolean white) {
         return getPrevTimerEnd(white, positions.size() - 1);
     }
@@ -617,7 +617,7 @@ public class Game {
      * 
      * @param white    The color to get the {@code timerEnd} of.
      * @param position The position to start searching from.
-     * @return The pervious timer end.
+     * @return The previous timer end.
      */
     public long getPrevTimerEnd(boolean white, int position) {
 
@@ -1210,6 +1210,16 @@ public class Game {
 
         }
 
+    }
+
+    /**
+     * Gets the time elapsed of the currently running timer. Will be {@code 0} if
+     * the timer has not been started.
+     * 
+     * @return The time elapsed.
+     */
+    private long getElapsed() {
+        return timerStart >= 0 ? System.currentTimeMillis() - timerStart : 0;
     }
 
 }

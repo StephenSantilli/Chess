@@ -111,7 +111,7 @@ public class PGNParser {
                 final boolean isTurn = p.isWhite() && i == game.getPositions().size() - 1;
                 int moveCount = (int) Math.ceil(p.getMoveNumber() / 2.0);
 
-                if (isTurn && game.getSettings().isWhiteStarts() != p.isWhite())
+                if (isTurn && game.getPositions().get(0).isWhite() != p.isWhite())
                     --moveCount;
 
                 long time = game.getPositions().get(i - 1).getTimerEnd() + game.calcTimerDelta(moveCount);
@@ -388,8 +388,6 @@ public class PGNParser {
                                 .ceil((getLast(ravDepth - 1).get(getLast(ravDepth - 1).size() - 1).getMoveNumber() + 1
                                         + getLast(ravDepth).size()) / 2.0) != Integer.parseInt(tok)))
                     throw new Exception("Error @ " + t.start() + ". Unexpected move number.");
-
-
 
             } else if (tok.matches("[A-Za-z0-9][A-Za-z0-9_+#=:\\-]*")) {
 

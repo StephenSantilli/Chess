@@ -12,38 +12,6 @@ public class Square {
     private int rank;
 
     /**
-     * @return The file (column) of the square.
-     */
-    public int getFile() {
-        return file;
-    }
-
-    /**
-     * Sets the file (column) of the square.
-     * 
-     * @param file The numeric file to set the square to.
-     */
-    public void setFile(int file) {
-        this.file = file;
-    }
-
-    /**
-     * @return The rank (row) of the square.
-     */
-    public int getRank() {
-        return rank;
-    }
-
-    /**
-     * Sets the rank (row) of the square.
-     * 
-     * @param rank The numeric rank to set the square to.
-     */
-    public void setRank(int rank) {
-        this.rank = rank;
-    }
-
-    /**
      * Creates a new {@link Square} object.
      * 
      * @param file The file (column).
@@ -78,6 +46,38 @@ public class Square {
         if (!isValid())
             throw new Exception("Invalid square.");
 
+    }
+
+    /**
+     * @return The file (column) of the square.
+     */
+    public int getFile() {
+        return file;
+    }
+
+    /**
+     * Sets the file (column) of the square.
+     * 
+     * @param file The numeric file to set the square to.
+     */
+    public void setFile(int file) {
+        this.file = file;
+    }
+
+    /**
+     * @return The rank (row) of the square.
+     */
+    public int getRank() {
+        return rank;
+    }
+
+    /**
+     * Sets the rank (row) of the square.
+     * 
+     * @param rank The numeric rank to set the square to.
+     */
+    public void setRank(int rank) {
+        this.rank = rank;
     }
 
     /**

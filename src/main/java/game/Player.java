@@ -6,6 +6,26 @@ package game;
 public class Player {
 
     /**
+     * An enumeration of the types of players.
+     */
+    public enum Type {
+
+        HUMAN("human"),
+        PROGRAM("program");
+
+        private final String string;
+
+        Type(String string) {
+            this.string = string;
+        }
+
+        public String getString() {
+            return string;
+        }
+
+    }
+
+    /**
      * The maximum length of a name.
      */
     public static final int MAX_NAME_LENGTH = 100;
@@ -16,26 +36,6 @@ public class Player {
     public static final String NAME_REGEX = "[A-Za-z0-9!@#$%^&*()_\\-\\+=\"',. ?:\\/\\[\\]\\{\\}]{1," + MAX_NAME_LENGTH
             + "}";
 
-    /**
-     * An enumeration of the types of players.
-     */
-    public enum Type {
-
-        HUMAN("human"),
-        PROGRAM("program");
-
-        private final String string;
-
-        public String getString() {
-            return string;
-        }
-
-        Type(String string) {
-            this.string = string;
-        }
-
-    }
-
     /** The name of the player. */
     private String name;
 
@@ -44,6 +44,38 @@ public class Player {
 
     /** Whether or not the player is white. */
     private boolean white;
+
+    /**
+     * Creates a new Player object.
+     * 
+     * @param name The name of the player.
+     */
+    public Player(String name) throws Exception {
+
+        if (!name.matches(NAME_REGEX))
+            throw new Exception("Invalid name.");
+
+        this.name = name;
+
+    }
+
+    /**
+     * Creates a new Player object.
+     * 
+     * @param name  The name of the player.
+     * @param type  The type of player.
+     * @param white Whether or not the player is white.
+     */
+    public Player(String name, Type type, boolean white) throws Exception {
+
+        if (!name.matches(NAME_REGEX))
+            throw new Exception("Invalid name.");
+
+        this.name = name;
+        this.type = type;
+        this.white = white;
+
+    }
 
     /**
      * @return {@link #name}
@@ -115,38 +147,6 @@ public class Player {
         Player casted = (Player) o;
 
         return name.equals(casted.getName()) && white == casted.isWhite();
-
-    }
-
-    /**
-     * Creates a new Player object.
-     * 
-     * @param name The name of the player.
-     */
-    public Player(String name) throws Exception {
-
-        if (!name.matches(NAME_REGEX))
-            throw new Exception("Invalid name.");
-
-        this.name = name;
-
-    }
-
-    /**
-     * Creates a new Player object.
-     * 
-     * @param name  The name of the player.
-     * @param type  The type of player.
-     * @param white Whether or not the player is white.
-     */
-    public Player(String name, Type type, boolean white) throws Exception {
-
-        if (!name.matches(NAME_REGEX))
-            throw new Exception("Invalid name.");
-
-        this.name = name;
-        this.type = type;
-        this.white = white;
 
     }
 

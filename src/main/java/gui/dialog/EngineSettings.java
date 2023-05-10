@@ -32,9 +32,10 @@ public class EngineSettings extends Stage {
     private EngineHook hook;
 
     public EngineSettings(Window window, EngineHook hook) {
+
         final UCIEngine engine = hook.getEngine();
         this.hook = hook;
-        // initOwner(window);
+
         setResizable(false);
         initModality(Modality.APPLICATION_MODAL);
         getIcons().setAll(((Stage) (window)).getIcons());
@@ -60,7 +61,18 @@ public class EngineSettings extends Stage {
 
         db.getChildren().addAll(depth, dSpinner);
 
-        vb.getChildren().add(db);
+        HBox bm = new HBox();
+        bm.setSpacing(5);
+        bm.setAlignment(Pos.CENTER_LEFT);
+
+        Label bestM = new Label("Output best move:");
+        CheckBox bCheckBox = new CheckBox();
+        bCheckBox.setOnAction(ae -> hook.setBestMove(bCheckBox.isSelected()));
+        bCheckBox.setSelected(hook.isBestMove());
+
+        bm.getChildren().addAll(bestM, bCheckBox);
+
+        vb.getChildren().addAll(db, bm);
 
         final ArrayList<UCIOption> opts = engine.getOpts();
 

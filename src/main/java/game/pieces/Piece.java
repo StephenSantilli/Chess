@@ -56,7 +56,7 @@ abstract public class Piece {
     /**
      * Sets that the piece has moved.
      * 
-     * @param hasMoved
+     * @param hasMoved Whether or not the piece has moved.
      */
     public void setHasMoved(boolean hasMoved) {
         this.hasMoved = hasMoved;
@@ -103,9 +103,10 @@ abstract public class Piece {
     @Override
     public boolean equals(Object compare) {
 
-        if(!(compare instanceof Piece)) return false;
+        if (!(compare instanceof Piece))
+            return false;
 
-        Piece casted = (Piece)(compare);
+        Piece casted = (Piece) (compare);
 
         return (casted.getCode() == getCode()) && isWhite() == casted.isWhite() && square == casted.getSquare()
                 && casted.hasMoved() == hasMoved;
@@ -137,6 +138,7 @@ abstract public class Piece {
      * Gets all moves that a given piece can make, regardless of if they are
      * possible in the context of the game.
      * 
+     * @param p The position this piece is a part of.
      * @return A list of valid moves. Does not account for check.
      */
     abstract public ArrayList<Move> getMoves(Position p);

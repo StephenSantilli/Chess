@@ -47,7 +47,7 @@ public class Export extends Stage {
         setResizable(false);
 
         VBox vb = new VBox();
-        vb.setPadding(new Insets(15, 15, 15, 15));
+        vb.setPadding(new Insets(15));
 
         Scene s = new Scene(vb, 550, 500);
 
