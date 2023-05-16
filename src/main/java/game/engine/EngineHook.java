@@ -70,6 +70,8 @@ public class EngineHook implements GameListener {
                         Square origin = new Square(bm.substring(0, 2));
                         Square destination = new Square(bm.substring(2, 4));
 
+                        char promoteType = bm.substring(4).equals("") ? '0' : Character.toUpperCase(bm.substring(4).charAt(0));
+
                         if (game.getPositions().size() - 3 < 0)
                             return;
 
@@ -78,13 +80,18 @@ public class EngineHook implements GameListener {
                         if (m == null || !bestMove)
                             return;
 
+                        String mn = m.getMoveNotation();
+
+                        if (promoteType != '0')
+                            mn = mn.substring(0, mn.length() - 1) + promoteType;
+
                         game.sendMessage(new Chat(game.getPlayer(white), System.currentTimeMillis(),
                                 game.getPositions().size() > 2 &&
-                                        bm.startsWith(
+                                        bm.toUpperCase().startsWith(
                                                 (game.getPositions().get(game.getPositions().size() - 2).getMove()
-                                                        .toString()))
+                                                        .toString().toUpperCase()))
                                                                 ? "That was the best move."
-                                                                : ("Best move was: " + m.getMoveNotation())));
+                                                                : ("Best move was: " + mn)));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

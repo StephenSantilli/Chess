@@ -169,7 +169,7 @@ public class Export extends Stage {
         buttons.setSpacing(10);
 
         pgnArea.setPrefColumnCount(85);
-        pgnArea.setPrefRowCount(15);
+        pgnArea.setPrefRowCount(35);
 
     }
 
