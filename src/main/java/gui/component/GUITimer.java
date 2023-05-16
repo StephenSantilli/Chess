@@ -66,7 +66,10 @@ public class GUITimer extends Label {
 
         } else {
 
-            setId("guitimer");
+            if ((white == board.getGame().getLastPos().isWhite()))
+                setId("guitimeractive");
+            else
+                setId("guitimer");
 
             tl.pause();
             frame();

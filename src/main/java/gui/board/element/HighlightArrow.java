@@ -21,7 +21,7 @@ public class HighlightArrow extends Pane {
         final Board board = gameView.getBoard();
         setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
 
-        final double lineWidth = board.getSquareSize() / 6.0;
+        final double lineWidth = board.getSquareSize() / 7.0;
 
         final double startX = board.getXBySquare(startSquare, false) + (board.getSquareSize() / 2.0);
         final double startY = board.getYBySquare(startSquare, false) + (board.getSquareSize() / 2.0);
