@@ -198,7 +198,7 @@ public class Board extends StackPane {
     };
 
     private final EventHandler<MouseEvent> mouseReleased = e -> {
-        System.out.println("ooaa");
+
 
         if (arrowing != null) {
 

@@ -134,14 +134,24 @@ public class Export extends Stage {
 
         });
 
-        Button copyButton = new Button("Copy");
-        copyButton.setOnAction(e -> {
+        Button copyFENButton = new Button("Copy FEN");
+        copyFENButton.setOnAction(e -> {
+
+            ClipboardContent content = new ClipboardContent();
+            content.putString(fenArea.getText());
+            Clipboard.getSystemClipboard().setContent(content);
+
+        });
+
+        Button copyPGNButton = new Button("Copy PGN");
+        copyPGNButton.setOnAction(e -> {
 
             ClipboardContent content = new ClipboardContent();
             content.putString(pgnArea.getText());
             Clipboard.getSystemClipboard().setContent(content);
 
         });
+
 
         Button okButton = new Button("Ok");
         okButton.setOnAction(e -> {
@@ -151,7 +161,7 @@ public class Export extends Stage {
         });
 
         buttons.setAlignment(Pos.CENTER_RIGHT);
-        buttons.getChildren().addAll(exportButton, copyButton, okButton);
+        buttons.getChildren().addAll(exportButton, copyFENButton, copyPGNButton, okButton);
 
         vb.getChildren().addAll(fen, pgn, opts, buttons);
 
