@@ -21,7 +21,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-public class PGN extends Stage {
+public class ImportPGN extends Stage {
 
     private TextArea field;
     private Button fromFile, set, cancel;
@@ -38,7 +38,7 @@ public class PGN extends Stage {
         return create;
     }
 
-    public PGN(Window window) {
+    public ImportPGN(Window window) {
 
         // initOwner(window);
         initModality(Modality.APPLICATION_MODAL);

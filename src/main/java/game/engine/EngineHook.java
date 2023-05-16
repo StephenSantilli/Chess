@@ -16,6 +16,7 @@ public class EngineHook implements GameListener {
     private final boolean white;
     private int depth;
     private boolean bestMove;
+    private int bestMoveDepth;
 
     public EngineHook(UCIEngine engine, Game game, boolean white) {
 
@@ -23,6 +24,7 @@ public class EngineHook implements GameListener {
         this.engine = engine;
         this.white = white;
         bestMove = true;
+        bestMoveDepth = 15;
         depth = 10;
 
         game.addListener(this);
@@ -51,7 +53,7 @@ public class EngineHook implements GameListener {
 
                 }
 
-                if (event.getCurr().isWhite() != white) {
+                if (event.getCurr().isWhite() != white && bestMove) {
                     try {
                         ArrayList<String> moveList = new ArrayList<>();
 
@@ -62,7 +64,7 @@ public class EngineHook implements GameListener {
                         String[] arr = new String[moveList.size()];
                         engine.setPosition(game.getPositions().get(0).toString(), moveList.toArray(arr));
 
-                        String bm = engine.getBestMove(depth, game.getTimerTime(true), game.getTimerTime(false),
+                        String bm = engine.getBestMove(bestMoveDepth, game.getTimerTime(true), game.getTimerTime(false),
                                 game.getSettings().getTimePerMove() * 1000, game.getSettings().getTimePerMove() * 1000);
 
                         Square origin = new Square(bm.substring(0, 2));
@@ -171,6 +173,14 @@ public class EngineHook implements GameListener {
 
     public void setBestMove(boolean bestMove) {
         this.bestMove = bestMove;
+    }
+
+    public int getBestMoveDepth() {
+        return bestMoveDepth;
+    }
+
+    public void setBestMoveDepth(int bestMoveDepth) {
+        this.bestMoveDepth = bestMoveDepth;
     }
 
 }

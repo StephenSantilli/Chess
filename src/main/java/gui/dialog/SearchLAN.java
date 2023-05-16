@@ -34,7 +34,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class SearchDialog extends Stage {
+public class SearchLAN extends Stage {
 
     private int timePerSide, timePerMove;
 
@@ -102,7 +102,7 @@ public class SearchDialog extends Stage {
 
     };
 
-    public SearchDialog(Window window) throws Exception {
+    public SearchLAN(Window window) throws Exception {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);

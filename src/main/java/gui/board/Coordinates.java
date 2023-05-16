@@ -6,16 +6,29 @@ import javafx.geometry.Bounds;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 
+/**
+ * Draws the letters and numbers along the edges of the game that show the
+ * coordinates of the board.
+ */
 public class Coordinates extends Pane {
 
+    /** The GameView that contains these coordinates. */
     private GameView gameView;
 
+    /**
+     * Creates a new Coordinates object.
+     * 
+     * @param gameView The GameView that contains this coordinates view.
+     */
     public Coordinates(GameView gameView) {
 
         this.gameView = gameView;
 
     }
 
+    /**
+     * Draws or redraws the coordinates.
+     */
     public void draw() {
 
         getChildren().clear();

@@ -13,39 +13,42 @@ public class Challenge {
     public static final int CHALLENGE_WHITE = 1;
     public static final int CHALLENGE_BLACK = 2;
 
-    private String version, name, fen;
+    /** The version of the game the challenge is for. */
+    private String version;
+
+    /** The name of the user making the challenge. */
+    private String name;
+
+    /** The FEN of the starting position of the challenge. */
+    private String fen;
+
+    /**
+     * The color of the user who created the challenge, correlating to
+     * {@link #CHALLENGE_RANDOM}, {@link #CHALLENGE_WHITE}, and
+     * {@link #CHALLENGE_BLACK}.
+     */
     private int color;
-    private long timePerSide, timePerMove;
+
+    /** The time each side will have per the challenge. */
+    private long timePerSide;
+
+    /** The time each side will gain per each move. */
+    private long timePerMove;
+
+    /** The address of the user who created the challenge. */
     private InetAddress address;
 
-    public String getFen() {
-        return fen;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public long getTimePerSide() {
-        return timePerSide;
-    }
-
-    public long getTimePerMove() {
-        return timePerMove;
-    }
-
-    public InetAddress getAddress() {
-        return address;
-    }
-
+    /**
+     * Creates a new challenge for a LAN game.
+     * 
+     * @param name        The user's name.
+     * @param fen         The starting position, in FEN notation.
+     * @param color       The color of the user creating the challenge.
+     * @param timePerSide The time each side has in total.
+     * @param timePerMove The time each side gains per move.
+     * @param address     The address of the user creating the challenge.
+     * @throws Exception If the challenge parameters are not valid.
+     */
     public Challenge(String name, String fen, int color, long timePerSide, long timePerMove, InetAddress address)
             throws Exception {
 
@@ -61,6 +64,12 @@ public class Challenge {
 
     }
 
+    /**
+     * Creates a challenge that was received from a packet.
+     * 
+     * @param packet The packet that contains the challenge data.
+     * @throws Exception If the challenge data is not valid.
+     */
     public Challenge(DatagramPacket packet) throws Exception {
 
         String str = new String(packet.getData()).trim();
@@ -103,19 +112,35 @@ public class Challenge {
 
     }
 
-    private void checkIfValid() throws Exception {
-
-        if (name.length() > Player.MAX_NAME_LENGTH)
-            throw new Exception("Your name is too long.");
-
-        if (!name.matches(Player.NAME_REGEX))
-            throw new Exception("Invalid name.");
-
-        if (color < Challenge.CHALLENGE_RANDOM || color > CHALLENGE_BLACK)
-            throw new Exception("Invalid color.");
-
+    public String getFen() {
+        return fen;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public long getTimePerSide() {
+        return timePerSide;
+    }
+
+    public long getTimePerMove() {
+        return timePerMove;
+    }
+
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    /** Outputs this challenge in text format that can be sent to other users. */
     public String toString() {
 
         String str = version + ";" + name + ";" + fen + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
@@ -123,6 +148,7 @@ public class Challenge {
 
     }
 
+    /** Checks if two challenges are equal. */
     @Override
     public boolean equals(Object compare) {
 
@@ -139,7 +165,26 @@ public class Challenge {
 
         Challenge cast = (Challenge) compare;
 
-        return name.equals(cast.getName()) && address.equals(cast.getAddress());
+        return name.equals(cast.getName()) && address.equals(cast.getAddress()) && fen.equals(cast.getFen())
+                && color == cast.getColor();
+
+    }
+
+    /**
+     * Checks if this challenge is valid.
+     * 
+     * @throws Exception If the challenge is not valid.
+     */
+    private void checkIfValid() throws Exception {
+
+        if (name.length() > Player.MAX_NAME_LENGTH)
+            throw new Exception("Your name is too long.");
+
+        if (!name.matches(Player.NAME_REGEX))
+            throw new Exception("Invalid name.");
+
+        if (color < Challenge.CHALLENGE_RANDOM || color > CHALLENGE_BLACK)
+            throw new Exception("Invalid color.");
 
     }
 

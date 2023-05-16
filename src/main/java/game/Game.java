@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.LinkedList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -255,7 +256,7 @@ public class Game {
     /**
      * A list of the chat messages sent throughout the game.
      */
-    private ArrayList<Chat> messages;
+    private LinkedList<Chat> messages;
 
     /**
      * A list of the positions in this game, in order.
@@ -267,7 +268,7 @@ public class Game {
      * 
      * @see #addListener(GameListener)
      */
-    private ArrayList<GameListener> listeners;
+    private LinkedList<GameListener> listeners;
 
     /**
      * <p>
@@ -331,8 +332,8 @@ public class Game {
         this.black = new Player(blackName, blackType, false);
 
         positions = new ArrayList<Position>();
-        listeners = new ArrayList<GameListener>();
-        messages = new ArrayList<Chat>();
+        listeners = new LinkedList<GameListener>();
+        messages = new LinkedList<Chat>();
 
         this.settings = settings;
 
@@ -358,8 +359,8 @@ public class Game {
     public Game(PGNParser pgn, GameSettings settings, boolean overridePGNSettings) throws Exception {
 
         positions = new ArrayList<Position>();
-        messages = new ArrayList<Chat>();
-        listeners = new ArrayList<GameListener>();
+        messages = new LinkedList<Chat>();
+        listeners = new LinkedList<GameListener>();
 
         result = Game.Result.NOT_STARTED;
         resultReason = Game.Reason.IN_PROGRESS;
@@ -472,7 +473,7 @@ public class Game {
      * 
      * @return {@link #messages}
      */
-    public ArrayList<Chat> getMessages() {
+    public LinkedList<Chat> getMessages() {
         return messages;
     }
 

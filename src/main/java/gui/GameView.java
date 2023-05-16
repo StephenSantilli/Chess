@@ -563,7 +563,7 @@ public class GameView extends HBox implements GameListener {
                 if ((color == WHITE || color == BLACK) && game.getDrawOfferer().isWhite() == (color == WHITE))
                     return;
 
-                drawDialog = new Draw(this, game.getPlayer(client.isOppColor()).getName());
+                drawDialog = new Draw(this, game.getPlayer(client.isOppWhite()).getName());
 
                 drawDialog.setOnHidden(ev -> {
 

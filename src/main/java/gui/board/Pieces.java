@@ -7,6 +7,7 @@ import game.Square;
 import game.pieces.Piece;
 import gui.GameView;
 import gui.PieceTranscoder;
+import gui.board.element.GUIPiece;
 import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;

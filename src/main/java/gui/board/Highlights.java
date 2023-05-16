@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import game.Position;
 import game.Square;
 import gui.GameView;
+import gui.board.element.HighlightSquare;
 import javafx.scene.layout.Pane;
 
 /**

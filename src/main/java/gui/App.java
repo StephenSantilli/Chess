@@ -85,12 +85,12 @@ public class App extends Application {
 
             view.getChildren().addAll(menu, gameView);
 
-
             scene.setOnKeyReleased(gameView::keyHandler);
 
             stage.setOnShown(we -> gameView.startGame());
             stage.setOnCloseRequest(we -> {
 
+                we.consume();
 
                 final Game game = gameView.getGame();
 
@@ -109,11 +109,18 @@ public class App extends Application {
 
                         save.showAndWait();
 
+                        // if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
+                        //     game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
+
+                        // Platform.exit();
+
                     } else if (res.get().equals(ButtonType.YES)) {
+
                         if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
                             game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
 
                         Platform.exit();
+
                     } else {
                         sure.hide();
                     }

@@ -95,7 +95,7 @@ public class Position {
     private int fiftyMoveCounter;
 
     /**
-     * The square that can be en passanted from this position.
+     * The square that can be en-passanted from this position.
      */
     private Square enPassantTarget;
 
@@ -639,6 +639,10 @@ public class Position {
     /**
      * Returns a string representation of the move that led to this position.
      * 
+     * <p>
+     * Should be used over {@link Move#getMoveNotation()} when possible, as it
+     * includes whether or not this move was a check or checkmate.
+     * 
      * @return A {@link String} containing the move text.
      */
     public String getMoveString() {
@@ -654,11 +658,9 @@ public class Position {
     }
 
     /**
-     * Checks if the board positions are exactly equal. Will return {@code false}
-     * even if pieces
-     * are in the same spots but their {@link Piece#hasMoved()} property is
-     * different. It will also return {@code false} if the pieces are in the same
-     * positions, but it is the opposite color's turn.
+     * Checks if the board positions are exactly equal, including castling
+     * privilege, en passant availability, turn, move number, and fifty move
+     * counter.
      */
     @Override
     public boolean equals(Object compare) {
@@ -668,32 +670,14 @@ public class Position {
 
         Position casted = (Position) (compare);
 
-        boolean same = true;
-
-        if (isWhite() != casted.isWhite())
-            same = false;
-
-        for (int r = 0; same && r < 8; r++) {
-
-            for (int f = 0; same && f < 8; f++) {
-
-                if (!pieces[r][f].equals(casted.getPieces()[r][f])) {
-
-                    same = false;
-
-                }
-
-            }
-
-        }
-
-        return same;
+        return toString().equals(casted.toString());
 
     }
 
     /**
      * Gets the rook on the side specified and of the given color. Will only return
-     * the rook that is on the home file of that color.
+     * the rook that is on the home rank of that color. Will not return a rook that
+     * has already moved.
      * 
      * @param aRook Whether or not to search for the a-side rook or the h-side rook.
      * @param white Whether or not the rook is white.
@@ -711,7 +695,7 @@ public class Position {
 
                 Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
 
-                if (pc != null && pc.getCode() == 'R')
+                if (pc != null && pc.getCode() == 'R' && !pc.hasMoved())
                     rook = pc;
 
             }
@@ -722,7 +706,7 @@ public class Position {
 
                 Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
 
-                if (pc != null && pc.getCode() == 'R')
+                if (pc != null && pc.getCode() == 'R' && !pc.hasMoved())
                     rook = pc;
 
             }
@@ -735,7 +719,7 @@ public class Position {
 
     /**
      * Constructs an array of all of the pieces that are not on the board in this
-     * position.
+     * position of a given color.
      * 
      * @param white The color of the captured pieces.
      * @return The array of captured pieces.
@@ -813,16 +797,30 @@ public class Position {
 
     }
 
+    /**
+     * Calculates the difference in material for each side by taking the point total
+     * of white pieces minus the point total of black pieces.
+     * 
+     * <p>
+     * If the delta is negative, black has that amount more material. If it is
+     * positive, white has that amount more material.
+     * 
+     * @return The point delta.
+     */
     public int calculatePieceDelta() {
 
         int delta = 0;
         for (int r = 0; r < 8; r++) {
+
             for (int f = 0; f < 8; f++) {
+
                 Piece p = pieces[r][f];
-                if (p != null) {
+
+                if (p != null)
                     delta += (p.isWhite() ? 1 : -1) * p.getPoints();
-                }
+
             }
+
         }
 
         return delta;
@@ -838,7 +836,9 @@ public class Position {
      * variants like Chess960, the king may be able to move to the same square it
      * can castle to. In that case, the normal move always overrides the castle
      * move.
-     * Castle moves can always be unambiguously represented as the king moving to
+     * 
+     * <p>
+     * Castle moves can always be represented unambiguously as the king moving to
      * the rook's square.
      * 
      * @param origin      The origin square of the move to search for
@@ -926,6 +926,7 @@ public class Position {
      * 
      * @param white The color
      * @return A point total of the pieces.
+     * @see #calculatePieceDelta()
      */
     public int getPoints(boolean white) {
 
@@ -961,7 +962,7 @@ public class Position {
     }
 
     /**
-     * Finds the first occurance of a piece at the given square.
+     * Finds the first occurrence of a piece at the given square.
      * 
      * @param square The square to search for a piece at
      * @return The {@link Piece} object. Will be {@code null}

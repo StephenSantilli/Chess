@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import game.Position;
 import game.Square;
 import gui.GameView;
+import gui.board.element.GUIPiece;
 import gui.dialog.Promote;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -61,15 +62,16 @@ public class Board extends StackPane {
     }
 
     private GameView gameView;
+
     private Squares squarePane;
     private Highlights highlightPane;
     private Coordinates coordsPane;
-    private SquareBorders borderPane;
     private MoveIndicators moveIndicatorsPane;
+    private SquareBorders borderPane;
     private Pieces piecePane;
     private Arrows arrowPane;
-
     private PauseView pausePane;
+
     private double pieceSize = 90;
 
     private double squareSize = Math.round(pieceSize / pieceSizeMultiplier);
@@ -154,8 +156,8 @@ public class Board extends StackPane {
 
             // TODO: calculate the padding values, not just default to 280 and 40
             squareSize = Math.min(
-                    Math.min(Math.max(20, ev.getSceneX()), getScene().getWidth() - 280),
-                    Math.min(Math.max(20, ev.getSceneY()), getScene().getHeight() - 40))
+                    Math.min(Math.max(150, ev.getSceneX()), getScene().getWidth() - 280),
+                    Math.min(Math.max(150, ev.getSceneY()), getScene().getHeight() - 40))
                     / 8.0;
             pieceSize = Math.round(squareSize * pieceSizeMultiplier);
 
@@ -167,6 +169,7 @@ public class Board extends StackPane {
             setHeight(squareSize * 8);
 
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
+            gameView.getOpeningLabel().update();
 
             squarePane.draw();
             coordsPane.draw();
@@ -306,32 +309,38 @@ public class Board extends StackPane {
         squarePane = new Squares(gameView);
         highlightPane = new Highlights(gameView);
         coordsPane = new Coordinates(gameView);
-        borderPane = new SquareBorders(gameView);
         moveIndicatorsPane = new MoveIndicators(gameView);
+        borderPane = new SquareBorders(gameView);
         piecePane = new Pieces(gameView);
-        pausePane = new PauseView();
         arrowPane = new Arrows(gameView);
+        pausePane = new PauseView();
 
         pausePane.setVisible(false);
 
-        getChildren().addAll(squarePane, highlightPane, coordsPane, moveIndicatorsPane, borderPane, piecePane,
+        getChildren().addAll(squarePane,
+                highlightPane,
+                coordsPane,
+                moveIndicatorsPane,
+                borderPane,
+                piecePane,
                 arrowPane,
                 pausePane);
 
-        gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
+        gameView.getApp().getStage().addEventHandler(WindowEvent.WINDOW_SHOWN,
+                we -> {
 
-            try {
+                    try {
 
-                squarePane.draw();
-                coordsPane.draw();
+                        squarePane.draw();
+                        coordsPane.draw();
 
-                piecePane.initPieceTranscoders();
-                gameView.getInfoPane().initPieceTranscoders();
+                        piecePane.initPieceTranscoders();
+                        gameView.getInfoPane().initPieceTranscoders();
 
-            } catch (Exception e) {
-            }
+                    } catch (Exception e) {
+                    }
 
-        }));
+                });
 
     }
 
@@ -660,7 +669,7 @@ public class Board extends StackPane {
         final double resizeSize = 10;
 
         return (x >= boardBounds.getMaxX() - resizeSize && x <= boardBounds.getMaxX() + resizeSize
-                && y >= boardBounds.getMaxY() - resizeSize && y <= boardBounds.getMaxY() + resizeSize);
+                && y >= boardBounds.getMinY() /* - resizeSize */ && y <= boardBounds.getMaxY() /* + resizeSize */);
 
     }
 

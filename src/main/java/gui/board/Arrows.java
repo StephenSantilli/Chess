@@ -4,10 +4,14 @@ import java.util.ArrayList;
 
 import game.Square;
 import gui.GameView;
+import gui.board.element.HighlightArrow;
 import javafx.scene.layout.Pane;
 
 /**
- * A board component that draws the arrows on the board.
+ * A board pane that displays and manages the {@link HighlightArrow}s on the
+ * board.
+ * 
+ * @see HighlightArrow
  */
 public class Arrows extends Pane {
 
@@ -17,11 +21,15 @@ public class Arrows extends Pane {
     private GameView gameView;
 
     /**
-     * The squares the user has highlighted, not the active, origin, or
-     * destination squares.
+     * The arrows the user has currently placed.
      */
     private ArrayList<HighlightArrow> highlightedArrows;
 
+    /**
+     * Creates a new arrow pane object.
+     * 
+     * @param gameView The GameView this arrow belongs to.
+     */
     public Arrows(GameView gameView) {
         this.gameView = gameView;
 
@@ -29,6 +37,13 @@ public class Arrows extends Pane {
 
     }
 
+    /**
+     * Draws an arrow on the board.
+     * 
+     * @param start The start square to draw the arrow from.
+     * @param end   The end square to draw the arrow from.
+     * @param color The color of the arrow.
+     */
     public void arrow(Square start, Square end, int color) {
 
         HighlightArrow arrow = new HighlightArrow(start, end, color, gameView);
@@ -45,24 +60,16 @@ public class Arrows extends Pane {
 
         });
 
-        if (contains) {
+        if (contains)
             highlightedArrows.remove(arrow);
-            return;
-        }
-
-        highlightedArrows.add(arrow);
+        else
+            highlightedArrows.add(arrow);
 
     }
 
     public void draw() {
 
-        getChildren().clear();
-
         highlightedArrows.clear();
-
-        if (gameView.getGame() == null)
-            return;
-
         redraw();
 
     }
@@ -70,6 +77,9 @@ public class Arrows extends Pane {
     public void redraw() {
 
         getChildren().clear();
+
+        if (gameView.getGame() == null)
+            return;
 
         for (int i = highlightedArrows.size() - 1; i >= 0; i--) {
 

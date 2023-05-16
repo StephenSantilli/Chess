@@ -1,7 +1,8 @@
-package gui.board;
+package gui.board.element;
 
 import game.Square;
 import gui.GameView;
+import gui.board.Board;
 import javafx.scene.layout.Pane;
 
 public class HighlightSquare extends Pane {

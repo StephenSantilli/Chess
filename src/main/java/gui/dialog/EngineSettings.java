@@ -72,7 +72,19 @@ public class EngineSettings extends Stage {
 
         bm.getChildren().addAll(bestM, bCheckBox);
 
-        vb.getChildren().addAll(db, bm);
+        HBox bd = new HBox();
+        bd.setSpacing(5);
+        bd.setAlignment(Pos.CENTER_LEFT);
+
+        Label bmdepth = new Label("Checking best move depth:");
+        Spinner<Integer> bdSpinner = new Spinner<>(1, 999, hook.getBestMoveDepth());
+        bdSpinner.getValueFactory().valueProperty().addListener(v -> {
+            hook.setBestMoveDepth(bdSpinner.getValue());
+        });
+
+        bd.getChildren().addAll(bmdepth, bdSpinner);
+
+        vb.getChildren().addAll(db, bm, bd);
 
         final ArrayList<UCIOption> opts = engine.getOpts();
 

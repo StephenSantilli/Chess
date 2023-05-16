@@ -369,7 +369,7 @@ public class CreateGame extends Stage {
 
     private void importPgn(ActionEvent ae) {
 
-        PGN pDialog = new PGN(getOwner());
+        ImportPGN pDialog = new ImportPGN(getOwner());
 
         pDialog.showAndWait();
 
@@ -431,7 +431,7 @@ public class CreateGame extends Stage {
 
             App.prefs.put("p1name", oneName.getText());
 
-            SearchDialog sd = new SearchDialog(getScene().getWindow());
+            SearchLAN sd = new SearchLAN(getScene().getWindow());
 
             sd.setOnHiding(we -> {
 
@@ -443,7 +443,7 @@ public class CreateGame extends Stage {
 
                 this.game = client.getGame();
                 this.create = true;
-                this.white = !client.isOppColor();
+                this.white = !client.isOppWhite();
 
                 hide();
 

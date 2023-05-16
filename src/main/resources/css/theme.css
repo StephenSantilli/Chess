@@ -32,37 +32,37 @@ OpeningLabel, #chatScroller {
 
 #highlightedA {
   -fx-background-color: -highlighta;
-  -fx-stroke: -highlighta;
+  /* -fx-stroke: -highlighta; */
   -fx-fill: -highlighta;
 }
 
 #highlightedB {
   -fx-background-color: -highlightb;
-  -fx-stroke: -highlightb;
+  /* -fx-stroke: -highlightb; */
   -fx-fill: -highlightb;
 }
 
 #highlightedC {
   -fx-background-color: -highlightc;
-  -fx-stroke: -highlightc;
+  /* -fx-stroke: -highlightc; */
   -fx-fill: -highlightc;
 }
 
 #highlightedD {
   -fx-background-color: -highlightd;
-  -fx-stroke: -highlightd;
+  /* -fx-stroke: -highlightd; */
   -fx-fill: -highlightd;
 }
 
 #highlightedE {
   -fx-background-color: -highlighte;
-  -fx-stroke: -highlighte;
+  /* -fx-stroke: -highlighte; */
   -fx-fill: -highlighte;
 }
 
 #highlightedF {
   -fx-background-color: -highlightf;
-  -fx-stroke: -highlightf;
+  /* -fx-stroke: -highlightf; */
   -fx-fill: -highlightf;
 }
 

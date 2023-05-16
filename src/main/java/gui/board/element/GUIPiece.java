@@ -1,4 +1,4 @@
-package gui.board;
+package gui.board.element;
 
 import game.Game;
 import game.Move;
@@ -6,6 +6,7 @@ import game.Square;
 import game.pieces.Piece;
 
 import gui.GameView;
+import gui.board.Board;
 
 import java.util.ArrayList;
 
