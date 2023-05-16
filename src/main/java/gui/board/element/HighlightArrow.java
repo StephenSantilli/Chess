@@ -32,6 +32,15 @@ public class HighlightArrow extends Pane {
         // k = +- (l) / sqrt(1 + m^2)
         // (x, y) = (endX, endY) + k(1, m)
 
+        // (xt, yt)
+        //
+        //
+        // (xh, yh) (xe, ye) (xea, yea) (xha, yha)
+        //
+        //
+        //
+        // (xs,ys) (xsa, ysa)
+
         final double negative = endX - startX;
 
         final double arrowLength = lineWidth * 1.75;
@@ -39,21 +48,34 @@ public class HighlightArrow extends Pane {
 
         final double headSlope = -(1 / arrowSlope);
 
+        // bottom left
         final double ks = (negative >= 0 ? 1 : -1) * lineWidth / (Math.sqrt(1 + Math.pow(headSlope, 2)));
         final double xs = Double.isInfinite(headSlope) ? startX : ks * 1 + startX;
         final double ys = Double.isInfinite(headSlope) ? startY - lineWidth : ks * headSlope + startY;
 
+        // bottom right
+        final double xsa = startX + (startX - xs);
+        final double ysa = startY - (ys - startY);
+
+        // top left
         final double ke = (negative >= 0 ? 1 : -1) * lineWidth / (Math.sqrt(1 + Math.pow(headSlope, 2)));
         final double xe = Double.isInfinite(headSlope) ? endX : ke * 1 + endX;
         final double ye = Double.isInfinite(headSlope) ? endY - lineWidth : ke * headSlope + endY;
 
-        // Calculating arrow-head line end point
+        // top right
+        final double xea = endX + (endX - xe);
+        final double yea = endY - (ye - endY);
 
-        final double k = arrowLength / (Math.sqrt(1 + Math.pow(headSlope, 2)));
-        final double x = Double.isInfinite(headSlope) ? endX : k * 1 + endX;
-        final double y = Double.isInfinite(headSlope) ? endY - arrowLength : k * headSlope + endY;
+        // arrow left
+        final double kh = arrowLength / (Math.sqrt(1 + Math.pow(headSlope, 2)));
+        final double xh = Double.isInfinite(headSlope) ? endX : kh * 1 + endX;
+        final double yh = Double.isInfinite(headSlope) ? endY - arrowLength : kh * headSlope + endY;
 
-        // Calculating arrow head tip
+        // arrow right
+        final double xha = endX + (endX - xh);
+        final double yha = endY - (yh - endY);
+
+        // arrow tip
         final double kt = (negative > 0 ? 1 : -1) * arrowLength
                 / (Math.sqrt(1 + Math.pow(arrowSlope, 2)));
         final double xt = kt * 1 + endX;
@@ -63,11 +85,11 @@ public class HighlightArrow extends Pane {
 
         Polygon triangle = new Polygon(
                 xs, ys,
-                startX + (startX - xs), startY - (ys - startY),
-                endX + (endX - xe), endY - (ye - endY),
-                endX + (endX - x), endY - (y - endY),
+                xsa, ysa,
+                xea, yea,
+                xha, yha,
                 xt, yt,
-                x, y,
+                xh, yh,
                 xe, ye);
 
         triangle.setId("highlighted" + ((char) (color + 65)));

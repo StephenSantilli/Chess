@@ -54,12 +54,10 @@ public class Highlights extends Pane {
 
         });
 
-        if (contains) {
+        if (contains)
             highlightedSquares.remove(rect);
-            return;
-        }
-
-        highlightedSquares.add(rect);
+        else
+            highlightedSquares.add(rect);
 
     }
 

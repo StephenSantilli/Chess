@@ -137,6 +137,7 @@ public class Board extends StackPane {
 
         setMouseType(ev.getSceneX(), ev.getSceneY());
 
+
     };
 
     private final EventHandler<MouseEvent> mouseDragged = ev -> {
@@ -154,7 +155,7 @@ public class Board extends StackPane {
 
         if (resizing != null) {
 
-            // TODO: calculate the padding values, not just default to 280 and 40
+
             squareSize = Math.min(
                     Math.min(Math.max(150, ev.getSceneX()), getScene().getWidth() - 280),
                     Math.min(Math.max(150, ev.getSceneY()), getScene().getHeight() - 40))
@@ -197,6 +198,7 @@ public class Board extends StackPane {
     };
 
     private final EventHandler<MouseEvent> mouseReleased = e -> {
+        System.out.println("ooaa");
 
         if (arrowing != null) {
 
