@@ -8,22 +8,6 @@ public class MoveMessage extends Message {
     private final char promoteType;
     private final long timerEnd;
 
-    public Square getOrigin() {
-        return origin;
-    }
-
-    public Square getDestination() {
-        return destination;
-    }
-
-    public char getPromoteType() {
-        return promoteType;
-    }
-
-    public long getTimerEnd() {
-        return timerEnd;
-    }
-
     public MoveMessage(Square origin, Square destination, char promoteType, long timerEnd) {
         
         super("move", origin.toString(), destination.toString(), promoteType + "", timerEnd + "");
@@ -51,6 +35,22 @@ public class MoveMessage extends Message {
 
         timerEnd = Long.parseLong(args.get(4));
 
+    }
+
+    public Square getOrigin() {
+        return origin;
+    }
+
+    public Square getDestination() {
+        return destination;
+    }
+
+    public char getPromoteType() {
+        return promoteType;
+    }
+
+    public long getTimerEnd() {
+        return timerEnd;
     }
 
 }

@@ -9,6 +9,9 @@ import game.GameListener;
 import game.Move;
 import game.Square;
 
+/**
+ * Class used to bridge the engine and the game.
+ */
 public class EngineHook implements GameListener {
 
     private final Game game;
@@ -70,7 +73,8 @@ public class EngineHook implements GameListener {
                         Square origin = new Square(bm.substring(0, 2));
                         Square destination = new Square(bm.substring(2, 4));
 
-                        char promoteType = bm.substring(4).equals("") ? '0' : Character.toUpperCase(bm.substring(4).charAt(0));
+                        char promoteType = bm.substring(4).equals("") ? '0'
+                                : Character.toUpperCase(bm.substring(4).charAt(0));
 
                         if (game.getPositions().size() - 3 < 0)
                             return;
@@ -95,7 +99,7 @@ public class EngineHook implements GameListener {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                } else
+                } else if (event.getCurr().isWhite() == white)
                     makeMove(event);
 
                 break;

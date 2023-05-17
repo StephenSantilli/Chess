@@ -10,14 +10,6 @@ public class ErrorMessage extends Message {
     private final int severity;
     private final String reason;
 
-    public int getSeverity() {
-        return severity;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
     public ErrorMessage(int severity, String reason) {
 
         super("error", severity + "", reason);
@@ -45,6 +37,14 @@ public class ErrorMessage extends Message {
 
         reason = args.get(2);
 
+    }
+
+    public int getSeverity() {
+        return severity;
+    }
+
+    public String getReason() {
+        return reason;
     }
 
 }

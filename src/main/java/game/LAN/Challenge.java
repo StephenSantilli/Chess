@@ -148,7 +148,9 @@ public class Challenge {
 
     }
 
-    /** Checks if two challenges are equal. */
+    /** 
+     * Checks if two challenges are equal.
+     */
     @Override
     public boolean equals(Object compare) {
 

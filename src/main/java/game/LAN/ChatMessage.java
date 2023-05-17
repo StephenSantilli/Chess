@@ -7,14 +7,6 @@ public class ChatMessage extends Message {
     private final Date timestamp;
     private final String message;
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
     public ChatMessage(Date timestamp, String message) {
 
         super("chat", timestamp.getTime() + "", message);
@@ -39,6 +31,14 @@ public class ChatMessage extends Message {
 
         this.message = args.get(2);
 
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
 }

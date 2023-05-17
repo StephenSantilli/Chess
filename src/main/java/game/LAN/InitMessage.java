@@ -8,14 +8,6 @@ public class InitMessage extends Message {
 
     private final String name;
 
-    public String getVersion() {
-        return version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     public InitMessage(String version, String name) {
 
         super("init", version, name);
@@ -38,6 +30,14 @@ public class InitMessage extends Message {
         if (!name.matches(Player.NAME_REGEX))
             throw new Exception("Invalid name.");
 
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

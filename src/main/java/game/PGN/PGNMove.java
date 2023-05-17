@@ -10,12 +10,15 @@ public class PGNMove {
 
     /**
      * The PGN notation text of the move, not including commentary, etc.
-     * <br>
-     * <br>
+     * 
+     * <p>
      * <b>Ex:</b> {@code Nf3}
      */
     private String moveText;
 
+    /**
+     * The half-move number this move is in the game.
+     */
     private int moveNumber;
 
     /**
@@ -24,10 +27,31 @@ public class PGNMove {
      */
     private int nag;
 
+    /**
+     * The commentary that is included with this move.
+     */
     private ArrayList<String> comments;
 
+    /**
+     * The termination marker that is after this move.
+     */
     private Result termination;
 
+    /**
+     * The recursive annotation variation (RAV) associated with this move.
+     * 
+     * <p>
+     * From the PGN specification:
+     * {@snippet : 
+     * An RAV (Recursive Annotation Variation) is a sequence of movetext
+     * containing one or more moves enclosed in parentheses. An RAV is used to
+     * represent an alternative variation. The alternate move sequence given by an
+     * RAV is one that may be legally played by first unplaying the move that
+     * appears immediately prior to the RAV. Because the RAV is a recursive
+     * construct, it may be nested.
+     * }
+     * 
+     */
     private ArrayList<ArrayList<PGNMove>> rav;
 
     public Result getTermination() {
@@ -174,7 +198,7 @@ public class PGNMove {
 
         if (clk == null || clk.equals(""))
             return -1;
-            
+
         Matcher matcher = pat.matcher(clk);
 
         long timerEnd = 0;
@@ -190,6 +214,20 @@ public class PGNMove {
 
     }
 
+    /**
+     * A collection, in order, of the predetermined meanings of the numeric
+     * annotation glyphs (NAGs) from 0 to 255.
+     * 
+     * <p>
+     * From the PGN specification:
+     * 
+     * {@snippet :
+     * An NAG (Numeric Annotation Glyph) is a movetext element that is used to
+     * indicate a simple annotation in a language independent manner. An NAG is
+     * formed from a dollar sign ("$") with a non-negative decimal integer suffix.
+     * The non-negative integer must be from zero to 255 in value.
+     * }
+     */
     public static final String[] NAGs = {
             "null annotation", "good move (traditional !)", "poor move (traditional ?)",
             "very good move (traditional !!)", "very poor move (traditional ??)", "speculative move (traditional !?)",

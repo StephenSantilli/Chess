@@ -14,10 +14,7 @@ import java.util.concurrent.TimeUnit;
 import game.Chat;
 import game.Game;
 import game.GameSettings;
-import game.Move;
 import game.Player;
-import game.Game.Reason;
-import game.Game.Result;
 import game.GameEvent.Type;
 import game.GameEvent;
 import game.GameListener;
@@ -27,7 +24,17 @@ public class Client implements GameListener {
     /** The default port to use for connecting to other Chess clients. */
     public static final int PORT = 49265;
 
+    public static int getPort() {
+        return PORT;
+    }
+
+    /** The timestamp of when the last ping message was sent. */
     private long pingSent = -1;
+
+    /**
+     * The most recently measured connection to the client, measured in
+     * the amount of milliseconds it took to receive a response.
+     */
     private long ping = -1;
 
     /** If the connection has been closed. */
@@ -101,6 +108,18 @@ public class Client implements GameListener {
 
     };
 
+    /**
+     * Creates a new client from a socket connection. Usually created by the client
+     * that is broadcasting a challenge.
+     * 
+     * @param socket              The socket connection to the client.
+     * @param name                The name of the other user.
+     * @param color               The color this user will be.
+     * @param settings            The settings of the game based on the challenge.
+     * @param gameCreatedCallback A callback to be executed when the game has been
+     *                            created.
+     * @throws Exception If there is an error establishing the connection.
+     */
     public Client(Socket socket, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
             throws Exception {
 
@@ -120,6 +139,18 @@ public class Client implements GameListener {
 
     }
 
+    /**
+     * Creates a new client and connects over a socket to {@code address}. Usually
+     * created by the client that is accepting a challenge.
+     * 
+     * @param address             The address of the other client.
+     * @param name                The name of the other user.
+     * @param color               The color this user will be.
+     * @param settings            The settings of the game based on the challenge.
+     * @param gameCreatedCallback A callback to be executed when the game has been
+     *                            created.
+     * @throws Exception If there is an error establishing the connection.
+     */
     public Client(InetAddress address, String name, int color, GameSettings settings, Runnable gameCreatedCallback)
             throws Exception {
 
@@ -141,24 +172,56 @@ public class Client implements GameListener {
 
     }
 
+    /**
+     * Gets if the other client is white in this game.
+     * 
+     * @return {@link #oppWhite}
+     */
     public boolean isOppWhite() {
         return oppWhite;
     }
 
+    /**
+     * Gets the game associated with this client.
+     * 
+     * @return {@link #game}
+     */
     public Game getGame() {
         return game;
     }
 
+    /**
+     * Gets the most recently measured delay in connection to the other client, in
+     * milliseconds.
+     * 
+     * @return {@link #ping}
+     */
+    public long getPing() {
+        return ping;
+    }
+
+    /**
+     * Starts the game. This is sent by the client who accepted the challenge once
+     * they are ready.
+     */
     public void start() {
 
         send(new InitMessage(Game.VERSION, name));
 
     }
 
+    /**
+     * Stops the game with no reason.
+     */
     public void stop() {
         stop(null);
     }
 
+    /**
+     * Stops the game with a given reason.
+     * 
+     * @param reason The reason for stopping. Will be sent to the other client.
+     */
     public void stop(ErrorMessage reason) {
 
         try {
@@ -195,6 +258,10 @@ public class Client implements GameListener {
 
     }
 
+    /**
+     * To be executed when a player event occurs. Will receive the given event and,
+     * when appropriate, send data to the other client.
+     */
     @Override
     public void onPlayerEvent(GameEvent event) {
 
@@ -243,12 +310,22 @@ public class Client implements GameListener {
 
     }
 
+    /**
+     * Sends a message to the other client.
+     * 
+     * @param message The message to send.
+     */
     private void send(Message message) {
 
         output.println(message.toString());
 
     }
 
+    /**
+     * Receives a message from the other client.
+     * 
+     * @param message The message received from the other client.
+     */
     private void receive(String message) {
 
         System.out.println(message);
@@ -263,146 +340,146 @@ public class Client implements GameListener {
 
             ping = System.currentTimeMillis() - pingSent;
 
-        }
-
-        if (game == null) {
+        } else if (game == null) {
 
             initMessage(msg);
 
-        } else {
+        } else if (msg.equals(Message.STARTED) || msg.equals(Message.START)) {
 
-            if (msg.equals(Message.STARTED) || msg.equals(Message.START)) {
-
-                if (game.getResult() == Game.Result.NOT_STARTED) {
-
-                    try {
-
-                        game.startGame();
-
-                        if (msg.equals(Message.START))
-                            send(Message.STARTED);
-
-                    } catch (Exception e) {
-                        stop(new ErrorMessage(ErrorMessage.FATAL, "Error starting game."));
-                    }
-
-                } else
-                    stop(new ErrorMessage(ErrorMessage.FATAL, "Game already started."));
-
-            } else if (msg.getArgs().get(0).equals("move")) {
+            if (game.getResult() == Game.Result.NOT_STARTED) {
 
                 try {
 
-                    MoveMessage moveMsg = new MoveMessage(msg.toString());
+                    game.startGame();
 
-                    try {
-
-                        game.makeMove(moveMsg.getOrigin(), moveMsg.getDestination(), moveMsg.getPromoteType());
-
-                        game.getLastPos().setTimerEnd(moveMsg.getTimerEnd());
-
-                        send(new Message("moved", game.getLastPos().toString()));
-
-                    } catch (Exception e) {
-                        stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move: " + e.getMessage()));
-                    }
+                    if (msg.equals(Message.START))
+                        send(Message.STARTED);
 
                 } catch (Exception e) {
-                    stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move message: " + e.getMessage()));
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Error starting game."));
                 }
 
-            } else if (msg.getArgs().get(0).equals("moved")) {
+            } else
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Game already started."));
 
-                if (msg.getArgs().size() != 2)
-                    send(new ErrorMessage(ErrorMessage.FATAL, "Invalid moved message."));
+        } else if (msg.getArgs().get(0).equals("move")) {
 
-                String fen = msg.getArgs().get(1);
+            try {
 
-                if (!fen.trim().equals(game.getLastPos().toString().trim()))
-                    stop(new ErrorMessage(ErrorMessage.FATAL, "Position desynchronized."));
-
-            } else if (msg.getArgs().get(0).equals("chat")) {
+                MoveMessage moveMsg = new MoveMessage(msg.toString());
 
                 try {
 
-                    ChatMessage cMsg = new ChatMessage(msg.toString());
-                    game.sendMessage(
-                            new Chat(game.getPlayer(oppWhite),
-                                    cMsg.getTimestamp().getTime(),
-                                    cMsg.getMessage()));
+                    game.makeMove(moveMsg.getOrigin(), moveMsg.getDestination(), moveMsg.getPromoteType());
+
+                    game.getLastPos().setTimerEnd(moveMsg.getTimerEnd());
+
+                    send(new Message("moved", game.getLastPos().toString()));
 
                 } catch (Exception e) {
-                    send(new ErrorMessage(ErrorMessage.NORMAL, "Invalid chat message."));
+                    stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move: " + e.getMessage()));
                 }
 
-            } else if (msg.equals(Message.RESIGN)) {
+            } catch (Exception e) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid move message: " + e.getMessage()));
+            }
 
-                game.markGameOver(!oppWhite ? Game.Result.WHITE_WIN : Game.Result.BLACK_WIN,
-                        Game.Reason.RESIGNATION);
+        } else if (msg.getArgs().get(0).equals("moved")) {
 
-            } else if (msg.equals(Message.DRAW_OFFER)) {
+            if (msg.getArgs().size() != 2)
+                send(new ErrorMessage(ErrorMessage.FATAL, "Invalid moved message."));
 
-                try {
-                    game.sendDrawOffer(oppWhite);
-                } catch (Exception e) {
-                    send(new ErrorMessage(ErrorMessage.NORMAL, "Cannot offer a draw right now."));
-                }
+            String fen = msg.getArgs().get(1);
 
-            } else if (msg.equals(Message.DRAW_ACCEPT)) {
+            if (!fen.trim().equals(game.getLastPos().toString().trim()))
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Position desynchronized."));
 
-                if (game.getDrawOfferer() == null || game.getDrawOfferer().isWhite() != oppWhite) {
+        } else if (msg.getArgs().get(0).equals("chat")) {
 
-                    stop(new ErrorMessage(ErrorMessage.FATAL, "No draw offer was sent."));
-                    return;
+            try {
 
-                }
+                ChatMessage cMsg = new ChatMessage(msg.toString());
+                game.sendMessage(
+                        new Chat(game.getPlayer(oppWhite),
+                                cMsg.getTimestamp().getTime(),
+                                cMsg.getMessage()));
 
-                try {
+            } catch (Exception e) {
+                send(new ErrorMessage(ErrorMessage.NORMAL, "Invalid chat message."));
+            }
 
-                    game.acceptDrawOffer();
+        } else if (msg.equals(Message.RESIGN)) {
 
-                } catch (Exception e) {
-                    stop(new ErrorMessage(ErrorMessage.FATAL, "Cannot accept draw offer."));
-                }
+            game.markGameOver(!oppWhite ? Game.Result.WHITE_WIN : Game.Result.BLACK_WIN,
+                    Game.Reason.RESIGNATION);
 
-            } else if (msg.equals(Message.DRAW_DECLINE)) {
+        } else if (msg.equals(Message.DRAW_OFFER)) {
 
-                try {
-                    game.declineDrawOffer();
-                } catch (Exception e) {
-                    send(new ErrorMessage(ErrorMessage.NORMAL, "Unable to decline draw."));
-                }
+            try {
+                game.sendDrawOffer(oppWhite);
+            } catch (Exception e) {
+                send(new ErrorMessage(ErrorMessage.NORMAL, "Cannot offer a draw right now."));
+            }
 
-            } else if (msg.equals(ErrorMessage.TERMINATE)) {
+        } else if (msg.equals(Message.DRAW_ACCEPT)) {
 
-                stop();
+            if (game.getDrawOfferer() == null || game.getDrawOfferer().isWhite() != oppWhite) {
 
-            } else if (msg.getArgs().get(0).equals("error")) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "No draw offer was sent."));
+                return;
 
-                try {
+            }
 
-                    ErrorMessage eMsg = new ErrorMessage(msg.toString());
+            try {
 
-                    game.sendMessage(new Chat(game.getPlayer(oppWhite),
-                            (new Date().getTime()),
-                            (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal e" : "E") + "rror from "
-                                    + game.getPlayer(oppWhite).getName() + ": " + eMsg.getReason(),
-                            true,
-                            true));
+                game.acceptDrawOffer();
 
-                    if (eMsg.getSeverity() == ErrorMessage.FATAL)
-                        stop();
+            } catch (Exception e) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Cannot accept draw offer."));
+            }
 
-                } catch (Exception e) {
-                    stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid error message: " + e.getMessage()));
-                }
+        } else if (msg.equals(Message.DRAW_DECLINE)) {
 
+            try {
+                game.declineDrawOffer();
+            } catch (Exception e) {
+                send(new ErrorMessage(ErrorMessage.NORMAL, "Unable to decline draw."));
+            }
+
+        } else if (msg.equals(ErrorMessage.TERMINATE)) {
+
+            stop();
+
+        } else if (msg.getArgs().get(0).equals("error")) {
+
+            try {
+
+                ErrorMessage eMsg = new ErrorMessage(msg.toString());
+
+                game.sendMessage(new Chat(game.getPlayer(oppWhite),
+                        new Date().getTime(),
+                        (eMsg.getSeverity() == ErrorMessage.FATAL ? "Fatal e" : "E") + "rror from "
+                                + game.getPlayer(oppWhite).getName() + ": " + eMsg.getReason(),
+                        true,
+                        true));
+
+                if (eMsg.getSeverity() == ErrorMessage.FATAL)
+                    stop();
+
+            } catch (Exception e) {
+                stop(new ErrorMessage(ErrorMessage.FATAL, "Invalid error message: " + e.getMessage()));
             }
 
         }
 
     }
 
+    /**
+     * Handles received init and ready messages, which are sent before the game is
+     * started in order to set it up.
+     * 
+     * @param msg The message received.
+     */
     private void initMessage(Message msg) {
 
         // Init message to be sent by the challenge accepter once they are ready. This

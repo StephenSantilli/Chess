@@ -13,6 +13,28 @@ public class Message {
 
     protected ArrayList<String> args;
 
+    public Message(String text) {
+
+        this.args = new ArrayList<String>();
+
+        String[] split = text.split("(?<!\\\\);");
+
+        for (int i = 0; i < split.length; i++) {
+            args.add(split[i].replaceAll("\\\\;", ";"));
+        }
+
+    }
+
+    public Message(String... split) {
+
+        this.args = new ArrayList<String>();
+
+        for (int i = 0; i < split.length; i++) {
+            args.add(split[i].replaceAll("\\\\;", ";"));
+        }
+
+    }
+
     public ArrayList<String> getArgs() {
         return args;
     }
@@ -36,28 +58,6 @@ public class Message {
 
         return same;
       
-    }
-
-    public Message(String text) {
-
-        this.args = new ArrayList<String>();
-
-        String[] split = text.split("(?<!\\\\);");
-
-        for (int i = 0; i < split.length; i++) {
-            args.add(split[i].replaceAll("\\\\;", ";"));
-        }
-
-    }
-
-    public Message(String... split) {
-
-        this.args = new ArrayList<String>();
-
-        for (int i = 0; i < split.length; i++) {
-            args.add(split[i].replaceAll("\\\\;", ";"));
-        }
-
     }
 
     @Override

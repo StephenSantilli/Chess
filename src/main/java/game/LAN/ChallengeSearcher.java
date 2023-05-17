@@ -11,27 +11,38 @@ import java.util.Enumeration;
 import game.Game;
 
 /**
- * Sends out a request for {@link Challenge}s on the local network.
+ * Class used to send out requests for {@link Challenge}s on the local network.
  */
 public class ChallengeSearcher {
 
+    /** The amount of times the searcher will search before giving up. */
     private static final int SEARCH_RETRIES = 3;
+
+    /** The amount of time in between successive searches. */
     private static final int SEARCH_MILLIS_BETWEEN = 1000;
 
+    /** The socket used to send feelers and receive challenges. */
     private DatagramSocket socket;
 
-    private Thread listenThread, emitThread;
+    /** The thread used to listen for challenges. */
+    private Thread listenThread;
 
+    /** The thread used to send feelers for challenges. */
+    private Thread emitThread;
+
+    /** A list of challenges that were received. */
     private ArrayList<Challenge> challenges;
 
+    /** The searcher's own address. */
     private InetAddress ownAddress;
 
+    /** A callback to be executed when the search for challenges is complete. */
     private Runnable searchDoneCallback;
 
-    public ArrayList<Challenge> getChallenges() {
-        return challenges;
-    }
-
+    /**
+     * The task to be executed on {@link #emitThread}, which sends out feelers on
+     * the broadcast channel for challenges.
+     */
     private Runnable emitter = () -> {
 
         try {
@@ -62,6 +73,10 @@ public class ChallengeSearcher {
 
     };
 
+    /**
+     * The task to be executed by {@link #listenThread}, which listens for
+     * challenges sent by other lients on the network.
+     */
     private Runnable listener = () -> {
 
         try {
@@ -74,7 +89,8 @@ public class ChallengeSearcher {
 
                 try {
                     Challenge add = new Challenge(packet);
-                    if (add.getVersion().equals(Game.VERSION) && !packet.getAddress().equals(ownAddress) && !challenges.contains(add))
+                    if (add.getVersion().equals(Game.VERSION) && !packet.getAddress().equals(ownAddress)
+                            && !challenges.contains(add))
                         challenges.add(add);
                 } catch (Exception e) {
                     continue;
@@ -87,6 +103,12 @@ public class ChallengeSearcher {
 
     };
 
+    /**
+     * Creates a new searcher object, which can be used to search for challenges on
+     * the local network.
+     * 
+     * @throws Exception If there is an issue with getting the client's address.
+     */
     public ChallengeSearcher() throws Exception {
 
         ownAddress = getOwnAddress();
@@ -97,24 +119,43 @@ public class ChallengeSearcher {
 
     }
 
+    /**
+     * Gets the list of challenges found by the searcher.
+     * 
+     * @return {@link #challenges}
+     */
+    public ArrayList<Challenge> getChallenges() {
+        return challenges;
+    }
+
+    /**
+     * Searches for challenges on the local network.
+     * 
+     * @param searchDoneCallback A callback to be executed when the search is
+     *                           completed.
+     * @throws Exception If there is an error connecting to the socket.
+     */
     public void search(Runnable searchDoneCallback) throws Exception {
 
         this.searchDoneCallback = searchDoneCallback;
+        challenges.clear();
 
         socket = new DatagramSocket(Client.PORT);
         socket.setBroadcast(true);
 
-        challenges.clear();
-
-        listenThread = new Thread(listener, "Searcher Listener");
+        listenThread = new Thread(listener, "Challenge Search Listener");
         listenThread.start();
 
-        emitThread = new Thread(emitter, "Searcher Emitter");
+        emitThread = new Thread(emitter, "Challenge Search Emitter");
         emitThread.start();
 
     }
 
+    /**
+     * Stops searching for challenges and closes the socket.
+     */
     public void stop() {
+
         try {
             socket.close();
         } catch (Exception e) {
@@ -123,18 +164,33 @@ public class ChallengeSearcher {
 
     }
 
+    /**
+     * Gets the client's address. May get the wrong address, particularly on
+     * Windows, if there are multiple enabled network adapters. Disable network
+     * adapters that are not in use to fix.
+     * 
+     * @return The address of the client.
+     * @throws IOException If there is an issue getting the network interfaces of
+     *                     the client.
+     */
     private InetAddress getOwnAddress() throws IOException {
 
         Enumeration<NetworkInterface> is = NetworkInterface.getNetworkInterfaces();
 
         while (is.hasMoreElements()) {
+
             NetworkInterface ifsInterface = is.nextElement();
             Enumeration<InetAddress> ads = ifsInterface.getInetAddresses();
+
             while (ads.hasMoreElements()) {
+
                 InetAddress a = ads.nextElement();
+
                 if (a.isSiteLocalAddress())
                     return a;
+
             }
+
         }
 
         return null;
