@@ -89,11 +89,12 @@ public class EngineHook implements GameListener {
                         if (promoteType != '0')
                             mn = mn.substring(0, mn.length() - 1) + promoteType;
 
-                        game.sendMessage(new Chat(game.getPlayer(white), System.currentTimeMillis(),
-                                game.getPositions().size() > 2 &&
-                                        bm.toUpperCase().startsWith(
-                                                (game.getPositions().get(game.getPositions().size() - 2).getMove()
-                                                        .toString().toUpperCase()))
+                        game.sendMessage(new Chat(game.getPlayer(white),
+                                System.currentTimeMillis(),
+                                (game.getPositions().size() > 2
+                                        && bm.startsWith(
+                                                game.getPositions().get(game.getPositions().size() - 2).getMove()
+                                                        .toString()))
                                                                 ? "That was the best move."
                                                                 : ("Best move was: " + mn)));
                     } catch (Exception e) {
@@ -140,9 +141,10 @@ public class EngineHook implements GameListener {
 
                 String bm = engine.getBestMove(depth, game.getTimerTime(true), game.getTimerTime(false),
                         game.getSettings().getTimePerMove() * 1000, game.getSettings().getTimePerMove() * 1000);
+
                 Square origin = new Square(bm.substring(0, 2));
                 Square destination = new Square(bm.substring(2, 4));
-                char promoteType = bm.substring(4).equals("") ? '0' : bm.substring(4).charAt(0);
+                char promoteType = bm.substring(4).equals("") ? '0' : Character.toUpperCase(bm.substring(4).charAt(0));
 
                 System.out.println(bm);
                 engine.waitReady();

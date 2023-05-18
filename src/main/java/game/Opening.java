@@ -4,7 +4,8 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Openings database from https://github.com/lichess-org/chess-openings
+ * Openings database from <a href=
+ * "https://github.com/lichess-org/chess-openings">https://github.com/lichess-org/chess-openings</a>.
  */
 public class Opening {
 
@@ -14,11 +15,11 @@ public class Opening {
      * 
      * @param fen      The FEN of the position to check.
      * @param openings A tab-separated values file, formatted
-     *                 {@code ECO code]\t[opening name]\t[opening sequence of
+     *                 {@code [ECO code]\t[opening name]\t[opening sequence of
      *                 moves]\t[opening FEN]}
      * @return The opening that matches the position.
      */
-    public static Opening getOpening(String fen, InputStream openings) throws Exception {
+    public static Opening getOpening(String fen, InputStream openings) throws RuntimeException {
 
         Opening found = null;
         try (Scanner s = new Scanner(openings)) {
@@ -37,7 +38,7 @@ public class Opening {
             }
 
         } catch (Exception e) {
-            throw new Exception("Error getting opening: " + e.getMessage());
+            throw new RuntimeException("Error getting opening: " + e.getMessage());
         }
 
         return found;

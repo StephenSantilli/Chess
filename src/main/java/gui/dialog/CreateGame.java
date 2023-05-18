@@ -5,6 +5,7 @@ import java.util.Random;
 import game.Game;
 import game.GameSettings;
 import game.Player;
+import game.Position;
 import game.LAN.Challenge;
 import game.LAN.ChallengeServer;
 import game.LAN.Client;
@@ -55,26 +56,6 @@ public class CreateGame extends Stage {
     private Client client;
     private EngineHook engine;
     private boolean create;
-
-    public EngineHook getEngine() {
-        return engine;
-    }
-
-    public boolean isWhite() {
-        return white;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public boolean isCreate() {
-        return create;
-    }
 
     public CreateGame(Window window) {
 
@@ -257,7 +238,7 @@ public class CreateGame extends Stage {
         startId.valueProperty().addListener(v -> {
             try {
 
-                fenField.setText(Game.generate960Start(startId.getValue()));
+                fenField.setText(Position.generate960Start(startId.getValue()));
 
             } catch (Exception e) {
                 showLabel(e.getMessage(), true);
@@ -292,7 +273,7 @@ public class CreateGame extends Stage {
         search.setOnAction(this::searchAction);
 
         start = new Button("Start");
-        start.setOnAction(this::startAction);
+        start.setOnAction(ae -> startAction(ae, null));
 
         cancel = new Button("Cancel");
         cancel.setOnAction(this::cancelAction);
@@ -319,6 +300,26 @@ public class CreateGame extends Stage {
         setTitle("Create Game");
         setScene(s);
 
+    }
+
+    public EngineHook getEngine() {
+        return engine;
+    }
+
+    public boolean isWhite() {
+        return white;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public boolean isCreate() {
+        return create;
     }
 
     private void registerNew() {
@@ -379,19 +380,21 @@ public class CreateGame extends Stage {
 
                 PGNParser parser = new PGNParser(pDialog.getPgn());
 
-                game = new Game(parser,
-                        new GameSettings(
-                                !useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText(),
-                                0,
-                                0,
-                                true,
-                                true,
-                                true,
-                                true),
-                        false);
+                startAction(ae, parser);
 
-                create = true;
-                hide();
+                // game = new Game(parser,
+                // new GameSettings(
+                // !useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText(),
+                // 0,
+                // 0,
+                // true,
+                // true,
+                // true,
+                // true),
+                // false);
+
+                // create = true;
+                // hide();
 
             } catch (Exception e) {
 
@@ -457,49 +460,12 @@ public class CreateGame extends Stage {
 
     }
 
-    private void startAction(ActionEvent ae) {
+    private void startAction(ActionEvent ae, PGNParser parser) {
 
         App.prefs.put("p1name", oneName.getText());
         App.prefs.put("p2name", twoName.getText());
 
-        if (type.getValue().equals("Two Player")) {
-
-            try {
-
-                boolean oneWhite = color.getValue().equals("White");
-
-                if (color.getValue().equals("Random"))
-                    oneWhite = Math.random() >= 0.5;
-
-                white = oneWhite;
-
-                long timePerSide = useTimeBox.isSelected() ? ((minPerSide.getValue() * 60) + (secPerSide.getValue()))
-                        : -1;
-                long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue()))
-                        : -1;
-
-                game = new Game((oneWhite ? oneName.getText() : twoName.getText()),
-                        (oneWhite ? twoName.getText() : oneName.getText()),
-                        Player.Type.HUMAN,
-                        Player.Type.HUMAN,
-                        new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
-                                timePerSide,
-                                timePerMove,
-                                true,
-                                true,
-                                true,
-                                true));
-
-                create = true;
-                hide();
-
-            } catch (Exception e) {
-
-                showLabel(e.getMessage(), true);
-
-            }
-
-        } else if (type.getValue().equals("Online")) {
+        if (type.getValue().equals("Online") && parser == null) {
 
             try {
 
@@ -570,17 +536,34 @@ public class CreateGame extends Stage {
 
                 UCIEngine en = new UCIEngine(new File(path));
 
-                game = new Game((oneWhite ? oneName.getText() : en.getName()),
-                        (oneWhite ? en.getName() : oneName.getText()),
-                        oneWhite ? Player.Type.HUMAN : Player.Type.PROGRAM,
-                        !oneWhite ? Player.Type.HUMAN : Player.Type.PROGRAM,
-                        new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
-                                timePerSide,
-                                timePerMove,
-                                true,
-                                true,
-                                true,
-                                true));
+                if (parser == null) {
+
+                    game = new Game((oneWhite ? oneName.getText() : en.getName()),
+                            (oneWhite ? en.getName() : oneName.getText()),
+                            oneWhite ? Player.Type.HUMAN : Player.Type.PROGRAM,
+                            !oneWhite ? Player.Type.HUMAN : Player.Type.PROGRAM,
+                            new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
+                                    timePerSide,
+                                    timePerMove,
+                                    true,
+                                    true,
+                                    true,
+                                    true));
+
+                } else {
+
+                    game = new Game(parser,
+                            new GameSettings(
+                                    !useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText(),
+                                    0,
+                                    0,
+                                    true,
+                                    true,
+                                    true,
+                                    true),
+                            false);
+
+                }
 
                 engine = new EngineHook(en, game, !oneWhite);
 
@@ -597,7 +580,59 @@ public class CreateGame extends Stage {
 
             }
 
-        } else if (type.getValue().startsWith("Register")) {
+        } else {
+
+            try {
+
+                boolean oneWhite = color.getValue().equals("White");
+
+                if (color.getValue().equals("Random"))
+                    oneWhite = Math.random() >= 0.5;
+
+                white = oneWhite;
+
+                long timePerSide = useTimeBox.isSelected() ? ((minPerSide.getValue() * 60) + (secPerSide.getValue()))
+                        : -1;
+                long timePerMove = useTimeBox.isSelected() ? ((minPerMove.getValue() * 60) + (secPerMove.getValue()))
+                        : -1;
+
+                if (parser == null) {
+
+                    game = new Game((oneWhite ? oneName.getText() : twoName.getText()),
+                            (oneWhite ? twoName.getText() : oneName.getText()),
+                            Player.Type.HUMAN,
+                            Player.Type.HUMAN,
+                            new GameSettings((!useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText()),
+                                    timePerSide,
+                                    timePerMove,
+                                    true,
+                                    true,
+                                    true,
+                                    true));
+
+                } else {
+
+                    game = new Game(parser,
+                            new GameSettings(
+                                    !useFenBox.isSelected() ? GameSettings.DEFAULT_FEN : fenField.getText(),
+                                    0,
+                                    0,
+                                    true,
+                                    true,
+                                    true,
+                                    true),
+                            false);
+
+                }
+
+                create = true;
+                hide();
+
+            } catch (Exception e) {
+
+                showLabel(e.getMessage(), true);
+
+            }
 
         }
 

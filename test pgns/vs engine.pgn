@@ -1,0 +1,17 @@
+[Event "?"]
+[Site "?"]
+[Date "2023.05.17"]
+[Round "-"]
+[White "Stephen"]
+[Black "Stockfish dev-20230412-acb0d204"]
+[Result "*"]
+[TimeControl "-"]
+[WhiteType "human"]
+[BlackType "program"]
+[ECO "A43"]
+[Opening "Benoni Defense: Benoni Gambit Accepted"]
+
+1. d4 c5 2. dxc5 Nf6 3. Nf3 Nc6 4. e3 e5 5. Nc3 Be7 6. b4 0-0 7. a3 a5 8. Bb2
+axb4 9. axb4 Rb8 10. Nd5 Nxd5 11. Qxd5 d6 12. Bb5 Bf5 13. 0-0 Nxb4 14. Qc4 dxc5
+15. Bxe5 Be6 16. Qc3 Na2 17. Rxa2 Bxa2 18. Bxb8 Bf6 19. Ne5 Qxb8 20. f4 Rc8 21.
+Rd1 b6 22. Rd3 Be6 23. Qd2 c4 24. Nd7 cxd3 25. Nxb8 dxc2 26. Bc6 Bb3

@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +20,154 @@ import game.pieces.Rook;
 public class Position {
 
     /**
+     * Generates the given Chess960 starting position using the algorithm found
+     * here:
+     * <a href=
+     * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
+     * 
+     * <p>
+     * A list of all start positions can be found here:
+     * <a href=
+     * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
+     * 
+     * @param startId the ID (from 0-959) of the Chess960 starting position.
+     * @return A Chess960 starting position in Forsyth-Edwards Notation (FEN) based
+     *         on the given id.
+     * @throws RuntimeException If startId is not between 0-959 (inclusive).
+     */
+    public static String generate960Start(int startId) throws RuntimeException {
+
+        if (startId < 0 || startId > 959)
+            throw new RuntimeException("Invalid startId.");
+
+        char[] pcs = new char[8];
+
+        final int n2 = startId / 4;
+        final int b1 = startId % 4;
+
+        // Place light-square bishop
+        switch (b1) {
+            case 0:
+                pcs[1] = 'B';
+                break;
+            case 1:
+                pcs[3] = 'B';
+                break;
+            case 2:
+                pcs[5] = 'B';
+                break;
+            case 3:
+                pcs[7] = 'B';
+                break;
+        }
+
+        final int n3 = n2 / 4;
+        final int b2 = n2 % 4;
+
+        // Place dark-square bishop
+        switch (b2) {
+            case 0:
+                pcs[0] = 'B';
+                break;
+            case 1:
+                pcs[2] = 'B';
+                break;
+            case 2:
+                pcs[4] = 'B';
+                break;
+            case 3:
+                pcs[6] = 'B';
+                break;
+        }
+
+        final int n4 = n3 / 6;
+        final int q = n3 % 6;
+
+        // Place queen in the [q]th open square
+        int iq = 0;
+        int zq = 0;
+        while (iq <= q) {
+
+            if (pcs[zq] == '\u0000')
+                iq++;
+
+            if (iq <= q)
+                zq++;
+
+        }
+
+        pcs[zq] = 'Q';
+
+        // Place Knights based on the N5N table
+        final int[] n5nTable1 = { 0, 0, 0, 0, 1, 1, 1, 2, 2, 3 };
+        final int[] n5nTable2 = { 1, 2, 3, 4, 2, 3, 4, 3, 4, 4 };
+
+        final int knight1 = n5nTable1[n4];
+        final int knight2 = n5nTable2[n4];
+
+        // Place first knight in the [knight1]th open square
+        int in1 = 0;
+        int zn1 = 0;
+        while (in1 <= knight1) {
+
+            if (pcs[zn1] == '\u0000')
+                in1++;
+
+            if (in1 <= knight1)
+                zn1++;
+
+        }
+
+        // Place second knight in the [knight2]th open square
+        int in2 = 0;
+        int zn2 = 0;
+        while (in2 <= knight2) {
+
+            if (pcs[zn2] == '\u0000')
+                in2++;
+
+            if (in2 <= knight2)
+                zn2++;
+
+        }
+
+        pcs[zn1] = 'N';
+        pcs[zn2] = 'N';
+
+        int x = 0;
+
+        // Place rook in first open square
+        while (x < 8 && pcs[x] != '\u0000') {
+            ++x;
+        }
+
+        pcs[x] = 'R';
+        ++x;
+
+        // Place king in middle open square
+        while (x < 8 && pcs[x] != '\u0000') {
+            ++x;
+        }
+
+        pcs[x] = 'K';
+        ++x;
+
+        // Place rook in last open square
+        while (x < 8 && pcs[x] != '\u0000') {
+            ++x;
+        }
+
+        pcs[x] = 'R';
+
+        String fenRow = new String(pcs);
+
+        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w KQkq - 0 1";
+
+        return fen;
+
+    }
+
+    /**
      * The number of moves made in this game (including the move that led to
      * this position.) Starts at {@code 0} for the default position as no moves have
      * been made.
@@ -31,7 +180,7 @@ public class Position {
     private Piece[][] pieces;
 
     /**
-     * All of the moves that can be made. If {@code checkForMate} is {@code true}
+     * All of the moves that can be made. If {@link #mateChecked} is {@code true}
      * when constructor is called, moves that lead to check will not be included.
      */
     private ArrayList<Move> moves;
@@ -58,7 +207,7 @@ public class Position {
     private boolean inCheck;
 
     /**
-     * If {@link #isWhite()} is checkmated. Will only be set if {@code checkForMate}
+     * If {@link #isWhite()} is checkmated. Will only be set if {@link #mateChecked}
      * is {@code true} when constructor is called.
      */
     private boolean checkMate;
@@ -70,14 +219,19 @@ public class Position {
     private Position redo;
 
     /**
-     * The promote type of the redo. May be {@code null} if there is no position to
+     * The promote type of the redo move. May be {@code null} if there is no
+     * position to
      * redo.
+     * 
+     * @see #redo
      */
     private char redoPromote;
 
     /**
      * The timer end of the previous position, saved for if this position is
      * restored by calling {@link Game#redo()}.
+     * 
+     * @see #redo
      */
     private long redoTimerEnd;
 
@@ -104,7 +258,7 @@ public class Position {
 
     /**
      * The opening that led to this position. May be null if this position was
-     * created from a custom FEN.
+     * created from a custom FEN or is in the starting position.
      */
     private Opening opening;
 
@@ -132,24 +286,20 @@ public class Position {
      * @param prev         The previous position to use as a baseline for this
      *                     position.
      * @param move         The move to be made.
-     * @param white        Whether or not it is white's turn after this move is
-     *                     made.
-     * @param checkForMate Whether or not checkmate should be checked for.
      * @param promoteType  The type of piece to promote to.
+     * @param checkForMate Whether or not checkmate should be checked for.
+     * @throws Exception If the {@code promoteType} is incorrect or the opening
+     *                   cannot be found.
      */
-    public Position(Position prev, Move move, boolean white, boolean checkForMate, char promoteType)
-            throws Exception {
+    public Position(Position prev, Move move, char promoteType, boolean checkForMate) throws Exception {
 
         this.pieces = new Piece[8][8];
-        this.mateChecked = false;
-
         this.timerEnd = -1;
-
-        this.white = white;
+        this.white = !move.isWhite();
+        this.moveNumber = prev.getMoveNumber() + 1;
+        this.move = move;
 
         Piece[][] prevPieces = prev.getPieces();
-
-        this.moveNumber = prev.getMoveNumber() + 1;
 
         for (int r = 0; r < prevPieces.length; r++) {
 
@@ -219,10 +369,9 @@ public class Position {
 
         }
 
-        if (!movePiece.hasMoved() && movePiece.getCode() == 'P' && move.getMoveDistance() == 2) {
+        if (!movePiece.hasMoved() && movePiece.getCode() == 'P' && move.getMoveDistance() == 2)
             enPassantTarget = new Square(move.getDestination().getFile(),
                     move.getDestination().getRank() + (move.isWhite() ? -1 : 1));
-        }
 
         movePiece.setSquare(move.getDestination());
         movePiece.setHasMoved(true);
@@ -232,14 +381,11 @@ public class Position {
         if (move.isCastle()) {
 
             final Piece rook = getPieceAtSquare(move.getRookOrigin());
-            // rook.setSquare(new Square(move.getDestination().getFile() == 7 ? 6 : 4,
-            // rook.getSquare().getRank()));
             rook.setSquare(move.getRookDestination());
+            rook.setHasMoved(true);
 
             pieces[move.getRookOrigin().getRank() - 1][move.getRookOrigin().getFile() - 1] = null;
             pieces[move.getRookDestination().getRank() - 1][move.getRookDestination().getFile() - 1] = rook;
-
-            rook.setHasMoved(true);
 
         }
 
@@ -251,58 +397,58 @@ public class Position {
                 throw new Exception("Invalid promote type.");
 
             move.setPromoteType(promoteType);
-            final Square mps = move.getDestination();
+
+            final Square moveDest = move.getDestination();
 
             switch (promoteType) {
                 case 'Q':
-                    setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Queen(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
                 case 'R':
-                    setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Rook(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
                 case 'B':
-                    setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Bishop(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
                 case 'N':
-                    setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Knight(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
             }
 
         } else if (move.getPromoteType() != '0' && checkForMate) {
 
-            if (move.getPromoteType() != 'Q' && move.getPromoteType() != 'R'
-                    && move.getPromoteType() != 'B' && move.getPromoteType() != 'N')
+            if (move.getPromoteType() != 'Q'
+                    && move.getPromoteType() != 'R'
+                    && move.getPromoteType() != 'B'
+                    && move.getPromoteType() != 'N')
                 throw new Exception("Invalid promote type.");
 
-            final Square mps = move.getDestination();
+            final Square moveDest = move.getDestination();
 
             switch (move.getPromoteType()) {
                 case 'Q':
-                    setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Queen(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
                 case 'R':
-                    setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Rook(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
                 case 'B':
-                    setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Bishop(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
                 case 'N':
-                    setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                    setSquare(moveDest, new Knight(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                     break;
             }
 
         }
 
         move.updateMoveNotation();
-        this.move = move;
-
         initMoves(checkForMate);
 
-        if (move.isCapture() || move.getPiece().getCode() == 'P') {
+        if (move.isCapture() || move.getPiece().getCode() == 'P')
             this.fiftyMoveCounter = 0;
-        } else {
+        else
             this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
-        }
 
         try {
 
@@ -311,8 +457,8 @@ public class Position {
             if (opening == null)
                 opening = prev.getOpening();
 
-        } catch (Exception e) {
-            throw new Exception("Error finding the opening associated with this position: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error finding the opening associated with this position: " + e.getMessage());
         }
 
     }
@@ -322,12 +468,12 @@ public class Position {
      * 
      * @param fen The Forsyth-Edwards Notation (FEN) of the position to start from.
      */
-    public Position(String fen) throws Exception {
+    public Position(String fen) throws RuntimeException {
 
         String[] a = fen.split(" ");
 
         if (a.length != 6)
-            throw new Exception("Invalid FEN.");
+            throw new RuntimeException("Invalid FEN.");
 
         this.pieces = new Piece[8][8];
         this.mateChecked = false;
@@ -337,32 +483,32 @@ public class Position {
         String[] ranks = a[0].split("/");
 
         if (ranks.length != 8)
-            throw new Exception("Invalid ranks.");
+            throw new RuntimeException("Invalid number of ranks.");
 
         if (a[1].equals("w"))
             white = true;
         else if (a[1].equals("b"))
             white = false;
         else
-            throw new Exception("Invalid color to move.");
+            throw new RuntimeException("Invalid color to move.");
 
         try {
             fiftyMoveCounter = Integer.parseInt(a[4]);
         } catch (Exception e) {
-            throw new Exception("Invalid 50 move counter.");
+            throw new RuntimeException("Invalid 50 move counter.");
         }
 
         try {
             moveNumber = ((Integer.parseInt(a[5]) - 1) * 2) + (white ? 0 : 1);
         } catch (Exception e) {
-            throw new Exception("Invalid move number.");
+            throw new RuntimeException("Invalid move number.");
         }
 
         if (fiftyMoveCounter < 0)
-            throw new Exception("Fifty move counter cannot be less than 0.");
+            throw new RuntimeException("Fifty move counter cannot be less than 0.");
 
         if (moveNumber + 1 < 1)
-            throw new Exception("Move number cannot be less than 1.");
+            throw new RuntimeException("Move number cannot be less than 1.");
 
         for (int r = 0; r < 8; r++) {
 
@@ -370,14 +516,18 @@ public class Position {
 
                 char c = ranks[r].charAt(i);
 
+                // Blank spaces
                 if (Character.isDigit(c)) {
-                    int amt = Integer.parseInt(c + "");
-                    f += amt;
+
+                    int blankCount = Integer.parseInt(c + "");
+                    f += blankCount;
                     continue;
+
                 } else {
+                    // Pieces
 
                     if (!(c + "").matches("[KQBRNPkqbrnp]"))
-                        throw new Exception("Unexpected piece type.");
+                        throw new RuntimeException("Unexpected piece type.");
                     boolean white = Character.isUpperCase(c);
                     switch (Character.toUpperCase(c)) {
                         case 'K':
@@ -409,7 +559,7 @@ public class Position {
 
                             break;
                         default:
-                            throw new Exception("Unexpected piece.");
+                            throw new RuntimeException("Unexpected piece.");
                     }
 
                     ++f;
@@ -421,11 +571,13 @@ public class Position {
         }
 
         if (!a[3].equals("-")) {
+
             try {
                 enPassantTarget = new Square(a[3]);
             } catch (Exception e) {
-                throw new Exception("Invalid en passant target square.");
+                throw new RuntimeException("Invalid en passant target square.");
             }
+
         }
 
         Piece wkr = getPieceAtSquare(new Square(8, 1));
@@ -467,13 +619,21 @@ public class Position {
                             bqr.setHasMoved(false);
                         break;
                     default:
-                        throw new Exception("Invalid castle status.");
+                        throw new RuntimeException("Invalid castle status.");
                 }
 
             }
         }
 
         initMoves(true);
+
+        try {
+
+            opening = Opening.getOpening(this.toString(), getClass().getResourceAsStream("/tsv/openings.tsv"));
+
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Error finding the opening associated with this position: " + e.getMessage());
+        }
 
     }
 
@@ -641,13 +801,14 @@ public class Position {
      * 
      * <p>
      * Should be used over {@link Move#getMoveNotation()} when possible, as it
-     * includes whether or not this move was a check or checkmate.
+     * includes whether or not this move was a check (+) or checkmate (#).
      * 
      * @return A {@link String} containing the move text.
      */
     public String getMoveString() {
 
         String str = move.getMoveNotation();
+
         if (isCheckmate())
             str += "#";
         else if (isInCheck())
@@ -735,6 +896,7 @@ public class Position {
             for (int f = 0; f < 8; f++) {
 
                 Piece a = pieces[rk][f];
+
                 if (a != null && a.isWhite() == white) {
 
                     switch (a.getCode()) {
@@ -805,11 +967,12 @@ public class Position {
      * If the delta is negative, black has that amount more material. If it is
      * positive, white has that amount more material.
      * 
-     * @return The point delta.
+     * @return The point delta (white - black.)
      */
     public int calculatePieceDelta() {
 
         int delta = 0;
+
         for (int r = 0; r < 8; r++) {
 
             for (int f = 0; f < 8; f++) {
@@ -853,6 +1016,7 @@ public class Position {
         // Finding the move based on the origin and destination.
         // Castle moves should be king moving to rook's square.
         Move move = null, maybe = null;
+
         for (int i = 0; move == null && i < moves.size(); i++) {
 
             Move a = moves.get(i);
@@ -892,27 +1056,27 @@ public class Position {
         move.setPromoteType(promo);
 
         final Piece movePiece = move.getPiece();
-        final Square mps = move.getDestination();
+        final Square moveDest = move.getDestination();
 
         switch (promo) {
             case 'Q':
-                setSquare(mps, new Queen(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                setSquare(moveDest, new Queen(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                 break;
             case 'R':
-                setSquare(mps, new Rook(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                setSquare(moveDest, new Rook(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                 break;
             case 'B':
-                setSquare(mps, new Bishop(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                setSquare(moveDest, new Bishop(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                 break;
             case 'N':
-                setSquare(mps, new Knight(mps.getFile(), mps.getRank(), movePiece.isWhite()));
+                setSquare(moveDest, new Knight(moveDest.getFile(), moveDest.getRank(), movePiece.isWhite()));
                 break;
             case '?':
-                setSquare(mps, movePiece);
+                setSquare(moveDest, movePiece);
                 break;
         }
 
-        if (!move.getPiece().equals(getPieceAtSquare(mps))) {
+        if (!move.getPiece().equals(getPieceAtSquare(moveDest))) {
 
             initMoves(true);
             move.updateMoveNotation();
@@ -962,12 +1126,11 @@ public class Position {
     }
 
     /**
-     * Finds the first occurrence of a piece at the given square.
+     * Gets the piece at the given square.
      * 
      * @param square The square to search for a piece at
-     * @return The {@link Piece} object. Will be {@code null}
-     *         if no
-     *         piece is at the square.
+     * @return The {@link Piece} object. Will be {@code null} if no piece is at the
+     *         square.
      */
     public Piece getPieceAtSquare(Square square) {
         return pieces[square.getRank() - 1][square.getFile() - 1];
@@ -977,18 +1140,18 @@ public class Position {
      * Gets a list of the pieces that are attacking the given square (able to
      * capture the piece occupying it.)
      * 
-     * 
-     * @param s The square to search for attacking pieces at.
+     * @param square The square to search for attacking pieces at.
      * @return An {@link ArrayList} of {@link Piece} objects
+     * @see #getPiecesByCanMoveTo(Square)
      */
-    public ArrayList<Piece> getPiecesByAttacking(Square s) {
+    public ArrayList<Piece> getPiecesByAttacking(Square square) {
 
         ArrayList<Piece> pieces = new ArrayList<Piece>();
 
         for (int i = 0; i < moves.size(); i++) {
 
             Move m = moves.get(i);
-            if (m.isCapture() && m.getCaptureSquare().equals(s))
+            if (m.isCapture() && m.getCaptureSquare().equals(square))
                 pieces.add(m.getPiece());
 
         }
@@ -1002,6 +1165,7 @@ public class Position {
      * 
      * @param square The square to search for moves to.
      * @return An {@link ArrayList} of {@link Piece} objects
+     * @see #getPiecesByAttacking(Square)
      */
     public ArrayList<Piece> getPiecesByCanMoveTo(Square square) {
 
@@ -1075,6 +1239,14 @@ public class Position {
     }
 
     /**
+     * Checks if this position has insufficient material to reach a checkmate.
+     * 
+     * <p>
+     * See:
+     * <a
+     * href=
+     * "https://en.wikipedia.org/wiki/Glossary_of_chess#insufficient_material">https://en.wikipedia.org/wiki/Glossary_of_chess#insufficient_material</a>
+     * 
      * @return If the position has insufficient pieces on both sides to reach
      *         checkmate.
      */
@@ -1119,6 +1291,14 @@ public class Position {
     }
 
     /**
+     * Checks if this position is a stalemate.
+     * 
+     * <p>
+     * See:
+     * <a
+     * href=
+     * "https://en.wikipedia.org/wiki/Glossary_of_chess#stalemate">https://en.wikipedia.org/wiki/Glossary_of_chess#stalemate</a>
+     * 
      * @return If the position is stalemate.
      */
     public boolean isStalemate() {
@@ -1128,6 +1308,8 @@ public class Position {
     }
 
     /**
+     * Gets the pieces as an {@link ArrayList}.
+     * 
      * @return The pieces as an {@link ArrayList}.
      */
     public ArrayList<Piece> getPiecesAsArrayList() {
@@ -1171,8 +1353,10 @@ public class Position {
                 else {
 
                     if (noPieceCount > 0) {
+
                         fen += noPieceCount;
                         noPieceCount = 0;
+
                     }
 
                     fen += p.isWhite() ? (p.getCode() + "") : (p.getCode() + "").toLowerCase();
@@ -1182,8 +1366,10 @@ public class Position {
             }
 
             if (noPieceCount > 0) {
+
                 fen += noPieceCount;
                 noPieceCount = 0;
+
             }
 
             if (r > 0)
@@ -1220,19 +1406,18 @@ public class Position {
      * the given side. Does not mean that castling can occur during the current
      * turn, as temporary blocks like check may still be present.
      * 
-     * @param white    The color to check if can castle.
-     * @param kingSide Whether to check castling king side (h side) or queen side (a
-     *                 side).
-     * @return Whether or the given castle is possible.
+     * @param white The color to check if can castle.
+     * @param aSide Whether to check castling a side or h side.
+     * @return Whether or not the given castle is possible.
      */
-    public boolean canCastle(boolean white, boolean kingSide) {
+    public boolean canCastle(boolean white, boolean aSide) {
 
         final Piece king = getPieceAtSquare(white ? whiteKing : blackKing);
 
         if (king.hasMoved())
             return false;
 
-        final Piece rook = getPieceAtSquare(new Square(white ? 1 : 8, kingSide ? 8 : 1));
+        final Piece rook = getPieceAtSquare(new Square(white ? 1 : 8, aSide ? 1 : 8));
 
         if (rook != null && !rook.hasMoved()) {
             return true;
@@ -1247,13 +1432,13 @@ public class Position {
      * 
      * @param move The SAN of the move to find.
      * @return The move found from the SAN.
-     * @throws Exception If the move notation is invalid or {@link #mateChecked} is
-     *                   not {@code true}.
+     * @throws Exception        If the move notation is invalid.
+     * @throws RuntimeException If {@link #mateChecked} is not {@code true}.
      */
     public Move getMoveBySAN(String move) throws Exception {
 
         if (!mateChecked)
-            throw new Exception(
+            throw new RuntimeException(
                     "Cannot find move by SAN if position has not been initialized with checkForMate as true.");
 
         move = move.trim();
@@ -1484,7 +1669,7 @@ public class Position {
             }
 
             try {
-                Position test = new Position(this, m, !white, false, '0');
+                Position test = new Position(this, m, '0', false);
                 if (!test.isGivingCheck())
                     checkMate = false;
                 else {

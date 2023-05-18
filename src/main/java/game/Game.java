@@ -62,178 +62,6 @@ public class Game {
             : "DEV";
 
     /**
-     * Generates a random Chess960 starting position using the algorithm found here:
-     * <a href=
-     * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
-     * 
-     * <p>
-     * A list of all start positions can be found here:
-     * <a href=
-     * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
-     * 
-     * @return A random Chess960 starting position.
-     * @throws Exception If startId is not between 0-959 (inclusive), or
-     *                   if there is an error creating the Position.
-     */
-    public static String generate960Start() throws Exception {
-
-        // Generate random number from 0 to 959
-        Random rand = new Random();
-        final int startId = rand.nextInt(0, 960);
-
-        return generate960Start(startId);
-
-    }
-
-    /**
-     * Generates the given Chess960 starting position using the algorithm found
-     * here:
-     * <a href=
-     * "https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation">https://en.wikipedia.org/wiki/Fischer_random_chess_numbering_scheme#Direct_derivation</a>
-     * 
-     * <p>
-     * A list of all start positions can be found here:
-     * <a href=
-     * "https://www.mark-weeks.com/cfaa/chess960/c960strt.htm">https://www.mark-weeks.com/cfaa/chess960/c960strt.htm</a>
-     * 
-     * @param startId the ID (from 0-959) of the Chess960 starting position.
-     * @return A Chess960 starting position based on the given id.
-     * @throws Exception If startId is not between 0-959 (inclusive), or if there is
-     *                   an error creating the Position.
-     */
-    public static String generate960Start(int startId) throws Exception {
-
-        if (startId < 0 || startId > 959)
-            throw new Exception("Invalid startId.");
-
-        char[] pcs = new char[8];
-
-        final int n2 = startId / 4;
-        final int b1 = startId % 4;
-
-        // Place light-square bishop
-        switch (b1) {
-            case 0:
-                pcs[1] = 'B';
-                break;
-            case 1:
-                pcs[3] = 'B';
-                break;
-            case 2:
-                pcs[5] = 'B';
-                break;
-            case 3:
-                pcs[7] = 'B';
-                break;
-        }
-
-        final int n3 = n2 / 4;
-        final int b2 = n2 % 4;
-
-        // Place dark-square bishop
-        switch (b2) {
-            case 0:
-                pcs[0] = 'B';
-                break;
-            case 1:
-                pcs[2] = 'B';
-                break;
-            case 2:
-                pcs[4] = 'B';
-                break;
-            case 3:
-                pcs[6] = 'B';
-                break;
-        }
-
-        final int n4 = n3 / 6;
-        final int q = n3 % 6;
-
-        // Place queen in the [q]th open square
-        int iq = 0;
-        int zq = 0;
-        while (iq <= q) {
-
-            if (pcs[zq] == '\u0000')
-                iq++;
-
-            if (iq <= q)
-                zq++;
-
-        }
-
-        pcs[zq] = 'Q';
-
-        // Place Knights based on the N5N table
-        final int[] n5nTable1 = { 0, 0, 0, 0, 1, 1, 1, 2, 2, 3 };
-        final int[] n5nTable2 = { 1, 2, 3, 4, 2, 3, 4, 3, 4, 4 };
-
-        final int knight1 = n5nTable1[n4];
-        final int knight2 = n5nTable2[n4];
-
-        // Place first knight in the [knight1]th open square
-        int in1 = 0;
-        int zn1 = 0;
-        while (in1 <= knight1) {
-
-            if (pcs[zn1] == '\u0000')
-                in1++;
-
-            if (in1 <= knight1)
-                zn1++;
-
-        }
-
-        // Place second knight in the [knight2]th open square
-        int in2 = 0;
-        int zn2 = 0;
-        while (in2 <= knight2) {
-
-            if (pcs[zn2] == '\u0000')
-                in2++;
-
-            if (in2 <= knight2)
-                zn2++;
-
-        }
-
-        pcs[zn1] = 'N';
-        pcs[zn2] = 'N';
-
-        int x = 0;
-
-        // Place rook in first open square
-        while (x < 8 && pcs[x] != '\u0000') {
-            ++x;
-        }
-
-        pcs[x] = 'R';
-        ++x;
-
-        // Place king in middle open square
-        while (x < 8 && pcs[x] != '\u0000') {
-            ++x;
-        }
-
-        pcs[x] = 'K';
-        ++x;
-
-        // Place rook in last open square
-        while (x < 8 && pcs[x] != '\u0000') {
-            ++x;
-        }
-
-        pcs[x] = 'R';
-
-        String fenRow = new String(pcs);
-
-        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w KQkq - 0 1";
-
-        return fen;
-
-    }
-
-    /**
      * The settings of the game.
      */
     private GameSettings settings;
@@ -425,8 +253,8 @@ public class Game {
                 if (!(promote + "").matches("[QRBN]"))
                     promote = '0';
 
-                positions.add(new Position(getLastPos(), getLastPos().getMoveBySAN(m), !getLastPos().isWhite(),
-                        true, promote));
+                positions.add(new Position(getLastPos(), getLastPos().getMoveBySAN(m),
+                        promote, true));
 
                 getPreviousPos().setTimerEnd(
                         pMoves.get(i).getTimerEnd()
@@ -817,7 +645,7 @@ public class Game {
             throw new Exception("Invalid promotion type.");
 
         // The position after the move is made.
-        Position movePosition = new Position(getLastPos(), move, !getLastPos().isWhite(), true, promoteType);
+        Position movePosition = new Position(getLastPos(), move, promoteType, true);
 
         if (movePosition.isGivingCheck())
             throw new Exception("Cannot move into check.");

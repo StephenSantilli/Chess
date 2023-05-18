@@ -17,17 +17,17 @@ public class Move {
     /**
      * The starting square of the piece being moved.
      */
-    private Square origin;
+    private final Square origin;
 
     /**
      * The ending square of the piece being moved.
      */
-    private Square destination;
+    private final Square destination;
 
     /**
      * The piece being moved.
      */
-    private Piece piece;
+    private final Piece piece;
 
     /**
      * The piece being captured. Will be {@code null} if the move is not a capture
@@ -181,14 +181,21 @@ public class Move {
     }
 
     /**
-     * @return the move described by its origin square and destination square. For
-     *         algebraic notation, use {@link #getMoveNotation()} instead.
+     * Gets the move in long algebraic notation, which denotes the move by its
+     * origin square, destination square, and promotion type if applicable.
+     * (Ex: e2e4, e7e8q)
+     * 
+     * <p>
+     * For short algebraic notation, use {@link #getMoveNotation()} instead.
+     * 
+     * @return The move in long algebraic notation (LAN).
      * 
      * @see #getMoveNotation()
      */
     @Override
     public String toString() {
-        return origin.toString() + destination.toString() + (promoteType == '0' ? "" : promoteType);
+        return origin.toString() + destination.toString()
+                + (promoteType == '0' ? "" : Character.toLowerCase(promoteType));
     }
 
     /**
@@ -203,7 +210,8 @@ public class Move {
 
         Move casted = (Move) (compare);
 
-        return origin.equals(casted.getOrigin()) && destination.equals(casted.getDestination())
+        return origin.equals(casted.getOrigin())
+                && destination.equals(casted.getDestination())
                 && castle == casted.isCastle();
 
     }
@@ -356,7 +364,7 @@ public class Move {
      * <p>
      * The modifier is the section of the move notation that disambiguates when
      * there are multiple of the same kind and color of piece that can move to the
-     * given square.
+     * given square. For example, in Rfe8, "f" would be the modifier.
      * 
      * @return The modifier of the move notation.
      */
