@@ -97,7 +97,7 @@ public class CapturedView extends VBox {
             Region r = new Region();
             HBox.setHgrow(r, Priority.ALWAYS);
             HBox deltaBox = new HBox(r, l);
-            // deltaBox.setAlignment(Pos.CENTER);
+
             if (gv.isFlipped() != white)
                 getChildren().add(0, deltaBox);
             else

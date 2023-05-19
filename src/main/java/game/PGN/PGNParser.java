@@ -11,23 +11,45 @@ import game.Position;
 import game.Game.Result;
 
 /**
- * Class to parse a .pgn file following this specification:
+ * Class to parse .pgn files following this specification:
  * http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
  */
 public class PGNParser {
 
-    // public static void main(String[] args) throws Exception {
+    /**
+     * Matches the various tokens described in the PGN standard.
+     */
+    private static final String TOKEN_REGEX = "(?<termination>1-0|0-1|1/2-1/2|\\*)|(?<period>\\.)|\\[|\\]|\\(|\\)|\\<|\\>|(?<nag>\\$[\\d]+)|(?<symbol>[A-Za-z0-9][A-Za-z0-9_+#=:\\-]*)|(?<num>[\\d]+)|(?<str>\"[^\"]*\")|(?<comment>\\{[^}]*\\})|(?<eol>\\;([^\\n]*))|(?<suffix>[?!]{1,2})";
 
-    // Scanner s = new Scanner(new FileReader("./test pgns/Untitled.pgn"));
-    // String str = "";
-    // while (s.hasNextLine()) {
-    // str += s.nextLine().trim() + "\n";
-    // }
-    // PGNParser p = new PGNParser(str);
+    /**
+     * Converts a time in milliseconds to the format used in the %clk tag.
+     * 
+     * @param time The time to convert.
+     * @return A string representing the time.
+     */
+    public static String millisToOutputFormat(long time) {
 
-    // System.out.println(p.outputPGN(true));
+        long hours = (time / 1000 / 60 / 60);
+        long minutes = (time / 1000 / 60 % 60);
+        long seconds = (time / 1000 % 60 % 60 % 60);
 
-    // }
+        String s = "";
+
+        s += hours + ":";
+
+        if (minutes < 10) {
+            s += "0";
+        }
+        s += minutes + ":";
+
+        if (seconds < 10) {
+            s += "0";
+        }
+        s += seconds;
+
+        return s;
+
+    }
 
     /** The original content of the PGN file. */
     private String text;
@@ -40,32 +62,6 @@ public class PGNParser {
 
     /** The moves. */
     private ArrayList<PGNMove> moves;
-
-    /**
-     * Matches the various tokens described in the PGN standard.
-     */
-    private static final String TOKEN_REGEX = "(?<termination>1-0|0-1|1/2-1/2|\\*)|(?<period>\\.)|\\[|\\]|\\(|\\)|\\<|\\>|(?<nag>\\$[\\d]+)|(?<symbol>[A-Za-z0-9][A-Za-z0-9_+#=:\\-]*)|(?<num>[\\d]+)|(?<str>\"[^\"]*\")|(?<comment>\\{[^}]*\\})|(?<eol>\\;([^\\n]*))|(?<suffix>[?!]{1,2})";
-
-    /**
-     * @see #text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * @see #tags
-     */
-    public Map<String, String> getTags() {
-        return tags;
-    }
-
-    /**
-     * @see #moves
-     */
-    public ArrayList<PGNMove> getMoves() {
-        return moves;
-    }
 
     /**
      * Parses a PGN game based on the input text.
@@ -134,6 +130,32 @@ public class PGNParser {
 
     }
 
+    /**
+     * @see #text
+     */
+    public String getText() {
+        return text;
+    }
+
+    /**
+     * @see #tags
+     */
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    /**
+     * @see #moves
+     */
+    public ArrayList<PGNMove> getMoves() {
+        return moves;
+    }
+
+    /**
+     * Gets the amount of time each side has based on the TimeControl tag.
+     * 
+     * @return The time in milliseconds
+     */
     public long getTimePerSide() {
 
         final String tc = tags.getOrDefault("TimeControl", "-");
@@ -150,6 +172,11 @@ public class PGNParser {
 
     }
 
+    /**
+     * Gets the amount of time per move based on the TimeControl tag.
+     * 
+     * @return The time in milliseconds
+     */
     public long getTimePerMove() {
 
         final String tc = tags.getOrDefault("TimeControl", "-");
@@ -166,6 +193,12 @@ public class PGNParser {
 
     }
 
+    /**
+     * Outputs the parsed PGN.
+     * 
+     * @param includeTags Whether or not to include the game info tags. If
+     *                    {@code false}, only the movetext will be included.
+     */
     public String outputPGN(boolean includeTags) {
 
         String str = "";
@@ -242,6 +275,12 @@ public class PGNParser {
         return str;
     }
 
+    /**
+     * Parses a PGN file.
+     * 
+     * @throws Exception If the PGN file is formatted incorrectly or the game is
+     *                   invalid.
+     */
     private void parse() throws Exception {
 
         Matcher t = Pattern.compile(TOKEN_REGEX).matcher(text);
@@ -426,30 +465,6 @@ public class PGNParser {
         }
 
         return a;
-
-    }
-
-    public static String millisToOutputFormat(long time) {
-
-        long hours = (time / 1000 / 60 / 60);
-        long minutes = (time / 1000 / 60 % 60);
-        long seconds = (time / 1000 % 60 % 60 % 60);
-
-        String s = "";
-
-        s += hours + ":";
-
-        if (minutes < 10) {
-            s += "0";
-        }
-        s += minutes + ":";
-
-        if (seconds < 10) {
-            s += "0";
-        }
-        s += seconds;
-
-        return s;
 
     }
 

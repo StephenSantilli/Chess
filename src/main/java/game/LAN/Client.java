@@ -19,14 +19,14 @@ import game.GameEvent.Type;
 import game.GameEvent;
 import game.GameListener;
 
+/**
+ * Bridges the game and LAN, allowing a game to be played over the local
+ * network.
+ */
 public class Client implements GameListener {
 
     /** The default port to use for connecting to other Chess clients. */
     public static final int PORT = 49265;
-
-    public static int getPort() {
-        return PORT;
-    }
 
     /** The timestamp of when the last ping message was sent. */
     private long pingSent = -1;

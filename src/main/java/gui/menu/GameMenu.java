@@ -131,7 +131,7 @@ public class GameMenu extends Menu {
 
         });
 
-        showPgn = new MenuItem("Show PGN");
+        showPgn = new MenuItem("Export");
         showPgn.setAccelerator(KeyCombination.keyCombination("Shortcut+Shift+E"));
         showPgn.setOnAction(e -> {
 

@@ -6,6 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Interfaces with a UCI-compatible engine following the standard found here:
+ * <a href=
+ * "https://backscattering.de/chess/uci/">https://backscattering.de/chess/uci/
+ * </a>
+ */
 public class UCIEngine {
 
     private String name;

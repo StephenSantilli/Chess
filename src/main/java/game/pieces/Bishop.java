@@ -10,10 +10,27 @@ import game.Position;
  */
 public class Bishop extends Piece {
 
+    /**
+     * Creates a new Bishop object.
+     * 
+     * @param file  The file (column) the piece is on.
+     * @param rank  The rank (row) the piece is on.
+     * @param white Whether the piece is white or not. (True if white, false if
+     *              black)
+     */
     public Bishop(int file, int rank, boolean white) {
         super(file, rank, white);
     }
 
+    /**
+     * Creates a new Bishop object.
+     * 
+     * @param file     The file (column) the piece is on.
+     * @param rank     The rank (row) the piece is on.
+     * @param white    Whether the piece is white or not. (True if white, false if
+     *                 black)
+     * @param hasMoved Whether or not the piece has moved.
+     */
     public Bishop(int file, int rank, boolean white, boolean hasMoved) {
         super(file, rank, white, hasMoved);
     }

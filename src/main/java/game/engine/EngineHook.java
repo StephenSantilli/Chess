@@ -14,18 +14,53 @@ import game.Square;
  */
 public class EngineHook implements GameListener {
 
+    /**
+     * The game this engine is being used in.
+     */
     private final Game game;
+
+    /**
+     * The engine being used.
+     */
     private final UCIEngine engine;
+
+    /**
+     * Whether or not the engine is playing the white side.
+     */
     private final boolean white;
+
+    /**
+     * The depth the engine should compute for each move.
+     */
     private int depth;
+
+    /**
+     * Whether or not the engine should tell the opponent what it thinks their best
+     * move would have been in the previous position.
+     */
     private boolean bestMove;
+
+    /**
+     * The depth the engine should compute when searching for the opponents best
+     * move in the previous position.
+     * 
+     * @see #bestMove
+     */
     private int bestMoveDepth;
 
+    /**
+     * Creates a new engine hook.
+     * 
+     * @param engine The engine associated with this hook.
+     * @param game   The game associated with this hook.
+     * @param white  Whether or not the engine is playing the white side.
+     */
     public EngineHook(UCIEngine engine, Game game, boolean white) {
 
         this.game = game;
         this.engine = engine;
         this.white = white;
+
         bestMove = true;
         bestMoveDepth = 15;
         depth = 10;
@@ -34,6 +69,7 @@ public class EngineHook implements GameListener {
 
     }
 
+    // Handles the game events and sends them to the engine.
     @Override
     public void onPlayerEvent(GameEvent event) {
 
@@ -122,6 +158,10 @@ public class EngineHook implements GameListener {
 
     }
 
+    /**
+     * Takes the move made in the game and outputs it to the engine, then waits for
+     * the engine to make it's move.
+     */
     private void makeMove(GameEvent event) {
 
         Thread t = new Thread(() -> {
@@ -160,38 +200,85 @@ public class EngineHook implements GameListener {
         t.start();
     }
 
+    /**
+     * Gets the game.
+     * 
+     * @return {@link #game}
+     */
     public Game getGame() {
         return game;
     }
 
+    /**
+     * Gets the engine.
+     * 
+     * @return {@link #engine}
+     */
     public UCIEngine getEngine() {
         return engine;
     }
 
+    /**
+     * Gets if the engine is playing white.
+     * 
+     * @return {@link #white}
+     */
     public boolean isWhite() {
         return white;
     }
 
+    /**
+     * Gets the depth.
+     * 
+     * @return {@link #depth}
+     */
     public int getDepth() {
         return depth;
     }
 
+    /**
+     * Sets the depth.
+     * 
+     * @param depth The depth the engine will search for its own move.
+     */
     public void setDepth(int depth) {
         this.depth = depth;
     }
 
+    /**
+     * Gets whether or not the engine will analyze the opponents best move.
+     * 
+     * @return {@link #bestMove}
+     */
     public boolean isBestMove() {
         return bestMove;
     }
 
+    /**
+     * Sets whether or not the engine will analyze the opponents best move.
+     * 
+     * @param bestMove If the best move should be analyzed.
+     * @see #bestMove
+     */
     public void setBestMove(boolean bestMove) {
         this.bestMove = bestMove;
     }
 
+    /**
+     * Gets the depth the engine will search for the opponent's best move.
+     * 
+     * @return {@link #bestMoveDepth}
+     */
     public int getBestMoveDepth() {
         return bestMoveDepth;
     }
 
+    /**
+     * Sets the depth the engine will search for the opponent's best move.
+     * 
+     * @param bestMoveDepth The depth.
+     * @see #bestMoveDepth
+     */
     public void setBestMoveDepth(int bestMoveDepth) {
         this.bestMoveDepth = bestMoveDepth;
     }

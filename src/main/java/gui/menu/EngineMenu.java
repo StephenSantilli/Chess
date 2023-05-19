@@ -10,18 +10,16 @@ public class EngineMenu extends Menu {
 
     private MenuItem settings;
 
-    private GameView board;
-
-    public EngineMenu(GameView board) {
+    public EngineMenu(GameView gameView) {
 
         super("Engine");
-        this.board = board;
 
         settings = new MenuItem("Settings");
         settings.setOnAction(ae -> {
-            EngineSettings stgs = new EngineSettings(board.getScene().getWindow(), board.getEngine());
+            EngineSettings stgs = new EngineSettings(gameView.getScene().getWindow(), gameView.getEngine());
             stgs.showAndWait();
         });
+        
         settings.setAccelerator(KeyCombination.keyCombination("Shortcut+B"));
 
         getItems().addAll(settings);

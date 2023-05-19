@@ -42,20 +42,49 @@ public class GameView extends HBox implements GameListener {
     public static final int WHITE = 1;
     public static final int BLACK = 2;
 
+    /**
+     * Takes the numeric reason code for the game ending and turns it into text.
+     * 
+     * @param reason The numeric reason code for why the game ended.
+     * @return The text reason.
+     */
+    public static String reasonToText(Reason reason) {
+
+        switch (reason) {
+
+            case CHECKMATE:
+                return " by checkmate.";
+            case FLAGFALL:
+                return " by flagfall.";
+            case DEAD_INSUFFICIENT_MATERIAL:
+                return " due to insufficient material.";
+            case DEAD_NO_POSSIBLE_MATE:
+                return " due to dead position (no possible checkmate.)";
+            case FIFTY_MOVE:
+                return " by fifty move rule.";
+            case REPETITION:
+                return " by repetition.";
+            case STALEMATE:
+                return " by stalemate.";
+            case RESIGNATION:
+                return " by resignation.";
+            default:
+                return ".";
+
+        }
+
+    }
     private Game game;
     private Client client;
+
     private EngineHook engine;
 
     private App app;
-
     private GameInfo infoPane;
     private Board board;
-    private GridPane listAndChat;
 
+    private GridPane listAndChat;
     private OpeningLabel openingLabel;
-    public OpeningLabel getOpeningLabel() {
-        return openingLabel;
-    }
 
     private MoveList moveList;
     private ScrollPane scrollMoveList;
@@ -75,6 +104,105 @@ public class GameView extends HBox implements GameListener {
     private boolean autoFlip;
 
     // Getters/Setters
+
+    public GameView(App app, BarMenu menuBar) throws Exception {
+
+        this.app = app;
+        this.menuBar = menuBar;
+
+        color = TWO_PLAYER;
+        flipped = false;
+
+        // Info Pane
+        infoPane = new GameInfo(this);
+
+        // Move list & chat box
+        openingLabel = new OpeningLabel(this);
+
+        scrollMoveList = new ScrollPane();
+        scrollMoveList.setId("scrollMoveList");
+
+        moveList = new MoveList(this, scrollMoveList);
+
+        scrollMoveList.setContent(moveList);
+        scrollMoveList.setMaxWidth(Double.MAX_VALUE);
+
+        chatBox = new ChatArea(this);
+        chatBox.setMaxWidth(Double.MAX_VALUE);
+
+        GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
+        GridPane.setHgrow(chatBox, Priority.ALWAYS);
+        GridPane.setHgrow(openingLabel, Priority.ALWAYS);
+
+        listAndChat = new GridPane();
+        listAndChat.setId("listAndChat");
+
+        RowConstraints ro = new RowConstraints();
+        ro.setFillHeight(true);
+        ro.setPercentHeight(5);
+
+        RowConstraints rm = new RowConstraints();
+        rm.setFillHeight(true);
+        rm.setPercentHeight(65);
+
+        RowConstraints cm = new RowConstraints();
+        cm.setFillHeight(true);
+        cm.setPercentHeight(35);
+
+        ColumnConstraints col = new ColumnConstraints();
+        col.setFillWidth(true);
+        col.setMinWidth(250);
+        col.setMaxWidth(350);
+
+        listAndChat.getRowConstraints().setAll(ro, rm, cm);
+        listAndChat.getColumnConstraints().setAll(col);
+
+        listAndChat.add(openingLabel, 0, 0);
+        listAndChat.add(scrollMoveList, 0, 1);
+        listAndChat.add(chatBox, 0, 2);
+
+        // Board
+        board = new Board(this);
+
+        board.setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
+        board.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
+
+        setOnMouseMoved(board.getMouseMoved());
+        setOnMousePressed(board.getMousePressed());
+        setOnMouseDragged(board.getMouseDragged());
+        setOnMouseReleased(board.getMouseReleased());
+
+        app.getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
+
+            board.setBoardBounds(
+                    board.localToScene(new BoundingBox(0, 0, board.getSquareSize() * 8, board.getSquareSize() * 8)));
+
+            getScene().getWindow().widthProperty().addListener(board.getResizeEvent());
+            getScene().getWindow().heightProperty().addListener(board.getResizeEvent());
+
+        }));
+
+        // Menus
+        initMenus();
+
+        // Game view
+        getChildren().addAll(infoPane, board, listAndChat);
+
+        listAndChat.setViewOrder(1);
+        infoPane.setViewOrder(1);
+        board.setViewOrder(0);
+
+        HBox.setHgrow(infoPane, Priority.ALWAYS);
+        HBox.setHgrow(board, Priority.SOMETIMES);
+        HBox.setHgrow(listAndChat, Priority.ALWAYS);
+
+        board.draw();
+
+    }
+
+    public OpeningLabel getOpeningLabel() {
+        return openingLabel;
+    }
 
     public App getApp() {
         return app;
@@ -156,6 +284,8 @@ public class GameView extends HBox implements GameListener {
         return autoFlip;
     }
 
+    // Actions
+
     public boolean isTurn() {
 
         return color == TWO_PLAYER
@@ -163,105 +293,6 @@ public class GameView extends HBox implements GameListener {
                 || (color == WHITE && game.getLastPos().isWhite());
 
     }
-
-    public GameView(App app, BarMenu menuBar) throws Exception {
-
-        this.app = app;
-        this.menuBar = menuBar;
-
-        color = TWO_PLAYER;
-        flipped = false;
-
-        // Info Pane
-        infoPane = new GameInfo(this);
-
-        // Move list & chat box
-        openingLabel = new OpeningLabel(this);
-
-        scrollMoveList = new ScrollPane();
-        scrollMoveList.setId("scrollMoveList");
-
-        moveList = new MoveList(this, scrollMoveList);
-
-        scrollMoveList.setContent(moveList);
-        scrollMoveList.setMaxWidth(Double.MAX_VALUE);
-
-        chatBox = new ChatArea(this);
-        chatBox.setMaxWidth(Double.MAX_VALUE);
-
-        GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
-        GridPane.setHgrow(chatBox, Priority.ALWAYS);
-        GridPane.setHgrow(openingLabel, Priority.ALWAYS);
-
-        listAndChat = new GridPane();
-        listAndChat.setId("listAndChat");
-
-        RowConstraints ro = new RowConstraints();
-        ro.setFillHeight(true);
-        ro.setPercentHeight(5);
-
-        RowConstraints rm = new RowConstraints();
-        rm.setFillHeight(true);
-        rm.setPercentHeight(65);
-
-        RowConstraints cm = new RowConstraints();
-        cm.setFillHeight(true);
-        cm.setPercentHeight(35);
-
-        ColumnConstraints col = new ColumnConstraints();
-        col.setFillWidth(true);
-        col.setMinWidth(250);
-        col.setMaxWidth(350);
-
-        listAndChat.getRowConstraints().setAll(ro, rm, cm);
-        listAndChat.getColumnConstraints().setAll(col);
-
-        listAndChat.add(openingLabel, 0, 0);
-        listAndChat.add(scrollMoveList, 0, 1);
-        listAndChat.add(chatBox, 0, 2);
-
-        // GridPane.setRowSpan(scrollMoveList, 2);
-
-        // Board
-        board = new Board(this);
-
-        board.setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
-        board.setPrefSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
-
-        setOnMouseMoved(board.getMouseMoved());
-        setOnMousePressed(board.getMousePressed());
-        setOnMouseDragged(board.getMouseDragged());
-        setOnMouseReleased(board.getMouseReleased());
-
-        app.getStage().addEventHandler(WindowEvent.WINDOW_SHOWN, (we -> {
-
-            board.setBoardBounds(
-                    board.localToScene(new BoundingBox(0, 0, board.getSquareSize() * 8, board.getSquareSize() * 8)));
-
-            getScene().getWindow().widthProperty().addListener(board.getResizeEvent());
-            getScene().getWindow().heightProperty().addListener(board.getResizeEvent());
-
-        }));
-
-        // Menus
-        initMenus();
-
-        // Game view
-        getChildren().addAll(infoPane, board, listAndChat);
-
-        listAndChat.setViewOrder(1);
-        infoPane.setViewOrder(1);
-        board.setViewOrder(0);
-
-        HBox.setHgrow(infoPane, Priority.ALWAYS);
-        HBox.setHgrow(board, Priority.SOMETIMES);
-        HBox.setHgrow(listAndChat, Priority.ALWAYS);
-
-        board.draw();
-
-    }
-
-    // Actions
 
     /**
      * Sets the {@link #currentPos}.
@@ -348,6 +379,8 @@ public class GameView extends HBox implements GameListener {
 
     }
 
+    // Drawing
+
     /**
      * Shows the user the game setup dialog.
      */
@@ -433,57 +466,7 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    // Drawing
-
-    /**
-     * Takes the numeric reason code for the game ending and turns it into text.
-     * 
-     * @param reason The numeric reason code for why the game ended.
-     * @return The text reason.
-     */
-    public static String reasonToText(Reason reason) {
-
-        switch (reason) {
-
-            case CHECKMATE:
-                return " by checkmate.";
-            case FLAGFALL:
-                return " by flagfall.";
-            case DEAD_INSUFFICIENT_MATERIAL:
-                return " due to insufficient material.";
-            case DEAD_NO_POSSIBLE_MATE:
-                return " due to dead position (no possible checkmate.)";
-            case FIFTY_MOVE:
-                return " by fifty move rule.";
-            case REPETITION:
-                return " by repetition.";
-            case STALEMATE:
-                return " by stalemate.";
-            case RESIGNATION:
-                return " by resignation.";
-            default:
-                return ".";
-
-        }
-
-    }
-
     // Initializers
-
-    /**
-     * Initializes the menus and adds them to the menu bar.
-     */
-    private void initMenus() {
-
-        viewMenu = new ViewMenu(this);
-        gameMenu = new GameMenu(this);
-        engineMenu = new EngineMenu(this);
-
-        menuBar.addAll(gameMenu, viewMenu, engineMenu);
-
-    }
-
-    // Event Handlers
 
     /**
      * Handles key events.
@@ -518,6 +501,8 @@ public class GameView extends HBox implements GameListener {
         }
 
     }
+
+    // Event Handlers
 
     @Override
     public void onPlayerEvent(GameEvent event) {
@@ -639,6 +624,19 @@ public class GameView extends HBox implements GameListener {
             }
 
         });
+
+    }
+
+    /**
+     * Initializes the menus and adds them to the menu bar.
+     */
+    private void initMenus() {
+
+        viewMenu = new ViewMenu(this);
+        gameMenu = new GameMenu(this);
+        engineMenu = new EngineMenu(this);
+
+        menuBar.addAll(gameMenu, viewMenu, engineMenu);
 
     }
 

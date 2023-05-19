@@ -24,6 +24,38 @@ abstract public class Piece {
     protected boolean hasMoved;
 
     /**
+     * Creates a new Piece object.
+     * 
+     * @param file  The file (column) the piece is on.
+     * @param rank  The rank (row) the piece is on.
+     * @param white Whether the piece is white or not. (True if white, false if
+     *              black)
+     */
+    public Piece(int file, int rank, boolean white) {
+
+        this(file, rank, white, false);
+
+    }
+
+    /**
+     * Creates a new Piece object.
+     * 
+     * @param file     The file (column) the piece is on.
+     * @param rank     The rank (row) the piece is on.
+     * @param white    Whether the piece is white or not. (True if white, false if
+     *                 black)
+     * @param hasMoved Whether or not the piece has moved.
+     */
+    public Piece(int file, int rank, boolean white, boolean hasMoved) {
+
+        this.square = new Square(file, rank);
+        this.white = white;
+
+        this.hasMoved = hasMoved;
+
+    }
+
+    /**
      * @return The {@link Square} the piece is on.
      */
     public Square getSquare() {
@@ -60,38 +92,6 @@ abstract public class Piece {
      */
     public void setHasMoved(boolean hasMoved) {
         this.hasMoved = hasMoved;
-    }
-
-    /**
-     * Creates a new Piece object.
-     * 
-     * @param file  The file (column) the piece is on.
-     * @param rank  The rank (row) the piece is on.
-     * @param white Whether the piece is white or not. (True if white, false if
-     *              black)
-     */
-    public Piece(int file, int rank, boolean white) {
-
-        this(file, rank, white, false);
-
-    }
-
-    /**
-     * Creates a new Piece object.
-     * 
-     * @param file     The file (column) the piece is on.
-     * @param rank     The rank (row) the piece is on.
-     * @param white    Whether the piece is white or not. (True if white, false if
-     *                 black)
-     * @param hasMoved Whether or not the piece has moved.
-     */
-    public Piece(int file, int rank, boolean white, boolean hasMoved) {
-
-        this.square = new Square(file, rank);
-        this.white = white;
-
-        this.hasMoved = hasMoved;
-
     }
 
     /**
@@ -138,24 +138,24 @@ abstract public class Piece {
      * Gets all moves that a given piece can make, regardless of if they are
      * possible in the context of the game.
      * 
-     * @param p The position this piece is a part of.
+     * @param position The position this piece is a part of.
      * @return A list of valid moves. Does not account for check.
      */
-    abstract public ArrayList<Move> getMoves(Position p);
+    abstract public ArrayList<Move> getMoves(Position position);
 
     /**
      * Gets the vertical moves possible for the piece.
      * 
      * @param distance         The number of squares the piece may move. If there is
      *                         no limit, enter 0 or 8.
-     * @param p                The current {@link Position} the piece is on.
+     * @param position         The current {@link Position} the piece is on.
      * @param includeBackwards Should backwards moves be included? (e.g. not for
      *                         pawns)
      * @return A list of valid vertical moves for the piece. Does not account for
      *         check, but
      *         does account for capturing/pieces in the way.
      */
-    protected ArrayList<Move> getVerticalMoves(int distance, Position p, boolean includeBackwards) {
+    protected ArrayList<Move> getVerticalMoves(int distance, Position position, boolean includeBackwards) {
 
         ArrayList<Move> moves = new ArrayList<Move>();
 
@@ -171,7 +171,7 @@ abstract public class Piece {
 
             try {
 
-                move = new Move(square, new Square(file, white ? rank + i : rank - i), p);
+                move = new Move(square, new Square(file, white ? rank + i : rank - i), position);
 
             } catch (Exception e) {
 
@@ -199,7 +199,7 @@ abstract public class Piece {
 
                 try {
 
-                    move = new Move(square, new Square(file, white ? rank + i : rank - i), p);
+                    move = new Move(square, new Square(file, white ? rank + i : rank - i), position);
 
                 } catch (Exception e) {
 
@@ -226,12 +226,12 @@ abstract public class Piece {
      * 
      * @param distance The number of squares the piece may move. If there is
      *                 no limit, enter 0 or 8.
-     * @param p        The current {@link Position} the piece is on.
+     * @param position The current {@link Position} the piece is on.
      * @return A list of valid horizontal moves for the piece. Does not account for
      *         check, but
      *         does account for capturing/pieces in the way.
      */
-    protected ArrayList<Move> getHorizontalMoves(int distance, Position p) {
+    protected ArrayList<Move> getHorizontalMoves(int distance, Position position) {
 
         ArrayList<Move> moves = new ArrayList<Move>();
 
@@ -248,7 +248,7 @@ abstract public class Piece {
 
             try {
 
-                move = new Move(square, new Square(white ? file + i : file - i, rank), p);
+                move = new Move(square, new Square(white ? file + i : file - i, rank), position);
 
             } catch (Exception e) {
 
@@ -273,7 +273,7 @@ abstract public class Piece {
             Move move;
             try {
 
-                move = new Move(square, new Square(white ? file + i : file - i, rank), p);
+                move = new Move(square, new Square(white ? file + i : file - i, rank), position);
 
             } catch (Exception e) {
 
@@ -299,12 +299,12 @@ abstract public class Piece {
      * 
      * @param distance The number of squares the piece may move. If there is
      *                 no limit, enter 0 or 8.
-     * @param p        The current {@link Position} the piece is on.
+     * @param position The current {@link Position} the piece is on.
      * @return A list of valid diagonal moves for the piece. Does not account for
      *         check, but
      *         does account for capturing/pieces in the way.
      */
-    protected ArrayList<Move> getDiagonalMoves(int distance, Position p) {
+    protected ArrayList<Move> getDiagonalMoves(int distance, Position position) {
 
         ArrayList<Move> moves = new ArrayList<Move>();
 
@@ -324,7 +324,8 @@ abstract public class Piece {
                 final Move move;
                 try {
 
-                    move = new Move(square, new Square(color ? file + i : file - i, color ? rank + i : rank - i), p);
+                    move = new Move(square, new Square(color ? file + i : file - i, color ? rank + i : rank - i),
+                            position);
 
                 } catch (Exception e) {
 
@@ -349,7 +350,8 @@ abstract public class Piece {
                 final Move move;
                 try {
 
-                    move = new Move(square, new Square(color ? file + i : file - i, color ? rank - i : rank + i), p);
+                    move = new Move(square, new Square(color ? file + i : file - i, color ? rank - i : rank + i),
+                            position);
 
                 } catch (Exception e) {
 

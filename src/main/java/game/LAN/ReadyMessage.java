@@ -2,11 +2,16 @@ package game.LAN;
 
 import game.Player;
 
+/**
+ * A message that is sent over LAN when a client is ready to start the game. Sent by the person who created the challenge.
+ */
 public class ReadyMessage extends Message {
 
     private final int oppColor;
+
     private final String name;
     private final String fen;
+
     private final long timePerSide;
     private final long timePerMove;
 
