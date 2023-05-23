@@ -6,6 +6,9 @@ import game.Move;
 import game.Position;
 import game.Square;
 
+/**
+ * A representation of a king.
+ */
 public class King extends Piece {
 
     /**

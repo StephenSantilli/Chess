@@ -8,7 +8,7 @@ import java.io.IOException;
  * @see UCIOption
  */
 public class UCIString extends UCIOption<String> {
-
+    
     /**
      * Creates a new UCI string option.
      * 

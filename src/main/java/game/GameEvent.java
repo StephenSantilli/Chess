@@ -9,14 +9,50 @@ public class GameEvent {
      * An enumeration of the different types of events.
      */
     public enum Type {
+
+        /**
+         * The event was triggered by a move being made.
+         */
         MOVE,
+
+        /**
+         * The event was triggered by the game starting.
+         */
         STARTED,
+
+        /**
+         * The event was triggered because the game ended.
+         */
         OVER,
+
+        /**
+         * The event was triggered by a draw being offered.
+         */
         DRAW_OFFER,
+
+        /**
+         * The event was triggered by a draw offer being declined.
+         */
         DRAW_DECLINED,
+
+        /**
+         * The event was triggered by a chat message being sent.
+         */
         MESSAGE,
+
+        /**
+         * The event was triggered because a game finished importing.
+         */
         IMPORTED,
+
+        /**
+         * The event was triggered by the game being paused.
+         */
         PAUSED,
+
+        /**
+         * The event was triggered by the game being resumed.
+         */
         RESUMED
     }
 
@@ -104,6 +140,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the type of event.
+     * 
      * @return {@link #type}
      */
     public Type getType() {
@@ -111,6 +149,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the index of the previous position.
+     * 
      * @return {@link #prevIndex}
      */
     public int getPrevIndex() {
@@ -118,6 +158,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the index of the current position.
+     * 
      * @return {@link #currIndex}
      */
     public int getCurrIndex() {
@@ -125,6 +167,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the previous position.
+     * 
      * @return {@link #prev}
      */
     public Position getPrev() {
@@ -132,6 +176,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the current position.
+     * 
      * @return {@link #curr}
      */
     public Position getCurr() {
@@ -139,6 +185,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the move that triggered this event.
+     * 
      * @return {@link #move}
      */
     public Move getMove() {
@@ -146,6 +194,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets whether or not white triggered this event.
+     * 
      * @return {@link #white}
      */
     public boolean isWhite() {
@@ -153,6 +203,8 @@ public class GameEvent {
     }
 
     /**
+     * Gets the message that triggered this event.
+     * 
      * @return {@link #message}
      */
     public Chat getMessage() {

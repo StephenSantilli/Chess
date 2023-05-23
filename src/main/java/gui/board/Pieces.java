@@ -13,31 +13,72 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
+/**
+ * The pane which contains the piece images.
+ */
 public class Pieces extends Pane {
 
+    /**
+     * The GameView that contains this pane.
+     */
     private GameView gameView;
 
+    /**
+     * The pieces that are part of this pane.
+     */
     private ArrayList<GUIPiece> pieces;
+
+    /**
+     * The transcoders that are used to draw the pieces.
+     */
     private ArrayList<PieceTranscoder> transcoders;
+
+    /**
+     * The list of pending piece animations.
+     */
     private ArrayList<TranslateTransition> transitions;
 
-    public ArrayList<GUIPiece> getPieces() {
-        return pieces;
-    }
-
-    public ArrayList<PieceTranscoder> getTranscoders() {
-        return transcoders;
-    }
-
-    public ArrayList<TranslateTransition> getTransitions() {
-        return transitions;
-    }
-
+    /**
+     * Creates a new pieces pane.
+     * 
+     * @param gameView The GameView that contains this pane.
+     */
     public Pieces(GameView gameView) {
         this.gameView = gameView;
         this.transitions = new ArrayList<TranslateTransition>();
     }
 
+    /**
+     * Gets the pieces.
+     * 
+     * @return {@link #pieces}
+     */
+    public ArrayList<GUIPiece> getPieces() {
+        return pieces;
+    }
+
+    /**
+     * Gets the transcoders used to display the pieces.
+     * 
+     * @return {@link #transcoders}
+     */
+    public ArrayList<PieceTranscoder> getTranscoders() {
+        return transcoders;
+    }
+
+    /**
+     * Gets the list of the pending piece animations.
+     * 
+     * @return {@link #transitions}
+     */
+    public ArrayList<TranslateTransition> getTransitions() {
+        return transitions;
+    }
+
+    /**
+     * Clears the old pieces and draws the pieces on the board in the most recent
+     * position.
+     */
     public void draw() {
         draw(false, null, null);
     }
@@ -78,7 +119,7 @@ public class Pieces extends Pane {
                 if (p == null)
                     continue;
 
-                ImageView img = getPieceTranscoder(p).getImageView();
+                ImageView img = getPieceTranscoder(p).toImageView();
                 GUIPiece guiP = new GUIPiece(p, img, gameView);
 
                 getChildren().add(img);
@@ -90,7 +131,8 @@ public class Pieces extends Pane {
 
                 if (prev != null && curr != null
                         && ((!backward && curr.getMove() != null) || (backward && prev.getMove() != null))
-                        // Either not backwards and the piece in the move of curr is the piece @ this square
+                        // Either not backwards and the piece in the move of curr is the piece @ this
+                        // square
                         && ((!backward && curr.getMove().getDestination().equals(p.getSquare()))
                                 // Or it is backwards and the piece in the move of prev is this piece
                                 || (backward && prev.getMove().getOrigin().equals(p.getSquare()))
@@ -164,8 +206,8 @@ public class Pieces extends Pane {
 
     /**
      * Creates and plays an animation of a piece moving. If {@code capture} is not
-     * {@code null}, the capture
-     * piece will still show up until the animation completes.
+     * {@code null}, the capture piece will still show up until the animation
+     * completes.
      * 
      * @param guiPiece    The piece to animate
      * @param origin      The start square of the animated piece
@@ -173,6 +215,7 @@ public class Pieces extends Pane {
      * @param capture     The piece captured by {@code guiPiece}. Should be
      *                    {@code null} if
      *                    there is no piece being captured.
+     * @param callback    A callback to be exctued when the animation is complete.
      */
     public void pieceMoveAnimation(GUIPiece guiPiece, Square origin, Square destination, Piece capture,
             Runnable callback) {
@@ -199,7 +242,7 @@ public class Pieces extends Pane {
 
         if (capture != null) {
 
-            ImageView i = getPieceTranscoder(capture).getImageView();
+            ImageView i = getPieceTranscoder(capture).toImageView();
 
             getChildren().add(i);
 
@@ -248,7 +291,7 @@ public class Pieces extends Pane {
         for (int i = 0; i < transcoders.size() && found == null; i++) {
 
             PieceTranscoder pt = transcoders.get(i);
-            if (pt.isColor() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
+            if (pt.isWhite() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
                 found = pt;
 
         }
@@ -257,6 +300,11 @@ public class Pieces extends Pane {
 
     }
 
+    /**
+     * Initializes the piece transcoders based on the current size of the pieces.
+     * 
+     * @throws Exception If there is an error transcoding the SVGs.
+     */
     public void initPieceTranscoders() throws Exception {
 
         final Board board = gameView.getBoard();

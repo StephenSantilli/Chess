@@ -13,15 +13,36 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+/**
+ * A pane contains all of the chat components, including the entry field and the
+ * history box.
+ */
 public class ChatArea extends VBox {
 
+    /** The GameView that contains this chat area. */
     private GameView gameView;
 
+    /**
+     * The history box, which displays the previous chats.
+     */
     private ChatHistoryBox historyBox;
+
+    /**
+     * The scroll pane that contains {@link #historyBox} in order to make it
+     * scrollable.
+     */
     private ScrollPane scroller;
 
+    /**
+     * The entry field, for sending new chats.
+     */
     private TextField enter;
 
+    /**
+     * Creates a new chat area.
+     * 
+     * @param gameView The GameView that will contain this chat area.
+     */
     public ChatArea(GameView gameView) {
 
         this.gameView = gameView;
@@ -43,8 +64,9 @@ public class ChatArea extends VBox {
             final Game game = gameView.getGame();
             try {
 
-                gameView.getGame().sendMessage(new Chat(game.getPlayer(gameView.getColor() == GameView.WHITE),
-                        new Date().getTime(), enter.getText()));
+                gameView.getGame()
+                        .sendMessage(new Chat(game.getPlayer(gameView.getColor().equals(GameView.Color.WHITE)),
+                                new Date().getTime(), enter.getText()));
 
                 enter.setText("");
 
@@ -71,11 +93,14 @@ public class ChatArea extends VBox {
 
     }
 
+    /**
+     * Updates and redraws this chat area.
+     */
     public void update() {
 
         Platform.runLater(() -> {
 
-            if (gameView.getColor() == GameView.TWO_PLAYER) {
+            if (gameView.getColor().equals(GameView.Color.TWO_PLAYER)) {
                 historyBox.setDisable(true);
                 enter.setDisable(true);
 
@@ -87,7 +112,7 @@ public class ChatArea extends VBox {
             } else {
                 historyBox.setDisable(false);
                 enter.setDisable(false);
-  
+
                 GridPane.setRowSpan(gameView.getScrollMoveList(), 1);
 
                 setVisible(true);

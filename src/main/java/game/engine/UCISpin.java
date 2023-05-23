@@ -10,6 +10,16 @@ import java.io.IOException;
 public class UCISpin extends UCIOption<Integer> {
 
     /**
+     * The min value of the spinner.
+     */
+    protected int min;
+
+    /**
+     * The max value of the spinner.
+     */
+    protected int max;
+
+    /**
      * Creates a new UCI spinner option.
      * 
      * @param engine The engine.
@@ -25,6 +35,44 @@ public class UCISpin extends UCIOption<Integer> {
         this.def = def;
         this.value = value;
         this.min = min;
+        this.max = max;
+    }
+
+    /**
+     * Gets the minimum value.
+     * 
+     * @return {@link #min}
+     */
+    public int getMin() {
+        return min;
+    }
+
+    /**
+     * Sets the minimum value.
+     * 
+     * @param min The minimum value.
+     * @see #min
+     */
+    public void setMin(int min) {
+        this.min = min;
+    }
+
+    /**
+     * Gets the maximum value.
+     * 
+     * @return {@link #max}
+     */
+    public int getMax() {
+        return max;
+    }
+
+    /**
+     * Sets the maximum value.
+     * 
+     * @param max The max value.
+     * @see #max
+     */
+    public void setMax(int max) {
         this.max = max;
     }
 

@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 
 import java.awt.Taskbar;
 import java.awt.Toolkit;
-import java.net.URL;
+
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
@@ -20,27 +20,54 @@ import game.Game;
 import gui.dialog.Export;
 import gui.menu.BarMenu;
 
+/**
+ * The main application class that displays the GUI.
+ */
 public class App extends Application {
 
+    /**
+     * The preferences the user has set.
+     */
     public static Preferences prefs = Preferences.userNodeForPackage(App.class);
+
+    /**
+     * The host services of the app. Used to open web pages in the user's browser.
+     */
     public static HostServices hostServices;
-
-    private Stage stage;
-    private Scene scene;
-
-    public Stage getStage() {
-        return stage;
-    }
-
-    public Scene getScene() {
-        return scene;
-    }
 
     public static void main(String[] args) {
 
         launch(args);
         System.exit(0);
 
+    }
+
+    /**
+     * The main stage of the GUI.
+     */
+    private Stage stage;
+
+    /**
+     * The main scene of the GUI.
+     */
+    private Scene scene;
+
+    /**
+     * Gets the main stage of the GUI.
+     * 
+     * @return {@link #stage}
+     */
+    public Stage getStage() {
+        return stage;
+    }
+
+    /**
+     * Gets the main scene of the GUI.
+     * 
+     * @return {@link #scene}
+     */
+    public Scene getScene() {
+        return scene;
     }
 
     @Override
@@ -94,25 +121,20 @@ public class App extends Application {
 
                 final Game game = gameView.getGame();
 
-                Dialog<ButtonType> sure = new Dialog<>();
-                sure.setTitle("Are you sure?");
-                sure.setContentText("Are you sure? If you quit you will lose your game.");
-                sure.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO,
+                Dialog<ButtonType> confirmCloseDialog = new Dialog<>();
+                confirmCloseDialog.setTitle("Are you sure?");
+                confirmCloseDialog.setContentText("Are you sure? If you quit you will lose your game.");
+                confirmCloseDialog.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO,
                         new ButtonType("Export", ButtonData.OTHER));
 
                 if (gameView.getGame() != null) {
-                    Optional<ButtonType> res = sure.showAndWait();
+                    Optional<ButtonType> res = confirmCloseDialog.showAndWait();
 
                     if (res.get().getButtonData().equals(ButtonData.OTHER)) {
 
                         Export save = new Export(gameView);
 
                         save.showAndWait();
-
-                        // if (game != null && game.getResult() == Game.Result.IN_PROGRESS)
-                        //     game.markGameOver(Game.Result.TERMINATED, Game.Reason.OTHER);
-
-                        // Platform.exit();
 
                     } else if (res.get().equals(ButtonType.YES)) {
 
@@ -122,7 +144,7 @@ public class App extends Application {
                         Platform.exit();
 
                     } else {
-                        sure.hide();
+                        confirmCloseDialog.hide();
                     }
                 } else {
                     Platform.exit();
@@ -136,19 +158,6 @@ public class App extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
-
-    public void setTheme(String name) throws Exception {
-
-        URL sheet = null;
-        try {
-            sheet = getClass().getResource("/css/" + name + ".css");
-        } catch (Exception e) {
-            throw new Exception("Theme not found.");
-        }
-
-        scene.getStylesheets().add(sheet.toString());
 
     }
 

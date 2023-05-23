@@ -3,26 +3,34 @@ package gui.component;
 import gui.GameView;
 import javafx.scene.control.Label;
 
+/**
+ * A display which shows the timer history--the time on the timer of a past
+ * move.
+ */
 public class GUITimerHistory extends Label {
 
-    private GameView board;
+    /**
+     * The GameView that contains this pane.
+     */
+    private GameView gameView;
 
+    /**
+     * Whether or not this timer displays white's time.
+     */
     private boolean white;
 
-    public boolean isWhite() {
-        return white;
-    }
+    /**
+     * Creates a new timer history display.
+     * 
+     * @param gameView The GameView that displays this pane.
+     * @param white    Whether or not this timer displays white's time.
+     */
+    public GUITimerHistory(GameView gameView, boolean white) {
 
-    public void setWhite(boolean white) {
-        this.white = white;
-    }
+        super(GUITimer.formatTime(gameView.getGame() == null ? 0
+                : (gameView.getGame().getTimerTime(white))));
 
-    public GUITimerHistory(GameView board, boolean white) {
-
-        super(formatTime(board.getGame() == null ? 0
-                : (board.getGame().getTimerTime(white))));
-
-        this.board = board;
+        this.gameView = gameView;
         this.white = white;
 
         setId("guitimerhistory");
@@ -33,22 +41,44 @@ public class GUITimerHistory extends Label {
 
     }
 
+    /**
+     * Gets whether or not this timer displays white's time.
+     * 
+     * @return {@link #white}
+     */
+    public boolean isWhite() {
+        return white;
+    }
+
+    /**
+     * Sets whether or not this timer displays white's time.
+     * 
+     * @param white If white.
+     */
+    public void setWhite(boolean white) {
+        this.white = white;
+    }
+
+    /**
+     * Updates the history view based on the current position being displayed in the
+     * {@link #gameView}.
+     */
     public void update() {
 
-        if (board.getGame() == null) {
+        if (gameView.getGame() == null) {
             setText("");
             setVisible(false);
             return;
         }
 
-        if (board.getGame().getPositions().size() - 1 == board.getCurrentPos()
-                || board.getGame().getSettings().getTimePerSide() == -1) {
+        if (gameView.getGame().getPositions().size() - 1 == gameView.getCurrentPos()
+                || gameView.getGame().getSettings().getTimePerSide() == -1) {
             setVisible(false);
             return;
         }
 
-        if ((white == board.getGame().getPositions().get(board.getCurrentPos()).isWhite())
-                && board.getGame().getSettings().getTimePerSide() > -1) {
+        if ((white == gameView.getGame().getPositions().get(gameView.getCurrentPos()).isWhite())
+                && gameView.getGame().getSettings().getTimePerSide() > -1) {
 
             setId("guitimerhistoryactive");
             frame();
@@ -66,47 +96,20 @@ public class GUITimerHistory extends Label {
 
     }
 
-    private static String formatTime(long time) {
 
-        String str = "";
+    
 
-        long counted = time;
-
-        long hours = counted / 1000 / 60 / 60;
-        counted -= (hours * 1000 * 60 * 60);
-
-        long minutes = counted / 1000 / 60;
-        counted -= (minutes * 1000 * 60);
-
-        long seconds = counted / 1000;
-        counted -= (seconds * 1000);
-
-        long tenths = counted / 100;
-        counted -= (tenths * 100);
-
-        str += (seconds < 10 && minutes > 0 ? "0" : "") + seconds;
-        if (minutes > 0) {
-            str = (minutes < 10 && hours > 0 ? "0" : "") + minutes + ":" + str;
-        } else if (hours == 0) {
-            str += "." + tenths;
-        }
-
-        if (hours > 0) {
-            str = hours + ":" + str;
-        }
-
-        return str;
-
-    }
-
+    /**
+     * Animates a frame to display.
+     */
     private void frame() {
 
-        if (board.getGame() == null || board.getGame().getSettings().getTimePerSide() == -1) {
+        if (gameView.getGame() == null || gameView.getGame().getSettings().getTimePerSide() == -1) {
             setText("");
             return;
         }
 
-        setText(formatTime(board.getGame().getTimerTime(white, board.getCurrentPos())));
+        setText(GUITimer.formatTime(gameView.getGame().getTimerTime(white, gameView.getCurrentPos())));
 
     }
 

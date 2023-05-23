@@ -2,6 +2,8 @@ package game.engine;
 
 /**
  * A generic option for a UCI engine.
+ * 
+ * @param <E> The type of data that is stored by this option.
  */
 public abstract class UCIOption<E> {
 
@@ -24,22 +26,6 @@ public abstract class UCIOption<E> {
      * The default value of the option.
      */
     protected E def;
-
-    //TODO: Why aren't these in their respective class?
-    /**
-     * The min value of this option.
-     */
-    protected E min;
-
-    /**
-     * The max value of this option.
-     */
-    protected E max;
-
-    /**
-     * The variables associated with this option.
-     */
-    protected E[] vars;
 
     /**
      * Gets the engine.
@@ -105,63 +91,6 @@ public abstract class UCIOption<E> {
      */
     public void setDef(E def) {
         this.def = def;
-    }
-
-    /**
-     * Gets the minimum value.
-     * 
-     * @return {@link #min}
-     */
-    public E getMin() {
-        return min;
-    }
-
-    /**
-     * Sets the minimum value.
-     * 
-     * @param min The minimum value.
-     * @see #min
-     */
-    public void setMin(E min) {
-        this.min = min;
-    }
-
-    /**
-     * Gets the maximum value.
-     * 
-     * @return {@link #max}
-     */
-    public E getMax() {
-        return max;
-    }
-
-    /**
-     * Sets the maximum value.
-     * 
-     * @param max The max value.
-     * @see #max
-     */
-    public void setMax(E max) {
-        this.max = max;
-    }
-
-    /**
-     * Gets the predefined variables.
-     * 
-     * @return {@link #vars}
-     */
-    public E[] getVars() {
-        return vars;
-    }
-
-    /**
-     * Sets the variables.
-     * 
-     * @param vars A list of the variables.
-     * @see #vars
-     */
-    public void setVars(E[] vars) {
-        this.vars = vars;
     }
 
     /**

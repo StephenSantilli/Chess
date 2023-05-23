@@ -131,21 +131,27 @@ public class PGNParser {
     }
 
     /**
-     * @see #text
+     * Gets the text.
+     * 
+     * @return {@link #text}
      */
     public String getText() {
         return text;
     }
 
     /**
-     * @see #tags
+     * Gets the tags.
+     * 
+     * @return {@link #tags}
      */
     public Map<String, String> getTags() {
         return tags;
     }
 
     /**
-     * @see #moves
+     * Gets the moves.
+     * 
+     * @return {@link #moves}
      */
     public ArrayList<PGNMove> getMoves() {
         return moves;

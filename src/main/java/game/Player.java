@@ -10,15 +10,35 @@ public class Player {
      */
     public enum Type {
 
+        /**
+         * A player that is a human.
+         */
         HUMAN("human"),
+
+        /**
+         * A player that is a computer program/engine/bot.
+         */
         PROGRAM("program");
 
+        /**
+         * The string representation of the type of player.
+         */
         private final String string;
 
+        /**
+         * Creates a new type.
+         * 
+         * @param string The string representation of the type.
+         */
         Type(String string) {
             this.string = string;
         }
 
+        /**
+         * Gets the string representation of the type.
+         * 
+         * @return {@link #string}
+         */
         public String getString() {
             return string;
         }
@@ -49,6 +69,7 @@ public class Player {
      * Creates a new Player object.
      * 
      * @param name The name of the player.
+     * @throws Exception If the name is invalid.
      */
     public Player(String name) throws Exception {
 
@@ -65,6 +86,7 @@ public class Player {
      * @param name  The name of the player.
      * @param type  The type of player.
      * @param white Whether or not the player is white.
+     * @throws Exception If the name is invalid.
      */
     public Player(String name, Type type, boolean white) throws Exception {
 
@@ -78,6 +100,8 @@ public class Player {
     }
 
     /**
+     * Gets the name.
+     * 
      * @return {@link #name}
      */
     public String getName() {
@@ -94,6 +118,8 @@ public class Player {
     }
 
     /**
+     * Gets the type.
+     * 
      * @return {@link #type}
      */
     public Type getType() {
@@ -110,6 +136,8 @@ public class Player {
     }
 
     /**
+     * Gets whether or not the player is white.
+     * 
      * @return {@link #white}
      */
     public boolean isWhite() {

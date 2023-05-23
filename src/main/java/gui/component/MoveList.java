@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import game.Game;
 import game.GameSettings;
 import game.Move;
+
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,20 +16,38 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
+/**
+ * A pane that displays a list of the moves made in the game.
+ */
 public class MoveList extends GridPane {
 
-    private GameView board;
+    /**
+     * The GameView that contains this move list.
+     */
+    private GameView gameView;
 
+    /**
+     * A list of each row which displays two moves, a white turn and a black turn.
+     */
     private ArrayList<MoveRow> rows;
 
+    /**
+     * The scroll pane that contains {@link #rows}, so that they are scrollable.
+     */
     private ScrollPane sp;
 
-    public MoveList(GameView board, ScrollPane sp) {
+    /**
+     * Creates a new pane which displays a list of the moves made in the game.
+     * 
+     * @param gameView The GameView that contains this.
+     * @param sp       The scroll pane that will contain the moves.
+     */
+    public MoveList(GameView gameView, ScrollPane sp) {
 
         setId("movePane");
 
         setMaxWidth(Double.MAX_VALUE);
-        this.board = board;
+        this.gameView = gameView;
 
         this.sp = sp;
 
@@ -51,12 +70,21 @@ public class MoveList extends GridPane {
 
     }
 
+    /**
+     * Updates the move list.
+     */
     public void boardUpdated() {
 
         initMoveList();
 
     }
 
+    /**
+     * Called when {@link GameView#currentPos} is changed, but there was no change
+     * to the list of moves.
+     * 
+     * @param active The new active position.
+     */
     public void posChanged(int active) {
 
         for (int i = 0; i < getChildren().size(); i++) {
@@ -64,9 +92,9 @@ public class MoveList extends GridPane {
             Node c = getChildren().get(i);
 
             if (active != 0
-                    && getRowIndex(c) == calcRow(active + board.getGame().getPositions().get(0).getMoveNumber())
+                    && getRowIndex(c) == calcRow(active + gameView.getGame().getPositions().get(0).getMoveNumber())
                     && getColumnIndex(
-                            c) == (board.getGame().getPositions().get(active).isWhite() ? 2
+                            c) == (gameView.getGame().getPositions().get(active).isWhite() ? 2
                                     : 1)) {
 
                 c.setId("movePaneButtonActive");
@@ -86,6 +114,9 @@ public class MoveList extends GridPane {
 
     }
 
+    /**
+     * Updates the move pane.
+     */
     public void updateMovePane() {
 
         if (rows == null || rows.size() == 0) {
@@ -97,24 +128,27 @@ public class MoveList extends GridPane {
 
     }
 
+    /**
+     * Initializes the move list from scratch based on the positions in the game.
+     */
     public void initMoveList() {
 
         getChildren().clear();
 
-        if (board.getGame() == null)
+        if (gameView.getGame() == null)
             return;
 
-        for (int i = 1; i < board.getGame().getPositions().size(); i++) {
+        for (int i = 1; i < gameView.getGame().getPositions().size(); i++) {
 
             execMove(i);
 
         }
 
-        final Game game = board.getGame();
-        final GameSettings stgs = board.getGame().getSettings();
+        final Game game = gameView.getGame();
+        final GameSettings stgs = gameView.getGame().getSettings();
 
         String result = "";
-        switch (board.getGame().getResult()) {
+        switch (gameView.getGame().getResult()) {
             case DRAW:
                 result = "1/2-1/2";
                 break;
@@ -159,7 +193,7 @@ public class MoveList extends GridPane {
 
             } else
 
-                add(res, board.getGame().getLastPos().isWhite() ? 1 : 2,
+                add(res, gameView.getGame().getLastPos().isWhite() ? 1 : 2,
                         calcRow(game.getLastPos().getMoveNumber() + 1));
 
             res.requestFocus();
@@ -173,15 +207,23 @@ public class MoveList extends GridPane {
 
     }
 
+    /**
+     * Calculates the move number for a given row.
+     */
     private int calcRow(int moveNumber) {
 
         return (int) Math.ceil((moveNumber /* - 1 */) / 2.0) - 1;
 
     }
 
+    /**
+     * Adds the given move to the move list.
+     * 
+     * @param pos The index of the position of the move to add to the list.
+     */
     private void execMove(int pos) {
 
-        Position p = board.getGame().getPositions().get(pos);
+        Position p = gameView.getGame().getPositions().get(pos);
         int row = calcRow(p.getMoveNumber());
 
         Move m = p.getMove();
@@ -193,7 +235,7 @@ public class MoveList extends GridPane {
         btn.setOnAction(e -> {
 
             try {
-                board.setPos(pos);
+                gameView.setPos(pos);
             } catch (Exception e1) {
             }
 

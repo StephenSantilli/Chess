@@ -14,6 +14,9 @@ import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 
+/**
+ * A visual representation of a piece in a chess game.
+ */
 public class GUIPiece {
 
     /** The {@link Piece} that this node represents. */
@@ -97,6 +100,8 @@ public class GUIPiece {
     }
 
     /**
+     * Gets the promote move.
+     * 
      * @return {@link #promoteMove}
      */
     public Move getPromoteMove() {
@@ -113,6 +118,8 @@ public class GUIPiece {
     }
 
     /**
+     * Gets the promotion callback.
+     * 
      * @return {@link #promoteCallback}
      */
     public Runnable getPromoteCallback() {
@@ -120,6 +127,8 @@ public class GUIPiece {
     }
 
     /**
+     * Gets the promotion response.
+     * 
      * @return {@link #promoteResponse}
      */
     public char getPromoteResponse() {
@@ -136,6 +145,8 @@ public class GUIPiece {
     }
 
     /**
+     * Gets the piece.
+     * 
      * @return {@link #piece}
      */
     public Piece getPiece() {
@@ -143,6 +154,8 @@ public class GUIPiece {
     }
 
     /**
+     * Gets the image that displays the piece.
+     * 
      * @return {@link #image}
      */
     public ImageView getImage() {
@@ -150,6 +163,8 @@ public class GUIPiece {
     }
 
     /**
+     * Gets whether or not the piece is already active.
+     * 
      * @return {@link #alreadyActive}
      */
     public boolean isAlreadyActive() {

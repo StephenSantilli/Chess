@@ -5,14 +5,29 @@ import gui.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
+/**
+ * The pane that displays the underlying squares of the board.
+ */
 public class Squares extends Pane {
 
+    /**
+     * The GameView that contains this pane.
+     */
     private GameView gameView;
 
+    /**
+     * Creates a new squares pane.
+     * 
+     * @param gameView The GameView that contains this pane.
+     */
     public Squares(GameView gameView) {
         this.gameView = gameView;
     }
 
+    /**
+     * Clears any previously drawn squares, then draws the new squares based on the
+     * current {@link Board#squareSize}.
+     */
     public void draw() {
 
         getChildren().clear();

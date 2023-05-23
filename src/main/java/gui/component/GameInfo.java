@@ -12,73 +12,76 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+/**
+ * A pane which displays information about the current game such as the timers,
+ * captured pieces, and names of the players.
+ */
 public class GameInfo extends VBox {
 
-    private GUITimer topTimer, bottomTimer;
-    private GUITimerHistory topTimerHistory, bottomTimerHistory;
-    private CapturedView topCap, bottomCap;
-    private Label topName, bottomName;
+    /**
+     * The timer that is displayed at the top.
+     */
+    private GUITimer topTimer;
+
+    /**
+     * The timer that is displayed at the bottom.
+     */
+    private GUITimer bottomTimer;
+
+    /**
+     * The "history" timer that is displayed at the top. Used when the user is
+     * looking at a past position to display the amount of time the player had on
+     * the timer at the end of that move.
+     */
+    private GUITimerHistory topTimerHistory;
+
+    /**
+     * The "history" timer that is displayed at the bottom. Used when the user is
+     * looking at a past position to display the amount of time the player had on
+     * the timer at the end of that move.
+     */
+    private GUITimerHistory bottomTimerHistory;
+
+    /**
+     * The captured pieces view that is at the top.
+     */
+    private CapturedView topCap;
+
+    /**
+     * The captured pieces view that is at the bottom.
+     */
+    private CapturedView bottomCap;
+
+    /**
+     * The name of the player that is at the top.
+     */
+    private Label topName;
+
+    /**
+     * The name of the player that is at the bottom.
+     */
+    private Label bottomName;
+
+    /**
+     * The spacer that divides the information at the top and the bottom.
+     */
     private Region spacer;
+
+    /**
+     * The GameView that contains this pane.
+     */
     private GameView gameView;
 
+    /**
+     * The piece transcoders used to display the captured pieces.
+     */
     private ArrayList<PieceTranscoder> transcoders;
 
-    public CapturedView getTopCap() {
-        return topCap;
-    }
-
-    public CapturedView getBottomCap() {
-        return bottomCap;
-    }
-
-    public GUITimer getTopTimer() {
-        return topTimer;
-    }
-
-    public void setTopTimer(GUITimer topTimer) {
-        this.topTimer = topTimer;
-    }
-
-    public GUITimer getBottomTimer() {
-        return bottomTimer;
-    }
-
-    public void setBottomTimer(GUITimer bottomTimer) {
-        this.bottomTimer = bottomTimer;
-    }
-
-    public GUITimerHistory getTopTimerHistory() {
-        return topTimerHistory;
-    }
-
-    public void setTopTimerHistory(GUITimerHistory topHistory) {
-        this.topTimerHistory = topHistory;
-    }
-
-    public GUITimerHistory getBottomTimerHistory() {
-        return bottomTimerHistory;
-    }
-
-    public void setBottomTimerHistory(GUITimerHistory bottomHistory) {
-        this.bottomTimerHistory = bottomHistory;
-    }
-
-    public Label getTopName() {
-        return topName;
-    }
-
-    public void setTopName(Label topName) {
-        this.topName = topName;
-    }
-
-    public Label getBottomName() {
-        return bottomName;
-    }
-
-    public void setBottomName(Label bottomName) {
-        this.bottomName = bottomName;
-    }
-
+    /**
+     * Creates a new game info pane.
+     * 
+     * @param gameView The GameView that contains this info pane.
+     */
     public GameInfo(GameView gameView) {
 
         this.gameView = gameView;
@@ -135,6 +138,135 @@ public class GameInfo extends VBox {
 
     }
 
+    /**
+     * Gets the top captured view.
+     * 
+     * @return {@link #topCap}
+     */
+    public CapturedView getTopCap() {
+        return topCap;
+    }
+
+    /**
+     * Gets the bottom captured view.
+     * 
+     * @return {@link #bottomCap}
+     */
+    public CapturedView getBottomCap() {
+        return bottomCap;
+    }
+
+    /**
+     * Gets the top timer view.
+     * 
+     * @return {@link #topTimer}
+     */
+    public GUITimer getTopTimer() {
+        return topTimer;
+    }
+
+    /**
+     * Sets the top timer view.
+     * 
+     * @param topTimer The timer to set it to.
+     */
+    public void setTopTimer(GUITimer topTimer) {
+        this.topTimer = topTimer;
+    }
+
+    /**
+     * Gets the bottom timer view.
+     * 
+     * @return {@link #bottomTimer}
+     */
+    public GUITimer getBottomTimer() {
+        return bottomTimer;
+    }
+
+    /**
+     * Sets the bottom timer view.
+     * 
+     * @param bottomTimer The timer to set it to.
+     */
+    public void setBottomTimer(GUITimer bottomTimer) {
+        this.bottomTimer = bottomTimer;
+    }
+
+    /**
+     * Gets the top timer history view.
+     * 
+     * @return {@link #topTimerHistory}
+     */
+    public GUITimerHistory getTopTimerHistory() {
+        return topTimerHistory;
+    }
+
+    /**
+     * Sets the top timer history view.
+     * 
+     * @param topHistory The timer history view to set it to.
+     */
+    public void setTopTimerHistory(GUITimerHistory topHistory) {
+        this.topTimerHistory = topHistory;
+    }
+
+    /**
+     * Gets the bottom timer history view.
+     * 
+     * @return {@link #bottomTimerHistory}
+     */
+    public GUITimerHistory getBottomTimerHistory() {
+        return bottomTimerHistory;
+    }
+
+    /**
+     * Sets the bottom timer history view.
+     * 
+     * @param bottomHistory The timer history view to set it to.
+     */
+    public void setBottomTimerHistory(GUITimerHistory bottomHistory) {
+        this.bottomTimerHistory = bottomHistory;
+    }
+
+    /**
+     * Gets the top name label.
+     * 
+     * @return {@link #topName}
+     */
+    public Label getTopName() {
+        return topName;
+    }
+
+    /**
+     * Sets the top name label.
+     * 
+     * @param topName The label to set the top name to.
+     */
+    public void setTopName(Label topName) {
+        this.topName = topName;
+    }
+
+    /**
+     * Gets the bottom name label.
+     * 
+     * @return {@link #bottomName}
+     */
+    public Label getBottomName() {
+        return bottomName;
+    }
+
+    /**
+     * Sets the bottom name label.
+     * 
+     * @param bottomName The label to set the bottom name to.
+     */
+    public void setBottomName(Label bottomName) {
+        this.bottomName = bottomName;
+    }
+
+    /**
+     * Updates the timers displayed in the info pane.
+     */
     public void updateTimers() {
 
         topTimer.update();
@@ -144,14 +276,6 @@ public class GameInfo extends VBox {
         topCap.draw();
         bottomCap.draw();
 
-    }
-
-    public Region getSpacer() {
-        return spacer;
-    }
-
-    public void setSpacer(Region spacer) {
-        this.spacer = spacer;
     }
 
     /**
@@ -168,7 +292,7 @@ public class GameInfo extends VBox {
         for (int i = 0; i < transcoders.size() && found == null; i++) {
 
             PieceTranscoder pt = transcoders.get(i);
-            if (pt.isColor() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
+            if (pt.isWhite() == piece.isWhite() && pt.getPieceCode() == piece.getCode())
                 found = pt;
 
         }
@@ -177,12 +301,17 @@ public class GameInfo extends VBox {
 
     }
 
+    /**
+     * Initializes the transcoders needed to display the captured pieces.
+     * 
+     * @throws Exception If there is an error transcoding the piece images.
+     */
     public void initPieceTranscoders() throws Exception {
 
         final Board board = gameView.getBoard();
         if (board == null)
             return;
-            
+
         final double pieceSize = board.getPieceSize();
 
         transcoders = new ArrayList<PieceTranscoder>();

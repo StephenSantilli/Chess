@@ -28,16 +28,32 @@ public class Highlights extends Pane {
      */
     private ArrayList<HighlightSquare> highlightedSquares;
 
-    public ArrayList<HighlightSquare> getHighlightedSquares() {
-        return highlightedSquares;
-    }
-
+    /**
+     * Creates a new highlights pane.
+     * 
+     * @param gameView The GameView which contains this pane.
+     */
     public Highlights(GameView gameView) {
         this.gameView = gameView;
         highlightedSquares = new ArrayList<>();
 
     }
 
+    /**
+     * Gets the squares that are currently highlighted.
+     * 
+     * @return {@link #highlightedSquares}
+     */
+    public ArrayList<HighlightSquare> getHighlightedSquares() {
+        return highlightedSquares;
+    }
+
+    /**
+     * Highlights a square.
+     * 
+     * @param square The square to highlight.
+     * @param color  The color of the highlight.
+     */
     public void highlight(Square square, int color) {
 
         HighlightSquare rect = new HighlightSquare(square, color, gameView);
@@ -61,6 +77,9 @@ public class Highlights extends Pane {
 
     }
 
+    /**
+     * Clears the user-added highlights and redraws the default highlights.
+     */
     public void draw() {
 
         getChildren().clear();
@@ -98,6 +117,9 @@ public class Highlights extends Pane {
 
     }
 
+    /**
+     * Redraws the highlights.
+     */
     public void redraw() {
 
         getChildren().clear();

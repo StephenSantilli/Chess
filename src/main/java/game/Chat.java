@@ -90,6 +90,8 @@ public class Chat {
     }
 
     /**
+     * Gets the player.
+     * 
      * @return {@link #player}
      */
     public Player getPlayer() {
@@ -97,6 +99,8 @@ public class Chat {
     }
 
     /**
+     * Gets the timestamp.
+     * 
      * @return {@link #timestamp}
      */
     public long getTimestamp() {
@@ -104,6 +108,8 @@ public class Chat {
     }
 
     /**
+     * Gets the message.
+     * 
      * @return {@link #message}
      */
     public String getMessage() {
@@ -111,6 +117,8 @@ public class Chat {
     }
 
     /**
+     * Gets whether or not this is a system message.
+     * 
      * @return {@link #systemMessage}
      */
     public boolean isSystemMessage() {
@@ -118,6 +126,8 @@ public class Chat {
     }
 
     /**
+     * Gets whether or not this is an error message.
+     * 
      * @return {@link #error}
      */
     public boolean isError() {

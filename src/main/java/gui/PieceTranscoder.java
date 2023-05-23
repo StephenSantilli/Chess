@@ -10,31 +10,46 @@ import org.apache.batik.transcoder.image.ImageTranscoder;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.ImageView;
 
+/**
+ * A transcoder for SVG icons of pieces. Will take a {@code .svg} image as input
+ * and transcode it into an image that can be displayed within the program.
+ */
 public class PieceTranscoder extends ImageTranscoder {
 
+    /**
+     * The image that was transcoded from an SVG.
+     */
     private BufferedImage img = null;
 
-    private final boolean color;
+    /**
+     * Whether or not the piece is white.
+     */
+    private final boolean white;
+
+    /**
+     * The code of the piece (e.g. 'K', 'P', etc.)
+     */
     private final char pieceCode;
+
+    /**
+     * The height and width, in pixels, that the pieces on the board are.
+     */
     private final double pieceSize;
 
-    public boolean isColor() {
-        return color;
-    }
-
-    public char getPieceCode() {
-        return pieceCode;
-    }
-
-    public double getPieceSize() {
-        return pieceSize;
-    }
-
-    public PieceTranscoder(double pieceSize, boolean color, char pieceCode) throws Exception {
+    /**
+     * Creates a new piece transcoder based on the current piece size, the color it
+     * should be, and the code it should be.
+     * 
+     * @param pieceSize The height and width the piece image should be.
+     * @param white     Whether or not the piece should be white.
+     * @param pieceCode The letter code of the piece.
+     * @throws Exception If there is an error transcoding the SVG.
+     */
+    public PieceTranscoder(double pieceSize, boolean white, char pieceCode) throws Exception {
 
         super();
 
-        this.color = color;
+        this.white = white;
         this.pieceCode = pieceCode;
         this.pieceSize = pieceSize;
 
@@ -44,7 +59,7 @@ public class PieceTranscoder extends ImageTranscoder {
         try {
 
             TranscoderInput input = new TranscoderInput(
-                    getClass().getResource("/img/" + (color ? "W" : "B") + pieceCode + ".svg").toURI().toString());
+                    getClass().getResource("/img/" + (white ? "W" : "B") + pieceCode + ".svg").toURI().toString());
 
             transcode(input, null);
 
@@ -54,7 +69,39 @@ public class PieceTranscoder extends ImageTranscoder {
 
     }
 
-    public ImageView getImageView() {
+    /**
+     * Gets whether or not the piece is white.
+     * 
+     * @return {@link #white}
+     */
+    public boolean isWhite() {
+        return white;
+    }
+
+    /**
+     * Gets the code of the piece (e.g. 'K', 'P', etc.)
+     * 
+     * @return {@link #pieceCode}
+     */
+    public char getPieceCode() {
+        return pieceCode;
+    }
+
+    /**
+     * Gets the height and width, in pixels, that the pieces on the board are.
+     * 
+     * @return {@link #pieceSize}
+     */
+    public double getPieceSize() {
+        return pieceSize;
+    }
+
+    /**
+     * Outputs the image as an {@code ImageView}.
+     * 
+     * @return The transcoded image as an image view.
+     */
+    public ImageView toImageView() {
 
         ImageView i = new ImageView(SwingFXUtils.toFXImage(img, null));
 

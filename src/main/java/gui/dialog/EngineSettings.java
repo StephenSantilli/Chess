@@ -27,10 +27,27 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+/**
+ * Dialog that allows the user to adjust the options of the engine.
+ */
 public class EngineSettings extends Stage {
 
+    /**
+     * The engine hook.
+     */
     private EngineHook hook;
 
+    /**
+     * The spinner that sets the best move depth.
+     */
+    private Spinner<Integer> bestMoveDepthSpinner;
+
+    /**
+     * Creates a new engine settings dialog.
+     * 
+     * @param window The window that owns this dialog.
+     * @param hook   The engine hook that this dialog is setting the settings of.
+     */
     public EngineSettings(Window window, EngineHook hook) {
 
         final UCIEngine engine = hook.getEngine();
@@ -49,85 +66,99 @@ public class EngineSettings extends Stage {
         sp.setFitToHeight(true);
         sp.setFitToWidth(true);
 
-        HBox db = new HBox();
-        db.setSpacing(5);
-        db.setAlignment(Pos.CENTER_LEFT);
+        // Non-UCI options
 
-        Label depth = new Label("Depth:");
-        Spinner<Integer> dSpinner = new Spinner<>(1, 999, hook.getDepth());
-        dSpinner.getValueFactory().valueProperty().addListener(v -> {
-            hook.setDepth(dSpinner.getValue());
+        // Depth of searching
+        HBox depthBox = new HBox();
+        depthBox.setSpacing(5);
+        depthBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label depthLabel = new Label("Depth:");
+        Spinner<Integer> depthSpinner = new Spinner<>(1, 999, hook.getDepth());
+        depthSpinner.getValueFactory().valueProperty().addListener(v -> {
+            hook.setDepth(depthSpinner.getValue());
         });
 
-        db.getChildren().addAll(depth, dSpinner);
+        depthBox.getChildren().addAll(depthLabel, depthSpinner);
 
-        HBox bm = new HBox();
-        bm.setSpacing(5);
-        bm.setAlignment(Pos.CENTER_LEFT);
+        // Best move checkbox
+        HBox bestMoveBox = new HBox();
+        bestMoveBox.setSpacing(5);
+        bestMoveBox.setAlignment(Pos.CENTER_LEFT);
 
-        Label bestM = new Label("Output best move:");
-        CheckBox bCheckBox = new CheckBox();
-        bCheckBox.setOnAction(ae -> hook.setBestMove(bCheckBox.isSelected()));
-        bCheckBox.setSelected(hook.isBestMove());
+        Label bestMoveLabel = new Label("Output best move:");
 
-        bm.getChildren().addAll(bestM, bCheckBox);
+        CheckBox bestMoveCheckBox = new CheckBox();
+        bestMoveCheckBox.setSelected(hook.isBestMove());
+        bestMoveCheckBox.setOnAction(ae -> toggleBestMove(bestMoveCheckBox.isSelected()));
 
-        HBox bd = new HBox();
-        bd.setSpacing(5);
-        bd.setAlignment(Pos.CENTER_LEFT);
+        bestMoveBox.getChildren().addAll(bestMoveLabel, bestMoveCheckBox);
 
-        Label bmdepth = new Label("Checking best move depth:");
-        Spinner<Integer> bdSpinner = new Spinner<>(1, 999, hook.getBestMoveDepth());
-        bdSpinner.getValueFactory().valueProperty().addListener(v -> {
-            hook.setBestMoveDepth(bdSpinner.getValue());
+        // Best move depth spinner
+        HBox bestMoveDepthBox = new HBox();
+        bestMoveDepthBox.setSpacing(5);
+        bestMoveDepthBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label bestMoveDepthLabel = new Label("Output best move depth:");
+        bestMoveDepthSpinner = new Spinner<>(1, 999, hook.getBestMoveDepth());
+        bestMoveDepthSpinner.setDisable(!bestMoveCheckBox.isSelected());
+
+        bestMoveDepthSpinner.getValueFactory().valueProperty().addListener(v -> {
+            hook.setBestMoveDepth(bestMoveDepthSpinner.getValue());
         });
 
-        bd.getChildren().addAll(bmdepth, bdSpinner);
+        bestMoveDepthBox.getChildren().addAll(bestMoveDepthLabel, bestMoveDepthSpinner);
 
-        vb.getChildren().addAll(db, bm, bd);
+        vb.getChildren().addAll(depthBox, bestMoveBox, bestMoveDepthBox);
 
-        final ArrayList<UCIOption> opts = engine.getOpts();
+        // End non-UCI options
+
+        final ArrayList<UCIOption<?>> opts = engine.getOpts();
 
         for (int i = 0; i < opts.size(); i++) {
 
-            final UCIOption o = opts.get(i);
+            final UCIOption<?> opt = opts.get(i);
 
-            HBox hb = new HBox();
-            hb.setSpacing(10);
+            HBox optBox = new HBox();
+            optBox.setSpacing(10);
 
-            Label l = new Label(o.getName() + ":");
-            l.setAlignment(Pos.CENTER_LEFT);
+            Label optLabel = new Label(opt.getName() + ":");
+            optLabel.setAlignment(Pos.CENTER_LEFT);
 
-            hb.getChildren().add(l);
-            hb.setAlignment(Pos.CENTER_LEFT);
+            optBox.getChildren().add(optLabel);
+            optBox.setAlignment(Pos.CENTER_LEFT);
 
-            if (o instanceof UCIButton) {
+            if (opt instanceof UCIButton) {
 
-                final UCIButton c = (UCIButton) o;
+                final UCIButton casted = (UCIButton) opt;
 
                 Button btn = new Button("Set");
                 btn.setAlignment(Pos.CENTER_LEFT);
 
                 btn.setOnAction(ae -> {
+
                     try {
 
-                        c.set(null);
+                        casted.set(null);
 
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 });
 
-                hb.getChildren().addAll(btn);
+                optBox.getChildren().addAll(btn);
 
-            } else if (o instanceof UCICheck) {
+            } else if (opt instanceof UCICheck) {
 
-                final UCICheck c = (UCICheck) o;
+                final UCICheck c = (UCICheck) opt;
 
                 CheckBox check = new CheckBox();
                 check.setAlignment(Pos.CENTER_LEFT);
                 check.setSelected(c.getValue());
+
                 check.setOnAction(ae -> {
+
                     try {
 
                         c.set(check.isSelected());
@@ -135,19 +166,22 @@ public class EngineSettings extends Stage {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 });
 
-                hb.getChildren().addAll(check);
+                optBox.getChildren().addAll(check);
 
-            } else if (o instanceof UCICombo) {
+            } else if (opt instanceof UCICombo) {
 
-                final UCICombo c = (UCICombo) o;
+                final UCICombo c = (UCICombo) opt;
 
                 ComboBox<String> combo = new ComboBox<>();
 
                 combo.getItems().setAll(c.getVars());
                 combo.setValue(c.getValue());
+
                 combo.setOnAction(ae -> {
+
                     try {
 
                         c.set(combo.getValue());
@@ -155,17 +189,20 @@ public class EngineSettings extends Stage {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 });
 
-                hb.getChildren().addAll(combo);
+                optBox.getChildren().addAll(combo);
 
-            } else if (o instanceof UCISpin) {
+            } else if (opt instanceof UCISpin) {
 
-                final UCISpin c = (UCISpin) o;
+                final UCISpin c = (UCISpin) opt;
 
                 Spinner<Integer> spin = new Spinner<Integer>(c.getMin(), c.getMax(), c.getValue());
                 spin.setEditable(true);
+
                 spin.getValueFactory().valueProperty().addListener(v -> {
+
                     try {
 
                         c.set(spin.getValue());
@@ -173,13 +210,14 @@ public class EngineSettings extends Stage {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 });
 
-                hb.getChildren().addAll(spin);
+                optBox.getChildren().addAll(spin);
 
-            } else if (o instanceof UCIString) {
+            } else if (opt instanceof UCIString) {
 
-                final UCIString c = (UCIString) o;
+                final UCIString c = (UCIString) opt;
 
                 TextField field = new TextField();
                 field.setAlignment(Pos.CENTER_LEFT);
@@ -187,6 +225,7 @@ public class EngineSettings extends Stage {
                 field.setText(c.getValue());
 
                 field.textProperty().addListener(v -> {
+
                     try {
 
                         c.set(field.getText());
@@ -194,48 +233,55 @@ public class EngineSettings extends Stage {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                 });
 
-                hb.getChildren().addAll(field);
+                optBox.getChildren().addAll(field);
 
             }
 
-            vb.getChildren().add(hb);
+            vb.getChildren().add(optBox);
 
         }
+
         vb.setSpacing(10);
+
         Button close = new Button("Close");
         close.setAlignment(Pos.CENTER_RIGHT);
         close.setOnAction(ae -> {
+
             try {
+
                 engine.waitReady();
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             hide();
+
         });
 
         HBox btns = new HBox(new Region(), close);
+
         vb.getChildren().add(btns);
 
         Scene s = new Scene(sp);
-        // setWidth(500);
-        // setMinWidth(500);
-        // setMinHeight(400);
-        // setHeight(400);
-        setOnShown(we -> {
-
-            // sizeToScene();
-
-            // setMaxHeight(getHeight());
-            // setMaxWidth(getWidth());
-
-        });
 
         setTitle("Engine Settings");
         setScene(s);
 
+    }
+
+    /**
+     * Toggles whether or not best moves should be displayed and appropriately
+     * disables the {@link #bestMoveDepthSpinner}.
+     * 
+     * @param selected Whether or not the "Output best move" box is selected.
+     */
+    private void toggleBestMove(boolean selected) {
+        hook.setBestMove(selected);
+        bestMoveDepthSpinner.setDisable(!selected);
     }
 
 }

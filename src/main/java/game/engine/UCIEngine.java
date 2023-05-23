@@ -14,101 +14,37 @@ import java.util.ArrayList;
  */
 public class UCIEngine {
 
+    /**
+     * The name of the engine.
+     */
     private String name;
+
+    /**
+     * The author of the engine.
+     */
     private String author;
 
+    /**
+     * The buffer of data received from the engine.
+     */
     protected BufferedReader input;
+
+    /**
+     * The buffer of data that is sent to the engine.
+     */
     protected BufferedWriter output;
 
-    protected ArrayList<UCIOption> opts;
+    /**
+     * The options associated with the engine.
+     */
+    protected ArrayList<UCIOption<?>> opts;
 
-    public ArrayList<UCIOption> getOpts() {
-        return opts;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    private void println(String command) throws IOException {
-        System.out.println("Outputting: " + command);
-        output.write(command + "\n");
-        output.flush();
-    }
-
-    public void waitReady() throws IOException {
-
-        println("isready");
-
-        String rec = input.readLine();
-        while (!rec.equals("readyok")) {
-            System.out.println(rec);
-            rec = input.readLine();
-        }
-        System.out.println(rec);
-
-    }
-
-    public void setPosition(String fen, String... moves) throws IOException {
-
-        println("position fen " + fen + " moves " + String.join(" ", moves));
-
-    }
-
-    public String getBestMove(int depth, long wtime, long btime, long winc, long binc) throws IOException {
-
-        String d = " depth " + depth;
-        if (depth <= 0)
-            d = "";
-
-        String wt = " wtime " + wtime;
-        if (wtime <= 0)
-            wt = "";
-
-        String bt = " btime " + btime;
-        if (btime <= 0)
-            bt = "";
-
-        String wi = " winc " + winc;
-        if (winc <= 0)
-            wi = "";
-
-        String bi = " binc " + binc;
-        if (binc <= 0)
-            bi = "";
-
-        println("go" + d + wt + bt + wi + bi);
-
-        String rec = input.readLine();
-        while (!rec.startsWith("bestmove ")) {
-            System.out.println(rec);
-            rec = input.readLine();
-        }
-
-        System.out.println(rec);
-        String[] sp = rec.split(" ");
-        return sp[1];
-
-    }
-
-    public void setOption(String name, String value) throws IOException {
-
-        println("setoption name " + name + " value " + value);
-
-    }
-
+    /**
+     * Finds and initializes the engine at the given path.
+     * 
+     * @param enginePath The location of the engine.
+     * @throws IOException If there is an error outputting to the engine.
+     */
     public UCIEngine(File enginePath) throws IOException {
 
         opts = new ArrayList<>();
@@ -200,6 +136,161 @@ public class UCIEngine {
         println("ucinewgame");
         waitReady();
 
+    }
+
+    /**
+     * Gets the options.
+     * 
+     * @return {@link #opts}
+     */
+    public ArrayList<UCIOption<?>> getOpts() {
+        return opts;
+    }
+
+    /**
+     * Gets the name.
+     * 
+     * @return {@link #name}
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name.
+     * 
+     * @param name The name.
+     * @see #name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the author.
+     * 
+     * @return {@link #author}
+     */
+    public String getAuthor() {
+        return author;
+    }
+
+    /**
+     * Sets the author.
+     * 
+     * @param author The author.
+     * @see #author
+     */
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    /**
+     * Waits for the engine to be ready. This method is blocking. Used to confirm an
+     * engine is ready after performing an operation.
+     * 
+     * @throws IOException If there is an error outputting to the engine.
+     */
+    public void waitReady() throws IOException {
+
+        println("isready");
+
+        String rec = input.readLine();
+        while (!rec.equals("readyok")) {
+            System.out.println(rec);
+            rec = input.readLine();
+        }
+        System.out.println(rec);
+
+    }
+
+    /**
+     * Tells the engine the current position of the game.
+     * 
+     * @param fen   The starting position in FEN notation.
+     * @param moves The moves that led up to the current position.
+     * @throws IOException If there is an error outputting to the engine.
+     */
+    public void setPosition(String fen, String... moves) throws IOException {
+
+        println("position fen " + fen + " moves " + String.join(" ", moves));
+
+    }
+
+    /**
+     * Gets the best move from the currently set position.
+     * 
+     * @param depth The depth to search for.
+     * @param wtime The amount of time white has left.
+     * @param btime The amount of time black has left.
+     * @param winc  The amount of time white gains per move.
+     * @param binc  The amount of time black gains per move.
+     * @return The best move in long algebraic notation.
+     * @throws IOException If there is an error outputting to the engine or
+     *                     receiving its response.
+     * 
+     * @see #setPosition(String, String...)
+     */
+    public String getBestMove(int depth, long wtime, long btime, long winc, long binc) throws IOException {
+
+        String d = " depth " + depth;
+        if (depth <= 0)
+            d = "";
+
+        String wt = " wtime " + wtime;
+        if (wtime <= 0)
+            wt = "";
+
+        String bt = " btime " + btime;
+        if (btime <= 0)
+            bt = "";
+
+        String wi = " winc " + winc;
+        if (winc <= 0)
+            wi = "";
+
+        String bi = " binc " + binc;
+        if (binc <= 0)
+            bi = "";
+
+        println("go" + d + wt + bt + wi + bi);
+
+        String rec = input.readLine();
+        while (!rec.startsWith("bestmove ")) {
+            System.out.println(rec);
+            rec = input.readLine();
+        }
+
+        System.out.println(rec);
+        String[] sp = rec.split(" ");
+        return sp[1];
+
+    }
+
+    /**
+     * Sets an option of the engine to the given value.
+     * 
+     * @param name  The name of the option to set.
+     * @param value The value to set the option to.
+     * @throws IOException If there is an error outputting to the engine.
+     * @see #waitReady()
+     */
+    public void setOption(String name, String value) throws IOException {
+
+        println("setoption name " + name + " value " + value);
+
+    }
+
+    /**
+     * Outputs a message to the engine.
+     * 
+     * @param command The command to output to the engine.
+     * @throws IOException If there is an error outputting to the engine.
+     */
+    private void println(String command) throws IOException {
+        System.out.println("Outputting: " + command);
+        output.write(command + "\n");
+        output.flush();
     }
 
 }

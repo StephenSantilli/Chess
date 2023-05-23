@@ -74,6 +74,7 @@ public class Opening {
      * @param code     The ECO code
      * @param name     The name of the opening
      * @param sequence A sequence of moves that leads to it
+     * @param fen      The FEN position that this opening leads to.
      */
     public Opening(String code, String name, String sequence, String fen) {
         this.code = code;

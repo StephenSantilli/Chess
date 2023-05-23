@@ -11,10 +11,21 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+/**
+ * The view which displays the previous chats sent.
+ */
 public class ChatHistoryBox extends VBox {
 
+    /**
+     * The GameView which contains this box.
+     */
     private GameView gameView;
 
+    /**
+     * Creates a new chat history box.
+     * 
+     * @param gameView The GameView which contains this chat history box.
+     */
     public ChatHistoryBox(GameView gameView) {
 
         this.gameView = gameView;
@@ -23,6 +34,11 @@ public class ChatHistoryBox extends VBox {
 
     }
 
+    /**
+     * Draws the chat history.
+     * 
+     * @param callback A callback to be executed when drawing the chats is complete.
+     */
     public void draw(Runnable callback) {
 
         getChildren().clear();

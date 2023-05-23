@@ -7,10 +7,24 @@ import java.util.ArrayList;
 import game.Game;
 import game.Player;
 
+/**
+ * A challenge which contains the details of a game offered to other players.
+ */
 public class Challenge {
 
+    /**
+     * The color of the client will be randomly selected before the game starts.
+     */
     public static final int CHALLENGE_RANDOM = 0;
+
+    /**
+     * The color of the client will be white.
+     */
     public static final int CHALLENGE_WHITE = 1;
+
+    /**
+     * The color of the client will be black.
+     */
     public static final int CHALLENGE_BLACK = 2;
 
     /** The version of the game the challenge is for. */
@@ -112,35 +126,72 @@ public class Challenge {
 
     }
 
+    /**
+     * Gets the starting FEN of the challenge.
+     * 
+     * @return {@link #fen}
+     */
     public String getFen() {
         return fen;
     }
 
+    /**
+     * Gets the version of the challenging client.
+     * 
+     * @return {@link #version}
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * Gets the name of the challenger.
+     * 
+     * @return {@link #name}
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the color of the challenger.
+     * 
+     * @return {@link #color}
+     */
     public int getColor() {
         return color;
     }
 
+    /**
+     * Gets the amount of time each side will have.
+     * 
+     * @return {@link #timePerSide}
+     */
     public long getTimePerSide() {
         return timePerSide;
     }
 
+    /**
+     * Gets the amount of time each side will gain after each move is made.
+     * 
+     * @return {@link #timePerMove}
+     */
     public long getTimePerMove() {
         return timePerMove;
     }
 
+    /**
+     * Gets the IP address of the other client.
+     * 
+     * @return {@link #address}
+     */
     public InetAddress getAddress() {
         return address;
     }
 
-    /** Outputs this challenge in text format that can be sent to other users. */
+    /**
+     * Outputs this challenge in text format that can be sent to other users.
+     */
     public String toString() {
 
         String str = version + ";" + name + ";" + fen + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
@@ -148,7 +199,7 @@ public class Challenge {
 
     }
 
-    /** 
+    /**
      * Checks if two challenges are equal.
      */
     @Override

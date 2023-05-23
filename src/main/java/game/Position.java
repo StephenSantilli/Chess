@@ -637,6 +637,8 @@ public class Position {
     }
 
     /**
+     * Gets the en passant target square for this position.
+     * 
      * @return {@link #enPassantTarget}
      */
     public Square getEnPassantTarget() {
@@ -644,6 +646,8 @@ public class Position {
     }
 
     /**
+     * Gets the move number.
+     * 
      * @return {@link #moveNumber}
      */
     public int getMoveNumber() {
@@ -651,6 +655,8 @@ public class Position {
     }
 
     /**
+     * Gets the two-dimensional array of the pieces.
+     * 
      * @return {@link #pieces}
      */
     public Piece[][] getPieces() {
@@ -676,6 +682,8 @@ public class Position {
     }
 
     /**
+     * Gets the position that will be redone if the player requests it.
+     * 
      * @return The {@link Position} that was previously after this {@link Position}.
      */
     public Position getRedo() {
@@ -728,6 +736,8 @@ public class Position {
     }
 
     /**
+     * Gets the list of moves.
+     * 
      * @return A list of the {@link Move} objects possible in this position. If
      *         {@code checkForMate} is {@code true} when constructor is called,
      *         moves that lead to check will not be included.
@@ -737,6 +747,8 @@ public class Position {
     }
 
     /**
+     * Gets the move that led to this position.
+     * 
      * @return Gets the current {@link Move} that led to this position.
      */
     public Move getMove() {
@@ -744,6 +756,8 @@ public class Position {
     }
 
     /**
+     * Gets whether or not it is white's turn in this position.
+     * 
      * @return Returns {@code true} if it is currently white's turn. Is the opposite
      *         color of the move that led to this position.
      */
@@ -752,6 +766,8 @@ public class Position {
     }
 
     /**
+     * Gets whether or not the current player is giving check.
+     * 
      * @return Returns {@code true} if the value of {@link #isWhite()} is giving
      *         check to the other color.
      */
@@ -760,6 +776,8 @@ public class Position {
     }
 
     /**
+     * Gets whether or not the curent player is in check.
+     * 
      * @return Returns {@code true} if the value of {@link #isWhite()} is in check
      *         from the other color.
      */
@@ -768,6 +786,8 @@ public class Position {
     }
 
     /**
+     * Gets whether or not this position is checkmate.
+     * 
      * @return Returns {@code true} if the current position is check mate. May be
      *         {@code null} if {@code checkForMate} was not true when constructor
      *         was called.

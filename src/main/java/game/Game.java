@@ -21,34 +21,113 @@ public class Game {
 
     /**
      * An enumeration of the result states of the game.
+     * 
+     * @see Reason
      */
     public enum Result {
 
+        /**
+         * The game has not started yet.
+         */
         NOT_STARTED,
+
+        /**
+         * The game is currently in progress.
+         */
         IN_PROGRESS,
+
+        /**
+         * White has won the game.
+         */
         WHITE_WIN,
+
+        /**
+         * Black has won the game.
+         */
         BLACK_WIN,
+
+        /**
+         * The game has concluded in a draw.
+         */
         DRAW,
+
+        /**
+         * The game was terminated.
+         */
         TERMINATED
 
     }
 
     /**
      * An enumeration of all the reasons for the {@link Result}.
+     * 
+     * @see Result
      */
     public enum Reason {
 
+        /**
+         * The game is in progress.
+         */
         IN_PROGRESS,
+
+        /**
+         * The game has concluded due to a checkmate by either side.
+         */
         CHECKMATE,
+
+        /**
+         * The game has concluded due to one side running out of time (flagfall.)
+         */
         FLAGFALL,
+
+        /**
+         * The game has concluded because black accepted a draw that white offered.
+         */
         WHITE_OFFERED_DRAW,
+
+        /**
+         * The game has concluded because white accepted a draw that black offered.
+         */
         BLACK_OFFERED_DRAW,
+
+        /**
+         * The game has concluded in a draw due to stalemate.
+         */
         STALEMATE,
+
+        /**
+         * The game has concluded in a draw due to a dead position because there are
+         * insufficient pieces for either side to perform a checkmate.
+         */
         DEAD_INSUFFICIENT_MATERIAL,
+
+        /**
+         * The game has concluded in a draw due to a dead position because there is no
+         * way a checkmate can be achieved.
+         */
         DEAD_NO_POSSIBLE_MATE,
+
+        // TODO support draw by repetition
+        /**
+         * The game has concluded in a draw because the same position was repeated three
+         * times over the course of the game.
+         */
         REPETITION,
+
+        /**
+         * The game has concluded in a draw because there has been no capture or pawn
+         * move in the last fifty moves (one hundred half-moves.)
+         */
         FIFTY_MOVE,
+
+        /**
+         * The game has concluded because either color has resigned.
+         */
         RESIGNATION,
+
+        /**
+         * The game has concluded for another reason.
+         */
         OTHER;
 
     }
@@ -151,6 +230,8 @@ public class Game {
      * @param whiteType The type of the white player.
      * @param blackType The type of the white player.
      * @param settings  The settings used for this game.
+     * @throws Exception If there is an error with the starting position or the
+     *                   player names are invalid.
      */
     public Game(String whiteName, String blackName, Player.Type whiteType, Player.Type blackType, GameSettings settings)
             throws Exception {
@@ -182,6 +263,7 @@ public class Game {
      * @param overridePGNSettings Whether or not the settings specified in
      *                            {@code settings} should override the settings
      *                            specified in the parsed PGN.
+     * @throws Exception If there is an error importing the parsed PGN.
      */
     public Game(PGNParser pgn, GameSettings settings, boolean overridePGNSettings) throws Exception {
 
@@ -341,6 +423,8 @@ public class Game {
     }
 
     /**
+     * Gets the position at the end of the list of positions.
+     * 
      * @return the most recent position, the last position in the list of
      *         positions
      */
@@ -349,6 +433,8 @@ public class Game {
     }
 
     /**
+     * Gets the second to last position in the list of positions.
+     * 
      * @return the second to last position in the list of positions.
      */
     public Position getPreviousPos() {
@@ -673,6 +759,8 @@ public class Game {
     }
 
     /**
+     * Gets if the game can be paused right now.
+     * 
      * @return If the game can be paused right now.
      */
     public boolean canPause() {
@@ -706,6 +794,8 @@ public class Game {
     }
 
     /**
+     * Gets if the game can be resumed right now.
+     * 
      * @return If the game can be resumed right now.
      */
     public boolean canResume() {
@@ -739,6 +829,8 @@ public class Game {
     }
 
     /**
+     * Gets if an undo can occur.
+     * 
      * @return If undoing is allowed, and there is a position to undo to.
      */
     public boolean canUndo() {
@@ -796,6 +888,8 @@ public class Game {
     }
 
     /**
+     * Gets if a redo can occur.
+     * 
      * @return If redoing is allowed, and there is a position to redo to.
      */
     public boolean canRedo() {
@@ -845,6 +939,8 @@ public class Game {
     }
 
     /**
+     * Gets if a draw offer can be sent.
+     * 
      * @return If a draw offer can be sent, meaning the game is currently in
      *         progress and there is no current offer.
      */

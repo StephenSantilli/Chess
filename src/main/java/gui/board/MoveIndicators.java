@@ -7,25 +7,55 @@ import gui.GameView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Ellipse;
 
+/**
+ * The pane that displays the indicators which show where the currently active
+ * piece can move to.
+ */
 public class MoveIndicators extends Pane {
 
+    /**
+     * The GameView that contains this pane.
+     */
     private GameView gameView;
+
+    /**
+     * The squares that can be moved to by the active piece.
+     */
     private ArrayList<Square> moveSquares;
 
-    public ArrayList<Square> getMoveSquares() {
-        return moveSquares;
-    }
-
+    /**
+     * Creates a new move indicators pane.
+     * 
+     * @param gameView The GameView that contains this pane.
+     */
     public MoveIndicators(GameView gameView) {
         this.gameView = gameView;
         moveSquares = new ArrayList<>();
     }
 
-    public void clear() {
-        getChildren().clear();
-        moveSquares.clear();
+    /**
+     * Gets the squares that can be moved to by the active piece.
+     * 
+     * @return {@link #moveSquares}
+     */
+    public ArrayList<Square> getMoveSquares() {
+        return moveSquares;
     }
 
+    /**
+     * Clears the move indicators.
+     */
+    public void clear() {
+
+        getChildren().clear();
+        moveSquares.clear();
+
+    }
+
+    /**
+     * Clears any previously drawn indicators, then draws the move indicators based
+     * on the currently active piece.
+     */
     public void draw() {
 
         getChildren().clear();

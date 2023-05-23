@@ -99,49 +99,63 @@ public class GameSettings {
     }
 
     /**
-     * @see #timePerSide
+     * Gets the starting FEN.
+     * 
+     * @return {@link #fen}
      */
     public String getFen() {
         return fen;
     }
 
     /**
-     * @see #timePerSide
+     * Gets the time each side has.
+     * 
+     * @return {@link #timePerSide}
      */
     public long getTimePerSide() {
         return timePerSide;
     }
 
     /**
-     * @see #timePerMove
+     * Gets the time each side gains per each move.
+     * 
+     * @return {@link #timePerMove}
      */
     public long getTimePerMove() {
         return timePerMove;
     }
 
     /**
-     * @see #canPause
+     * Gets if pausing is permitted.
+     * 
+     * @return {@link #canPause}
      */
     public boolean canPause() {
         return canPause;
     }
 
     /**
-     * @see #canUndo
+     * Gets if undoing is permitted.
+     * 
+     * @return {@link #canUndo}
      */
     public boolean canUndo() {
         return canUndo;
     }
 
     /**
-     * @see #whiteTimerManaged
+     * Gets if white's timer will be managed.
+     * 
+     * @return {@link #whiteTimerManaged}
      */
     public boolean isWhiteTimerManged() {
         return whiteTimerManaged;
     }
 
     /**
-     * @see #blackTimerManaged
+     * Gets if black's timer will be managed.
+     * 
+     * @return {@link #blackTimerManaged}
      */
     public boolean isBlackTimerManaged() {
         return blackTimerManaged;

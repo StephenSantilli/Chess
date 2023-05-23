@@ -12,8 +12,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+/**
+ * The menu bar tab that contains help options.
+ */
 public class HelpMenu extends Menu {
 
+    /**
+     * Creates a new "Help" menu tab.
+     */
     public HelpMenu() {
 
         super("Help");
@@ -29,6 +35,9 @@ public class HelpMenu extends Menu {
 
     }
 
+    /**
+     * Shows the "About" dialog, which contains information about the application.
+     */
     private void showAboutDialog() {
 
         Dialog<Void> aboutDialog = new Dialog<Void>();
@@ -60,6 +69,10 @@ public class HelpMenu extends Menu {
 
     }
 
+    /**
+     * Shows the engine dialog, which contains instructions on how to set up an
+     * engine to play against.
+     */
     private void showEngineDialog() {
 
         Dialog<Void> engineDialog = new Dialog<Void>();

@@ -23,6 +23,10 @@ import javafx.stage.WindowEvent;
  */
 public class Board extends StackPane {
 
+    /**
+     * The multiplier which determines how large the squares should be based on the
+     * size of the pieces.
+     */
     private static final double pieceSizeMultiplier = .85;
 
     /**
@@ -61,46 +65,117 @@ public class Board extends StackPane {
 
     }
 
+    /**
+     * The GameView that contains this board.
+     */
     private GameView gameView;
 
+    /**
+     * The pane which displays the underlying squares, with their checkerboard
+     * pattern.
+     */
     private Squares squarePane;
+
+    /**
+     * The pane which displays square highlights.
+     */
     private Highlights highlightPane;
+
+    /**
+     * The pane which displays the coordinate guides on the bottom rows and left
+     * columns.
+     */
     private Coordinates coordsPane;
+
+    /**
+     * The pane which shows the moves that are possible when a piece is active.
+     */
     private MoveIndicators moveIndicatorsPane;
+
+    /**
+     * The pane which draws the squares around the border that a piece is currently
+     * being dragged over.
+     */
     private SquareBorders borderPane;
+
+    /**
+     * The pane which displays the pieces.
+     */
     private Pieces piecePane;
+
+    /**
+     * The pane which displays the highlight arrows.
+     */
     private Arrows arrowPane;
+
+    /**
+     * The pane which indicates when the game is paused.
+     */
     private PauseView pausePane;
 
+    /**
+     * The height and width of the pieces, in pixels.
+     */
     private double pieceSize = 90;
 
+    /**
+     * The height and width of the squares, in pixels.
+     */
     private double squareSize = Math.round(pieceSize / pieceSizeMultiplier);
+
+    /**
+     * The currently active piece.
+     */
     private GUIPiece active;
 
+    /**
+     * The piece that is currently being dragged.
+     */
     private GUIPiece dragging;
 
+    /**
+     * The layout bounds of the board in its scene.
+     */
     private Bounds boardBounds;
 
+    /**
+     * The mouse event where the user first clicked to start resizing. Will be
+     * {@code null} when the user is not currently resizing the board.
+     */
     private MouseEvent resizing;
+
+    /**
+     * The mouse event where the user first clicked to start drawing a highlight
+     * arrow. Will be {@code null} when the user is not currently drawing an arrow.
+     */
     private MouseEvent arrowing;
 
+    /**
+     * The event that is triggered when the board is resized.
+     */
     private final ChangeListener<Number> resizeEvent = (obs, o, n) -> {
 
         Platform.runLater(() -> {
 
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
-            gameView.getOpeningLabel().update();
+            gameView.getOpeningLabelPane().update();
 
         });
 
     };
 
+    /**
+     * The event that is triggered when the mouse is moved.
+     */
     private final EventHandler<MouseEvent> mouseMoved = ev -> {
 
         setMouseType(ev.getSceneX(), ev.getSceneY());
 
     };
 
+    /**
+     * The event that is triggered when the mouse is pressed down.
+     */
     private final EventHandler<MouseEvent> mousePressed = ev -> {
 
         if (ev.getButton() != MouseButton.PRIMARY)
@@ -137,9 +212,12 @@ public class Board extends StackPane {
 
         setMouseType(ev.getSceneX(), ev.getSceneY());
 
-
     };
 
+    /**
+     * The event that is triggered when the mouse is dragged (meaning the mouse is
+     * moving while the button is down.)
+     */
     private final EventHandler<MouseEvent> mouseDragged = ev -> {
 
         if (ev.getButton() == MouseButton.SECONDARY && arrowing == null) {
@@ -155,7 +233,6 @@ public class Board extends StackPane {
 
         if (resizing != null) {
 
-
             squareSize = Math.min(
                     Math.min(Math.max(150, ev.getSceneX()), getScene().getWidth() - 280),
                     Math.min(Math.max(150, ev.getSceneY()), getScene().getHeight() - 40))
@@ -170,7 +247,7 @@ public class Board extends StackPane {
             setHeight(squareSize * 8);
 
             boardBounds = localToScene(new BoundingBox(0, 0, squareSize * 8, squareSize * 8));
-            gameView.getOpeningLabel().update();
+            gameView.getOpeningLabelPane().update();
 
             squarePane.draw();
             coordsPane.draw();
@@ -197,8 +274,10 @@ public class Board extends StackPane {
 
     };
 
+    /**
+     * The event that is triggered when the mouse is released.
+     */
     private final EventHandler<MouseEvent> mouseReleased = e -> {
-
 
         if (arrowing != null) {
 
@@ -258,7 +337,7 @@ public class Board extends StackPane {
                 moveIndicatorsPane.setVisible(true);
                 piecePane.setVisible(true);
                 piecePane.initPieceTranscoders();
-                gameView.getInfoPane().initPieceTranscoders();
+                gameView.getGameInfoPane().initPieceTranscoders();
                 draw();
 
             } catch (Exception ex) {
@@ -337,7 +416,7 @@ public class Board extends StackPane {
                         coordsPane.draw();
 
                         piecePane.initPieceTranscoders();
-                        gameView.getInfoPane().initPieceTranscoders();
+                        gameView.getGameInfoPane().initPieceTranscoders();
 
                     } catch (Exception e) {
                     }
@@ -346,74 +425,102 @@ public class Board extends StackPane {
 
     }
 
+    /**
+     * Gets the GameView that contains this board.
+     * 
+     * @return The GameView that contains this board.
+     */
     public GameView getGameView() {
         return gameView;
     }
 
+    /**
+     * Gets the square pane.
+     * 
+     * @return {@link #squarePane}
+     */
     public Squares getSquarePane() {
         return squarePane;
     }
 
-    public void setSquarePane(Squares squarePane) {
-        this.squarePane = squarePane;
-    }
-
+    /**
+     * Gets the highlight pane.
+     * 
+     * @return {@link #highlightPane}
+     */
     public Highlights getHighlightPane() {
         return highlightPane;
     }
 
-    public void setHighlightPane(Highlights highlightPane) {
-        this.highlightPane = highlightPane;
-    }
-
+    /**
+     * Gets the border pane.
+     * 
+     * @return {@link #borderPane}
+     */
     public SquareBorders getBorderPane() {
         return borderPane;
     }
 
-    public void setBorderPane(SquareBorders borderPane) {
-        this.borderPane = borderPane;
-    }
-
+    /**
+     * Gets the move indicators pane.
+     * 
+     * @return {@link #moveIndicatorsPane}
+     */
     public MoveIndicators getMoveIndicatorsPane() {
         return moveIndicatorsPane;
     }
 
-    public void setMovesCanvas(MoveIndicators moveIndicatorsPane) {
-        this.moveIndicatorsPane = moveIndicatorsPane;
-    }
-
+    /**
+     * Gets the piece pane.
+     * 
+     * @return {@link #piecePane}
+     */
     public Pieces getPiecePane() {
         return piecePane;
     }
 
-    public void setPiecePane(Pieces piecePane) {
-        this.piecePane = piecePane;
-    }
-
+    /**
+     * Gets the pause pane.
+     * 
+     * @return {@link #pausePane}
+     */
     public PauseView getPausePane() {
         return pausePane;
     }
 
+    /**
+     * Gets the height and width of the squares, in pixels.
+     * 
+     * @return {@link #squareSize}
+     */
     public double getSquareSize() {
         return squareSize;
     }
 
-    public void setSquareSize(double squareSize) {
-        this.squareSize = squareSize;
-    }
-
+    /**
+     * Gets the height and width of the pieces, in pixels.
+     * 
+     * @return {@link #pieceSize}
+     */
     public double getPieceSize() {
         return pieceSize;
     }
 
-    public void setPieceSize(double pieceSize) {
-        this.pieceSize = pieceSize;
-    }
-
+    /**
+     * Gets the currently active piece.
+     * 
+     * @return {@link #active}
+     */
     public GUIPiece getActive() {
         return active;
     }
 
+    /**
+     * Sets the currently active piece.
+     * 
+     * @param active The currently active piece. May be {@code null} if the active
+     *               piece is to be cleared.
+     */
     public void setActive(GUIPiece active) {
 
         if (this.active != null && (active == null || !this.active.getPiece().equals(active.getPiece())))
@@ -424,38 +531,84 @@ public class Board extends StackPane {
         activeUpdated();
     }
 
+    /**
+     * Gets the piece that is currently being dragged.
+     * 
+     * @return {@link #dragging}
+     */
     public GUIPiece getDragging() {
         return dragging;
     }
 
+    /**
+     * Sets the piece that is currently being dragged.
+     * 
+     * @param dragging The piece currently being dragged. May be {@code null} if the
+     *                 active piece is to be cleared.
+     */
     public void setDragging(GUIPiece dragging) {
         this.dragging = dragging;
     }
 
+    /**
+     * Gets the layout bounds of the board in its scene.
+     * 
+     * @return {@link #boardBounds}
+     */
     public Bounds getBoardBounds() {
         return boardBounds;
     }
 
+    /**
+     * Sets the layout bounds of the board in its scene.
+     * 
+     * @param boardBounds The new bounds.
+     */
     public void setBoardBounds(Bounds boardBounds) {
         this.boardBounds = boardBounds;
     }
 
+    /**
+     * Gets the resize event.
+     * 
+     * @return {@link #resizeEvent}
+     */
     public ChangeListener<Number> getResizeEvent() {
         return resizeEvent;
     }
 
+    /**
+     * Gets the mouse moved event.
+     * 
+     * @return {@link #mouseMoved}
+     */
     public EventHandler<MouseEvent> getMouseMoved() {
         return mouseMoved;
     }
 
+    /**
+     * Gets the mouse released event.
+     * 
+     * @return {@link #mouseReleased}
+     */
     public EventHandler<MouseEvent> getMouseReleased() {
         return mouseReleased;
     }
 
+    /**
+     * Gets the mouse pressed event.
+     * 
+     * @return {@link #mousePressed}
+     */
     public EventHandler<MouseEvent> getMousePressed() {
         return mousePressed;
     }
 
+    /**
+     * Gets the mouse dragged event.
+     * 
+     * @return {@link #mouseDragged}
+     */
     public EventHandler<MouseEvent> getMouseDragged() {
         return mouseDragged;
     }
@@ -489,19 +642,19 @@ public class Board extends StackPane {
             gameView.getGameMenu().update();
             gameView.getViewMenu().update();
 
-            gameView.getInfoPane().updateTimers();
+            gameView.getGameInfoPane().updateTimers();
 
-            gameView.getMoveList().initMoveList();
+            gameView.getMoveListPane().initMoveList();
 
-            gameView.getInfoPane().getTopName().setText("");
-            gameView.getInfoPane().getBottomName().setText("");
+            gameView.getGameInfoPane().getTopName().setText("");
+            gameView.getGameInfoPane().getBottomName().setText("");
 
             setActive(null);
             setDragging(null);
 
             piecePane.draw();
 
-            gameView.getOpeningLabel().update();
+            gameView.getOpeningLabelPane().update();
 
             return;
 
@@ -520,23 +673,24 @@ public class Board extends StackPane {
 
         piecePane.draw(backward, ani ? p1 : null, p2);
 
-        gameView.getInfoPane().getTopTimer().setWhite(gameView.isFlipped());
-        gameView.getInfoPane().getTopTimerHistory().setWhite(gameView.isFlipped());
+        gameView.getGameInfoPane().getTopTimer().setWhite(gameView.isFlipped());
+        gameView.getGameInfoPane().getTopTimerHistory().setWhite(gameView.isFlipped());
 
-        gameView.getInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
-        gameView.getInfoPane().getBottomTimerHistory().setWhite(!gameView.isFlipped());
+        gameView.getGameInfoPane().getBottomTimer().setWhite(!gameView.isFlipped());
+        gameView.getGameInfoPane().getBottomTimerHistory().setWhite(!gameView.isFlipped());
 
-        gameView.getInfoPane().getTopCap().setWhite(gameView.isFlipped());
-        gameView.getInfoPane().getBottomCap().setWhite(!gameView.isFlipped());
+        gameView.getGameInfoPane().getTopCap().setWhite(gameView.isFlipped());
+        gameView.getGameInfoPane().getBottomCap().setWhite(!gameView.isFlipped());
 
-        gameView.getInfoPane().updateTimers();
+        gameView.getGameInfoPane().updateTimers();
 
-        gameView.getInfoPane().getTopName().setText(gameView.getGame().getPlayer(gameView.isFlipped()).getName());
-        gameView.getInfoPane().getBottomName().setText(gameView.getGame().getPlayer(!gameView.isFlipped()).getName());
+        gameView.getGameInfoPane().getTopName().setText(gameView.getGame().getPlayer(gameView.isFlipped()).getName());
+        gameView.getGameInfoPane().getBottomName()
+                .setText(gameView.getGame().getPlayer(!gameView.isFlipped()).getName());
 
         borderPane.drawBorder(null);
 
-        gameView.getOpeningLabel().update();
+        gameView.getOpeningLabelPane().update();
 
         activeUpdated();
 

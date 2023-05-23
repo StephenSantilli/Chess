@@ -36,11 +36,33 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.stage.WindowEvent;
 
+/**
+ * The display of a game of chess including the board, timers, move list, chat,
+ * etc.
+ */
 public class GameView extends HBox implements GameListener {
 
-    public static final int TWO_PLAYER = 0;
-    public static final int WHITE = 1;
-    public static final int BLACK = 2;
+    /**
+     * An enumeration of the various colors the active user can be in the game view.
+     */
+    public enum Color {
+
+        /**
+         * The game is a two-player (pass and play) game.
+         */
+        TWO_PLAYER,
+
+        /**
+         * The user using this GameView is playing as white.
+         */
+        WHITE,
+
+        /**
+         * The user using this GameView is playing as black.
+         */
+        BLACK;
+
+    }
 
     /**
      * Takes the numeric reason code for the game ending and turns it into text.
@@ -74,57 +96,148 @@ public class GameView extends HBox implements GameListener {
         }
 
     }
+
+    /**
+     * The game that this GameView represents.
+     */
     private Game game;
+
+    /**
+     * The LAN client that this GameView represents. Will be null if this is not a
+     * LAN game.
+     */
     private Client client;
 
+    /**
+     * The engine hook that this GameView represents. Will be null if this is not a
+     * game against an engine.
+     */
     private EngineHook engine;
 
+    /**
+     * The {@link App} that contains this GameView.
+     */
     private App app;
-    private GameInfo infoPane;
+
+    /**
+     * The {@link GameInfo} pane contained in this GameView.
+     */
+    private GameInfo gameInfoPane;
+
+    /**
+     * The {@link Board} pane contained in this GameView.
+     */
     private Board board;
 
-    private GridPane listAndChat;
-    private OpeningLabel openingLabel;
+    /**
+     * The pane containing the move list and chat box in this GameView.
+     */
+    private GridPane listAndChatPane;
 
-    private MoveList moveList;
+    /**
+     * The {@link OpeningLabel} pane contained in this GameView.
+     */
+    private OpeningLabel openingLabelPane;
+
+    /**
+     * The {@link MoveList} pane contained in this GameView.
+     */
+    private MoveList moveListPane;
+
+    /**
+     * The scroll pane that contains the {@link #moveListPane}, allowing its
+     * contents to be scrolled.
+     */
     private ScrollPane scrollMoveList;
+
+    /**
+     * The {@link ChatArea} pane contained in this GameView.
+     */
     private ChatArea chatBox;
 
+    /**
+     * The parent menu bar managed by this GameView.
+     */
     private BarMenu menuBar;
+
+    /**
+     * The {@link GameMenu} contained in {@link #menuBar}.
+     */
     private GameMenu gameMenu;
+
+    /**
+     * The {@link ViewMenu} contained in {@link #menuBar}.
+     */
     private ViewMenu viewMenu;
+
+    /**
+     * The {@link EngineMenu} contained in {@link #menuBar}.
+     */
     private EngineMenu engineMenu;
 
+    /**
+     * The dialog shown to the user when they are offered a draw by the other
+     * player.
+     */
     private Draw drawDialog;
 
-    private int color;
+    /**
+     * The {@link Color} of the user who is using this GameView.
+     */
+    private Color color;
+
+    /**
+     * The index of the {@link Position} currently being displayed by this GameView.
+     */
     private int currentPos;
 
+    /**
+     * Whether or not the board is flipped.
+     * 
+     * <p>
+     * Note that the board being flipped ({@code flipped} being {@code true}) simply
+     * means that white's pieces are displayed on top and black's pieces are
+     * displayed on the bottom of the screen, regardless of the value of
+     * {@link #color}.
+     */
     private boolean flipped;
+
+    /**
+     * Whether or not the board should automatically flip so that the color whose
+     * turn it is will be on the bottom after each move is made.
+     * 
+     * <p>
+     * Only works when {@link #color} is equal to {@link Color.TWO_PLAYER}.
+     */
     private boolean autoFlip;
 
-    // Getters/Setters
-
-    public GameView(App app, BarMenu menuBar) throws Exception {
+    /**
+     * Creates a new game view.
+     * 
+     * @param app     The app that will contain this GameView.
+     * @param menuBar The menu bar that will contain the menus managed by this
+     *                GameView.
+     */
+    public GameView(App app, BarMenu menuBar) {
 
         this.app = app;
         this.menuBar = menuBar;
 
-        color = TWO_PLAYER;
+        color = Color.TWO_PLAYER;
         flipped = false;
 
         // Info Pane
-        infoPane = new GameInfo(this);
+        gameInfoPane = new GameInfo(this);
 
         // Move list & chat box
-        openingLabel = new OpeningLabel(this);
+        openingLabelPane = new OpeningLabel(this);
 
         scrollMoveList = new ScrollPane();
         scrollMoveList.setId("scrollMoveList");
 
-        moveList = new MoveList(this, scrollMoveList);
+        moveListPane = new MoveList(this, scrollMoveList);
 
-        scrollMoveList.setContent(moveList);
+        scrollMoveList.setContent(moveListPane);
         scrollMoveList.setMaxWidth(Double.MAX_VALUE);
 
         chatBox = new ChatArea(this);
@@ -132,10 +245,10 @@ public class GameView extends HBox implements GameListener {
 
         GridPane.setHgrow(scrollMoveList, Priority.ALWAYS);
         GridPane.setHgrow(chatBox, Priority.ALWAYS);
-        GridPane.setHgrow(openingLabel, Priority.ALWAYS);
+        GridPane.setHgrow(openingLabelPane, Priority.ALWAYS);
 
-        listAndChat = new GridPane();
-        listAndChat.setId("listAndChat");
+        listAndChatPane = new GridPane();
+        listAndChatPane.setId("listAndChat");
 
         RowConstraints ro = new RowConstraints();
         ro.setFillHeight(true);
@@ -154,12 +267,12 @@ public class GameView extends HBox implements GameListener {
         col.setMinWidth(250);
         col.setMaxWidth(350);
 
-        listAndChat.getRowConstraints().setAll(ro, rm, cm);
-        listAndChat.getColumnConstraints().setAll(col);
+        listAndChatPane.getRowConstraints().setAll(ro, rm, cm);
+        listAndChatPane.getColumnConstraints().setAll(col);
 
-        listAndChat.add(openingLabel, 0, 0);
-        listAndChat.add(scrollMoveList, 0, 1);
-        listAndChat.add(chatBox, 0, 2);
+        listAndChatPane.add(openingLabelPane, 0, 0);
+        listAndChatPane.add(scrollMoveList, 0, 1);
+        listAndChatPane.add(chatBox, 0, 2);
 
         // Board
         board = new Board(this);
@@ -186,111 +299,234 @@ public class GameView extends HBox implements GameListener {
         initMenus();
 
         // Game view
-        getChildren().addAll(infoPane, board, listAndChat);
+        getChildren().addAll(gameInfoPane, board, listAndChatPane);
 
-        listAndChat.setViewOrder(1);
-        infoPane.setViewOrder(1);
+        listAndChatPane.setViewOrder(1);
+        gameInfoPane.setViewOrder(1);
         board.setViewOrder(0);
 
-        HBox.setHgrow(infoPane, Priority.ALWAYS);
+        HBox.setHgrow(gameInfoPane, Priority.ALWAYS);
         HBox.setHgrow(board, Priority.SOMETIMES);
-        HBox.setHgrow(listAndChat, Priority.ALWAYS);
+        HBox.setHgrow(listAndChatPane, Priority.ALWAYS);
 
         board.draw();
 
     }
 
-    public OpeningLabel getOpeningLabel() {
-        return openingLabel;
+    /**
+     * Gets the opening label pane.
+     * 
+     * @return {@link #openingLabelPane}.
+     */
+    public OpeningLabel getOpeningLabelPane() {
+        return openingLabelPane;
     }
 
+    /**
+     * Gets the app that contains this GameView.
+     * 
+     * @return {@link #app}
+     */
     public App getApp() {
         return app;
     }
 
+    /**
+     * Gets the board.
+     * 
+     * @return {@link #board}
+     */
     public Board getBoard() {
         return board;
     }
 
+    /**
+     * Gets the engine hook.
+     * 
+     * @return {@link #engine}
+     */
     public EngineHook getEngine() {
         return engine;
     }
 
+    /**
+     * Sets the engine hook.
+     * 
+     * @param engine The engine hook to set {@link #engine} to.
+     */
     public void setEngine(EngineHook engine) {
         this.engine = engine;
     }
 
-    public GameInfo getInfoPane() {
-        return infoPane;
+    /**
+     * Gets the {@link GameInfo} pane.
+     * 
+     * @return {@link #gameInfoPane}
+     */
+    public GameInfo getGameInfoPane() {
+        return gameInfoPane;
     }
 
-    public MoveList getMoveList() {
-        return moveList;
+    /**
+     * Gets the {@link MoveList} pane.
+     * 
+     * @return {@link #moveListPane}
+     */
+    public MoveList getMoveListPane() {
+        return moveListPane;
     }
 
+    /**
+     * Gets the scroll pane that contains {@link #moveListPane}.
+     * 
+     * @return {@link #scrollMoveList}
+     */
     public ScrollPane getScrollMoveList() {
         return scrollMoveList;
     }
 
+    /**
+     * Gets the {@link BarMenu} that contains the menu items managed by this
+     * GameView.
+     * 
+     * @return {@link #menuBar}
+     */
     public BarMenu getMenuBar() {
         return menuBar;
     }
 
+    /**
+     * Gets the {@link GameMenu} menu.
+     * 
+     * @return {@link #gameMenu}
+     */
     public GameMenu getGameMenu() {
         return gameMenu;
     }
 
+    /**
+     * Gets the {@link ViewMenu} menu.
+     * 
+     * @return {@link #viewMenu}
+     */
     public ViewMenu getViewMenu() {
         return viewMenu;
     }
 
+    /**
+     * Gets the {@link EngineMenu} menu.
+     * 
+     * @return {@link #engineMenu}
+     */
+    public EngineMenu getEngineMenu() {
+        return engineMenu;
+    }
+
+    /**
+     * Gets the {@link Draw} dialog.
+     * 
+     * @return {@link #drawDialog}
+     */
     public Draw getDrawDialog() {
         return drawDialog;
     }
 
+    /**
+     * Gets the game represented by this GameView.
+     * 
+     * @return {@link #game}
+     */
     public Game getGame() {
         return game;
     }
 
+    /**
+     * Sets the game represented by this GameView.
+     * 
+     * @param game The game to set {@link #game} to.
+     */
     public void setGame(Game game) {
         this.game = game;
     }
 
+    /**
+     * Gets the client represented by this GameView.
+     * 
+     * @return {@link #client}
+     */
     public Client getClient() {
         return client;
     }
 
+    /**
+     * Sets the client represented by this GameView.
+     * 
+     * @param client The client to set {@link #client} to.
+     */
     public void setClient(Client client) {
         this.client = client;
     }
 
-    public int getColor() {
+    /**
+     * Gets the color of the user using this GameView.
+     * 
+     * @return {@link #color}
+     */
+    public Color getColor() {
         return color;
     }
 
+    /**
+     * Gets the index of the curent {@link game.Position} being displayed by this
+     * GameView.
+     * 
+     * @return {@link #currentPos}
+     */
     public int getCurrentPos() {
         return currentPos;
     }
 
+    /**
+     * Changes the curent {@link game.Position} being displayed by this
+     * GameView.
+     * 
+     * @param pos The index of the position.
+     */
     public void setCurrentPos(int pos) {
         this.currentPos = pos;
     }
 
+    /**
+     * Whether or not the board is flipped.
+     * 
+     * @return {@link #flipped}
+     * @see #flipped
+     */
     public boolean isFlipped() {
         return flipped;
     }
 
+    /**
+     * Whether or not the board will automatically flip.
+     * 
+     * @return {@link #autoFlip}
+     * @see #autoFlip
+     */
     public boolean isAutoFlip() {
         return autoFlip;
     }
 
-    // Actions
-
+    /**
+     * Checks if it is {@link #color}'s turn. Will always return true when
+     * {@link #color} is equal to {@link gui.GameView.Color#TWO_PLAYER}.
+     * 
+     * @return If it is the player's turn.
+     */
     public boolean isTurn() {
 
-        return color == TWO_PLAYER
-                || (color == BLACK && !game.getLastPos().isWhite())
-                || (color == WHITE && game.getLastPos().isWhite());
+        return color.equals(Color.TWO_PLAYER)
+                || (color.equals(Color.BLACK) && !game.getLastPos().isWhite())
+                || (color.equals(Color.WHITE) && game.getLastPos().isWhite());
 
     }
 
@@ -308,7 +544,7 @@ public class GameView extends HBox implements GameListener {
         board.draw(Math.abs(pos - old) == 1, game.getPositions().get(old), game.getPositions().get(currentPos),
                 old > currentPos);
 
-        moveList.posChanged(currentPos);
+        moveListPane.posChanged(currentPos);
 
     }
 
@@ -379,10 +615,8 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    // Drawing
-
     /**
-     * Shows the user the game setup dialog.
+     * Shows the user the game setup dialog and allows them to create a new game.
      */
     public void startGame() {
 
@@ -422,11 +656,11 @@ public class GameView extends HBox implements GameListener {
             engine = setup.getEngine();
 
             if (client == null && engine == null)
-                color = TWO_PLAYER;
+                color = Color.TWO_PLAYER;
             else if (client != null)
-                color = setup.isWhite() ? WHITE : BLACK;
+                color = setup.isWhite() ? Color.WHITE : Color.BLACK;
             else if (engine != null)
-                color = !engine.isWhite() ? WHITE : BLACK;
+                color = !engine.isWhite() ? Color.WHITE : Color.BLACK;
 
             currentPos = 0;
 
@@ -435,13 +669,13 @@ public class GameView extends HBox implements GameListener {
                 if (client == null)
                     game.startGame();
                 else {
-                    moveList.initMoveList();
+                    moveListPane.initMoveList();
                     chatBox.update();
                     engineMenu.setVisible(engine != null);
 
                     goToLastPos();
 
-                    if (color != TWO_PLAYER && isFlipped() == (color == WHITE))
+                    if (!color.equals(Color.TWO_PLAYER) && isFlipped() == (color.equals(Color.WHITE)))
                         flip();
 
                     if (!app.getStage().isFocused())
@@ -466,12 +700,10 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    // Initializers
-
     /**
      * Handles key events.
      * 
-     * @param ev The event from pressing the key.
+     * @param ev The eventfrom pressing the key.
      */
     public void keyHandler(KeyEvent ev) {
 
@@ -502,8 +734,6 @@ public class GameView extends HBox implements GameListener {
 
     }
 
-    // Event Handlers
-
     @Override
     public void onPlayerEvent(GameEvent event) {
         if (game == null)
@@ -511,13 +741,13 @@ public class GameView extends HBox implements GameListener {
         Platform.runLater(() -> {
             if (event.getType() == Type.STARTED) {
 
-                moveList.initMoveList();
+                moveListPane.initMoveList();
                 chatBox.update();
                 engineMenu.setVisible(engine != null);
 
                 goToLastPos();
 
-                if (color != TWO_PLAYER && isFlipped() == (color == WHITE))
+                if (!color.equals(Color.TWO_PLAYER) && isFlipped() == (color.equals(Color.WHITE)))
                     flip();
 
                 if (!app.getStage().isFocused())
@@ -527,25 +757,26 @@ public class GameView extends HBox implements GameListener {
 
                 currentPos = event.getCurrIndex();
 
-                if (color == TWO_PLAYER && autoFlip && game.getLastPos().isWhite() == flipped)
+                if (color.equals(Color.TWO_PLAYER) && autoFlip && game.getLastPos().isWhite() == flipped)
                     flip();
 
                 board.draw(true, event.getPrev(), event.getCurr(), event.getPrevIndex() > event.getCurrIndex());
 
-                moveList.boardUpdated();
-                moveList.posChanged(currentPos);
+                moveListPane.boardUpdated();
+                moveListPane.posChanged(currentPos);
 
                 gameMenu.update();
                 viewMenu.update();
 
-                if (color != TWO_PLAYER && event.getCurr().isWhite() != (color == WHITE)) {
+                if (!color.equals(Color.TWO_PLAYER) && event.getCurr().isWhite() != (color.equals(Color.WHITE))) {
                     if (!app.getStage().isFocused())
                         app.getStage().toFront();
                 }
 
             } else if (event.getType() == Type.DRAW_OFFER) {
 
-                if ((color == WHITE || color == BLACK) && game.getDrawOfferer().isWhite() == (color == WHITE))
+                if ((color.equals(Color.WHITE) || color.equals(Color.BLACK))
+                        && game.getDrawOfferer().isWhite() == (color.equals(Color.WHITE)))
                     return;
 
                 drawDialog = new Draw(this, game.getPlayer(client.isOppWhite()).getName());
@@ -584,7 +815,7 @@ public class GameView extends HBox implements GameListener {
                     return;
 
                 gameMenu.update();
-                moveList.initMoveList();
+                moveListPane.initMoveList();
 
                 Dialog<Void> over = new Dialog<Void>();
                 over.setTitle("Game Over");
@@ -610,8 +841,8 @@ public class GameView extends HBox implements GameListener {
 
                 chatBox.update();
 
-                if (color != TWO_PLAYER && event.getMessage() != null
-                        && event.getMessage().getPlayer().isWhite() != (color == WHITE)) {
+                if (!color.equals(Color.TWO_PLAYER) && event.getMessage() != null
+                        && event.getMessage().getPlayer().isWhite() != (color.equals(Color.WHITE))) {
                     if (!app.getStage().isFocused())
                         // app.getStage().toFront();
                         java.awt.Toolkit.getDefaultToolkit().beep();
@@ -619,7 +850,7 @@ public class GameView extends HBox implements GameListener {
 
             } else if (event.getType() == Type.PAUSED || event.getType() == Type.RESUMED) {
                 gameMenu.update();
-                infoPane.updateTimers();
+                gameInfoPane.updateTimers();
                 board.getPausePane().setVisible(game.isPaused());
             }
 

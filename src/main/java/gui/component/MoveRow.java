@@ -8,28 +8,38 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+/**
+ * A row representing a black move and a white move in the {@link MoveList}.
+ */
 public class MoveRow extends HBox {
 
-    int moveNumber;
-    Move move1, move2;
+    /**
+     * The amount of full turns (black and white moved), starting from 1.
+     */
+    private int moveNumber;
 
-    public int getMoveNumber() {
-        return moveNumber;
-    }
+    /**
+     * The move that will be displayed on the left of the row.
+     */
+    private Move move1;
 
-    public Move getMove1() {
-        return move1;
-    }
+    /**
+     * The move that will be displayed on the right of the row.
+     */
+    private Move move2;
 
-    public Move getMove2() {
-        return move2;
-    }
-
-    public MoveRow(int moveNumber, Move m1, Move m2) {
+    /**
+     * Creates a new move row.
+     * 
+     * @param moveNumber The number of {@code move1}.
+     * @param move1      The first move.
+     * @param move2      The second move.
+     */
+    public MoveRow(int moveNumber, Move move1, Move move2) {
 
         this.moveNumber = moveNumber;
-        this.move1 = m1;
-        this.move2 = m2;
+        this.move1 = move1;
+        this.move2 = move2;
 
         Label l = new Label(moveNumber + ".");
 
@@ -39,13 +49,11 @@ public class MoveRow extends HBox {
         HBox.setHgrow(l, Priority.ALWAYS);
 
         HBox moves = new HBox();
-
         moves.setAlignment(Pos.CENTER);
 
         HBox.setHgrow(moves, Priority.ALWAYS);
 
-        Button btn1 = new Button(m1.getMoveNotation());
-
+        Button btn1 = new Button(move1.getMoveNotation());
         btn1.setAlignment(Pos.CENTER_LEFT);
 
         HBox.setMargin(btn1, new Insets(5, 5, 5, 5));
@@ -53,9 +61,9 @@ public class MoveRow extends HBox {
 
         moves.getChildren().add(btn1);
 
-        if (m2 != null) {
+        if (move2 != null) {
 
-            Button btn2 = new Button(m2.getMoveNotation());
+            Button btn2 = new Button(move2.getMoveNotation());
             btn2.setAlignment(Pos.CENTER_RIGHT);
 
             HBox.setMargin(btn2, new Insets(5, 5, 5, 5));
@@ -67,6 +75,33 @@ public class MoveRow extends HBox {
 
         getChildren().addAll(l, moves);
 
+    }
+
+    /**
+     * Gets the move number.
+     * 
+     * @return {@link #moveNumber}
+     */
+    public int getMoveNumber() {
+        return moveNumber;
+    }
+
+    /**
+     * Gets the first move.
+     * 
+     * @return {@link #move1}
+     */
+    public Move getMove1() {
+        return move1;
+    }
+
+    /**
+     * Gets the second move.
+     * 
+     * @return {@link #move2}
+     */
+    public Move getMove2() {
+        return move2;
     }
 
 }

@@ -6,6 +6,9 @@ import game.Move;
 import game.Position;
 import game.Square;
 
+/**
+ * A representation of a pawn.
+ */
 public class Pawn extends Piece {
     /**
      * Creates a new Pawn object.

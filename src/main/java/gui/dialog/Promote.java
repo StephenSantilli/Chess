@@ -21,15 +21,27 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
+/**
+ * The dialog that is displayed to users when they must choose which piece they
+ * want to promote their pawn to.
+ */
 public class Promote extends Stage {
 
+    /**
+     * The piece code the the user selected. Will be {@code X} if the user chose not
+     * to promote. Will also be {@code X} before the user has made a choice.
+     */
     private char result;
 
-    public char getResult() {
-        return result;
-    }
-
-    public Promote(GameView gv, boolean white, Window owner) {
+    /**
+     * Creates a new promote dialog which will be shown to the user so they can
+     * select which piece to promote to.
+     * 
+     * @param gameView The GameView that created this dialog.
+     * @param white    Whether or not the pieces should be white.
+     * @param owner    The owner of this dialog.
+     */
+    public Promote(GameView gameView, boolean white, Window owner) {
 
         this.result = 'X';
 
@@ -38,14 +50,14 @@ public class Promote extends Stage {
 
         initStyle(StageStyle.UNDECORATED);
 
-        ImageView queen = gv.getBoard().getPiecePane().getPieceTranscoder(new Queen(0, 0, white)).getImageView();
-        ImageView rook = gv.getBoard().getPiecePane().getPieceTranscoder(new Rook(0, 0, white)).getImageView();
-        ImageView bishop = gv.getBoard().getPiecePane().getPieceTranscoder(new Bishop(0, 0, white)).getImageView();
-        ImageView knight = gv.getBoard().getPiecePane().getPieceTranscoder(new Knight(0, 0, white)).getImageView();
+        ImageView queen = gameView.getBoard().getPiecePane().getPieceTranscoder(new Queen(0, 0, white)).toImageView();
+        ImageView rook = gameView.getBoard().getPiecePane().getPieceTranscoder(new Rook(0, 0, white)).toImageView();
+        ImageView bishop = gameView.getBoard().getPiecePane().getPieceTranscoder(new Bishop(0, 0, white)).toImageView();
+        ImageView knight = gameView.getBoard().getPiecePane().getPieceTranscoder(new Knight(0, 0, white)).toImageView();
 
-        final double pieceSize = gv.getBoard().getPieceSize();
-        final double squareSize = gv.getBoard().getSquareSize();
-        final boolean flipped = gv.isFlipped();
+        final double pieceSize = gameView.getBoard().getPieceSize();
+        final double squareSize = gameView.getBoard().getSquareSize();
+        final boolean flipped = gameView.isFlipped();
 
         Pane q = new Pane(queen);
         q.setPrefHeight(squareSize);
@@ -128,6 +140,15 @@ public class Promote extends Stage {
         tileP.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
         setResizable(false);
 
+    }
+
+    /**
+     * Gets the result of the user's selection on the dialog.
+     * 
+     * @return {@link #result}
+     */
+    public char getResult() {
+        return result;
     }
 
 }

@@ -10,20 +10,36 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * The dialog that is displayed when the user is sent a draw offer.
+ */
 public class Draw extends Stage {
 
-    private Button yes, no;
+    /**
+     * The button that accepts the draw offer.
+     */
+    private Button yes;
 
+    /**
+     * The button that declines the draw offer.
+     */
+    private Button no;
+
+    /**
+     * Whether or not the draw offer was accepted.
+     */
     private boolean accept;
 
-    public boolean isAccept() {
-        return accept;
-    }
+    /**
+     * Creates a new draw offer dialog.
+     * 
+     * @param gameView    The GameView that created this dialog.
+     * @param offererName The name of the player who offered the draw offer.
+     */
+    public Draw(GameView gameView, String offererName) {
 
-    public Draw(GameView board, String offererName) {
-
-        initOwner(board.getScene().getWindow());
-        getIcons().setAll(((Stage) (board.getScene().getWindow())).getIcons());
+        initOwner(gameView.getScene().getWindow());
+        getIcons().setAll(((Stage) (gameView.getScene().getWindow())).getIcons());
 
         setResizable(false);
 
@@ -64,6 +80,15 @@ public class Draw extends Stage {
         vb.setSpacing(5);
         buttons.setSpacing(5);
 
+    }
+
+    /**
+     * Gets whether or not the user accepted the draw offer.
+     * 
+     * @return {@link #accept}
+     */
+    public boolean isAccept() {
+        return accept;
     }
 
 }

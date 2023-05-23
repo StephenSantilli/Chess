@@ -132,50 +132,110 @@ public class Move {
 
     }
 
+    /**
+     * Gets the position this move is being made from.
+     * 
+     * @return {@link #position}
+     */
     public Position getPosition() {
         return position;
     }
 
+    /**
+     * Gets the origin square.
+     * 
+     * @return {@link #origin}
+     */
     public Square getOrigin() {
         return origin;
     }
 
+    /**
+     * Gets the destination square.
+     * 
+     * @return {@link #destination}
+     */
     public Square getDestination() {
         return destination;
     }
 
+    /**
+     * Gets the piece being moved.
+     * 
+     * @return {@link #piece}
+     */
     public Piece getPiece() {
         return piece;
     }
 
+    /**
+     * Gets the piece being captured.
+     * 
+     * @return {@link #capturePiece}
+     */
     public Piece getCapturePiece() {
         return capturePiece;
     }
 
+    /**
+     * Gets the rook involved in castling.
+     * 
+     * @return {@link #rook}
+     */
     public Piece getRook() {
         return rook;
     }
 
+    /**
+     * Gets the promotion type.
+     * 
+     * @return {@link #promoteType}
+     */
     public char getPromoteType() {
         return promoteType;
     }
 
+    /**
+     * Gets whether or not this is a capture move.
+     * 
+     * @return {@link #capture}
+     */
     public boolean isCapture() {
         return capture;
     }
 
+    /**
+     * Gets whether or not this is an en passant move.
+     * 
+     * @return {@link #enPassant}
+     */
     public boolean isEnPassant() {
         return enPassant;
     }
 
+    /**
+     * Gets whether or not this is a castle move.
+     * 
+     * @return {@link #castle}
+     */
     public boolean isCastle() {
         return castle;
     }
 
+    /**
+     * Gets whether or not this is white's move.
+     * 
+     * @return {@link #white}
+     */
     public boolean isWhite() {
         return white;
     }
 
+    /**
+     * Gets the short algebraic notation (SAN) of this move.
+     * 
+     * @return {@link #moveNotation}
+     */
     public String getMoveNotation() {
         return moveNotation;
     }
@@ -217,7 +277,9 @@ public class Move {
     }
 
     /**
-     * @return Gets the destance between the {@link #origin} and
+     * Gets the move distance.
+     * 
+     * @return The destance between the {@link #origin} and
      *         {@link #destination} squares of the move.
      */
     public int getMoveDistance() {
@@ -261,6 +323,8 @@ public class Move {
     }
 
     /**
+     * Gets the capture square.
+     * 
      * @return The square that the piece being captured is on before this move.
      */
     public Square getCaptureSquare() {
@@ -273,6 +337,8 @@ public class Move {
     }
 
     /**
+     * Gets the rook's origin.
+     * 
      * @return The square the castling rook is on before this move is made.
      *         {@code null} if not a castle move.
      */
@@ -283,6 +349,8 @@ public class Move {
     }
 
     /**
+     * Gets the rook's destination.
+     * 
      * @return The square the castling rook is on after the move is made.
      *         {@code null} if not a castle move.
      */

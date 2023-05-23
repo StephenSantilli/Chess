@@ -26,23 +26,49 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 
+/**
+ * The dialog which exports the game into the FEN and PGN
+ * formats. This dialog also allows the user to copy these outputs and export
+ * the PGN to a {@code .pgn} file.
+ * 
+ * @see game.PGN
+ * @see game.Position#toString()
+ */
 public class Export extends Stage {
 
+    /**
+     * The area that displays the game in PGN format.
+     */
     private TextArea pgnArea;
+
+    /**
+     * The field that displays the game in FEN format.
+     */
     private TextField fenArea;
 
+    /**
+     * Whether or not the clock timestamps of the game should be included.
+     */
     private boolean includeClock;
 
-    private GameView board;
+    /**
+     * The GameView that this export dialog is exporting the details of.
+     */
+    private GameView gameView;
 
-    public Export(GameView board) {
+    /**
+     * Creates a new export dialog.
+     * 
+     * @param gameView The GameView which created this dialog.
+     */
+    public Export(GameView gameView) {
 
-        this.board = board;
+        this.gameView = gameView;
         includeClock = true;
 
-        initOwner(board.getScene().getWindow());
+        initOwner(gameView.getScene().getWindow());
         initModality(Modality.WINDOW_MODAL);
-        getIcons().setAll(((Stage) (board.getScene().getWindow())).getIcons());
+        getIcons().setAll(((Stage) (gameView.getScene().getWindow())).getIcons());
 
         setResizable(false);
 
@@ -83,7 +109,7 @@ public class Export extends Stage {
 
         // Include clock checkbox
         CheckBox cb = new CheckBox("Include clock");
-        if (board.getGame().getSettings().getTimePerSide() > -1)
+        if (gameView.getGame().getSettings().getTimePerSide() > -1)
             cb.setSelected(true);
         else {
             cb.setSelected(false);
@@ -152,7 +178,6 @@ public class Export extends Stage {
 
         });
 
-
         Button okButton = new Button("Ok");
         okButton.setOnAction(e -> {
 
@@ -173,11 +198,17 @@ public class Export extends Stage {
 
     }
 
+    /**
+     * Gets the FEN for the current position that should be displayed in
+     * {@link #fenArea}.
+     * 
+     * @return The game in FEN format.
+     */
     public String getFEN() {
 
         try {
 
-            return board.getGame().getLastPos().toString();
+            return gameView.getGame().getLastPos().toString();
 
         } catch (Exception e) {
 
@@ -193,15 +224,21 @@ public class Export extends Stage {
         return "";
     }
 
+    /**
+     * Gets the PGN for the current position that should be displayed in
+     * {@link #pgnArea}.
+     * 
+     * @return The game in PGN format.
+     */
     public String getPGN() {
 
         try {
 
-            if (!board.getGame().getSettings().getFen().equals(GameSettings.DEFAULT_FEN)
-                    && board.getGame().getPositions().get(0).getMoveNumber() != 0)
+            if (!gameView.getGame().getSettings().getFen().equals(GameSettings.DEFAULT_FEN)
+                    && gameView.getGame().getPositions().get(0).getMoveNumber() != 0)
                 return "Cannot export PGN from custom position that does not start at move 1.";
 
-            return board.getGame().exportPosition(true, includeClock);
+            return gameView.getGame().exportPosition(true, includeClock);
 
         } catch (Exception e) {
 

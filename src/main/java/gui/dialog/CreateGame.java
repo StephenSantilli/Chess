@@ -14,7 +14,6 @@ import game.engine.EngineHook;
 import game.engine.UCIEngine;
 import gui.App;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -38,25 +37,154 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+/**
+ * The dialog the user uses to create a new game.
+ */
 public class CreateGame extends Stage {
 
-    private TextField oneName, twoName, fenField;
-    private ChoiceBox<String> color, type;
-    private CheckBox useTimeBox, useFenBox;
-    private Spinner<Integer> minPerSide, secPerSide, minPerMove, secPerMove, startId;
+    /**
+     * The name of player one.
+     */
+    private TextField oneName;
+
+    /**
+     * The name of player two.
+     */
+    private TextField twoName;
+
+    /**
+     * The field which allows the user to enter a custom starting position in FEN
+     * format.
+     */
+    private TextField fenField;
+
+    /**
+     * The dropdown box which allows the user to select if player one should be
+     * white, black, or a random color.
+     */
+    private ChoiceBox<String> color;
+
+    /**
+     * The dropdown box which allows the user to select the type of player that
+     * player two should be.
+     */
+    private ChoiceBox<String> type;
+
+    /**
+     * The checkbox which allows the user to select if a time control should be
+     * used.
+     */
+    private CheckBox useTimeBox;
+
+    /**
+     * The checkbox which allows the user to select if they would like to start from
+     * a custom position.
+     */
+    private CheckBox useFenBox;
+
+    /**
+     * A spinner which allows the user to set how many minutes each side will get.
+     */
+    private Spinner<Integer> minPerSide;
+
+    /**
+     * A spinner which allows the user to set how many seconds each side will get.
+     */
+    private Spinner<Integer> secPerSide;
+
+    /**
+     * A spinner which allows the user to set how many minutes each side will get
+     * added on per move.
+     */
+    private Spinner<Integer> minPerMove;
+
+    /**
+     * A spinner which allows the user to set how many seconds each side will get
+     * added on per move.
+     */
+    private Spinner<Integer> secPerMove;
+
+    /**
+     * A spinner which allows the user to choose which Chess960 starting position to
+     * start from.
+     */
+    private Spinner<Integer> startId;
+
+    /**
+     * A label which is used to display information or errors.
+     */
     private Label sLabel;
-    private Button fromPgn, search, cancel, start, gen960, reset960;
+
+    /**
+     * A button which, when clicked, shows the user the {@link ImportPGN} prompt.
+     */
+    private Button fromPgn;
+
+    /**
+     * A button which displays the {@link SearchLAN} dialog.
+     */
+    private Button search;
+
+    /**
+     * A button which cancels the game creating process.
+     */
+    private Button cancel;
+
+    /**
+     * The button that starts the game with the entered settings.
+     */
+    private Button start;
+
+    /**
+     * The button that generates a random Chess960 start.
+     */
+    private Button gen960;
+
+    /**
+     * The button that resets the start position to the default position.
+     */
+    private Button reset960;
+
+    /**
+     * The separator that spaces out {@link #sLabel}.
+     */
     private Separator sep;
 
+    /**
+     * Whether or not player one is white.
+     */
     private boolean white;
 
+    /**
+     * The client used to make a challenge discoverable on the LAN network.
+     */
     private ChallengeServer server;
 
+    /**
+     * The game created by this dialog.
+     */
     private Game game;
+
+    /**
+     * The LAN client of the game created by this dialog.
+     */
     private Client client;
+
+    /**
+     * The engine hook associated with the game created by this dialog.
+     */
     private EngineHook engine;
+
+    /**
+     * Whether or not a game should be created.
+     */
     private boolean create;
 
+    /**
+     * Creates a new game creation dialog.
+     * 
+     * @param window The window that owns this dialog.
+     */
     public CreateGame(Window window) {
 
         initOwner(window);
@@ -222,7 +350,7 @@ public class CreateGame extends Stage {
         });
 
         gen960 = new Button("Randomize (Chess960)");
-        gen960.setOnAction(this::generate960);
+        gen960.setOnAction(ae -> generate960());
         gen960.setDisable(true);
 
         reset960 = new Button("Reset");
@@ -267,16 +395,16 @@ public class CreateGame extends Stage {
 
         // Buttons
         fromPgn = new Button("Start from PGN");
-        fromPgn.setOnAction(this::importPgn);
+        fromPgn.setOnAction(ae -> importPgn());
 
         search = new Button("Search for LAN Challenge");
-        search.setOnAction(this::searchAction);
+        search.setOnAction(ae -> searchAction());
 
         start = new Button("Start");
-        start.setOnAction(ae -> startAction(ae, null));
+        start.setOnAction(ae -> startAction(null));
 
         cancel = new Button("Cancel");
-        cancel.setOnAction(this::cancelAction);
+        cancel.setOnAction(ae -> cancelAction());
 
         HBox btns = new HBox(fromPgn, search, start, cancel);
         btns.setAlignment(Pos.CENTER_RIGHT);
@@ -302,30 +430,58 @@ public class CreateGame extends Stage {
 
     }
 
+    /**
+     * Gets the engine hook.
+     * 
+     * @return {@link #engine}
+     */
     public EngineHook getEngine() {
         return engine;
     }
 
+    /**
+     * Gets if the player is white.
+     * 
+     * @return {@link #white}
+     */
     public boolean isWhite() {
         return white;
     }
 
+    /**
+     * Gets the game created by this dialog.
+     * 
+     * @return {@link #game}
+     */
     public Game getGame() {
         return game;
     }
 
+    /**
+     * Gets the client created by this dialog.
+     * 
+     * @return {@link #client}
+     */
     public Client getClient() {
         return client;
     }
 
+    /**
+     * Gets whether or not a game should be created.
+     * 
+     * @return {@link #create}
+     */
     public boolean isCreate() {
         return create;
     }
 
+    /**
+     * Prompts the user with a file chooser, where they should select the engine
+     * they would like to register.
+     */
     private void registerNew() {
 
         FileChooser chooser = new FileChooser();
-        // chooser.getExtensionFilters().add(new ExtensionFilter("PGN File", "*.pgn"));
 
         File f = chooser.showOpenDialog(new Stage());
 
@@ -350,7 +506,12 @@ public class CreateGame extends Stage {
 
     }
 
-    private void generate960(ActionEvent ae) {
+    /**
+     * Generates a random Chess960 starting position.
+     * 
+     * @param ae The event that led to this action.
+     */
+    private void generate960() {
 
         try {
 
@@ -368,7 +529,12 @@ public class CreateGame extends Stage {
 
     }
 
-    private void importPgn(ActionEvent ae) {
+    /**
+     * Prompts the user to import a game that is in the PGN format.
+     * 
+     * @param ae The event that led to this.
+     */
+    private void importPgn() {
 
         ImportPGN pDialog = new ImportPGN(getOwner());
 
@@ -380,7 +546,7 @@ public class CreateGame extends Stage {
 
                 PGNParser parser = new PGNParser(pDialog.getPgn());
 
-                startAction(ae, parser);
+                startAction(parser);
 
                 // game = new Game(parser,
                 // new GameSettings(
@@ -406,6 +572,11 @@ public class CreateGame extends Stage {
 
     }
 
+    /**
+     * Sets whether or not the FEN fields should be disabled.
+     * 
+     * @param disable If the fields should be disabled.
+     */
     private void setDisabledFen(boolean disable) {
         fenField.setDisable(disable);
         gen960.setDisable(disable);
@@ -413,6 +584,12 @@ public class CreateGame extends Stage {
         reset960.setDisable(disable);
     }
 
+    /**
+     * Shows {@link #sLabel} with the given text.
+     * 
+     * @param text  The text to set {@link #sLabel} to.
+     * @param error Whether or not this message is an error message.
+     */
     private void showLabel(String text, boolean error) {
 
         sLabel.setVisible(true);
@@ -422,13 +599,20 @@ public class CreateGame extends Stage {
 
     }
 
+    /**
+     * Clears {@link #sLabel} and hides it.
+     */
     private void clearLabel() {
         sLabel.setVisible(false);
         sep.setVisible(false);
         sLabel.setText("");
     }
 
-    private void searchAction(ActionEvent ae) {
+    /**
+     * Prompts the user with a dialog which allows them to search for LAN challenges
+     * on their local network.
+     */
+    private void searchAction() {
 
         try {
 
@@ -460,7 +644,12 @@ public class CreateGame extends Stage {
 
     }
 
-    private void startAction(ActionEvent ae, PGNParser parser) {
+    /**
+     * Starts the game with the given settings.
+     * 
+     * @param parser The PGNParser associated with this game.
+     */
+    private void startAction(PGNParser parser) {
 
         App.prefs.put("p1name", oneName.getText());
         App.prefs.put("p2name", twoName.getText());
@@ -638,6 +827,11 @@ public class CreateGame extends Stage {
 
     }
 
+    /**
+     * Sets all fields as disabled or enabled.
+     * 
+     * @param disable Whether or not the fields should be disabled or enabled.
+     */
     private void setAllDisabled(boolean disable) {
         start.setDisable(disable);
         search.setDisable(disable);
@@ -654,7 +848,10 @@ public class CreateGame extends Stage {
         useFenBox.setDisable(disable);
     }
 
-    private void cancelAction(ActionEvent ae) {
+    /**
+     * Cancels the game creation process.
+     */
+    private void cancelAction() {
 
         if (server != null) {
 
@@ -673,6 +870,11 @@ public class CreateGame extends Stage {
 
     }
 
+    /**
+     * Disables/enables the time fields.
+     * 
+     * @param disable Whether or not the fields should be disabled.
+     */
     private void setDisabledTime(boolean disable) {
         minPerSide.setDisable(disable);
         secPerSide.setDisable(disable);

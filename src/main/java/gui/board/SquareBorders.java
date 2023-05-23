@@ -1,17 +1,35 @@
 package gui.board;
 
 import game.Square;
+
 import gui.GameView;
+
 import javafx.scene.layout.Pane;
 
+/**
+ * Displays borders around the squares when a piece is being dragged.
+ */
 public class SquareBorders extends Pane {
 
+    /**
+     * The GameView that contains this pane.
+     */
     private GameView gameView;
 
+    /**
+     * Creates a new square borders pane.
+     * 
+     * @param gameView The GameView that contains this pane.
+     */
     public SquareBorders(GameView gameView) {
         this.gameView = gameView;
     }
 
+    /**
+     * Clears any previous borders and draws a new border around the given square.
+     * 
+     * @param square The square to draw a border around.
+     */
     public void drawBorder(Square square) {
 
         getChildren().clear();

@@ -67,6 +67,9 @@ public class Arrows extends Pane {
 
     }
 
+    /**
+     * Clears out the currently drawn arrows.
+     */
     public void draw() {
 
         highlightedArrows.clear();
@@ -74,6 +77,9 @@ public class Arrows extends Pane {
 
     }
 
+    /**
+     * Redraws the arrows.
+     */
     public void redraw() {
 
         getChildren().clear();

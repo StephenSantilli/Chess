@@ -6,12 +6,34 @@ import gui.board.Board;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 
+/**
+ * An arrow which is displayed on the board, drawn from one square to another.
+ */
 public class HighlightArrow extends Pane {
 
+    /**
+     * The square the arrow should originate from.
+     */
     private Square startSquare;
+
+    /**
+     * The square the arrow should end on.
+     */
     private Square endSquare;
+
+    /**
+     * The color the arrow should be.
+     */
     private int color;
 
+    /**
+     * Creates a new highlight arrow.
+     * 
+     * @param startSquare The square the arrow should originate from.
+     * @param endSquare   The square the arrow should end on.
+     * @param color       The color the arrow should be.
+     * @param gameView    The GameView this arrow will be displayed on.
+     */
     public HighlightArrow(Square startSquare, Square endSquare, int color, GameView gameView) {
 
         this.startSquare = startSquare;
@@ -19,12 +41,14 @@ public class HighlightArrow extends Pane {
         this.color = color;
 
         final Board board = gameView.getBoard();
+
         setMinSize(board.getSquareSize() * 8, board.getSquareSize() * 8);
 
         final double lineWidth = board.getSquareSize() / 7.0;
 
         final double startX = board.getXBySquare(startSquare, false) + (board.getSquareSize() / 2.0);
         final double startY = board.getYBySquare(startSquare, false) + (board.getSquareSize() / 2.0);
+
         final double endX = board.getXBySquare(endSquare, false) + (board.getSquareSize() / 2.0);
         final double endY = board.getYBySquare(endSquare, false) + (board.getSquareSize() / 2.0);
 
@@ -32,14 +56,15 @@ public class HighlightArrow extends Pane {
         // k = +- (l) / sqrt(1 + m^2)
         // (x, y) = (endX, endY) + k(1, m)
 
-        // (xt, yt)
+        // ---------------(xt, yt)--------------------
+        // -------------/----------\------------------
+        // -----------/--------------\----------------
+        // -(xh, yh)-(xe, ye)-(xea, yea)-(xha, yha)---
+        // ---------|-------------------|-------------
+        // ---------|-------------------|-------------
+        // ---------|-------------------|-------------
         //
-        //
-        // (xh, yh) (xe, ye) (xea, yea) (xha, yha)
-        //
-        //
-        //
-        // (xs,ys) (xsa, ysa)
+        // ------(xs,ys)-----------(xsa, ysa)---------
 
         final double negative = endX - startX;
 
@@ -98,6 +123,9 @@ public class HighlightArrow extends Pane {
 
     }
 
+    /**
+     * Checks if two arrows are equal to each other, including the same color.
+     */
     @Override
     public boolean equals(Object o) {
 
@@ -110,28 +138,31 @@ public class HighlightArrow extends Pane {
 
     }
 
+    /**
+     * Gets the start square of the arrow.
+     * 
+     * @return {@link #startSquare}
+     */
     public Square getStartSquare() {
         return startSquare;
     }
 
-    public void setStartSquare(Square startSquare) {
-        this.startSquare = startSquare;
-    }
-
+    /**
+     * Gets the end square of the arrow.
+     * 
+     * @return {@link #endSquare}
+     */
     public Square getEndSquare() {
         return endSquare;
     }
 
-    public void setEndSquare(Square endSquare) {
-        this.endSquare = endSquare;
-    }
-
+    /**
+     * Gets the color of the arrow.
+     * 
+     * @return {@link #color}
+     */
     public int getColor() {
         return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
     }
 
 }

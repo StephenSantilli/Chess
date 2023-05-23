@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 
 import game.Game.Result;
 
+/**
+ * A move that was parsed from PGN.
+ */
 public class PGNMove {
 
     /**

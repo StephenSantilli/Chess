@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import game.GameSettings;
-import game.Player;
 import game.LAN.Challenge;
 import game.LAN.ChallengeSearcher;
 import game.LAN.Client;
 import gui.App;
+
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -34,43 +34,50 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+/**
+ * The dialog that allows the user to search for LAN challenges on their local
+ * network.
+ */
 public class SearchLAN extends Stage {
 
-    private int timePerSide, timePerMove;
-
-    private Button refresh;
-
-    private TableView<Challenge> challengeTable;
-
-    private ObservableList<Challenge> oList;
+    /**
+     * The challenges found by searching.
+     */
     private ArrayList<Challenge> challenges;
 
+    /**
+     * An observable list of challenges found (mirrors {@link #challenges}). This is
+     * used by the {@link #challengeTable}.
+     */
+    private ObservableList<Challenge> observableChallengesList;
+
+    /**
+     * The client used to search for challenges.
+     * 
+     * @see ChallengeSearcher
+     */
     private ChallengeSearcher searcher;
 
+    /**
+     * The client created if the user accepts a LAN challenge. Will be {@code null}
+     * if the user has not accepted a challenge.
+     */
     private Client client;
 
-    public Client getClient() {
-        return client;
-    }
+    /**
+     * The button used to refresh the search results.
+     */
+    private Button refresh;
 
-    private Player player;
+    /**
+     * The table that displays the challenges found.
+     */
+    private TableView<Challenge> challengeTable;
 
-    public ChallengeSearcher getSearcher() {
-        return searcher;
-    }
-
-    public int getTimePerMove() {
-        return timePerMove;
-    }
-
-    public int getTimePerSide() {
-        return timePerSide;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
+    /**
+     * The task that is run which will constantly check if new challenges have been
+     * found and subsequently update {@link #observableChallengesList}.
+     */
     private Runnable hostUpdateChecker = () -> {
 
         try {
@@ -89,6 +96,10 @@ public class SearchLAN extends Stage {
 
     };
 
+    /**
+     * The callback that is to be run when the {@link ChallengeSearcher} is finished
+     * searching for challenges.
+     */
     private Runnable searchDoneCallback = () -> {
 
         Platform.runLater(() -> {
@@ -102,25 +113,32 @@ public class SearchLAN extends Stage {
 
     };
 
+    /**
+     * Creates a new dialog which the user can use to search for LAN challenges.
+     * 
+     * @param window The window that is the owner of this dialog.
+     * @throws Exception If there is an error initializing the
+     *                   {@link ChallengeSearcher} client.
+     */
     public SearchLAN(Window window) throws Exception {
 
         initOwner(window);
         initModality(Modality.APPLICATION_MODAL);
-        getIcons().setAll(((Stage) (window)).getIcons());
-
         setResizable(false);
 
-        searcher = new ChallengeSearcher();
+        getIcons().setAll(((Stage) (window)).getIcons());
 
+        searcher = new ChallengeSearcher();
         challenges = new ArrayList<Challenge>();
 
-        VBox items = new VBox();
-        items.setPadding(new Insets(10, 10, 10, 10));
+        observableChallengesList = FXCollections.observableArrayList();
 
-        oList = FXCollections.observableArrayList();
-        challengeTable = new TableView<Challenge>(oList);
+        challengeTable = new TableView<Challenge>(observableChallengesList);
         challengeTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         challengeTable.setPlaceholder(new Label("Searching for challenges..."));
+
+        VBox items = new VBox();
+        items.setPadding(new Insets(10));
 
         TableColumn<Challenge, String> nameCol = new TableColumn<>("Name");
 
@@ -212,12 +230,17 @@ public class SearchLAN extends Stage {
         directConnect.setOnAction(ev -> {
 
             TextInputDialog dcDiag = new TextInputDialog();
-            dcDiag.setGraphic(null);
-            dcDiag.setHeaderText("Enter IP address...");
-            dcDiag.getEditor().setMinWidth(200);
+            
             dcDiag.setTitle("Direct Connect");
-            dcDiag.getDialogPane().getButtonTypes().setAll(new ButtonType("Connect", ButtonData.OK_DONE),
+            dcDiag.setHeaderText("Enter IP address...");
+            dcDiag.setGraphic(null);
+
+            dcDiag.getEditor().setMinWidth(200);
+            
+            dcDiag.getDialogPane().getButtonTypes().setAll(new ButtonType("Connect",
+                    ButtonData.OK_DONE),
                     ButtonType.CANCEL);
+
             dcDiag.initOwner(getScene().getWindow());
 
             dcDiag.setOnHidden(we -> {
@@ -309,11 +332,19 @@ public class SearchLAN extends Stage {
 
     }
 
+    public Client getClient() {
+        return client;
+    }
+
+    public ChallengeSearcher getSearcher() {
+        return searcher;
+    }
+
     private void setOList() {
 
         Platform.runLater(() -> {
 
-            oList.setAll(challenges);
+            observableChallengesList.setAll(challenges);
 
         });
 

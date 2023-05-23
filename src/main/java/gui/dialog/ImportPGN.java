@@ -21,23 +21,50 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.FileChooser.ExtensionFilter;
 
+/**
+ * The dialog that allows users to import a game that is in PGN format.
+ * 
+ * @see game.PGN
+ */
 public class ImportPGN extends Stage {
 
+    /**
+     * The text area where the user enters the PGN text.
+     */
     private TextArea field;
-    private Button fromFile, set, cancel;
 
+    /**
+     * The button which allows the user to select a {@code .pgn} file to import the
+     * contents of.
+     */
+    private Button fromFile;
+
+    /**
+     * The button which sets the PGN entered.
+     */
+    private Button set;
+
+    /**
+     * The cancel button. Will close the dialog.
+     */
+    private Button cancel;
+
+    /**
+     * Whether or not the user clicked the {@link #set} button.
+     */
     private boolean create;
 
+    /**
+     * The PGN text the user entered.
+     */
     private String pgn;
 
-    public String getPgn() {
-        return pgn;
-    }
-
-    public boolean isCreate() {
-        return create;
-    }
-
+    /**
+     * Creates a new import dialog which allows the user to import a game from the
+     * PGN format.
+     * 
+     * @param window The window which owns this dialog.
+     */
     public ImportPGN(Window window) {
 
         // initOwner(window);
@@ -135,6 +162,23 @@ public class ImportPGN extends Stage {
         setTitle("Start Game from PGN");
         setScene(s);
 
+    }
+
+    /**
+     * Gets the PGN the user entered.
+     * @return {@link #pgn}
+     */
+    public String getPgn() {
+        return pgn;
+    }
+
+    /**
+     * Gets whether or not a game is to be created.
+     * 
+     * @return {@link #create}
+     */
+    public boolean isCreate() {
+        return create;
     }
 
 }

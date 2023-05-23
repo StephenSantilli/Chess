@@ -56,6 +56,8 @@ abstract public class Piece {
     }
 
     /**
+     * Gets the square that the piece is on.
+     * 
      * @return The {@link Square} the piece is on.
      */
     public Square getSquare() {
@@ -72,6 +74,8 @@ abstract public class Piece {
     }
 
     /**
+     * Gets whether or not the piece is white.
+     * 
      * @return If the piece is white.
      */
     public boolean isWhite() {
@@ -79,6 +83,8 @@ abstract public class Piece {
     }
 
     /**
+     * Gets whether or not the piece has moved.
+     * 
      * @return If the piece has moved.
      */
     public boolean hasMoved() {
@@ -86,7 +92,7 @@ abstract public class Piece {
     }
 
     /**
-     * Sets that the piece has moved.
+     * Sets whether or not the piece has moved.
      * 
      * @param hasMoved Whether or not the piece has moved.
      */
@@ -130,7 +136,9 @@ abstract public class Piece {
     abstract public char getCode();
 
     /**
-     * @return The number of points the piece is worth.
+     * Gets the number of points the piece is worth.
+     * 
+     * @return The amount of points.
      */
     abstract public int getPoints();
 

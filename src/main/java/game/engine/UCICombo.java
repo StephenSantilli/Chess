@@ -11,6 +11,30 @@ import java.io.IOException;
 public class UCICombo extends UCIOption<String> {
 
     /**
+     * The variables (options) of this combo box.
+     */
+    protected String[] vars;
+
+    /**
+     * Gets the predefined options.
+     * 
+     * @return {@link #vars}
+     */
+    public String[] getVars() {
+        return vars;
+    }
+
+    /**
+     * Sets the variables.
+     * 
+     * @param vars A list of the variables.
+     * @see #vars
+     */
+    public void setVars(String[] vars) {
+        this.vars = vars;
+    }
+
+    /**
      * Creates a new UCI combo option.
      * 
      * @param engine The engine.
