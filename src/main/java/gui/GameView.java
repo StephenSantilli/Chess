@@ -187,7 +187,7 @@ public class GameView extends HBox implements GameListener {
     private Color color;
 
     /**
-     * The index of the {@link Position} currently being displayed by this GameView.
+     * The index of the {@link game.Position} currently being displayed by this GameView.
      */
     private int currentPos;
 
@@ -207,7 +207,7 @@ public class GameView extends HBox implements GameListener {
      * turn it is will be on the bottom after each move is made.
      * 
      * <p>
-     * Only works when {@link #color} is equal to {@link Color.TWO_PLAYER}.
+     * Only works when {@link #color} is equal to {@link Color#TWO_PLAYER}.
      */
     private boolean autoFlip;
 

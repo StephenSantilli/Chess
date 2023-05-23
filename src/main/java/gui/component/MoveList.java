@@ -209,6 +209,9 @@ public class MoveList extends GridPane {
 
     /**
      * Calculates the move number for a given row.
+     * 
+     * @param moveNumber The move number to calculate
+     * @return The number that should be labeled on the move row.
      */
     private int calcRow(int moveNumber) {
 

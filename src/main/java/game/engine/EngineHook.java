@@ -161,6 +161,8 @@ public class EngineHook implements GameListener {
     /**
      * Takes the move made in the game and outputs it to the engine, then waits for
      * the engine to make it's move.
+     * 
+     * @param event The event that was fired because of the move made.
      */
     private void makeMove(GameEvent event) {
 

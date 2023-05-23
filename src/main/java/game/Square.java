@@ -49,7 +49,9 @@ public class Square {
     }
 
     /**
-     * @return The file (column) of the square.
+     * Gets the file (column) of the square.
+     * 
+     * @return The file.
      */
     public int getFile() {
         return file;
@@ -65,7 +67,9 @@ public class Square {
     }
 
     /**
-     * @return The rank (row) of the square.
+     * Gets the rank (row) of the square.
+     * 
+     * @return The rank
      */
     public int getRank() {
         return rank;
@@ -81,6 +85,9 @@ public class Square {
     }
 
     /**
+     * Gets if the square is a valid board square (rank and file within one and
+     * eight inclusive.)
+     * 
      * @return If square is a valid board square.
      */
     public boolean isValid() {
@@ -90,6 +97,8 @@ public class Square {
     }
 
     /**
+     * Gets the if the square is a light square.
+     * 
      * @return If the square is a light square.
      */
     public boolean isLightSquare() {
@@ -103,6 +112,7 @@ public class Square {
     /**
      * A string representation of the square, with the file as a lowercase
      * letter and rank as the number.
+     * 
      * <p>
      * Ex: "h4"
      */

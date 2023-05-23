@@ -508,8 +508,6 @@ public class CreateGame extends Stage {
 
     /**
      * Generates a random Chess960 starting position.
-     * 
-     * @param ae The event that led to this action.
      */
     private void generate960() {
 
@@ -531,8 +529,6 @@ public class CreateGame extends Stage {
 
     /**
      * Prompts the user to import a game that is in the PGN format.
-     * 
-     * @param ae The event that led to this.
      */
     private void importPgn() {
 

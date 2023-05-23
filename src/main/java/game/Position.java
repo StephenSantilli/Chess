@@ -195,7 +195,7 @@ public class Position {
 
     /**
      * Whether or not it is currently white's turn, not whether white made the move
-     * that led to this position. Will be the opposite of {@link move#isWhite()}.
+     * that led to this position. Will be the opposite of {@link Move#isWhite()}.
      */
     private boolean white;
 
@@ -1436,13 +1436,9 @@ public class Position {
         if (king.hasMoved())
             return false;
 
-        final Piece rook = getPieceAtSquare(new Square(white ? 1 : 8, aSide ? 1 : 8));
+        final Piece rook = getRook(aSide, white);
 
-        if (rook != null && !rook.hasMoved()) {
-            return true;
-        }
-
-        return false;
+        return rook != null && !rook.hasMoved();
 
     }
 

@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import game.Move;
 import game.Position;
 
+/**
+ * A representation of a rook.
+ */
 public class Rook extends Piece {
 
     /**

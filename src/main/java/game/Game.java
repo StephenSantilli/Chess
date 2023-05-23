@@ -107,7 +107,6 @@ public class Game {
          */
         DEAD_NO_POSSIBLE_MATE,
 
-        // TODO support draw by repetition
         /**
          * The game has concluded in a draw because the same position was repeated three
          * times over the course of the game.
@@ -212,7 +211,7 @@ public class Game {
     /**
      * The flagfall checker task.
      */
-    Runnable flagfall = () -> {
+    private Runnable flagfall = () -> {
 
         if (getTimerTime(true) <= 0)
             markGameOver(Game.Result.BLACK_WIN, Game.Reason.FLAGFALL);
@@ -664,13 +663,34 @@ public class Game {
     public void checkGameOver() {
 
         if (getLastPos().isCheckmate())
-            markGameOver(getLastPos().isWhite() ? Game.Result.BLACK_WIN : Game.Result.WHITE_WIN, Game.Reason.CHECKMATE);
+            markGameOver(getLastPos().isWhite() ? Result.BLACK_WIN : Result.WHITE_WIN, Reason.CHECKMATE);
 
         else if (getLastPos().isInsufficientMaterial())
-            markGameOver(Game.Result.DRAW, Game.Reason.DEAD_INSUFFICIENT_MATERIAL);
+            markGameOver(Result.DRAW, Reason.DEAD_INSUFFICIENT_MATERIAL);
 
         else if (getLastPos().isStalemate())
-            markGameOver(Game.Result.DRAW, Game.Reason.STALEMATE);
+            markGameOver(Result.DRAW, Reason.STALEMATE);
+
+        else if (getLastPos().getFiftyMoveCounter() >= 100)
+            markGameOver(Result.DRAW, Reason.FIFTY_MOVE);
+
+        else {
+
+            String curr = getLastPos().toString().split(" ")[0];
+
+            int sameCount = 1;
+
+            for (int i = 0; i < positions.size() - 1; i++) {
+
+                if (positions.get(i).toString().split(" ")[0].equals(curr))
+                    ++sameCount;
+
+            }
+
+            if (sameCount >= 3)
+                markGameOver(Result.DRAW, Reason.REPETITION);
+
+        }
 
     }
 

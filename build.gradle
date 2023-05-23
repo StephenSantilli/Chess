@@ -35,6 +35,12 @@ jar {
     }
 }
 
+task genJavadocs(type: Javadoc) {
+    options.showFromPrivate()
+    source = sourceSets.main.allJava
+    classpath = project.sourceSets.main.runtimeClasspath
+}
+
 runtime {
 
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']

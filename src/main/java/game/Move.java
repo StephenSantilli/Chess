@@ -52,6 +52,7 @@ public class Move {
      * <li>R - Rook
      * <li>B - Bishop
      * <li>N - Knight
+     * </ul>
      */
     private char promoteType;
 
@@ -490,6 +491,8 @@ public class Move {
     }
 
     /**
+     * Checks if the move is an en passant move.
+     * 
      * @return If the move is an en passant move.
      */
     private boolean checkIfEnPassant() {
@@ -527,6 +530,8 @@ public class Move {
     }
 
     /**
+     * Checks if the move is a capture move.
+     * 
      * @return If the move is a capture.
      * @throws Exception If the move is not a valid capture.
      */
@@ -565,6 +570,8 @@ public class Move {
 
     /**
      * Checks if the move is a valid castle move.
+     * 
+     * @throws Exception If the move is invalid.
      */
     private void checkValidCastle() throws Exception {
 
@@ -597,6 +604,8 @@ public class Move {
     }
 
     /**
+     * Checks if the move is a promote move.
+     * 
      * @return If the move is a promotion move.
      */
     private boolean checkIfPromote() {

@@ -204,6 +204,7 @@ public class PGNParser {
      * 
      * @param includeTags Whether or not to include the game info tags. If
      *                    {@code false}, only the movetext will be included.
+     * @return The game in PGN format.
      */
     public String outputPGN(boolean includeTags) {
 

@@ -230,13 +230,13 @@ public class SearchLAN extends Stage {
         directConnect.setOnAction(ev -> {
 
             TextInputDialog dcDiag = new TextInputDialog();
-            
+
             dcDiag.setTitle("Direct Connect");
             dcDiag.setHeaderText("Enter IP address...");
             dcDiag.setGraphic(null);
 
             dcDiag.getEditor().setMinWidth(200);
-            
+
             dcDiag.getDialogPane().getButtonTypes().setAll(new ButtonType("Connect",
                     ButtonData.OK_DONE),
                     ButtonType.CANCEL);
@@ -332,14 +332,29 @@ public class SearchLAN extends Stage {
 
     }
 
+    /**
+     * Gets the client created if the user accepts a LAN challenge. Will be
+     * {@code null}
+     * if the user has not accepted a challenge.
+     * 
+     * @return The {@link Client}.
+     */
     public Client getClient() {
         return client;
     }
 
+    /**
+     * Gets the client used to search for challenges.
+     * 
+     * @return The {@link ChallengeSearcher}
+     */
     public ChallengeSearcher getSearcher() {
         return searcher;
     }
 
+    /**
+     * Updates the observable list.
+     */
     private void setOList() {
 
         Platform.runLater(() -> {
