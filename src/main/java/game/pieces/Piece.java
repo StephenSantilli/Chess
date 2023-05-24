@@ -18,12 +18,6 @@ abstract public class Piece {
     protected final boolean white;
 
     /**
-     * If the piece has moved yet. Used for castling (rook and king), pawn moving
-     * two squares.
-     */
-    protected boolean hasMoved;
-
-    /**
      * Creates a new Piece object.
      * 
      * @param file  The file (column) the piece is on.
@@ -33,25 +27,8 @@ abstract public class Piece {
      */
     public Piece(int file, int rank, boolean white) {
 
-        this(file, rank, white, false);
-
-    }
-
-    /**
-     * Creates a new Piece object.
-     * 
-     * @param file     The file (column) the piece is on.
-     * @param rank     The rank (row) the piece is on.
-     * @param white    Whether the piece is white or not. (True if white, false if
-     *                 black)
-     * @param hasMoved Whether or not the piece has moved.
-     */
-    public Piece(int file, int rank, boolean white, boolean hasMoved) {
-
         this.square = new Square(file, rank);
         this.white = white;
-
-        this.hasMoved = hasMoved;
 
     }
 
@@ -83,24 +60,6 @@ abstract public class Piece {
     }
 
     /**
-     * Gets whether or not the piece has moved.
-     * 
-     * @return If the piece has moved.
-     */
-    public boolean hasMoved() {
-        return hasMoved;
-    }
-
-    /**
-     * Sets whether or not the piece has moved.
-     * 
-     * @param hasMoved Whether or not the piece has moved.
-     */
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
-    }
-
-    /**
      * Checks if the given {@link Piece} object matches this {@link Piece} object.
      * 
      * @param compare The {@link Piece} object to compare
@@ -114,8 +73,7 @@ abstract public class Piece {
 
         Piece casted = (Piece) (compare);
 
-        return (casted.getCode() == getCode()) && isWhite() == casted.isWhite() && square == casted.getSquare()
-                && casted.hasMoved() == hasMoved;
+        return (casted.getCode() == getCode()) && isWhite() == casted.isWhite() && square == casted.getSquare();
 
     }
 

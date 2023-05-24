@@ -141,6 +141,8 @@ public class Position {
         }
 
         pcs[x] = 'R';
+        char rookAFile = (char) (x + 97);
+
         ++x;
 
         // Place king in middle open square
@@ -158,9 +160,17 @@ public class Position {
 
         pcs[x] = 'R';
 
+        char rookHFile = (char) (x + 97);
+
+        String castleRights = "" + rookAFile
+                + rookHFile;
+
+        if (castleRights.equals("AHah"))
+            castleRights = "KQkq";
+
         String fenRow = new String(pcs);
 
-        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w KQkq - 0 1";
+        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w " + castleRights.toUpperCase() + castleRights + " - 0 1";
 
         return fen;
 
@@ -192,6 +202,38 @@ public class Position {
 
     /** The position of the black king. */
     private Square blackKing;
+
+    /**
+     * Whether or not white can a-side castle.
+     */
+    private boolean whiteASide;
+
+    /**
+     * Whether or not white can h-side castle.
+     */
+    private boolean whiteHSide;
+
+    /**
+     * Whether or not black can a-side castle.
+     */
+    private boolean blackASide;
+
+    /**
+     * Whether or not black can h-side castle.
+     */
+    private boolean blackHSide;
+
+    /**
+     * The starting file of the a-side rooks. In a normal game, typically would be 1
+     * (a). In Chess960, however, this may differ.
+     */
+    private int aSideRookFile;
+
+    /**
+     * The starting file of the h-side rooks. In a normal game, typically would be 8
+     * (h). In Chess960, however, this may differ.
+     */
+    private int hSideRookFile;
 
     /**
      * Whether or not it is currently white's turn, not whether white made the move
@@ -273,6 +315,14 @@ public class Position {
         this.timerEnd = -1;
         this.fiftyMoveCounter = 0;
 
+        this.whiteASide = true;
+        this.whiteHSide = true;
+        this.blackASide = true;
+        this.blackHSide = true;
+
+        this.aSideRookFile = 1;
+        this.hSideRookFile = 8;
+
         initDefaultPosition();
         initMoves(true);
 
@@ -298,6 +348,14 @@ public class Position {
         this.moveNumber = prev.getMoveNumber() + 1;
         this.move = move;
 
+        this.whiteASide = prev.isWhiteASide();
+        this.whiteHSide = prev.isWhiteHSide();
+        this.blackASide = prev.isBlackASide();
+        this.blackHSide = prev.isBlackHSide();
+
+        this.aSideRookFile = prev.getaSideRookFile();
+        this.hSideRookFile = prev.gethSideRookFile();
+
         Piece[][] prevPieces = prev.getPieces();
 
         for (int r = 0; r < prevPieces.length; r++) {
@@ -312,12 +370,10 @@ public class Position {
                 Piece piece = null;
                 switch (old.getCode()) {
                     case 'P':
-                        piece = new Pawn(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                                old.hasMoved());
+                        piece = new Pawn(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite());
                         break;
                     case 'K':
-                        piece = new King(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                                old.hasMoved());
+                        piece = new King(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite());
 
                         if (piece.isWhite())
                             whiteKing = piece.getSquare();
@@ -326,20 +382,16 @@ public class Position {
 
                         break;
                     case 'N':
-                        piece = new Knight(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                                old.hasMoved());
+                        piece = new Knight(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite());
                         break;
                     case 'Q':
-                        piece = new Queen(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                                old.hasMoved());
+                        piece = new Queen(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite());
                         break;
                     case 'B':
-                        piece = new Bishop(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                                old.hasMoved());
+                        piece = new Bishop(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite());
                         break;
                     case 'R':
-                        piece = new Rook(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite(),
-                                old.hasMoved());
+                        piece = new Rook(old.getSquare().getFile(), old.getSquare().getRank(), old.isWhite());
                         break;
                 }
 
@@ -361,19 +413,45 @@ public class Position {
 
         if (movePiece.getCode() == 'K') {
 
-            if (movePiece.isWhite())
+            if (movePiece.isWhite()) {
+
                 whiteKing = move.getDestination();
-            else
+                whiteASide = false;
+                whiteHSide = false;
+
+            } else {
+
                 blackKing = move.getDestination();
+                blackASide = false;
+                blackHSide = false;
+
+            }
+
+        } else if (movePiece.getCode() == 'R') {
+
+            if (movePiece.isWhite()) {
+
+                if (move.getOrigin().getFile() == aSideRookFile)
+                    whiteASide = false;
+                else if (move.getOrigin().getFile() == hSideRookFile)
+                    whiteHSide = false;
+
+            } else {
+
+                if (move.getOrigin().getFile() == aSideRookFile)
+                    blackASide = false;
+                else if (move.getOrigin().getFile() == hSideRookFile)
+                    blackHSide = false;
+
+            }
 
         }
 
-        if (!movePiece.hasMoved() && movePiece.getCode() == 'P' && move.getMoveDistance() == 2)
+        if (movePiece.getCode() == 'P' && move.getMoveDistance() == 2)
             enPassantTarget = new Square(move.getDestination().getFile(),
                     move.getDestination().getRank() + (move.isWhite() ? -1 : 1));
 
         movePiece.setSquare(move.getDestination());
-        movePiece.setHasMoved(true);
 
         pieces[move.getOrigin().getRank() - 1][move.getOrigin().getFile() - 1] = null;
 
@@ -381,7 +459,18 @@ public class Position {
 
             final Piece rook = getPieceAtSquare(move.getRookOrigin());
             rook.setSquare(move.getRookDestination());
-            rook.setHasMoved(true);
+
+            if (move.isWhite()) {
+
+                whiteASide = false;
+                whiteHSide = false;
+
+            } else {
+
+                blackASide = false;
+                blackHSide = false;
+
+            }
 
             pieces[move.getRookOrigin().getRank() - 1][move.getRookOrigin().getFile() - 1] = null;
             pieces[move.getRookDestination().getRank() - 1][move.getRookDestination().getFile() - 1] = rook;
@@ -553,9 +642,6 @@ public class Position {
                         case 'P':
                             pieces[7 - r][f] = new Pawn(f + 1, 8 - r, white);
 
-                            if ((white && r != 6) || (!white && r != 1))
-                                pieces[7 - r][f].setHasMoved(true);
-
                             break;
                         default:
                             throw new RuntimeException("Unexpected piece.");
@@ -579,46 +665,53 @@ public class Position {
 
         }
 
-        Piece wkr = getPieceAtSquare(new Square(8, 1));
-        Piece wqr = getPieceAtSquare(new Square(1, 1));
-        Piece bkr = getPieceAtSquare(new Square(8, 8));
-        Piece bqr = getPieceAtSquare(new Square(1, 8));
-
-        if (wkr != null && wkr.getCode() == 'R')
-            wkr.setHasMoved(true);
-
-        if (wqr != null && wqr.getCode() == 'R')
-            wqr.setHasMoved(true);
-
-        if (bkr != null && bkr.getCode() == 'R')
-            bkr.setHasMoved(true);
-
-        if (bqr != null && bqr.getCode() == 'R')
-            bqr.setHasMoved(true);
-
         if (!a[2].equals("-")) {
             for (int i = 0; i < a[2].length(); i++) {
 
                 char c = a[2].charAt(i);
                 switch (c) {
+
                     case 'K':
-                        if (wkr != null && wkr.getCode() == 'R')
-                            wkr.setHasMoved(false);
+                        whiteASide = true;
+                        aSideRookFile = 1;
                         break;
                     case 'Q':
-                        if (wqr != null && wqr.getCode() == 'R')
-                            wqr.setHasMoved(false);
+                        whiteHSide = true;
+                        hSideRookFile = 8;
                         break;
                     case 'k':
-                        if (bkr != null && bkr.getCode() == 'R')
-                            bkr.setHasMoved(false);
+                        blackASide = true;
+                        aSideRookFile = 1;
                         break;
                     case 'q':
-                        if (bqr != null && bqr.getCode() == 'R')
-                            bqr.setHasMoved(false);
+                        blackHSide = true;
+                        hSideRookFile = 8;
                         break;
                     default:
-                        throw new RuntimeException("Invalid castle status.");
+
+                        boolean w = Character.isUpperCase(c);
+                        char lc = Character.toLowerCase(c);
+                        int file = lc - 96;
+                        if (file < (w ? whiteKing : blackKing).getFile()) {
+
+                            aSideRookFile = file;
+
+                            if (w)
+                                whiteASide = true;
+                            else
+                                blackASide = true;
+
+                        } else if (file > (w ? whiteKing : blackKing).getFile()) {
+
+                            hSideRookFile = file;
+
+                            if (w)
+                                whiteHSide = true;
+                            else
+                                blackHSide = true;
+
+                        }
+
                 }
 
             }
@@ -631,9 +724,34 @@ public class Position {
             opening = Opening.getOpening(this.toString(), getClass().getResourceAsStream("/tsv/openings.tsv"));
 
         } catch (RuntimeException e) {
-            throw new RuntimeException("Error finding the opening associated with this position: " + e.getMessage());
+            throw new RuntimeException(
+                    "Error finding the opening associated with this position: " + e.getMessage());
         }
 
+    }
+
+    public boolean isWhiteASide() {
+        return whiteASide;
+    }
+
+    public boolean isWhiteHSide() {
+        return whiteHSide;
+    }
+
+    public boolean isBlackASide() {
+        return blackASide;
+    }
+
+    public boolean isBlackHSide() {
+        return blackHSide;
+    }
+
+    public int getaSideRookFile() {
+        return aSideRookFile;
+    }
+
+    public int gethSideRookFile() {
+        return hSideRookFile;
     }
 
     /**
@@ -865,35 +983,15 @@ public class Position {
      */
     public Piece getRook(boolean aRook, boolean white) {
 
-        final Square square = (white ? whiteKing : blackKing);
+        if (aRook) {
 
-        Piece rook = null;
-
-        if (!aRook) {
-
-            for (int i = square.getFile() + 1; i <= 8 && rook == null; i++) {
-
-                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
-
-                if (pc != null && pc.getCode() == 'R' && !pc.hasMoved())
-                    rook = pc;
-
-            }
+            return getPieceAtSquare(new Square(aSideRookFile, white ? 1 : 8));
 
         } else {
 
-            for (int i = square.getFile() - 1; i > 0 && rook == null; i--) {
-
-                Piece pc = getPieceAtSquare(new Square(i, white ? 1 : 8));
-
-                if (pc != null && pc.getCode() == 'R' && !pc.hasMoved())
-                    rook = pc;
-
-            }
+            return getPieceAtSquare(new Square(hSideRookFile, white ? 1 : 8));
 
         }
-
-        return rook;
 
     }
 
@@ -1401,8 +1499,17 @@ public class Position {
 
         // Castle availability
 
-        fen += " " + (canCastle(true, true) ? "K" : "") + (canCastle(true, false) ? "Q" : "")
-                + (canCastle(false, true) ? "k" : "") + (canCastle(false, false) ? "q" : "");
+        boolean normalCastleIndicators = aSideRookFile == 1 && hSideRookFile == 8;
+
+        fen += " "
+                + (whiteASide ? (normalCastleIndicators ? "K" : Character.toUpperCase((char) (aSideRookFile + 96)))
+                        : "")
+                + (whiteHSide ? (normalCastleIndicators ? "Q" : Character.toUpperCase((char) (hSideRookFile + 96)))
+                        : "")
+                + (blackASide ? (normalCastleIndicators ? "k" : ((char) (aSideRookFile + 96)))
+                        : "")
+                + (blackHSide ? (normalCastleIndicators ? "q" : ((char) (hSideRookFile + 96)))
+                        : "");
 
         if (fen.charAt(fen.length() - 1) == ' ')
             fen += '-';
@@ -1431,14 +1538,10 @@ public class Position {
      */
     public boolean canCastle(boolean white, boolean aSide) {
 
-        final Piece king = getPieceAtSquare(white ? whiteKing : blackKing);
-
-        if (king.hasMoved())
-            return false;
-
-        final Piece rook = getRook(aSide, white);
-
-        return rook != null && !rook.hasMoved();
+        if (white)
+            return aSide ? whiteASide : whiteHSide;
+        else
+            return aSide ? blackASide : blackHSide;
 
     }
 
@@ -1588,12 +1691,13 @@ public class Position {
             for (int c = 0; c < pieces[r].length; c++) {
 
                 final Piece p = pieces[r][c];
+
                 if (p == null)
                     continue;
 
                 ArrayList<Move> pMoves = p.getMoves(this);
 
-                if (p.getCode() != 'K' || p.hasMoved() == true) {
+                if (p.getCode() != 'K') {
 
                     moves.addAll(pMoves);
 
@@ -1673,29 +1777,33 @@ public class Position {
         this.mateChecked = true;
         this.checkMate = true;
 
+        ArrayList<Move> temp = new ArrayList<>(moves.size());
+
         for (int i = 0; i < moves.size(); i++) {
 
             Move m = moves.get(i);
 
-            if (m.isWhite() != isWhite()) {
-                moves.remove(i);
-                --i;
+            if (m.isWhite() != isWhite())
                 continue;
-            }
 
             try {
+
                 Position test = new Position(this, m, '0', false);
+
                 if (!test.isGivingCheck())
                     checkMate = false;
-                else {
-                    moves.remove(i);
-                    --i;
-                }
+                else
+                    continue;
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+            temp.add(m);
+
         }
+
+        moves = temp;
 
     }
 

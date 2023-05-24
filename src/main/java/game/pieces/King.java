@@ -23,19 +23,6 @@ public class King extends Piece {
         super(file, rank, white);
     }
 
-    /**
-     * Creates a new King object.
-     * 
-     * @param file     The file (column) the piece is on.
-     * @param rank     The rank (row) the piece is on.
-     * @param white    Whether the piece is white or not. (True if white, false if
-     *                 black)
-     * @param hasMoved Whether or not the piece has moved.
-     */
-    public King(int file, int rank, boolean white, boolean hasMoved) {
-        super(file, rank, white, hasMoved);
-    }
-
     public char getCode() {
         return 'K';
     }
@@ -53,70 +40,92 @@ public class King extends Piece {
         moves.addAll(getDiagonalMoves(1, p));
 
         // Castling
-        // Piece kingRook = p.getPieceAtSquare(new Square(8, square.getRank()));
-        // Piece queenRook = p.getPieceAtSquare(new Square(1, square.getRank()));
-
         Piece hRook = p.getRook(false, white), aRook = p.getRook(true, white);
 
-        if (!hasMoved) {
+        if (hRook != null && p.canCastle(white, false)) {
 
-            if (hRook != null && !hRook.hasMoved()) {
+            boolean canReach = true;
 
-                boolean canReach = true;
+            // If king can reach
+            boolean left = square.getFile() > 7;
 
-                // If king can reach
-                for (int i = square.getFile() + 1; i < 8 && canReach; i++) {
+            for (int inc = (left ? -1 : 1), i = square.getFile() + inc; canReach
+                    && ((left && i >= 7) || (!left && i <= 7)); i += inc) {
 
-                    Piece find = p.getPieceAtSquare(new Square(i, square.getRank()));
-                    if (find != null && find.getCode() != 'R')
-                        canReach = false;
+                if (i == p.gethSideRookFile())
+                    continue;
 
-                }
+                Piece find = p.getPieceAtSquare(new Square(i, square.getRank()));
+                if (find != null)
+                    canReach = false;
 
-                // If rook can reach
-                for (int i = hRook.getSquare().getFile() - 1; i >= 6 && canReach; i--) {
+            }
 
-                    Piece find = p.getPieceAtSquare(new Square(i, hRook.getSquare().getRank()));
-                    if (find != null && find.getCode() != 'K')
-                        canReach = false;
+            // If rook can reach
+            left = hRook.getSquare().getFile() > 6;
 
-                }
+            for (int inc = (left ? -1 : 1), i = hRook.getSquare().getFile() + inc; canReach
+                    && ((left && i >= 6) || (!left && i <= 6)); i += inc) {
 
-                if (canReach) {
-                    try {
-                        moves.add(new Move(square, new Square(7, white ? 1 : 8), p, true));
-                    } catch (Exception e) {
-                    }
+                if (i == square.getFile())
+                    continue;
+
+                Piece find = p.getPieceAtSquare(new Square(i, square.getRank()));
+                if (find != null)
+                    canReach = false;
+
+            }
+
+            if (canReach) {
+
+                try {
+                    moves.add(new Move(square, new Square(7, white ? 1 : 8), p, true));
+                } catch (Exception e) {
                 }
 
             }
 
-            if (aRook != null && !aRook.hasMoved()) {
+        }
 
-                boolean canReach = true;
+        if (aRook != null && p.canCastle(white, true)) {
 
-                // If king can reach
-                for (int i = square.getFile() - 1; i > 2 && canReach; i--) {
-                    Piece find = p.getPieceAtSquare(new Square(i, square.getRank()));
-                    if (find != null && find.getCode() != 'R')
-                        canReach = false;
+            boolean canReach = true;
 
-                }
+            // If king can reach
+            boolean left = square.getFile() > 3;
 
-                // If rook can reach
-                for (int i = aRook.getSquare().getFile() + 1; i <= 4 && canReach; i++) {
+            for (int inc = (left ? -1 : 1), i = square.getFile() + inc; canReach
+                    && ((left && i >= 3) || (!left && i <= 3)); i += inc) {
 
-                    Piece find = p.getPieceAtSquare(new Square(i, aRook.getSquare().getRank()));
-                    if (find != null && find.getCode() != 'K')
-                        canReach = false;
+                if (i == p.gethSideRookFile())
+                    continue;
 
-                }
+                Piece find = p.getPieceAtSquare(new Square(i, square.getRank()));
+                if (find != null)
+                    canReach = false;
 
-                if (canReach) {
-                    try {
-                        moves.add(new Move(square, new Square(3, white ? 1 : 8), p, true));
-                    } catch (Exception e) {
-                    }
+            }
+
+            // If rook can reach
+            left = aRook.getSquare().getFile() > 4;
+
+            for (int inc = (left ? -1 : 1), i = aRook.getSquare().getFile() + inc; canReach
+                    && ((left && i >= 4) || (!left && i <= 4)); i += inc) {
+
+                if (i == square.getFile())
+                    continue;
+
+                Piece find = p.getPieceAtSquare(new Square(i, square.getRank()));
+                if (find != null)
+                    canReach = false;
+
+            }
+
+            if (canReach) {
+
+                try {
+                    moves.add(new Move(square, new Square(3, white ? 1 : 8), p, true));
+                } catch (Exception e) {
                 }
 
             }

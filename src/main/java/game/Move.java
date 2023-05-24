@@ -330,9 +330,9 @@ public class Move {
      */
     public Square getCaptureSquare() {
 
-        if (enPassant) {
+        if (enPassant) 
             return new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1));
-        } else
+        else
             return destination;
 
     }
@@ -578,23 +578,27 @@ public class Move {
         if (!castle)
             return;
 
-        if (piece.getCode() != 'K'/* || getMoveDistance() == 1 */)
+        if (piece.getCode() != 'K')
             throw new Exception("Castler is not a king.");
 
         if (((white && destination.getRank() != 1) || (!white && destination.getRank() != 8))
                 || (destination.getFile() != 3 && destination.getFile() != 7))
-            throw new Exception("Invalid castle location.");
+            throw new Exception("Invalid castle destination.");
+
+        boolean aSide = destination.getFile() == 3;
+
+        if (!position.canCastle(white, aSide))
+            throw new Exception("Cannot castle.");
 
         Piece king = position.getPieceAtSquare(origin);
 
-        if (king == null || king.hasMoved())
-            throw new Exception("King has already moved, cannot castle.");
+        if (king == null)
+            throw new Exception("King not found, cannot castle.");
 
-        boolean aSide = destination.getFile() == 3;
         Piece rook = position.getRook(aSide, piece.isWhite());
 
-        if (rook == null || rook.hasMoved())
-            throw new Exception("Rook already moved, cannot castle.");
+        if (rook == null)
+            throw new Exception("Rook not found, cannot castle.");
 
         this.rook = rook;
 
@@ -610,13 +614,7 @@ public class Move {
      */
     private boolean checkIfPromote() {
 
-        if (piece.getCode() != 'P')
-            return false;
-
-        if (white && destination.getRank() != 8 || !white && destination.getRank() != 1)
-            return false;
-
-        return true;
+        return piece.getCode() == 'P' && !((white && destination.getRank() != 8) || (!white && destination.getRank() != 1));
 
     }
 
