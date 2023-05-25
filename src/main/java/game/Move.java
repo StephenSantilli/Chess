@@ -127,6 +127,11 @@ public class Move {
         if (piece == null)
             throw new Exception("There is no piece at that square.");
 
+        Piece destPiece = position.getPieceAtSquare(destination);
+
+        if (destPiece != null && destPiece.isWhite() == piece.isWhite())
+            throw new Exception("Cannot capture your own piece.");
+
         this.castle = castle;
 
         initMove();
@@ -330,7 +335,7 @@ public class Move {
      */
     public Square getCaptureSquare() {
 
-        if (enPassant) 
+        if (enPassant)
             return new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1));
         else
             return destination;
@@ -497,35 +502,35 @@ public class Move {
      */
     private boolean checkIfEnPassant() {
 
-        if (piece.getCode() != 'P')
-            return false;
+        return piece.getCode() == 'P' && position.getEnPassantTarget() != null
+                && position.getEnPassantTarget().equals(destination);
 
-        if (origin.getFile() == destination.getFile())
-            return false;
+        // if (origin.getFile() == destination.getFile())
+        // return false;
 
-        if (white && destination.getRank() != 6 || !white && destination.getRank() != 3)
-            return false;
+        // if (white && destination.getRank() != 6 || !white && destination.getRank() !=
+        // 3)
+        // return false;
 
-        final Piece destinationPiece = position.getPieceAtSquare(destination);
+        // final Piece destinationPiece = position.getPieceAtSquare(destination);
 
-        if (destinationPiece != null)
-            return false;
+        // if (destinationPiece != null)
+        // return false;
 
-        if (position.getEnPassantTarget() != null && position.getEnPassantTarget().equals(destination))
-            return true;
+        // final Piece p = position
+        // .getPieceAtSquare(new Square(destination.getFile(), destination.getRank() +
+        // (white ? -1 : 1)));
+        // if (p == null || p.getCode() != 'P')
+        // return false;
 
-        final Piece p = position
-                .getPieceAtSquare(new Square(destination.getFile(), destination.getRank() + (white ? -1 : 1)));
-        if (p == null || p.getCode() != 'P')
-            return false;
+        // final Move prevMove = position.getMove();
 
-        final Move prevMove = position.getMove();
+        // if (prevMove == null
+        // || (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() !=
+        // destination.getFile()))
+        // return false;
 
-        if (prevMove == null
-                || (prevMove.getMoveDistance() != 2 || prevMove.getDestination().getFile() != destination.getFile()))
-            return false;
-
-        return true;
+        // return true;
 
     }
 
@@ -614,7 +619,8 @@ public class Move {
      */
     private boolean checkIfPromote() {
 
-        return piece.getCode() == 'P' && !((white && destination.getRank() != 8) || (!white && destination.getRank() != 1));
+        return piece.getCode() == 'P'
+                && !((white && destination.getRank() != 8) || (!white && destination.getRank() != 1));
 
     }
 

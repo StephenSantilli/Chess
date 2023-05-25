@@ -1,8 +1,15 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.*;
 
 import game.pieces.Bishop;
 import game.pieces.King;
@@ -170,7 +177,8 @@ public class Position {
 
         String fenRow = new String(pcs);
 
-        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w " + castleRights.toUpperCase() + castleRights + " - 0 1";
+        String fen = fenRow.toLowerCase() + "/pppppppp/8/8/8/8/PPPPPPPP/" + fenRow + " w " + castleRights.toUpperCase()
+                + castleRights + " - 0 1";
 
         return fen;
 
@@ -530,23 +538,30 @@ public class Position {
 
         }
 
-        move.updateMoveNotation();
+        if (checkForMate)
+            move.updateMoveNotation();
+
         initMoves(checkForMate);
 
-        if (move.isCapture() || move.getPiece().getCode() == 'P')
-            this.fiftyMoveCounter = 0;
-        else
-            this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
+        if (checkForMate) {
 
-        try {
+            if (move.isCapture() || move.getPiece().getCode() == 'P')
+                this.fiftyMoveCounter = 0;
+            else
+                this.fiftyMoveCounter = prev.getFiftyMoveCounter() + 1;
 
-            opening = Opening.getOpening(this.toString(), getClass().getResourceAsStream("/tsv/openings.tsv"));
+            try {
 
-            if (opening == null)
-                opening = prev.getOpening();
+                opening = Opening.getOpening(this.toString(), getClass().getResourceAsStream("/tsv/openings.tsv"));
 
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error finding the opening associated with this position: " + e.getMessage());
+                if (opening == null)
+                    opening = prev.getOpening();
+
+            } catch (RuntimeException e) {
+                throw new RuntimeException(
+                        "Error finding the opening associated with this position: " + e.getMessage());
+            }
+
         }
 
     }
@@ -1301,6 +1316,30 @@ public class Position {
     }
 
     /**
+     * Gets a list of the pieces that are able to move to a given square.
+     * 
+     * @param square The square to search for moves to.
+     * @param white  Whether or not to check if white pieces can move to the square.
+     * @return An {@link ArrayList} of {@link Piece} objects
+     * @see #getPiecesByAttacking(Square)
+     */
+    public ArrayList<Piece> getPiecesByCanMoveToColor(Square square, boolean white) {
+
+        ArrayList<Piece> pieces = new ArrayList<Piece>();
+
+        for (int i = 0; i < moves.size(); i++) {
+
+            Move m = moves.get(i);
+            if (m.isWhite() == white && m.getDestination().equals(square))
+                pieces.add(m.getPiece());
+
+        }
+
+        return pieces;
+
+    }
+
+    /**
      * Checks if a piece can move to the given square.
      * 
      * @param piece  The piece to check
@@ -1684,8 +1723,6 @@ public class Position {
 
         this.moves = new ArrayList<Move>();
 
-        ArrayList<Move> castleMoves = new ArrayList<Move>();
-
         for (int r = 0; r < pieces.length; r++) {
 
             for (int c = 0; c < pieces[r].length; c++) {
@@ -1695,24 +1732,7 @@ public class Position {
                 if (p == null)
                     continue;
 
-                ArrayList<Move> pMoves = p.getMoves(this);
-
-                if (p.getCode() != 'K') {
-
-                    moves.addAll(pMoves);
-
-                } else {
-
-                    for (Move m : pMoves) {
-
-                        if (m.isCastle())
-                            castleMoves.add(m);
-                        else
-                            moves.add(m);
-
-                    }
-
-                }
+                moves.addAll(p.getMoves(this));
 
             }
 
@@ -1726,45 +1746,131 @@ public class Position {
         if (oppPieces.size() >= 1)
             givingCheck = true;
 
-        for (int x = 0; x < castleMoves.size(); x++) {
+        ArrayList<Move> castleMoves = new ArrayList<>(2);
 
-            Move c = castleMoves.get(x);
+        // Castling
+        Square kingSquare = white ? whiteKing : blackKing;
 
-            boolean thruCheck = false;
-            final Piece king = c.getPiece();
-            final boolean aSide = king.getSquare().getFile() > c.getDestination().getFile();
+        Piece hRook = getRook(false, white), aRook = getRook(true, white);
 
-            for (int i = king.getSquare().getFile() + (aSide ? -1 : 1); thruCheck == false
-                    && ((aSide && i >= c.getDestination().getFile()
-                            || !aSide && i <= c.getDestination().getFile())); i += (aSide ? -1 : 1)) {
+        if (hRook != null && canCastle(white, false)) {
 
-                ArrayList<Piece> attackers = getPiecesByCanMoveTo(new Square(i, c.isWhite() ? 1 : 8));
-                attackers.removeIf((pc) -> pc.isWhite() == c.isWhite());
+            boolean canReach = true;
+
+            // If king can reach
+            boolean left = kingSquare.getFile() > 7;
+
+            for (int inc = (left ? -1 : 1), i = kingSquare.getFile() + inc; canReach
+                    && ((left && i >= 7) || (!left && i <= 7)); i += inc) {
+
+                Square lookingSquare = new Square(i, kingSquare.getRank());
+
+                ArrayList<Piece> attackers = getPiecesByCanMoveToColor(lookingSquare, !white);
 
                 if (attackers.size() > 0)
-                    thruCheck = true;
+                    canReach = false;
+
+                if (canReach == false || i == gethSideRookFile())
+                    continue;
+
+                Piece find = getPieceAtSquare(lookingSquare);
+                if (find != null)
+                    canReach = false;
 
             }
 
-            if (thruCheck || c.isWhite() != white) {
-                castleMoves.remove(x);
-                --x;
+            // If rook can reach
+            left = hRook.getSquare().getFile() > 6;
+
+            for (int inc = (left ? -1 : 1), i = hRook.getSquare().getFile() + inc; canReach
+                    && ((left && i >= 6) || (!left && i <= 6)); i += inc) {
+
+                if (i == kingSquare.getFile())
+                    continue;
+
+                Piece find = getPieceAtSquare(new Square(i, kingSquare.getRank()));
+                if (find != null)
+                    canReach = false;
+
+            }
+
+            if (canReach) {
+
+                try {
+                    castleMoves.add(new Move(kingSquare, new Square(7, white ? 1 : 8), this,
+                            true));
+                } catch (Exception e) {
+                }
+
+            }
+
+        }
+
+        if (aRook != null && canCastle(white, true)) {
+
+            boolean canReach = true;
+
+            // If king can reach
+            boolean left = kingSquare.getFile() > 3;
+
+            for (int inc = (left ? -1 : 1), i = kingSquare.getFile() + inc; canReach
+                    && ((left && i >= 3) || (!left && i <= 3)); i += inc) {
+
+                Square lookingSquare = new Square(i, kingSquare.getRank());
+
+                ArrayList<Piece> attackers = getPiecesByCanMoveToColor(lookingSquare, !white);
+
+                if (attackers.size() > 0)
+                    canReach = false;
+
+                if (canReach == false || i == gethSideRookFile())
+                    continue;
+
+                Piece find = getPieceAtSquare(lookingSquare);
+                if (find != null)
+                    canReach = false;
+
+            }
+
+            // If rook can reach
+            left = aRook.getSquare().getFile() > 4;
+
+            for (int inc = (left ? -1 : 1), i = aRook.getSquare().getFile() + inc; canReach
+                    && ((left && i >= 4) || (!left && i <= 4)); i += inc) {
+
+                if (i == kingSquare.getFile())
+                    continue;
+
+                Piece find = getPieceAtSquare(new Square(i, kingSquare.getRank()));
+                if (find != null)
+                    canReach = false;
+
+            }
+
+            if (canReach) {
+
+                try {
+                    castleMoves.add(new Move(kingSquare, new Square(3, white ? 1 : 8), this,
+                            true));
+                } catch (Exception e) {
+                }
+
             }
 
         }
 
         if (checkForMate) {
 
+            // longest delay
             setCheckmate();
 
             if (this.inCheck == false) {
-
-                // castleMoves.removeIf(m -> m.isWhite() != white);
 
                 moves.addAll(castleMoves);
 
             }
         }
+
     }
 
     /**
@@ -1777,33 +1883,46 @@ public class Position {
         this.mateChecked = true;
         this.checkMate = true;
 
-        ArrayList<Move> temp = new ArrayList<>(moves.size());
+        Collection<Move> temp = Collections.synchronizedList(new ArrayList<>(moves.size()));
 
-        for (int i = 0; i < moves.size(); i++) {
+        try (ExecutorService pool = Executors.newCachedThreadPool()) {
 
-            Move m = moves.get(i);
+            for (int i = 0; i < moves.size(); i++) {
 
-            if (m.isWhite() != isWhite())
-                continue;
+                Move m = moves.get(i);
 
-            try {
-
-                Position test = new Position(this, m, '0', false);
-
-                if (!test.isGivingCheck())
-                    checkMate = false;
-                else
+                if (m.isWhite() != isWhite())
                     continue;
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                try {
+                    pool.submit(() -> {
+
+                        try {
+
+                            Position test = new Position(this, m, '0', false);
+
+                            if (!test.isGivingCheck()) {
+                                checkMate = false;
+                                temp.add(m);
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
 
-            temp.add(m);
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        moves = temp;
+        moves.clear();
+        moves.addAll(temp);
 
     }
 

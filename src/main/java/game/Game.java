@@ -750,6 +750,7 @@ public class Game {
             throw new Exception("Invalid promotion type.");
 
         // The position after the move is made.
+        // biggest delay
         Position movePosition = new Position(getLastPos(), move, promoteType, true);
 
         if (movePosition.isGivingCheck())
