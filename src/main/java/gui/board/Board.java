@@ -23,6 +23,8 @@ import javafx.stage.WindowEvent;
  */
 public class Board extends StackPane {
 
+    private Promote promoteDialog;
+
     /**
      * The multiplier which determines how large the squares should be based on the
      * size of the pieces.
@@ -634,6 +636,10 @@ public class Board extends StackPane {
 
         resizeEvent.changed(null, null, null);
 
+        if (promoteDialog != null) {
+            promoteDialog.hide();
+        }
+
         if (gameView.getGame() == null) {
 
             borderPane.drawBorder(null);
@@ -667,8 +673,10 @@ public class Board extends StackPane {
         // Don't animate when promotion move (if you did it/two player game)
         if (p2 != null && p2.getMove() != null
                 && p2.getMove().getPromoteType() != '0'
-                && (getGUIPieceAtSquare(p2.getMove().getOrigin()) != null
-                        && (getGUIPieceAtSquare(p2.getMove().getOrigin()).getPromoteMove() != null)))
+                && ((getGUIPieceAtSquare(p2.getMove().getOrigin()) != null
+                        && (getGUIPieceAtSquare(p2.getMove().getOrigin()).getPromoteMove() != null))
+                        || (((getGUIPieceAtSquare(p2.getMove().getDestination()) != null
+                                && (getGUIPieceAtSquare(p2.getMove().getDestination()).getPromoteMove() != null))))))
             ani = false;
 
         piecePane.draw(backward, ani ? p1 : null, p2);
@@ -727,25 +735,25 @@ public class Board extends StackPane {
      */
     public void showPromoteDialog(Square square, boolean white, GUIPiece callback) throws Exception {
 
-        Promote pD = new Promote(gameView, white, getScene().getWindow());
+        promoteDialog = new Promote(gameView, white, getScene().getWindow());
 
-        pD.setOnHidden(ev -> {
+        promoteDialog.setOnHidden(ev -> {
 
-            callback.setPromoteResponse(pD.getResult());
+            callback.setPromoteResponse(promoteDialog.getResult());
             callback.getPromoteCallback().run();
 
         });
 
         Bounds bds = getPiecePane().localToScreen(getPiecePane().getBoundsInLocal());
 
-        pD.setX(bds.getMinX() + getXBySquare(square));
-        pD.setY(bds.getMinY() + getYBySquare(square)
+        promoteDialog.setX(bds.getMinX() + getXBySquare(square));
+        promoteDialog.setY(bds.getMinY() + getYBySquare(square)
                 - ((!white && gameView.isFlipped()) || (white && !gameView.isFlipped())
                         ? (-squareSize)
                         : (squareSize) * (4 + (1 / 3.0))));
 
-        pD.show();
-        pD.sizeToScene();
+        promoteDialog.show();
+        promoteDialog.sizeToScene();
 
     }
 
@@ -777,6 +785,7 @@ public class Board extends StackPane {
             setCursor(Cursor.HAND);
 
         } else if (getSquareByPoint(mouseX, mouseY, true).isValid()
+                && gameView.getCurrentPos() < gameView.getGame().getPositions().size()
                 && gameView.getGame().getPositions().get(gameView.getCurrentPos())
                         .getPieceAtSquare(getSquareByPoint(mouseX, mouseY, true)) != null) {
 

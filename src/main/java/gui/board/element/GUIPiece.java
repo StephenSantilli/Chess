@@ -220,6 +220,7 @@ public class GUIPiece {
 
                             try {
 
+                                // board.getPiecePane().getTransitions().clear();
                                 board.showPromoteDialog(move.getDestination(), move.isWhite(), this);
 
                             } catch (Exception e) {

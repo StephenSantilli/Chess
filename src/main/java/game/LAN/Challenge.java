@@ -28,29 +28,29 @@ public class Challenge {
     public static final int CHALLENGE_BLACK = 2;
 
     /** The version of the game the challenge is for. */
-    private String version;
+    private final String version;
 
     /** The name of the user making the challenge. */
-    private String name;
+    private final String name;
 
     /** The FEN of the starting position of the challenge. */
-    private String fen;
+    private final String fen;
 
     /**
      * The color of the user who created the challenge, correlating to
      * {@link #CHALLENGE_RANDOM}, {@link #CHALLENGE_WHITE}, and
      * {@link #CHALLENGE_BLACK}.
      */
-    private int color;
+    private final int color;
 
     /** The time each side will have per the challenge. */
-    private long timePerSide;
+    private final long timePerSide;
 
     /** The time each side will gain per each move. */
-    private long timePerMove;
+    private final long timePerMove;
 
     /** The address of the user who created the challenge. */
-    private InetAddress address;
+    private final InetAddress address;
 
     /**
      * Creates a new challenge for a LAN game.
@@ -63,7 +63,8 @@ public class Challenge {
      * @param address     The address of the user creating the challenge.
      * @throws Exception If the challenge parameters are not valid.
      */
-    public Challenge(String name, String fen, int color, long timePerSide, long timePerMove, InetAddress address)
+    public Challenge(final String name, final String fen, final int color, final long timePerSide,
+            final long timePerMove, final InetAddress address)
             throws Exception {
 
         this.version = Game.VERSION;
@@ -84,13 +85,13 @@ public class Challenge {
      * @param packet The packet that contains the challenge data.
      * @throws Exception If the challenge data is not valid.
      */
-    public Challenge(DatagramPacket packet) throws Exception {
+    public Challenge(final DatagramPacket packet) throws Exception {
 
-        String str = new String(packet.getData()).trim();
+        final String str = new String(packet.getData()).trim();
 
-        Message msg = new Message(str);
+        final Message msg = new Message(str);
 
-        ArrayList<String> a = msg.getArgs();
+        final ArrayList<String> a = msg.getArgs();
 
         if (a.size() != 6) {
             throw new Exception("Invalid challenge.");
@@ -104,19 +105,19 @@ public class Challenge {
 
         try {
             color = Integer.parseInt(a.get(3));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Exception("Invalid color.");
         }
 
         try {
             timePerSide = Integer.parseInt(a.get(4));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Exception("Invalid time per side.");
         }
 
         try {
             timePerMove = Integer.parseInt(a.get(5));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new Exception("Invalid time per move.");
         }
 
@@ -194,7 +195,7 @@ public class Challenge {
      */
     public String toString() {
 
-        String str = version + ";" + name + ";" + fen + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
+        final String str = version + ";" + name + ";" + fen + ";" + color + ";" + timePerSide + ";" + timePerMove + ";";
         return str;
 
     }
@@ -203,7 +204,7 @@ public class Challenge {
      * Checks if two challenges are equal.
      */
     @Override
-    public boolean equals(Object compare) {
+    public boolean equals(final Object compare) {
 
         if (address == null && compare == null)
             return true;
@@ -216,7 +217,7 @@ public class Challenge {
         if (compare == this)
             return true;
 
-        Challenge cast = (Challenge) compare;
+        final Challenge cast = (Challenge) compare;
 
         return name.equals(cast.getName()) && address.equals(cast.getAddress()) && fen.equals(cast.getFen())
                 && color == cast.getColor();

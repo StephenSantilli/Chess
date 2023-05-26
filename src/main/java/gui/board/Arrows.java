@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import game.Square;
 import gui.GameView;
 import gui.board.element.HighlightArrow;
+import javafx.application.Platform;
 import javafx.scene.layout.Pane;
 
 /**
@@ -82,18 +83,20 @@ public class Arrows extends Pane {
      */
     public void redraw() {
 
-        getChildren().clear();
+        Platform.runLater(() -> {
+            getChildren().clear();
 
-        if (gameView.getGame() == null)
-            return;
+            if (gameView.getGame() == null)
+                return;
 
-        for (int i = highlightedArrows.size() - 1; i >= 0; i--) {
+            for (int i = highlightedArrows.size() - 1; i >= 0; i--) {
 
-            final HighlightArrow hs = highlightedArrows.get(i);
+                final HighlightArrow hs = highlightedArrows.get(i);
 
-            getChildren().add(hs);
+                getChildren().add(hs);
 
-        }
+            }
+        });
 
     }
 

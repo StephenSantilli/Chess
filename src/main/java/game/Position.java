@@ -1,12 +1,8 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.*;
@@ -344,7 +340,9 @@ public class Position {
      *                     position.
      * @param move         The move to be made.
      * @param promoteType  The type of piece to promote to.
-     * @param checkForMate Whether or not checkmate should be checked for.
+     * @param checkForMate Whether or not checkmate should be checked for. Should
+     *                     only be {@code true} when the position being created is
+     *                     the result of a move that is made.
      * @throws Exception If the {@code promoteType} is incorrect or the opening
      *                   cannot be found.
      */
@@ -538,9 +536,7 @@ public class Position {
 
         }
 
-        if (checkForMate)
-            move.updateMoveNotation();
-
+        move.updateMoveNotation();
         initMoves(checkForMate);
 
         if (checkForMate) {

@@ -260,7 +260,7 @@ public class Move {
      */
     @Override
     public String toString() {
-        return origin.toString() + destination.toString()
+        return origin.toString() + (castle ? getRookOrigin().toString() : destination.toString())
                 + (promoteType == '0' ? "" : Character.toLowerCase(promoteType));
     }
 

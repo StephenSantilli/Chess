@@ -133,6 +133,17 @@ public class UCIEngine {
             rec = input.readLine();
         }
 
+        for (int i = 0; i < opts.size(); i++) {
+
+            UCIOption<?> o = opts.get(i);
+            if (o.getName().equals("UCI_Chess960") && o instanceof UCICheck) {
+                UCICheck c = (UCICheck) o;
+                c.set(true);
+                break;
+            }
+
+        }
+
         println("ucinewgame");
         waitReady();
 
