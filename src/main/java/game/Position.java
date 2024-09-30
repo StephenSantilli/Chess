@@ -1880,8 +1880,9 @@ public class Position {
         this.checkMate = true;
 
         Collection<Move> temp = Collections.synchronizedList(new ArrayList<>(moves.size()));
-
-        try (ExecutorService pool = Executors.newCachedThreadPool()) {
+        
+        ExecutorService pool = Executors.newCachedThreadPool();
+        try {
 
             for (int i = 0; i < moves.size(); i++) {
 
